@@ -225,6 +225,14 @@ main{flex:1; width:100%; max-width:1080px; margin:0 auto; padding:30px 22px 60px
   font-size:11.5px; font-weight:800; color:var(--dim);
   letter-spacing:.4px; margin-bottom:9px;
 }
+.q-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px;}
+.q-top .q-num{margin-bottom:0;}
+.topic{
+  font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
+  background:#2a2352; border:1px solid #524aa3; color:#c3b0ff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%;
+}
+
 .q-text{font-size:16px; font-weight:600; line-height:1.7; margin-bottom:6px;}
 .q-note{
   font-size:13px; color:var(--warn); background:rgba(240,180,41,.08);
@@ -263,6 +271,24 @@ main{flex:1; width:100%; max-width:1080px; margin:0 auto; padding:30px 22px 60px
 .fb.show{display:block;}
 .fb.ok{background:var(--good-bg); border:1px solid #1f6b40; color:#7ee2a8;}
 .fb.no{background:var(--bad-bg); border:1px solid #7a2831; color:#ff9ba1;}
+.fb .explain{
+  margin-top:10px; padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.13);
+  font-size:13.5px; font-weight:500; line-height:1.75; color:var(--text); opacity:.92;
+}
+
+/* ===== פילוח לפי נושא ===== */
+.bd-title{font-size:16px; font-weight:700; margin-bottom:4px;}
+.bd-sub{font-size:13px; color:var(--dim); margin-bottom:16px;}
+.bd-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+.bd-name{font-size:13.5px; font-weight:600; flex:none; width:38%; line-height:1.4;}
+.bd-row .bar{flex:1; height:8px;}
+.bd-score{font-size:13px; font-weight:800; flex:none; width:44px; text-align:left; font-variant-numeric:tabular-nums;}
+.bd-score.ok{color:var(--good);} .bd-score.no{color:var(--bad);}
+
+@media (max-width:640px){
+  .bd-name{width:44%; font-size:12.5px;}
+}
 
 /* ===== תוצאה ===== */
 .result{

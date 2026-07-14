@@ -2,6 +2,17 @@
   "updated": "2026-07-14",
   "exams": [
     {
+      "id": "biochem-a-high-yield",
+      "file": "biochem-a-high-yield.json",
+      "subject": "ביוכימיה א׳",
+      "title": "ביוכימיה א׳ — 50 השאלות הנפוצות ביותר",
+      "kind": "highyield",
+      "year": 2026,
+      "moed": null,
+      "added": "2026-07-14",
+      "count": 50
+    },
+    {
       "id": "biochem-b-2024-moed-a",
       "file": "biochem-b-2024-moed-a.json",
       "subject": "ביוכימיה ב׳",

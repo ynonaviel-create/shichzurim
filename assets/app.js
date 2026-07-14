@@ -423,8 +423,47 @@ function playQuestions(cfg) {
       row.append(rev);
       box.append(row);
       resultBox.append(box);
+
+      const breakdown = topicBreakdown();
+      if (breakdown) resultBox.append(breakdown);
       resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  }
+
+  /* פילוח התוצאה לפי נושא — מראה איפה נופלים, לא רק כמה.
+     מוצג רק כשלשאלות יש תיוג נושא. */
+  function topicBreakdown() {
+    const byTopic = {};
+    questions.forEach((item, qi) => {
+      if (!item.topic || answers[qi] == null) return;
+      const t = (byTopic[item.topic] ||= { good: 0, total: 0 });
+      t.total++;
+      if (answers[qi] === item.a) t.good++;
+    });
+
+    const topics = Object.entries(byTopic);
+    if (!topics.length) return null;
+
+    topics.sort((a, b) => a[1].good / a[1].total - b[1].good / b[1].total);
+
+    const box = el('div', 'form');
+    box.append(el('h3', 'bd-title', 'פילוח לפי נושא'));
+    box.append(el('p', 'bd-sub', 'ממוין מהחלש לחזק — הנושא העליון הוא זה שכדאי לפתוח בו.'));
+
+    topics.forEach(([name, t]) => {
+      const pct = Math.round((t.good / t.total) * 100);
+      const rowEl = el('div', 'bd-row');
+      rowEl.append(el('span', 'bd-name', name));
+      const track = el('div', 'bar');
+      const f = el('i');
+      f.style.width = pct + '%';
+      f.classList.add(pct >= 70 ? 'good' : 'bad');
+      track.append(f);
+      rowEl.append(track);
+      rowEl.append(el('span', 'bd-score' + (pct >= 70 ? ' ok' : ' no'), `${t.good}/${t.total}`));
+      box.append(rowEl);
+    });
+    return box;
   }
 
   function doReset() {
@@ -447,7 +486,11 @@ function playQuestions(cfg) {
     const card = el('div', 'q');
     card.id = 'q-' + qi;
 
-    card.append(el('div', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
+    const top = el('div', 'q-top');
+    top.append(el('span', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
+    if (item.topic) top.append(el('span', 'topic', item.topic));
+    card.append(top);
+
     card.append(el('div', 'q-text', item.q));
 
     if (item.origin) {
@@ -484,7 +527,9 @@ function playQuestions(cfg) {
     paint(qi, oi, card, opts, fb, item);
     refresh();
 
-    // גלילה אוטומטית לשאלה הבאה שטרם נענתה
+    // גלילה אוטומטית לשאלה הבאה — אבל לא כשיש הסבר לקרוא,
+    // אחרת נגלול את המשתמש מעל ההסבר בדיוק ברגע שהוא נחשף.
+    if (item.explain) return;
     const next = questions.findIndex((_, i) => answers[i] == null);
     if (next > -1) {
       setTimeout(() => {
@@ -502,10 +547,13 @@ function playQuestions(cfg) {
       else if (i === oi) o.classList.add('wrong');
       if (i === oi) o.classList.add('chosen');
     });
+
     fb.className = 'fb show ' + (isRight ? 'ok' : 'no');
-    fb.textContent = isRight
-      ? '✓ נכון'
-      : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`;
+    fb.innerHTML = '';
+    fb.append(
+      el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`)
+    );
+    if (item.explain) fb.append(el('div', 'explain', item.explain));
   }
 
   render();
