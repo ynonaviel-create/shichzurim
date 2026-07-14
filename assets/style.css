@@ -118,12 +118,19 @@ body::before{
 .topnav a.active{color:#fff; background:var(--accent-dk); border-color:var(--accent-dk);}
 
 .theme-btn{
-  width:36px; height:36px; border-radius:99px; margin-inline-start:4px;
-  display:grid; place-items:center; cursor:pointer;
-  background:var(--surface); border:1px solid var(--line);
-  font-size:15px; line-height:1; transition:.15s;
+  width:38px; height:38px; border-radius:11px; margin-inline-start:6px;
+  display:grid; place-items:center; cursor:pointer; padding:0;
+  background:transparent; border:1px solid var(--line);
+  color:var(--muted); line-height:0; transition:.16s;
 }
-.theme-btn:hover{border-color:var(--accent); background:var(--surface-2);}
+.theme-btn:hover{
+  border-color:var(--accent); color:var(--accent); background:var(--accent-sl);
+}
+.theme-btn svg{display:block;}
+/* מציגים ירח במצב בהיר (כלומר: "עבור לכהה"), ושמש במצב כהה. */
+.theme-btn .ico-sun{display:none;}
+:root[data-theme="dark"] .theme-btn .ico-moon{display:none;}
+:root[data-theme="dark"] .theme-btn .ico-sun{display:block;}
 
 /* ===== פריסה ===== */
 main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px;}
@@ -299,7 +306,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   max-width:70ch;                 /* שורה ארוכה מדי מעייפת את העין */
   letter-spacing:.1px;
 }
-.q-origin{font-size:12.5px; font-weight:700; color:var(--accent); margin-top:8px;}
+.q-origin{font-size:12.5px; font-weight:700; color:var(--dim); margin-top:9px;}
 
 .q-note{
   font-size:14px; color:var(--warn); background:var(--warn-bg);

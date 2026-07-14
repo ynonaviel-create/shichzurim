@@ -26,10 +26,7 @@ const plural = (n, one, many) => (n === 1 ? `${one} אחד` : `${n} ${many}`);
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
-  if (btn) {
-    btn.textContent = t === 'dark' ? '☀️' : '🌙';
-    btn.title = t === 'dark' ? 'מעבר למצב בהיר' : 'מעבר למצב כהה';
-  }
+  if (btn) btn.title = t === 'dark' ? 'מעבר למצב בהיר' : 'מעבר למצב כהה';
 }
 function initTheme() {
   const saved = localStorage.getItem(THEME_KEY);
@@ -56,21 +53,26 @@ const store = {
 /* ---------- נתונים ---------- */
 let COURSES = [];
 let EXAMS = [];
+let VERSION = '';
 const cache = {};
 
+/* המניפסט נטען עם no-cache כדי לאלץ אימות מול השרת — הוא קטן, וזה מה
+   שמאפשר לנו לגלות שיש תוכן חדש. הוא נושא version, ואיתה נטענים קבצי
+   המבחנים. בלי זה הדפדפן מגיש שאלות ישנות מהמטמון גם אחרי שעדכנו אותן. */
 async function loadManifest() {
-  const res = await fetch('exams/manifest.json');
+  const res = await fetch('exams/manifest.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error('manifest ' + res.status);
   const m = await res.json();
   COURSES = m.courses;
   EXAMS = m.exams;
+  VERSION = m.version || '';
 }
 
 async function loadExam(id) {
   if (cache[id]) return cache[id];
   const meta = EXAMS.find((e) => e.id === id);
   if (!meta) throw new Error('לא נמצא מבחן: ' + id);
-  const res = await fetch('exams/' + meta.file);
+  const res = await fetch(`exams/${meta.file}?v=${VERSION}`);
   if (!res.ok) throw new Error('exam ' + res.status);
   return (cache[id] = await res.json());
 }
@@ -241,7 +243,7 @@ function renderCourse(courseId) {
 
   const actions = el('div', 'btn-row');
   actions.style.marginBottom = '30px';
-  const pr = el('a', 'btn primary', `🎲 תרגול מעורב ב${c.name}`);
+  const pr = el('a', 'btn primary', `🎲 תרגול חופשי ב${c.name}`);
   pr.href = '#/practice/' + courseId;
   actions.append(pr);
   const rv = el('a', 'btn', `🎯 הטעויות שלי ב${c.name}`);
@@ -476,7 +478,11 @@ function playQuestions(cfg) {
     card.append(top);
 
     card.append(el('div', 'q-text', item.q));
-    if (item.origin) card.append(el('div', 'q-origin', item.origin));
+
+    // מקור השחזור והמבחן שממנו הגיעה השאלה — מידע רקע, לא אזהרה.
+    const src = [item.source, item.origin].filter(Boolean).join(' · ');
+    if (src) card.append(el('div', 'q-origin', src));
+
     if (item.note) card.append(el('div', 'q-note', item.note));
     if (item.table) card.append(tableOf(item.table));
 
@@ -548,50 +554,144 @@ function tableOf(t) {
   wrap.append(table);
   return wrap;
 }
-
-/* ================= תרגול מעורב (בתוך מקצוע) ================= */
-function renderPractice(courseId) {
+/* ================= תרגול חופשי =================
+   לא כבול למבחן. בוחרים חלק (א׳/ב׳), נושאים, וכמות — והמנוע שולף
+   שאלות מכל המבחנים של המקצוע לפי הסינון. */
+async function renderPractice(courseId) {
   setNav('home');
   const c = courseOf(courseId);
-  view.innerHTML = '';
-
   if (!c) {
+    view.innerHTML = '';
     view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
     toTop();
     return;
   }
 
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען את בנק השאלות…</b></div>';
+
+  // טוענים את כל שאלות המקצוע פעם אחת, עם המטא-דאטה שצריך לסינון
+  const pool = [];
+  for (const m of examsOf(courseId)) {
+    const exam = await loadExam(m.id);
+    exam.questions.forEach((q) =>
+      pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id })
+    );
+  }
+
+  view.innerHTML = '';
   view.append(crumb(c.name, '#/course/' + courseId));
 
   const head = el('div', 'page-head');
-  head.append(el('h1', null, `תרגול מעורב — ${c.name}`));
+  head.append(el('h1', null, `תרגול חופשי — ${c.name}`));
   head.append(el('p', null,
-    'שאלות אקראיות מכמה מבחנים יחד. זה שובר את הזיכרון של סדר השאלות, ומראה מה אתה באמת יודע.'));
+    'בנה לעצמך תרגול: בחר חלק, בחר נושאים, וקבע כמה שאלות. השאלות נשלפות מכל המבחנים יחד, בסדר אקראי.'));
   view.append(head);
 
-  const list = examsOf(courseId);
-  const chosen = new Set(list.map((e) => e.id));
+  if (!pool.length) {
+    view.append(emptyState('📭', 'אין עדיין שאלות במקצוע הזה', 'הוסף שחזור ראשון, והתרגול ייפתח.'));
+    toTop();
+    updateFooter();
+    return;
+  }
+
+  /* --- מצב הסינון --- */
+  const allParts = [...new Set(pool.map((q) => q.part))].filter(Boolean).sort();
+  const selParts = new Set(allParts);
+  const selTopics = new Set();          // ריק = כל הנושאים
   let count = 20;
+  let onlyWrong = false;
+
+  const wrongKeys = collectWrongKeys(courseId);
 
   const form = el('div', 'form');
 
-  const f1 = el('div', 'field');
-  f1.append(el('label', null, 'מאילו מבחנים'));
-  const chips = el('div', 'chips');
-  list.forEach((e) => {
-    const ch = el('div', 'chip on', e.part ? `${e.part} · ${e.title}` : e.title);
+  /* --- חלק (א׳ / ב׳) --- */
+  let partsField = null;
+  if (allParts.length > 1) {
+    partsField = el('div', 'field');
+    partsField.append(el('label', null, 'חלק'));
+    const chips = el('div', 'chips');
+    allParts.forEach((p) => {
+      const ch = el('div', 'chip on', `${c.name} ${p}`);
+      ch.onclick = () => {
+        if (selParts.has(p) && selParts.size > 1) { selParts.delete(p); ch.classList.remove('on'); }
+        else if (!selParts.has(p)) { selParts.add(p); ch.classList.add('on'); }
+        else return;                    // לא מרשים לכבות את האחרון
+        drawTopics();
+        update();
+      };
+      chips.append(ch);
+    });
+    partsField.append(chips);
+    form.append(partsField);
+  }
+
+  /* --- נושאים --- */
+  const topicsField = el('div', 'field');
+  const topicsLabel = el('label', null, 'נושאים');
+  topicsField.append(topicsLabel);
+  const topicChips = el('div', 'chips');
+  topicsField.append(topicChips);
+  form.append(topicsField);
+
+  function inParts(q) {
+    return !allParts.length || !q.part || selParts.has(q.part);
+  }
+
+  function drawTopics() {
+    // רק נושאים שקיימים בחלקים שנבחרו
+    const counts = {};
+    pool.filter(inParts).forEach((q) => {
+      if (q.topic) counts[q.topic] = (counts[q.topic] || 0) + 1;
+    });
+    const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+    // מנקים בחירות של נושאים שכבר לא רלוונטיים
+    [...selTopics].forEach((t) => { if (!counts[t]) selTopics.delete(t); });
+
+    topicChips.innerHTML = '';
+    if (!names.length) {
+      topicsField.style.display = 'none';
+      return;
+    }
+    topicsField.style.display = '';
+    topicsLabel.textContent = `נושאים ${selTopics.size ? `(${selTopics.size} נבחרו)` : '(הכול)'}`;
+
+    const all = el('div', 'chip' + (selTopics.size === 0 ? ' on' : ''), 'כל הנושאים');
+    all.onclick = () => { selTopics.clear(); drawTopics(); update(); };
+    topicChips.append(all);
+
+    names.forEach((t) => {
+      const ch = el('div', 'chip' + (selTopics.has(t) ? ' on' : ''), `${t} · ${counts[t]}`);
+      ch.onclick = () => {
+        if (selTopics.has(t)) selTopics.delete(t); else selTopics.add(t);
+        drawTopics();
+        update();
+      };
+      topicChips.append(ch);
+    });
+  }
+
+  /* --- רק שאלות שטעיתי בהן --- */
+  let wrongField = null;
+  if (wrongKeys.size) {
+    wrongField = el('div', 'field');
+    wrongField.append(el('label', null, 'מסננים'));
+    const chips = el('div', 'chips');
+    const ch = el('div', 'chip', `רק שאלות שטעיתי בהן · ${wrongKeys.size}`);
     ch.onclick = () => {
-      if (chosen.has(e.id)) { chosen.delete(e.id); ch.classList.remove('on'); }
-      else { chosen.add(e.id); ch.classList.add('on'); }
-      updateInfo();
+      onlyWrong = !onlyWrong;
+      ch.classList.toggle('on', onlyWrong);
+      update();
     };
     chips.append(ch);
-  });
-  f1.append(chips);
-  form.append(f1);
+    wrongField.append(chips);
+    form.append(wrongField);
+  }
 
-  const f2 = el('div', 'field');
-  f2.append(el('label', null, 'כמה שאלות'));
+  /* --- כמות --- */
+  const countField = el('div', 'field');
+  countField.append(el('label', null, 'כמה שאלות'));
   const cc = el('div', 'chips');
   [10, 20, 30, 50, 0].forEach((n) => {
     const ch = el('div', 'chip' + (n === 20 ? ' on' : ''), n === 0 ? 'הכול' : String(n));
@@ -599,12 +699,12 @@ function renderPractice(courseId) {
       count = n;
       cc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
       ch.classList.add('on');
-      updateInfo();
+      update();
     };
     cc.append(ch);
   });
-  f2.append(cc);
-  form.append(f2);
+  countField.append(cc);
+  form.append(countField);
 
   const info = el('p');
   info.style.cssText = 'color:var(--dim); font-size:13.5px; margin-bottom:20px;';
@@ -614,32 +714,41 @@ function renderPractice(courseId) {
   form.append(go);
   view.append(form);
 
-  const pool = () => list.filter((e) => chosen.has(e.id));
-  function updateInfo() {
-    const p = pool();
-    const total = p.reduce((a, e) => a + e.count, 0);
-    info.textContent = p.length
-      ? `בבריכה: ${total} שאלות מתוך ${plural(p.length, 'מבחן', 'מבחנים')}. ייבחרו ${count === 0 ? total : Math.min(count, total)} באקראי.`
-      : 'בחר לפחות מבחן אחד.';
-    go.disabled = !p.length;
+  function filtered() {
+    return pool.filter((q) => {
+      if (!inParts(q)) return false;
+      if (selTopics.size && !selTopics.has(q.topic)) return false;
+      if (onlyWrong && !wrongKeys.has(q.examId + '#' + q.q)) return false;
+      return true;
+    });
   }
-  updateInfo();
 
-  go.onclick = async () => {
-    go.disabled = true;
-    go.textContent = 'טוען שאלות…';
-    const p = pool();
-    const all = [];
-    for (const m of p) {
-      const exam = await loadExam(m.id);
-      exam.questions.forEach((q) => all.push({ ...q, origin: exam.title }));
-    }
-    shuffle(all);
-    const picked = count === 0 ? all : all.slice(0, count);
+  function update() {
+    const f = filtered();
+    const take = count === 0 ? f.length : Math.min(count, f.length);
+    info.textContent = f.length
+      ? `בבריכה: ${f.length} שאלות. ייבחרו ${take} באקראי.`
+      : 'אין שאלות שמתאימות לסינון הזה. הרחב את הבחירה.';
+    go.disabled = !f.length;
+    go.textContent = f.length ? `התחל תרגול · ${take} שאלות` : 'אין שאלות';
+  }
+
+  drawTopics();
+  update();
+
+  go.onclick = () => {
+    const f = shuffle(filtered().slice());
+    const picked = count === 0 ? f : f.slice(0, count);
+
+    const bits = [];
+    if (allParts.length > 1 && selParts.size < allParts.length) bits.push([...selParts].join(', '));
+    if (selTopics.size) bits.push(`${selTopics.size} נושאים`);
+    if (onlyWrong) bits.push('רק טעויות');
+
     playQuestions({
       key: 'practice',
-      title: `תרגול מעורב — ${c.name}`,
-      subtitle: `${picked.length} שאלות אקראיות מתוך ${plural(p.length, 'מבחן', 'מבחנים')}`,
+      title: `תרגול חופשי — ${c.name}`,
+      subtitle: `${picked.length} שאלות אקראיות${bits.length ? ' · ' + bits.join(' · ') : ''}`,
       questions: picked,
       persist: false,
       back: { text: 'תרגול חדש', href: '#/practice/' + courseId },
@@ -648,6 +757,23 @@ function renderPractice(courseId) {
 
   toTop();
   updateFooter();
+}
+
+/* מפתחות השאלות שנענו לא נכון במקצוע — לפי טקסט השאלה, כדי שיישרדו
+   גם אם סדר השאלות במבחן ישתנה בעדכון עתידי. */
+function collectWrongKeys(courseId) {
+  const saved = store.read();
+  const keys = new Set();
+  for (const m of examsOf(courseId)) {
+    const rec = saved[m.id];
+    const exam = cache[m.id];
+    if (!rec || !exam) continue;
+    for (const [qi, oi] of Object.entries(rec.answers || {})) {
+      const q = exam.questions[qi];
+      if (q && q.a !== oi) keys.add(m.id + '#' + q.q);
+    }
+  }
+  return keys;
 }
 
 function shuffle(arr) {
@@ -727,9 +853,10 @@ function renderAbout() {
     { icon: '✍️', title: 'עונים, ומקבלים תשובה מיד',
       body: 'לוחצים על מסיח. הנכון נצבע ירוק, השגוי אדום — מיד. איפה שיש הסבר, הוא מופיע גם. ' +
             'אפשר גם פשוט להקיש 1, 2, 3 על המקלדת.' },
-    { icon: '🎲', title: 'תרגול מעורב — החלק החשוב',
-      body: 'שולף שאלות אקראיות מכמה מבחנים יחד. כשפותרים את אותו מבחן פעם שלישית, המוח זוכר ' +
-            'שהתשובה היא "השלישית" במקום לזכור את החומר. ערבוב שובר את זה.' },
+    { icon: '🎲', title: 'תרגול חופשי — החלק החשוב',
+      body: 'בונים תרגול לפי הצורך: נושא מסוים, חלק מסוים, או פשוט אקראי מהכול. השאלות נשלפות ' +
+            'מכל המבחנים יחד — וזה חשוב, כי כשפותרים את אותו מבחן פעם שלישית המוח זוכר שהתשובה ' +
+            'היא "השלישית" במקום לזכור את החומר. ערבוב שובר את זה.' },
     { icon: '🎯', title: 'הטעויות שלי',
       body: 'כל שאלה שטעית בה נאספת לכאן לבד. זה הדף הכי שווה לפני מבחן: בדיוק רשימת החורים שלך, ' +
             'בלי לבזבז זמן על מה שכבר ידעת.' },

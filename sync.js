@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const EXAMS = path.join(__dirname, 'exams');
 const REQUIRED = ['id', 'course', 'title', 'kind', 'questions'];
@@ -98,17 +99,52 @@ if (problems.length) {
 
 courses.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
+/* גרסת התוכן — חתימה של כל קבצי המבחנים יחד.
+   האתר מוסיף אותה לכל בקשת קובץ מבחן (?v=...), כדי שעדכון תוכן
+   לא ייתקע במטמון הדפדפן של המשתמשים. */
+const contentHash = crypto
+  .createHash('md5')
+  .update(
+    exams
+      .map((e) => fs.readFileSync(path.join(EXAMS, e.file)))
+      .reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))
+  )
+  .digest('hex')
+  .slice(0, 8);
+
 fs.writeFileSync(
   path.join(EXAMS, 'manifest.json'),
   JSON.stringify(
-    { updated: new Date().toISOString().slice(0, 10), courses, exams },
+    { updated: new Date().toISOString().slice(0, 10), version: contentHash, courses, exams },
     null,
     2
   ),
   'utf8'
 );
 
-console.log('\n✅ manifest.json עודכן\n');
+/* --- חותם גרסה על הנכסים ---
+   בלי זה הדפדפן מגיש CSS/JS ישנים מהמטמון אחרי כל דחיפה (GitHub Pages
+   מגדיר cache-control ל-10 דקות), והמשתמש רואה אתר "שבור" שלמעשה תקין.
+   חתימה מתוכן הקובץ מכריחה הורדה מחדש בדיוק כשהוא באמת השתנה. */
+const stamp = (file) =>
+  crypto
+    .createHash('md5')
+    .update(fs.readFileSync(path.join(__dirname, file)))
+    .digest('hex')
+    .slice(0, 8);
+
+const cssV = stamp('assets/style.css');
+const jsV = stamp('assets/app.js');
+
+const indexPath = path.join(__dirname, 'index.html');
+let html = fs.readFileSync(indexPath, 'utf8');
+html = html
+  .replace(/assets\/style\.css(\?v=[a-f0-9]+)?/g, `assets/style.css?v=${cssV}`)
+  .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`);
+fs.writeFileSync(indexPath, html, 'utf8');
+
+console.log('\n✅ manifest.json עודכן');
+console.log(`   נכסים נחתמו:  style.css?v=${cssV}   app.js?v=${jsV}\n`);
 courses.forEach((c) => {
   const mine = exams.filter((e) => e.course === c.id);
   if (!mine.length) {
