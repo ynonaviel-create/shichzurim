@@ -10,8 +10,14 @@ const crypto = require('crypto');
 const EXAMS = path.join(__dirname, 'exams');
 const REQUIRED = ['id', 'course', 'title', 'kind', 'questions'];
 const KINDS = ['shichzur', 'practice', 'highyield'];
+const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
+
+/* מזהה שאלות שחוזרות בין מחזורים, מסמן אותן בקבצי השחזור, ובונה את מבחן
+   ה-High Yield. רץ *לפני* הסריקה, כי הוא כותב לקבצים שאנחנו עומדים לקרוא.
+   בזכות זה כל שחזור חדש מעדכן את הספירות מעצמו. */
+require('./repeats.js');
 
 /* --- מקצועות --- */
 let courses = [];
@@ -26,7 +32,7 @@ const courseIds = new Set(courses.map((c) => c.id));
 /* --- מבחנים --- */
 const files = fs
   .readdirSync(EXAMS)
-  .filter((f) => f.endsWith('.json') && f !== 'manifest.json' && f !== 'courses.json')
+  .filter((f) => f.endsWith('.json') && !NOT_EXAMS.has(f))
   .sort();
 
 const exams = [];

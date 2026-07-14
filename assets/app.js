@@ -663,10 +663,29 @@ function playQuestions(cfg) {
 
     const top = el('div', 'q-top');
     top.append(el('span', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
-    if (item.topic) top.append(el('span', 'topic', item.topic));
+
+    const tags = el('div', 'q-tags');
+
+    /* תג החזרה — הסיגנל שבשבילו כל זה נבנה. מוצג בכל מקום שבו שאלה מוצגת:
+       בתוך שחזור, בתרגול חופשי, ובמבחן ה-High Yield עצמו. */
+    const r = item.repeat;
+    if (r && r.n > 1) {
+      const tag = el('span', 'repeat' + (r.n >= 3 ? ' hot' : ''));
+      tag.append(el('span', null, r.n >= 3 ? '⭐' : '🔁'));
+      tag.append(el('span', null, `הופיעה ב-${r.n} מחזורים · ${r.in.join(' · ')}`));
+      tag.title =
+        'שאלה שחזרה על עצמה בין מחזורים — ההימור הטוב ביותר למבחן.' +
+        (r.span >= 3 ? `\nוהיא חזרה על פני ${r.span} מחזורים, לא רק בין שניים סמוכים.` : '');
+      tags.append(tag);
+    }
+    if (item.topic) tags.append(el('span', 'topic', item.topic));
+    top.append(tags);
     card.append(top);
 
     card.append(el('div', 'q-text', item.q));
+
+    if (r && r.conflict)
+      card.append(el('div', 'q-warn', '⚠️ המחזורים חלוקים על התשובה הנכונה לשאלה הזאת. אחד המפתחות טועה — אל תשנן, תבין.'));
 
     // מקור השחזור והמבחן שממנו הגיעה השאלה — מידע רקע, לא אזהרה.
     const src = [item.source, item.origin].filter(Boolean).join(' · ');
@@ -844,8 +863,10 @@ async function renderPractice(courseId) {
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען את בנק השאלות…</b></div>';
 
+  /* מבחן ה-High Yield נבנה מהשאלות של השחזורים עצמם, ולכן אסור לו להיכנס
+     למאגר — אחרת כל שאלה חוזרת הייתה מופיעה כאן פעמיים. */
   const pool = [];
-  for (const m of examsOf(courseId)) {
+  for (const m of examsOf(courseId).filter((m) => m.kind !== 'highyield')) {
     const exam = await loadExam(m.id);
     exam.questions.forEach((q, i) =>
       pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id, idx: i })
@@ -872,6 +893,7 @@ async function renderPractice(courseId) {
   const allParts = [...new Set(pool.map((q) => q.part))].filter(Boolean).sort();
   const selParts = new Set(allParts);
   const selTopics = new Set();          // ריק = כל הנושאים
+  let minRepeat = 1;                    // 1 = הכול. 2/3/4 = רק שאלות שחזרו כך וכך פעמים
   let mode = 'new';                     // new | wrong | all
   let count = 20;
 
@@ -975,6 +997,33 @@ async function renderPractice(courseId) {
     });
   }
 
+  /* --- חזרות --- */
+  const repeatCounts = (min) => pool.filter((q) => (q.repeat?.n || 1) >= min).length;
+  if (repeatCounts(2)) {
+    const repField = el('div', 'field');
+    repField.append(el('label', null, 'שאלות חוזרות'));
+    const rc = el('div', 'chips');
+    [
+      { n: 1, label: 'כל השאלות' },
+      { n: 2, label: '🔁 חזרו פעמיים ומעלה' },
+      { n: 3, label: '⭐ 3 מחזורים ומעלה' },
+      { n: 4, label: '🔥 4 ומעלה' },
+    ].forEach(({ n, label }) => {
+      const have = repeatCounts(n);
+      if (n > 1 && !have) return;                       // אל תציע מסנן שמחזיר אפס
+      const ch = el('div', 'chip' + (n === minRepeat ? ' on' : ''), n === 1 ? label : `${label} · ${have}`);
+      ch.onclick = () => {
+        minRepeat = n;
+        rc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
+        ch.classList.add('on');
+        update();
+      };
+      rc.append(ch);
+    });
+    repField.append(rc);
+    form.append(repField);
+  }
+
   /* --- כמות --- */
   const countField = el('div', 'field');
   countField.append(el('label', null, 'כמה שאלות'));
@@ -1021,6 +1070,7 @@ async function renderPractice(courseId) {
     return pool.filter((q) => {
       if (!inParts(q)) return false;
       if (selTopics.size && !selTopics.has(q.topic)) return false;
+      if ((q.repeat?.n || 1) < minRepeat) return false;
       const s = map[qKey(q)];
       if (mode === 'new') return s === undefined;
       if (mode === 'wrong') return s === 0;

@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-14",
-  "version": "1593706c",
+  "version": "6138a20f",
   "assets": {
-    "css": "887aa692",
-    "js": "f76d457f"
+    "css": "ece0a0c4",
+    "js": "0b56a62f"
   },
   "courses": [
     {
@@ -175,6 +175,19 @@
       "moed": null,
       "added": "2026-07-14",
       "count": 40
+    },
+    {
+      "id": "molecular-high-yield",
+      "file": "molecular-high-yield.json",
+      "course": "molecular",
+      "part": null,
+      "title": "High Yield — השאלות שחוזרות",
+      "kind": "highyield",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-14",
+      "count": 42
     },
     {
       "id": "molecular-mem-het",
