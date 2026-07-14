@@ -1,7 +1,8 @@
 {
   "id": "biochem-b-practice",
-  "subject": "ביוכימיה ב׳",
-  "title": "ביוכימיה ב׳ — מבחן תרגול",
+  "course": "biochem",
+  "part": "ב׳",
+  "title": "מבחן תרגול",
   "kind": "practice",
   "year": 2026,
   "moed": null,

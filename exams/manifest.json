@@ -1,11 +1,21 @@
 {
   "updated": "2026-07-14",
+  "courses": [
+    {
+      "id": "biochem",
+      "name": "ביוכימיה",
+      "icon": "🧪",
+      "blurb": "חלבונים, אנזימים ומטבוליזם — א׳ ו-ב׳ יחד",
+      "order": 1
+    }
+  ],
   "exams": [
     {
       "id": "biochem-a-high-yield",
       "file": "biochem-a-high-yield.json",
-      "subject": "ביוכימיה א׳",
-      "title": "ביוכימיה א׳ — 50 השאלות הנפוצות ביותר",
+      "course": "biochem",
+      "part": "א׳",
+      "title": "50 השאלות הנפוצות ביותר",
       "kind": "highyield",
       "year": 2026,
       "moed": null,
@@ -15,8 +25,9 @@
     {
       "id": "biochem-b-2024-moed-a",
       "file": "biochem-b-2024-moed-a.json",
-      "subject": "ביוכימיה ב׳",
-      "title": "ביוכימיה ב׳ 2024 — מועד א׳",
+      "course": "biochem",
+      "part": "ב׳",
+      "title": "שחזור 2024 — מועד א׳",
       "kind": "shichzur",
       "year": 2024,
       "moed": "א",
@@ -26,8 +37,9 @@
     {
       "id": "biochem-b-2026-moed-a",
       "file": "biochem-b-2026-moed-a.json",
-      "subject": "ביוכימיה ב׳",
-      "title": "ביוכימיה ב׳ 2026 — מועד א׳",
+      "course": "biochem",
+      "part": "ב׳",
+      "title": "שחזור 2026 — מועד א׳",
       "kind": "shichzur",
       "year": 2026,
       "moed": "א",
@@ -37,8 +49,9 @@
     {
       "id": "biochem-b-high-yield",
       "file": "biochem-b-high-yield.json",
-      "subject": "ביוכימיה ב׳",
-      "title": "ביוכימיה ב׳ — High Yield",
+      "course": "biochem",
+      "part": "ב׳",
+      "title": "High Yield — שאלות חוזרות",
       "kind": "highyield",
       "year": 2026,
       "moed": null,
@@ -48,8 +61,9 @@
     {
       "id": "biochem-b-practice",
       "file": "biochem-b-practice.json",
-      "subject": "ביוכימיה ב׳",
-      "title": "ביוכימיה ב׳ — מבחן תרגול",
+      "course": "biochem",
+      "part": "ב׳",
+      "title": "מבחן תרגול",
       "kind": "practice",
       "year": 2026,
       "moed": null,

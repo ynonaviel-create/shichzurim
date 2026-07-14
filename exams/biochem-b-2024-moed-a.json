@@ -1,7 +1,8 @@
 {
   "id": "biochem-b-2024-moed-a",
-  "subject": "ביוכימיה ב׳",
-  "title": "ביוכימיה ב׳ 2024 — מועד א׳",
+  "course": "biochem",
+  "part": "ב׳",
+  "title": "שחזור 2024 — מועד א׳",
   "kind": "shichzur",
   "year": 2024,
   "moed": "א",

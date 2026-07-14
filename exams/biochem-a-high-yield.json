@@ -1,7 +1,8 @@
 {
   "id": "biochem-a-high-yield",
-  "subject": "ביוכימיה א׳",
-  "title": "ביוכימיה א׳ — 50 השאלות הנפוצות ביותר",
+  "course": "biochem",
+  "part": "א׳",
+  "title": "50 השאלות הנפוצות ביותר",
   "kind": "highyield",
   "year": 2026,
   "moed": null,

@@ -7,16 +7,28 @@ const fs = require('fs');
 const path = require('path');
 
 const EXAMS = path.join(__dirname, 'exams');
-const REQUIRED = ['id', 'subject', 'title', 'kind', 'questions'];
+const REQUIRED = ['id', 'course', 'title', 'kind', 'questions'];
 const KINDS = ['shichzur', 'practice', 'highyield'];
 
+const problems = [];
+
+/* --- מקצועות --- */
+let courses = [];
+try {
+  courses = JSON.parse(fs.readFileSync(path.join(EXAMS, 'courses.json'), 'utf8')).courses;
+} catch (e) {
+  console.error('\n❌ לא הצלחתי לקרוא את exams/courses.json — ' + e.message + '\n');
+  process.exit(1);
+}
+const courseIds = new Set(courses.map((c) => c.id));
+
+/* --- מבחנים --- */
 const files = fs
   .readdirSync(EXAMS)
-  .filter((f) => f.endsWith('.json') && f !== 'manifest.json')
+  .filter((f) => f.endsWith('.json') && f !== 'manifest.json' && f !== 'courses.json')
   .sort();
 
 const exams = [];
-const problems = [];
 
 for (const file of files) {
   let data;
@@ -32,6 +44,13 @@ for (const file of files) {
     problems.push(`${file}: חסרים שדות — ${missing.join(', ')}`);
     continue;
   }
+  if (!courseIds.has(data.course)) {
+    problems.push(
+      `${file}: המקצוע "${data.course}" לא קיים ב-courses.json ` +
+      `(קיימים: ${[...courseIds].join(', ')}). הוסף אותו שם קודם.`
+    );
+    continue;
+  }
   if (!KINDS.includes(data.kind)) {
     problems.push(`${file}: kind לא חוקי "${data.kind}" (מותר: ${KINDS.join(' / ')})`);
     continue;
@@ -41,7 +60,6 @@ for (const file of files) {
     continue;
   }
 
-  // בדיקת תקינות של כל שאלה
   data.questions.forEach((q, i) => {
     const n = i + 1;
     if (!q.q) problems.push(`${file} · שאלה ${n}: אין טקסט שאלה`);
@@ -54,7 +72,8 @@ for (const file of files) {
   exams.push({
     id: data.id,
     file,
-    subject: data.subject,
+    course: data.course,
+    part: data.part ?? null,
     title: data.title,
     kind: data.kind,
     year: data.year ?? null,
@@ -64,7 +83,6 @@ for (const file of files) {
   });
 }
 
-// כפילות מזהים
 const seen = {};
 exams.forEach((e) => {
   if (seen[e.id]) problems.push(`מזהה כפול "${e.id}" — גם ב-${seen[e.id]} וגם ב-${e.file}`);
@@ -78,16 +96,30 @@ if (problems.length) {
   process.exit(1);
 }
 
-const today = new Date().toISOString().slice(0, 10);
+courses.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+
 fs.writeFileSync(
   path.join(EXAMS, 'manifest.json'),
-  JSON.stringify({ updated: today, exams }, null, 2),
+  JSON.stringify(
+    { updated: new Date().toISOString().slice(0, 10), courses, exams },
+    null,
+    2
+  ),
   'utf8'
 );
 
-const totalQ = exams.reduce((a, e) => a + e.count, 0);
 console.log('\n✅ manifest.json עודכן\n');
-exams.forEach((e) =>
-  console.log(`   ${e.subject.padEnd(12)} ${e.title}  (${e.count} שאלות)`)
+courses.forEach((c) => {
+  const mine = exams.filter((e) => e.course === c.id);
+  if (!mine.length) {
+    console.log(`   ${c.icon} ${c.name} — אין עדיין מבחנים`);
+    return;
+  }
+  console.log(`   ${c.icon} ${c.name}  (${mine.reduce((a, e) => a + e.count, 0)} שאלות)`);
+  mine.forEach((e) =>
+    console.log(`        ${e.part ? e.part + '  ' : '   '}${e.title}  — ${e.count}`)
+  );
+});
+console.log(
+  `\n   סה״כ: ${exams.length} מבחנים, ${exams.reduce((a, e) => a + e.count, 0)} שאלות\n`
 );
-console.log(`\n   סה״כ: ${exams.length} מבחנים, ${totalQ} שאלות\n`);

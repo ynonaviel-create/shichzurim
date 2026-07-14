@@ -1,7 +1,8 @@
 {
   "id": "biochem-b-high-yield",
-  "subject": "ביוכימיה ב׳",
-  "title": "ביוכימיה ב׳ — High Yield",
+  "course": "biochem",
+  "part": "ב׳",
+  "title": "High Yield — שאלות חוזרות",
   "kind": "highyield",
   "year": 2026,
   "moed": null,

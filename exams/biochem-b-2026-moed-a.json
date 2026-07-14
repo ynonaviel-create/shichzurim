@@ -1,7 +1,8 @@
 {
   "id": "biochem-b-2026-moed-a",
-  "subject": "ביוכימיה ב׳",
-  "title": "ביוכימיה ב׳ 2026 — מועד א׳",
+  "course": "biochem",
+  "part": "ב׳",
+  "title": "שחזור 2026 — מועד א׳",
   "kind": "shichzur",
   "year": 2026,
   "moed": "א",
