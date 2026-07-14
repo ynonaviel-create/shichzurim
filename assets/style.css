@@ -450,6 +450,23 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   max-width:70ch;
 }
 
+/* ===== כפתור העתקה ל-NotebookLM ===== */
+.nb-btn{
+  display:inline-flex; align-items:center; gap:7px; margin-top:14px;
+  padding:8px 14px; border-radius:99px; cursor:pointer;
+  background:var(--surface); border:1px solid var(--line);
+  color:var(--muted); font-family:var(--font);
+  font-size:12.5px; font-weight:700; transition:.15s;
+}
+.nb-btn:hover{border-color:var(--accent); color:var(--accent-dk); background:var(--accent-sl);}
+.nb-btn .nb-ico{font-size:13px; line-height:1;}
+.nb-btn.done{
+  background:var(--good-bg); border-color:var(--good-ln); color:var(--good);
+}
+.nb-btn.fail{
+  background:var(--bad-bg); border-color:var(--bad-ln); color:var(--bad);
+}
+
 /* ===== תוצאה ===== */
 .result{
   text-align:center; padding:38px 26px; margin-bottom:20px;

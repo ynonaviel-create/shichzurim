@@ -708,11 +708,88 @@ function playQuestions(cfg) {
     fb.innerHTML = '';
     fb.append(el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`));
     if (item.explain) fb.append(el('div', 'explain', item.explain));
+    fb.append(notebookButton(item, oi));
   }
 
   render();
   toTop();
   updateFooter();
+}
+
+/* ================= העתקה ל-NotebookLM =================
+   כל מה שצריך כדי לבנות את הפרומפט כבר נמצא בדפדפן: נוסח השאלה, המסיחים,
+   התשובה הנכונה ומה שהמשתמש בחר. אין צורך בשרת או ב-API — רק להרכיב
+   מחרוזת ולשים אותה בלוח.
+
+   שני נוסחים, לפי מה שקרה: טעית → "למה טעיתי"; צדקת → "העמק לי את הנושא". */
+function notebookPrompt(item, chosen) {
+  const correct = String(item.opts[item.a]).trim();
+  const picked = String(item.opts[chosen]).trim();
+
+  /* שאלה שנשענת על טבלה או על הערה (קיצורים, ציון שהיא מבוססת גרף) לא ניתנת
+     לפתרון בלעדיהן — בלי זה הפרומפט מגיע לנוטבוק חסר. */
+  let q = String(item.q).trim();
+  if (item.note) q += `\n(${String(item.note).trim()})`;
+  if (item.table) {
+    const rows = [item.table.headers, ...item.table.rows]
+      .map((r) => r.join(' | '))
+      .join('\n');
+    q += `\n\nנתוני הטבלה בשאלה:\n${rows}`;
+  }
+
+  const parts = [`יש לי בוחן על החומר הזה ונתקלתי בשאלה הבאה: "${q}"`];
+
+  if (chosen === item.a) {
+    parts.push(`בחרתי בתשובה הנכונה: "${correct}"`);
+    parts.push('עזור לי להבין את הנושא הזה יותר לעומק.');
+  } else {
+    parts.push(`זאת התשובה שבחרתי: "${picked}"`);
+    parts.push(`זאת הייתה תשובה שגויה. התשובה הנכונה היא "${correct}"`);
+    parts.push('עזור לי להבין למה התשובה שבחרתי הייתה שגויה.');
+  }
+
+  return parts.join('\n\n\n');
+}
+
+/* כתיבה ללוח. clipboard API דורש הקשר מאובטח (https / localhost) — יש נפילה
+   אחורה ל-execCommand כדי שזה יעבוד גם אם משהו חוסם. */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed; opacity:0; pointer-events:none;';
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    ta.remove();
+    return ok;
+  }
+}
+
+function notebookButton(item, chosen) {
+  const btn = el('button', 'nb-btn');
+  const label = el('span', null, 'העתק ל-NotebookLM');
+  btn.append(el('span', 'nb-ico', '📋'));
+  btn.append(label);
+  btn.title = chosen === item.a
+    ? 'מעתיק פרומפט שמבקש להעמיק בנושא'
+    : 'מעתיק פרומפט שמסביר למה התשובה שבחרת שגויה';
+
+  btn.onclick = async (e) => {
+    e.preventDefault();
+    const ok = await copyText(notebookPrompt(item, chosen));
+    btn.classList.add(ok ? 'done' : 'fail');
+    label.textContent = ok ? 'הועתק! הדבק בנוטבוק' : 'ההעתקה נחסמה';
+    setTimeout(() => {
+      btn.classList.remove('done', 'fail');
+      label.textContent = 'העתק ל-NotebookLM';
+    }, 2200);
+  };
+  return btn;
 }
 
 function tableOf(t) {
