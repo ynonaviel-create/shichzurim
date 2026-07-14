@@ -1,0 +1,49 @@
+{
+  "updated": "2026-07-14",
+  "exams": [
+    {
+      "id": "biochem-b-2024-moed-a",
+      "file": "biochem-b-2024-moed-a.json",
+      "subject": "ביוכימיה ב׳",
+      "title": "ביוכימיה ב׳ 2024 — מועד א׳",
+      "kind": "shichzur",
+      "year": 2024,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 40
+    },
+    {
+      "id": "biochem-b-2026-moed-a",
+      "file": "biochem-b-2026-moed-a.json",
+      "subject": "ביוכימיה ב׳",
+      "title": "ביוכימיה ב׳ 2026 — מועד א׳",
+      "kind": "shichzur",
+      "year": 2026,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 40
+    },
+    {
+      "id": "biochem-b-high-yield",
+      "file": "biochem-b-high-yield.json",
+      "subject": "ביוכימיה ב׳",
+      "title": "ביוכימיה ב׳ — High Yield",
+      "kind": "highyield",
+      "year": 2026,
+      "moed": null,
+      "added": "2026-07-14",
+      "count": 30
+    },
+    {
+      "id": "biochem-b-practice",
+      "file": "biochem-b-practice.json",
+      "subject": "ביוכימיה ב׳",
+      "title": "ביוכימיה ב׳ — מבחן תרגול",
+      "kind": "practice",
+      "year": 2026,
+      "moed": null,
+      "added": "2026-07-14",
+      "count": 40
+    }
+  ]
+}
