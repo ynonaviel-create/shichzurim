@@ -243,7 +243,7 @@ function renderLibrary() {
       const sh = el('div', 'subject-head');
       sh.append(el('h2', null, subject));
       const n = exams.reduce((a, e) => a + e.count, 0);
-      sh.append(el('span', 'pill', `${exams.length} מבחנים · ${n} שאלות`));
+      sh.append(el('span', 'pill', `${plural(exams.length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
       sec.append(sh);
 
       const cards = el('div', 'cards');
@@ -258,6 +258,11 @@ function renderLibrary() {
 
   toTop();
   updateFooter();
+}
+
+// "1 מבחנים" צורם בעברית. יחיד מקבל ניסוח משלו.
+function plural(n, one, many) {
+  return n === 1 ? `${one} אחד` : `${n} ${many}`;
 }
 
 function stat(value, label, cls) {
@@ -640,7 +645,7 @@ function renderPractice() {
     const p = pool();
     const total = p.reduce((a, m) => a + m.count, 0);
     info.textContent = p.length
-      ? `בבריכה: ${total} שאלות מתוך ${p.length} מבחנים. ייבחרו ${count === 0 ? total : Math.min(count, total)} באקראי.`
+      ? `בבריכה: ${total} שאלות מתוך ${plural(p.length, 'מבחן', 'מבחנים')}. ייבחרו ${count === 0 ? total : Math.min(count, total)} באקראי.`
       : 'בחר לפחות מקצוע אחד.';
     go.disabled = !p.length;
   }
@@ -662,7 +667,7 @@ function renderPractice() {
     playQuestions({
       key: 'practice',
       title: 'תרגול מעורב',
-      subtitle: `${picked.length} שאלות אקראיות מתוך ${p.length} מבחנים`,
+      subtitle: `${picked.length} שאלות אקראיות מתוך ${plural(p.length, 'מבחן', 'מבחנים')}`,
       questions: picked,
       persist: false,
       backHref: '#/practice',
@@ -735,7 +740,7 @@ async function renderReview() {
 function updateFooter() {
   const n = MANIFEST.reduce((a, m) => a + m.count, 0);
   document.getElementById('footerStats').textContent =
-    `${MANIFEST.length} מבחנים · ${n} שאלות · ההתקדמות נשמרת בדפדפן הזה בלבד`;
+    `${plural(MANIFEST.length, 'מבחן', 'מבחנים')} · ${n} שאלות · ההתקדמות נשמרת בדפדפן הזה בלבד`;
 }
 
 /* ---------- מקשי קיצור: 1-9 לבחירת תשובה בשאלה שבמוקד ---------- */
