@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-14",
-  "version": "41429a3b",
+  "version": "cb8eca75",
   "assets": {
     "css": "887aa692",
     "js": "f76d457f"
@@ -175,6 +175,19 @@
       "moed": null,
       "added": "2026-07-14",
       "count": 40
+    },
+    {
+      "id": "molecular-mem-het",
+      "file": "molecular-mem-het.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור מ״ח",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 48,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 59
     },
     {
       "id": "molecular-mem-tet",
