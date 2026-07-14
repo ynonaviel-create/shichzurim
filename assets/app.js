@@ -50,6 +50,34 @@ const store = {
   reset(id) { const d = this.read(); delete d[id]; this.write(d); },
 };
 
+/* ---------- מה כבר ראית ----------
+   מפה גלובלית של כל שאלה שנענתה אי־פעם, בכל מקום באתר:
+     "examId#index" → 1 (נכון) | 0 (טעות)
+
+   בלי זה התרגול החופשי שולף באקראי מכל הבריכה בכל פעם, אז חוזרים שוב ושוב
+   על אותן שאלות בזמן שאחרות לא הוצגו מעולם. עם זה אפשר לתת קודם את מה
+   שעוד לא ראית, ולהתקדם דרך הארכיון במקום להסתובב במעגל.
+
+   נכתב גם ממבחן וגם מתרגול — שאלה שראית במבחן לא תחזור כ"חדשה" בתרגול. */
+const SEEN_Q_KEY = 'shichzurim.seen';
+const qKey = (item) => `${item.examId}#${item.idx}`;
+
+const seen = {
+  read() {
+    try { return JSON.parse(localStorage.getItem(SEEN_Q_KEY)) || {}; }
+    catch { return {}; }
+  },
+  write(d) { localStorage.setItem(SEEN_Q_KEY, JSON.stringify(d)); },
+  mark(item, correct) {
+    if (item.examId == null || item.idx == null) return;
+    const d = this.read();
+    d[qKey(item)] = correct ? 1 : 0;
+    this.write(d);
+  },
+  status(item) { return this.read()[qKey(item)]; },  // undefined | 0 | 1
+  clear() { localStorage.removeItem(SEEN_Q_KEY); },
+};
+
 /* ---------- נתונים ---------- */
 let COURSES = [];
 let EXAMS = [];
@@ -325,7 +353,9 @@ async function renderExam(id) {
     title: exam.title,
     subtitle: `${c ? c.name : ''} ${exam.part || ''} · ${exam.questions.length} שאלות`.trim(),
     note: exam.note,
-    questions: exam.questions,
+    // examId+idx מזהים כל שאלה באופן יציב, כדי שנוכל לסמן אותה כ"נראתה"
+    // גם כשהיא מוצגת מתוך תרגול חופשי ולא מתוך המבחן שלה.
+    questions: exam.questions.map((q, i) => ({ ...q, examId: exam.id, idx: i })),
     persist: true,
     back: { text: c ? c.name : 'חזרה', href: '#/course/' + exam.course },
   });
@@ -505,6 +535,7 @@ function playQuestions(cfg) {
   function choose(qi, oi, card, opts, fb, item) {
     if (answers[qi] != null) return;
     answers[qi] = oi;
+    seen.mark(item, oi === item.a);   // נרשם גם במבחן וגם בתרגול
     paint(qi, oi, card, opts, fb, item);
     refresh();
 
@@ -555,8 +586,10 @@ function tableOf(t) {
   return wrap;
 }
 /* ================= תרגול חופשי =================
-   לא כבול למבחן. בוחרים חלק (א׳/ב׳), נושאים, וכמות — והמנוע שולף
-   שאלות מכל המבחנים של המקצוע לפי הסינון. */
+   לא כבול למבחן. בוחרים חלק (א׳/ב׳), נושאים, מצב, וכמות.
+
+   ברירת המחדל היא "שאלות חדשות" — שאלות שעוד לא ראית באף מקום באתר.
+   זה מה שמאפשר להתקדם דרך הארכיון במקום לחזור באקראי על אותן שאלות. */
 async function renderPractice(courseId) {
   setNav('home');
   const c = courseOf(courseId);
@@ -569,12 +602,11 @@ async function renderPractice(courseId) {
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען את בנק השאלות…</b></div>';
 
-  // טוענים את כל שאלות המקצוע פעם אחת, עם המטא-דאטה שצריך לסינון
   const pool = [];
   for (const m of examsOf(courseId)) {
     const exam = await loadExam(m.id);
-    exam.questions.forEach((q) =>
-      pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id })
+    exam.questions.forEach((q, i) =>
+      pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id, idx: i })
     );
   }
 
@@ -584,7 +616,7 @@ async function renderPractice(courseId) {
   const head = el('div', 'page-head');
   head.append(el('h1', null, `תרגול חופשי — ${c.name}`));
   head.append(el('p', null,
-    'בנה לעצמך תרגול: בחר חלק, בחר נושאים, וקבע כמה שאלות. השאלות נשלפות מכל המבחנים יחד, בסדר אקראי.'));
+    'בנה לעצמך תרגול. כברירת מחדל תקבל רק שאלות שעוד לא ראית — כדי שתתקדם דרך הארכיון ולא תסתובב במעגל.'));
   view.append(head);
 
   if (!pool.length) {
@@ -598,17 +630,54 @@ async function renderPractice(courseId) {
   const allParts = [...new Set(pool.map((q) => q.part))].filter(Boolean).sort();
   const selParts = new Set(allParts);
   const selTopics = new Set();          // ריק = כל הנושאים
+  let mode = 'new';                     // new | wrong | all
   let count = 20;
-  let onlyWrong = false;
 
-  const wrongKeys = collectWrongKeys(courseId);
+  /* --- מד התקדמות בארכיון --- */
+  const progress = el('div', 'dash');
+  view.append(progress);
+
+  function drawProgress() {
+    const map = seen.read();
+    const total = pool.length;
+    const done = pool.filter((q) => map[qKey(q)] !== undefined).length;
+    const wrong = pool.filter((q) => map[qKey(q)] === 0).length;
+    const fresh = total - done;
+
+    progress.innerHTML = '';
+    progress.append(stat(fresh, 'שאלות שלא ראית', fresh ? 'accent' : ''));
+    progress.append(stat(done, 'שאלות שראית'));
+    progress.append(stat(wrong, 'טעויות פתוחות', wrong ? 'bad' : ''));
+    progress.append(stat(Math.round((done / total) * 100) + '%', 'מהמקצוע'));
+  }
 
   const form = el('div', 'form');
 
-  /* --- חלק (א׳ / ב׳) --- */
-  let partsField = null;
+  /* --- מצב --- */
+  const modeField = el('div', 'field');
+  modeField.append(el('label', null, 'מה לתרגל'));
+  const modeChips = el('div', 'chips');
+  const MODES = [
+    { id: 'new',   label: '✨ שאלות חדשות' },
+    { id: 'wrong', label: '🎯 רק מה שטעיתי' },
+    { id: 'all',   label: '🔁 הכול, כולל מה שראיתי' },
+  ];
+  MODES.forEach((m) => {
+    const ch = el('div', 'chip' + (m.id === mode ? ' on' : ''), m.label);
+    ch.onclick = () => {
+      mode = m.id;
+      modeChips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
+      ch.classList.add('on');
+      update();
+    };
+    modeChips.append(ch);
+  });
+  modeField.append(modeChips);
+  form.append(modeField);
+
+  /* --- חלק --- */
   if (allParts.length > 1) {
-    partsField = el('div', 'field');
+    const partsField = el('div', 'field');
     partsField.append(el('label', null, 'חלק'));
     const chips = el('div', 'chips');
     allParts.forEach((p) => {
@@ -634,26 +703,18 @@ async function renderPractice(courseId) {
   topicsField.append(topicChips);
   form.append(topicsField);
 
-  function inParts(q) {
-    return !allParts.length || !q.part || selParts.has(q.part);
-  }
+  const inParts = (q) => !allParts.length || !q.part || selParts.has(q.part);
 
   function drawTopics() {
-    // רק נושאים שקיימים בחלקים שנבחרו
     const counts = {};
     pool.filter(inParts).forEach((q) => {
       if (q.topic) counts[q.topic] = (counts[q.topic] || 0) + 1;
     });
     const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-
-    // מנקים בחירות של נושאים שכבר לא רלוונטיים
     [...selTopics].forEach((t) => { if (!counts[t]) selTopics.delete(t); });
 
     topicChips.innerHTML = '';
-    if (!names.length) {
-      topicsField.style.display = 'none';
-      return;
-    }
+    if (!names.length) { topicsField.style.display = 'none'; return; }
     topicsField.style.display = '';
     topicsLabel.textContent = `נושאים ${selTopics.size ? `(${selTopics.size} נבחרו)` : '(הכול)'}`;
 
@@ -670,23 +731,6 @@ async function renderPractice(courseId) {
       };
       topicChips.append(ch);
     });
-  }
-
-  /* --- רק שאלות שטעיתי בהן --- */
-  let wrongField = null;
-  if (wrongKeys.size) {
-    wrongField = el('div', 'field');
-    wrongField.append(el('label', null, 'מסננים'));
-    const chips = el('div', 'chips');
-    const ch = el('div', 'chip', `רק שאלות שטעיתי בהן · ${wrongKeys.size}`);
-    ch.onclick = () => {
-      onlyWrong = !onlyWrong;
-      ch.classList.toggle('on', onlyWrong);
-      update();
-    };
-    chips.append(ch);
-    wrongField.append(chips);
-    form.append(wrongField);
   }
 
   /* --- כמות --- */
@@ -707,18 +751,37 @@ async function renderPractice(courseId) {
   form.append(countField);
 
   const info = el('p');
-  info.style.cssText = 'color:var(--dim); font-size:13.5px; margin-bottom:20px;';
+  info.style.cssText = 'color:var(--dim); font-size:13.5px; margin-bottom:20px; line-height:1.6;';
   form.append(info);
 
   const go = el('button', 'btn primary', 'התחל תרגול');
   form.append(go);
   view.append(form);
 
+  /* --- איפוס ההיסטוריה --- */
+  const resetRow = el('p');
+  resetRow.style.cssText = 'text-align:center; font-size:13px; color:var(--dim);';
+  const resetLink = el('button', 'btn ghost', 'איפוס — התחל את המקצוע מחדש');
+  resetLink.style.fontSize = '13px';
+  resetLink.onclick = () => {
+    if (!confirm(`לאפס את הסימון של כל השאלות שראית ב${c.name}?\nהציונים במבחנים עצמם יישארו.`)) return;
+    const map = seen.read();
+    pool.forEach((q) => delete map[qKey(q)]);
+    seen.write(map);
+    drawProgress();
+    update();
+  };
+  resetRow.append(resetLink);
+  view.append(resetRow);
+
   function filtered() {
+    const map = seen.read();
     return pool.filter((q) => {
       if (!inParts(q)) return false;
       if (selTopics.size && !selTopics.has(q.topic)) return false;
-      if (onlyWrong && !wrongKeys.has(q.examId + '#' + q.q)) return false;
+      const s = map[qKey(q)];
+      if (mode === 'new') return s === undefined;
+      if (mode === 'wrong') return s === 0;
       return true;
     });
   }
@@ -726,13 +789,29 @@ async function renderPractice(courseId) {
   function update() {
     const f = filtered();
     const take = count === 0 ? f.length : Math.min(count, f.length);
-    info.textContent = f.length
-      ? `בבריכה: ${f.length} שאלות. ייבחרו ${take} באקראי.`
-      : 'אין שאלות שמתאימות לסינון הזה. הרחב את הבחירה.';
-    go.disabled = !f.length;
-    go.textContent = f.length ? `התחל תרגול · ${take} שאלות` : 'אין שאלות';
+
+    if (f.length) {
+      const label = mode === 'new' ? 'שאלות שלא ראית' : mode === 'wrong' ? 'שאלות שטעית בהן' : 'שאלות';
+      info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
+      go.disabled = false;
+      go.textContent = `התחל תרגול · ${take} שאלות`;
+      return;
+    }
+
+    // בריכה ריקה — מסבירים למה, ומציעים מוצא
+    go.disabled = true;
+    go.textContent = 'אין שאלות';
+    if (mode === 'new') {
+      info.textContent = 'סיימת! ראית כבר את כל השאלות שמתאימות לסינון הזה. ' +
+        'עבור ל"רק מה שטעיתי" כדי לחזור על החורים, או ל"הכול" לסבב נוסף.';
+    } else if (mode === 'wrong') {
+      info.textContent = 'אין טעויות פתוחות בסינון הזה — או שלא ענית עדיין, או שענית נכון על הכול.';
+    } else {
+      info.textContent = 'אין שאלות שמתאימות לסינון הזה. הרחב את הבחירה.';
+    }
   }
 
+  drawProgress();
   drawTopics();
   update();
 
@@ -741,14 +820,14 @@ async function renderPractice(courseId) {
     const picked = count === 0 ? f : f.slice(0, count);
 
     const bits = [];
+    bits.push(mode === 'new' ? 'שאלות חדשות' : mode === 'wrong' ? 'רק טעויות' : 'הכול');
     if (allParts.length > 1 && selParts.size < allParts.length) bits.push([...selParts].join(', '));
     if (selTopics.size) bits.push(`${selTopics.size} נושאים`);
-    if (onlyWrong) bits.push('רק טעויות');
 
     playQuestions({
       key: 'practice',
       title: `תרגול חופשי — ${c.name}`,
-      subtitle: `${picked.length} שאלות אקראיות${bits.length ? ' · ' + bits.join(' · ') : ''}`,
+      subtitle: `${picked.length} שאלות · ${bits.join(' · ')}`,
       questions: picked,
       persist: false,
       back: { text: 'תרגול חדש', href: '#/practice/' + courseId },
@@ -759,22 +838,6 @@ async function renderPractice(courseId) {
   updateFooter();
 }
 
-/* מפתחות השאלות שנענו לא נכון במקצוע — לפי טקסט השאלה, כדי שיישרדו
-   גם אם סדר השאלות במבחן ישתנה בעדכון עתידי. */
-function collectWrongKeys(courseId) {
-  const saved = store.read();
-  const keys = new Set();
-  for (const m of examsOf(courseId)) {
-    const rec = saved[m.id];
-    const exam = cache[m.id];
-    if (!rec || !exam) continue;
-    for (const [qi, oi] of Object.entries(rec.answers || {})) {
-      const q = exam.questions[qi];
-      if (q && q.a !== oi) keys.add(m.id + '#' + q.q);
-    }
-  }
-  return keys;
-}
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -797,16 +860,16 @@ async function renderReview(courseId) {
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>אוסף את הטעויות…</b></div>';
 
-  const saved = store.read();
+  // נשען על מפת ה"נראו" — לכן טעות שנעשתה בתרגול חופשי מגיעה לכאן גם היא,
+  // ותשובה נכונה כאן מורידה את השאלה מהרשימה.
+  const map = seen.read();
   const wrong = [];
   for (const m of examsOf(courseId)) {
-    const rec = saved[m.id];
-    if (!rec || !Object.keys(rec.answers || {}).length) continue;
     const exam = await loadExam(m.id);
-    for (const [qi, oi] of Object.entries(rec.answers)) {
-      const q = exam.questions[qi];
-      if (q && q.a !== oi) wrong.push({ ...q, origin: exam.title });
-    }
+    exam.questions.forEach((q, i) => {
+      const item = { ...q, origin: exam.title, examId: m.id, idx: i };
+      if (map[qKey(item)] === 0) wrong.push(item);
+    });
   }
 
   view.innerHTML = '';
@@ -828,7 +891,7 @@ async function renderReview(courseId) {
     key: 'review',
     title: `הטעויות שלי — ${c.name}`,
     subtitle: `${wrong.length} שאלות שטעית בהן`,
-    note: 'זה סבב חזרה — התשובות כאן לא נשמרות. הטעויות המקוריות נשארות עד שתאפס מבחן.',
+    note: 'תענה נכון — והשאלה תרד מרשימת הטעויות. תטעה שוב — היא תישאר.',
     questions: wrong,
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
@@ -932,6 +995,18 @@ document.addEventListener('keydown', (e) => {
 
 /* ---------- הפעלה ---------- */
 window.addEventListener('hashchange', router);
+
+/* קישור אל הכתובת שכבר פתוחה לא מפעיל hashchange, ולכן לא מרנדר מחדש.
+   זה שובר את "תרגול חדש" (שמצביע חזרה לדף התרגול שממנו הגעת) ואת כל
+   כפתור חזרה שמצביע לדף הנוכחי. מכריחים רינדור במקרה הזה. */
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  if (a.getAttribute('href') === location.hash) {
+    e.preventDefault();
+    router();
+  }
+});
 
 (async function init() {
   initTheme();
