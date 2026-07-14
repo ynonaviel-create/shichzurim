@@ -87,6 +87,12 @@ const cache = {};
 /* המניפסט נטען עם no-cache כדי לאלץ אימות מול השרת — הוא קטן, וזה מה
    שמאפשר לנו לגלות שיש תוכן חדש. הוא נושא version, ואיתה נטענים קבצי
    המבחנים. בלי זה הדפדפן מגיש שאלות ישנות מהמטמון גם אחרי שעדכנו אותן. */
+/* הגרסה של הקובץ הזה עצמו, מתוך ה-?v= שאיתו נטען. */
+const BUILD = (() => {
+  try { return new URL(document.currentScript.src).searchParams.get('v') || ''; }
+  catch { return ''; }
+})();
+
 async function loadManifest() {
   const res = await fetch('exams/manifest.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error('manifest ' + res.status);
@@ -94,6 +100,19 @@ async function loadManifest() {
   COURSES = m.courses;
   EXAMS = m.exams;
   VERSION = m.version || '';
+
+  /* המניפסט תמיד טרי (no-cache), אז הוא יודע מה הגרסה האמיתית. אם ה-index.html
+     שהוגש לנו מהמטמון מצביע לגרסה ישנה של הקוד — אנחנו רצים כרגע כקוד ישן,
+     והמשתמש רואה אתר "לא מעודכן" בלי לדעת. מרעננים פעם אחת עם עוקף מטמון.
+     דגל ב-sessionStorage מבטיח שלא ניכנס ללולאת רענון אם משהו משתבש. */
+  const fresh = m.assets && m.assets.js;
+  if (BUILD && fresh && fresh !== BUILD && !sessionStorage.getItem('reloadedFor:' + fresh)) {
+    sessionStorage.setItem('reloadedFor:' + fresh, '1');
+    const u = new URL(location.href);
+    u.searchParams.set('b', fresh);
+    location.replace(u.toString());
+    await new Promise(() => {});   // עוצר את ההמשך עד שהדף מתחלף
+  }
 }
 
 async function loadExam(id) {
@@ -243,131 +262,7 @@ function router() {
   if (route === 'practice' && param) return renderPractice(param);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'about') return renderAbout();
-  if (route === 'demo') return renderDemo();
   return renderHome();
-}
-
-/* ================= הדגמה: מצב מבחן =================
-   דף לא מקושר מהתפריט (#/demo). קיים כדי להראות איך "מצב מבחן" ייראה
-   באתר לפני שמחליטים לבנות אותו באמת. */
-function renderDemo() {
-  setNav('');
-  view.innerHTML = '';
-
-  const Q = {
-    n: 15,
-    text: 'בן 15, הופנה לבירור בשל אירועים חוזרים של חולשה ועייפות. לאחרונה חווה אירוע של עילפון במהלך שיעור ספורט בביה״ס. ' +
-          'בבירור רפואי חשדו הרופאים כי המטופל סובל מ-MODY (maturity onset diabetes of the young) בשל תת פעילות של האנזים גלוקוקינאז. ' +
-          'ביכולתך לעשות ניסוי בודד כדי לאבחן את תת פעילות גלוקוקינאז במטופל זה לעומת בריא. מה יהיה הניסוי המתאים ביותר?',
-    opts: [
-      'בדיקת פעילות האנזים בריכוזי גלוקוז גבוהים מאוד תאפשר לאבחן תת פעילות עקב מוטציה הגורמת לירידה באפיניות של האנזים לגלוקוז.',
-      'בדיקת פעילות האנזים בריכוזי גלוקוז גבוהים מאוד תאפשר לאבחן תת פעילות עקב ירידה בריכוז האנזים.',
-      'בדיקת פעילות האנזים בריכוזי גלוקוז סביב ה-Km שלו לגלוקוז תאפשר לאבחן תת פעילות עקב עליה בריכוז האנזים.',
-      'אי אפשר להסיק דבר מהניסויים שהוצעו.',
-    ],
-    a: 2,
-  };
-
-  const head = el('div', 'page-head');
-  head.append(el('h1', null, 'הדגמה — מצב מבחן'));
-  head.append(el('p', null,
-    'אותה שאלה בדיוק, בשני מצבים. השווה ותחליט. הדף הזה לא מקושר מהתפריט ולא משנה כלום באתר.'));
-  view.append(head);
-
-  /* --- מצב תרגול (הקיים) --- */
-  view.append(sectionLabel('מצב תרגול — מה שיש היום', 'משוב מיידי, צבע, אוויר. בנוי לקריאוּת וללמידה.'));
-
-  const practice = el('div', 'q');
-  const top = el('div', 'q-top');
-  top.append(el('span', 'q-num', 'שאלה 15 מתוך 40'));
-  top.append(el('span', 'topic', 'אנזימים, קינטיקה ועיכוב'));
-  practice.append(top);
-  practice.append(el('div', 'q-text', Q.text));
-  const pOpts = el('div', 'opts');
-  Q.opts.forEach((t, i) => {
-    const o = el('div', 'opt locked' + (i === Q.a ? ' correct' : i === 0 ? ' wrong chosen' : ''));
-    o.append(el('span', 'key', String(i + 1)));
-    o.append(el('span', null, t));
-    pOpts.append(o);
-  });
-  practice.append(pOpts);
-  const fb = el('div', 'fb show no');
-  fb.append(el('div', null, '✗ לא נכון — התשובה הנכונה: ' + Q.opts[Q.a]));
-  fb.append(el('div', 'explain', 'תת פעילות עקב ירידה באפיניות מתבטאת בעליית Km. בריכוזי גלוקוז גבוהים מאוד האנזים מגיע ל-Vmax בכל מקרה, ולכן ההבדל נעלם — צריך לבדוק סביב ה-Km.'));
-  practice.append(fb);
-  view.append(practice);
-
-  /* --- מצב מבחן (המוצע) --- */
-  view.append(sectionLabel('מצב מבחן — ההצעה', 'נייר. בלי צבע, בלי משוב, בלי רמזים. טיימר רץ. הציון רק בסוף.'));
-
-  const paper = el('div', 'paper');
-
-  const ph = el('div', 'paper-head');
-  const phL = el('div');
-  phL.append(el('div', 'paper-uni', 'אוניברסיטת בן-גוריון בנגב'));
-  phL.append(el('div', 'paper-fac', 'הפקולטה למדעי הבריאות · בית ספר לרפואה'));
-  ph.append(phL);
-  const phR = el('div', 'paper-meta');
-  phR.append(el('div', null, 'ביוכימיה 0-471-8-1004'));
-  phR.append(el('div', null, 'מועד א׳ · 15.07.2026'));
-  ph.append(phR);
-  paper.append(ph);
-
-  const bar = el('div', 'paper-bar');
-  bar.append(el('span', null, 'שאלה 15 מתוך 40'));
-  bar.append(el('span', 'paper-timer', '⏱ 1:47:12'));
-  paper.append(bar);
-
-  const body = el('div', 'paper-body');
-  const qn = el('p', 'paper-q');
-  qn.append(el('b', null, '.15 '));
-  qn.append(document.createTextNode(Q.text));
-  body.append(qn);
-
-  const ol = el('div', 'paper-opts');
-  Q.opts.forEach((t, i) => {
-    const o = el('label', 'paper-opt');
-    const radio = el('span', 'paper-radio');
-    o.append(radio);
-    o.append(el('span', 'paper-num', `.${i + 1}`));
-    o.append(el('span', null, t));
-    o.onclick = () => {
-      ol.querySelectorAll('.paper-opt').forEach((x) => x.classList.remove('picked'));
-      o.classList.add('picked');
-    };
-    ol.append(o);
-  });
-  body.append(ol);
-  paper.append(body);
-
-  const foot = el('div', 'paper-foot');
-  foot.append(el('span', null, 'אין משוב עד סיום המבחן.'));
-  const nextBtn = el('button', 'paper-btn', 'לשאלה הבאה ←');
-  foot.append(nextBtn);
-  paper.append(foot);
-
-  view.append(paper);
-
-  const note = el('div', 'q-note');
-  note.style.marginTop = '18px';
-  note.textContent = 'זו הדגמה סטטית. לחיצה על מסיח מסמנת אותו — ולא אומרת לך אם צדקת. זו כל הנקודה.';
-  view.append(note);
-
-  toTop();
-  updateFooter();
-}
-
-function sectionLabel(title, sub) {
-  const d = el('div', 'part-head');
-  d.style.marginTop = '34px';
-  const wrap = el('div');
-  wrap.append(el('h2', null, title));
-  const s = el('div');
-  s.style.cssText = 'font-size:13.5px; color:var(--dim); font-weight:600; margin-top:3px;';
-  s.textContent = sub;
-  wrap.append(s);
-  d.append(wrap);
-  return d;
 }
 
 /* ================= דף הבית — המקצועות ================= */

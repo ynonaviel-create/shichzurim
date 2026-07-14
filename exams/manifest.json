@@ -1,6 +1,10 @@
 {
   "updated": "2026-07-14",
   "version": "fd72e64e",
+  "assets": {
+    "css": "25e28317",
+    "js": "5d4564f0"
+  },
   "courses": [
     {
       "id": "clinical",

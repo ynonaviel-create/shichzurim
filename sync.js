@@ -112,20 +112,7 @@ const contentHash = crypto
   .digest('hex')
   .slice(0, 8);
 
-fs.writeFileSync(
-  path.join(EXAMS, 'manifest.json'),
-  JSON.stringify(
-    { updated: new Date().toISOString().slice(0, 10), version: contentHash, courses, exams },
-    null,
-    2
-  ),
-  'utf8'
-);
-
-/* --- חותם גרסה על הנכסים ---
-   בלי זה הדפדפן מגיש CSS/JS ישנים מהמטמון אחרי כל דחיפה (GitHub Pages
-   מגדיר cache-control ל-10 דקות), והמשתמש רואה אתר "שבור" שלמעשה תקין.
-   חתימה מתוכן הקובץ מכריחה הורדה מחדש בדיוק כשהוא באמת השתנה. */
+/* חתימת קובץ לפי תוכנו. */
 const stamp = (file) =>
   crypto
     .createHash('md5')
@@ -133,9 +120,31 @@ const stamp = (file) =>
     .digest('hex')
     .slice(0, 8);
 
+/* החתימות נכתבות גם ל-index.html (למטה) וגם למניפסט (כאן).
+   המניפסט נטען תמיד עם no-cache ולכן הוא תמיד עדכני — האתר משווה אליו את
+   הגרסה של עצמו, ואם ה-index.html שהוגש לו מהמטמון ישן, הוא מרענן את עצמו.
+   בלי זה כל דחיפה משאירה חלון של 10 דקות שבו משתמשים רואים גרסה ישנה. */
 const cssV = stamp('assets/style.css');
 const jsV = stamp('assets/app.js');
 
+fs.writeFileSync(
+  path.join(EXAMS, 'manifest.json'),
+  JSON.stringify(
+    {
+      updated: new Date().toISOString().slice(0, 10),
+      version: contentHash,
+      assets: { css: cssV, js: jsV },
+      courses,
+      exams,
+    },
+    null,
+    2
+  ),
+  'utf8'
+);
+
+/* חותם את אותן חתימות על index.html, כדי שהדפדפן יוריד CSS/JS מחדש
+   בדיוק כשהם באמת השתנו. */
 const indexPath = path.join(__dirname, 'index.html');
 let html = fs.readFileSync(indexPath, 'utf8');
 html = html
