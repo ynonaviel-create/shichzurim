@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-14",
-  "version": "6b492068",
+  "version": "19aabbd3",
   "assets": {
     "css": "887aa692",
     "js": "f76d457f"
@@ -175,6 +175,19 @@
       "moed": null,
       "added": "2026-07-14",
       "count": 40
+    },
+    {
+      "id": "molecular-mem-vav",
+      "file": "molecular-mem-vav.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור מ״ו",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 46,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 55
     },
     {
       "id": "molecular-nun-alef-moed-a",
