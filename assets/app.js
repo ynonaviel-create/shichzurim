@@ -539,6 +539,12 @@ function playQuestions(cfg) {
   progress.append(fill);
   bar.append(progress);
 
+  /* מופיע רק כשסיימת. אין גלילה אוטומטית לתוצאה, אז זה מה שמאפשר להגיע
+     אליה בלחיצה — במקום להיחטף אליה. */
+  const toResult = el('button', 'btn primary', 'לתוצאה ↓');
+  toResult.style.display = 'none';
+  bar.append(toResult);
+
   const resetBtn = el('button', 'btn ghost', 'איפוס');
   bar.append(resetBtn);
   view.append(bar);
@@ -567,6 +573,8 @@ function playQuestions(cfg) {
       store.save(key, { answers, correct: good, done: answered === questions.length, at: Date.now() });
     }
 
+    toResult.style.display = answered === questions.length ? '' : 'none';
+
     resultBox.innerHTML = '';
     if (answered !== questions.length) return;
 
@@ -589,7 +597,8 @@ function playQuestions(cfg) {
 
     const bd = topicBreakdown();
     if (bd) resultBox.append(bd);
-    resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    /* גם כאן אין גלילה: אחרי השאלה האחרונה עדיין רוצים לקרוא את ההסבר שלה,
+       ולא להיחטף אל הציון. התוצאה מחכה למטה, והסרגל העליון מראה שסיימת. */
   }
 
   /* פילוח לפי נושא — מראה איפה נופלים, לא רק כמה. */
@@ -635,6 +644,8 @@ function playQuestions(cfg) {
   resetBtn.onclick = () => {
     if (confirm('לאפס את כל התשובות במבחן הזה?')) doReset();
   };
+
+  toResult.onclick = () => resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   function render() {
     qWrap.innerHTML = '';
@@ -683,15 +694,9 @@ function playQuestions(cfg) {
     paint(qi, oi, card, opts, fb, item);
     refresh();
 
-    // גלילה לשאלה הבאה — אבל לא כשיש הסבר לקרוא,
-    // אחרת נגלול את המשתמש מעל ההסבר בדיוק ברגע שהוא נחשף.
-    if (item.explain) return;
-    const next = questions.findIndex((_, i) => answers[i] == null);
-    if (next > -1) {
-      setTimeout(() => {
-        document.getElementById('q-' + next)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 320);
-    }
+    /* אין גלילה אוטומטית. הרגע שאחרי המענה הוא הרגע שבו לומדים —
+       קוראים את התשובה הנכונה, את ההסבר, ומעכלים. גלילה שמושכת משם
+       עובדת נגד המטרה. המשתמש גולל הלאה כשהוא מוכן. */
   }
 
   function paint(qi, oi, card, opts, fb, item) {
