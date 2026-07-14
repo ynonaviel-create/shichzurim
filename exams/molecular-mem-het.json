@@ -46,7 +46,8 @@
         ],
         "span": 2,
         "flipped": true,
-        "conflict": true
+        "conflict": true,
+        "resolved": true
       }
     },
     {

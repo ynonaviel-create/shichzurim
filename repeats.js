@@ -404,7 +404,16 @@ for (const courseId of COURSES) {
   const course = JSON.parse(fs.readFileSync(path.join(EXAMS, 'courses.json'), 'utf8'))
     .courses.find((c) => c.id === courseId);
   const conflicts = hy.filter((q) => q.repeat.conflict).length;
+  const resolved = hy.filter((q) => q.repeat.resolved).length;
   const hyFile = path.join(EXAMS, `${courseId}-high-yield.json`);
+
+  const conflictNote =
+    !conflicts ? ''
+    : resolved === conflicts
+      ? `ב-${conflicts} שאלות המחזורים סימנו תשובות שונות — כולן הוכרעו מול חומרי הקורס, והמפתח כאן מתוקן. ` +
+        `הן מסומנות, וכדאי ללמוד אותן לעומק: שאלה שהמשחזרים עצמם נחלקו עליה היא בדיוק זו שקל ליפול בה. `
+      : `⚠️ ב-${conflicts} שאלות המחזורים חלוקים על התשובה (${resolved} מהן כבר הוכרעו מול חומרי הקורס). ` +
+        `הן מסומנות, וכדאי ללמוד אותן לעומק. `;
 
   if (hy.length) {
     fs.writeFileSync(
@@ -423,9 +432,7 @@ for (const courseId of COURSES) {
             `נבנה אוטומטית מ-${exams.length} השחזורים בארכיון (${exams.map((e) => e.label).join(', ')}). ` +
             `כל שאלה כאן הופיעה בשני מחזורים לפחות — זה ההימור הטוב ביותר למבחן הקרוב. ` +
             `הנוסח נלקח מהשחזור האמין ביותר מבין אלה שבהם הופיעה. ` +
-            (conflicts
-              ? `⚠️ ב-${conflicts} שאלות המחזורים חלוקים על התשובה הנכונה — הן מסומנות, וכדאי ללמוד אותן לעומק. `
-              : '') +
+            conflictNote +
             `הקובץ נוצר ע״י repeats.js ונדרס בכל sync — אין טעם לערוך אותו ידנית.`,
           questions: hy.map(({ qid, ...q }) => q),
         },
