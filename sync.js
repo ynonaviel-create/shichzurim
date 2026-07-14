@@ -78,6 +78,7 @@ for (const file of files) {
     title: data.title,
     kind: data.kind,
     year: data.year ?? null,
+    cycle: data.cycle ?? null,
     moed: data.moed ?? null,
     added: data.added ?? null,
     count: data.questions.length,

@@ -125,7 +125,11 @@ async function loadExam(id) {
 }
 
 const courseOf = (id) => COURSES.find((c) => c.id === id);
-const examsOf = (courseId) => EXAMS.filter((e) => e.course === courseId);
+// מבחנים של מקצוע, מהמחזור החדש לישן. מבחן בלי מחזור (בנק שאלות, high-yield) בסוף.
+const examsOf = (courseId) =>
+  EXAMS.filter((e) => e.course === courseId).sort(
+    (a, b) => (b.cycle ?? -1) - (a.cycle ?? -1) || a.title.localeCompare(b.title, 'he'),
+  );
 
 /* ---------- ספירה לאחור למבחנים ---------- */
 const MS = { min: 60000, hour: 3600000, day: 86400000 };
