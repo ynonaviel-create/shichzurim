@@ -108,6 +108,100 @@ async function loadExam(id) {
 const courseOf = (id) => COURSES.find((c) => c.id === id);
 const examsOf = (courseId) => EXAMS.filter((e) => e.course === courseId);
 
+/* ---------- ספירה לאחור למבחנים ---------- */
+const MS = { min: 60000, hour: 3600000, day: 86400000 };
+
+/* המועד הבא שעוד לא עבר, מבין המועדים של המקצוע. null אם כולם מאחורינו. */
+function nextDate(course) {
+  const now = Date.now();
+  return (course.dates || [])
+    .map((d) => ({ ...d, ts: new Date(d.at).getTime() }))
+    .filter((d) => d.ts > now)
+    .sort((a, b) => a.ts - b.ts)[0] || null;
+}
+
+/* המבחן הקרוב ביותר בכל הארכיון. */
+function nextExamOverall() {
+  return COURSES
+    .map((c) => { const d = nextDate(c); return d ? { course: c, ...d } : null; })
+    .filter(Boolean)
+    .sort((a, b) => a.ts - b.ts)[0] || null;
+}
+
+/* דחיפות — קובעת את הצבע. פחות מיממה זה כבר לא "בעוד כמה ימים". */
+function urgency(ts) {
+  const left = ts - Date.now();
+  if (left <= 0) return 'past';
+  if (left < MS.day) return 'now';        // היום/מחר
+  if (left < 3 * MS.day) return 'soon';   // עד 3 ימים
+  if (left < 8 * MS.day) return 'near';   // עד שבוע
+  return 'far';
+}
+
+/* טקסט קצר: "עוד 8 ימים" / "עוד 5 שעות" / "עוד 12 דקות" */
+function countdownText(ts) {
+  const left = ts - Date.now();
+  if (left <= 0) return 'עבר';
+  const days = Math.floor(left / MS.day);
+  if (days >= 1) return `עוד ${plural(days, 'יום', 'ימים')}`;
+  const hours = Math.floor(left / MS.hour);
+  if (hours >= 1) return `עוד ${plural(hours, 'שעה', 'שעות')}`;
+  const mins = Math.max(1, Math.floor(left / MS.min));
+  return `עוד ${plural(mins, 'דקה', 'דקות')}`;
+}
+
+const fmtDate = (ts) =>
+  new Date(ts).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+const fmtTime = (ts) =>
+  new Date(ts).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+/* --- הבאנר הגדול: המבחן הבא, עם שעון שרץ --- */
+let tickTimer = null;
+
+function nextExamBanner() {
+  const next = nextExamOverall();
+  if (!next) return null;
+
+  const box = el('div', 'nextup u-' + urgency(next.ts));
+
+  const left = el('div', 'nextup-info');
+  left.append(el('div', 'nextup-label', 'המבחן הבא'));
+  const title = el('div', 'nextup-title');
+  title.append(el('span', 'nextup-ico', next.course.icon || '📘'));
+  title.append(el('span', null, `${next.course.name} — מועד ${next.moed}׳`));
+  left.append(title);
+  left.append(el('div', 'nextup-when', `${fmtDate(next.ts)} · ${fmtTime(next.ts)}`));
+  box.append(left);
+
+  const clock = el('div', 'nextup-clock');
+  box.append(clock);
+
+  // שעון חי — מתעדכן כל דקה. הטיימר מנוקה בכל רינדור מחדש כדי שלא יצטברו.
+  function tick() {
+    const left = next.ts - Date.now();
+    if (left <= 0) { clock.innerHTML = ''; clock.append(el('div', 'nextup-big', 'בהצלחה!')); return; }
+    const d = Math.floor(left / MS.day);
+    const h = Math.floor((left % MS.day) / MS.hour);
+    const m = Math.floor((left % MS.hour) / MS.min);
+
+    clock.innerHTML = '';
+    const units = d > 0
+      ? [[d, 'ימים'], [h, 'שעות'], [m, 'דקות']]
+      : [[h, 'שעות'], [m, 'דקות']];
+    units.forEach(([v, label]) => {
+      const u = el('div', 'cd-unit');
+      u.append(el('b', null, String(v).padStart(2, '0')));
+      u.append(el('span', null, label));
+      clock.append(u);
+    });
+  }
+  tick();
+  clearInterval(tickTimer);
+  tickTimer = setInterval(tick, MS.min);
+
+  return box;
+}
+
 /* מספר הנכונות נשמר ברשומה בזמן המענה, כדי שנוכל להציג ציון
    בלי לטעון את כל קבצי המבחנים. */
 function quickScore(meta) {
@@ -149,7 +243,131 @@ function router() {
   if (route === 'practice' && param) return renderPractice(param);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'about') return renderAbout();
+  if (route === 'demo') return renderDemo();
   return renderHome();
+}
+
+/* ================= הדגמה: מצב מבחן =================
+   דף לא מקושר מהתפריט (#/demo). קיים כדי להראות איך "מצב מבחן" ייראה
+   באתר לפני שמחליטים לבנות אותו באמת. */
+function renderDemo() {
+  setNav('');
+  view.innerHTML = '';
+
+  const Q = {
+    n: 15,
+    text: 'בן 15, הופנה לבירור בשל אירועים חוזרים של חולשה ועייפות. לאחרונה חווה אירוע של עילפון במהלך שיעור ספורט בביה״ס. ' +
+          'בבירור רפואי חשדו הרופאים כי המטופל סובל מ-MODY (maturity onset diabetes of the young) בשל תת פעילות של האנזים גלוקוקינאז. ' +
+          'ביכולתך לעשות ניסוי בודד כדי לאבחן את תת פעילות גלוקוקינאז במטופל זה לעומת בריא. מה יהיה הניסוי המתאים ביותר?',
+    opts: [
+      'בדיקת פעילות האנזים בריכוזי גלוקוז גבוהים מאוד תאפשר לאבחן תת פעילות עקב מוטציה הגורמת לירידה באפיניות של האנזים לגלוקוז.',
+      'בדיקת פעילות האנזים בריכוזי גלוקוז גבוהים מאוד תאפשר לאבחן תת פעילות עקב ירידה בריכוז האנזים.',
+      'בדיקת פעילות האנזים בריכוזי גלוקוז סביב ה-Km שלו לגלוקוז תאפשר לאבחן תת פעילות עקב עליה בריכוז האנזים.',
+      'אי אפשר להסיק דבר מהניסויים שהוצעו.',
+    ],
+    a: 2,
+  };
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, 'הדגמה — מצב מבחן'));
+  head.append(el('p', null,
+    'אותה שאלה בדיוק, בשני מצבים. השווה ותחליט. הדף הזה לא מקושר מהתפריט ולא משנה כלום באתר.'));
+  view.append(head);
+
+  /* --- מצב תרגול (הקיים) --- */
+  view.append(sectionLabel('מצב תרגול — מה שיש היום', 'משוב מיידי, צבע, אוויר. בנוי לקריאוּת וללמידה.'));
+
+  const practice = el('div', 'q');
+  const top = el('div', 'q-top');
+  top.append(el('span', 'q-num', 'שאלה 15 מתוך 40'));
+  top.append(el('span', 'topic', 'אנזימים, קינטיקה ועיכוב'));
+  practice.append(top);
+  practice.append(el('div', 'q-text', Q.text));
+  const pOpts = el('div', 'opts');
+  Q.opts.forEach((t, i) => {
+    const o = el('div', 'opt locked' + (i === Q.a ? ' correct' : i === 0 ? ' wrong chosen' : ''));
+    o.append(el('span', 'key', String(i + 1)));
+    o.append(el('span', null, t));
+    pOpts.append(o);
+  });
+  practice.append(pOpts);
+  const fb = el('div', 'fb show no');
+  fb.append(el('div', null, '✗ לא נכון — התשובה הנכונה: ' + Q.opts[Q.a]));
+  fb.append(el('div', 'explain', 'תת פעילות עקב ירידה באפיניות מתבטאת בעליית Km. בריכוזי גלוקוז גבוהים מאוד האנזים מגיע ל-Vmax בכל מקרה, ולכן ההבדל נעלם — צריך לבדוק סביב ה-Km.'));
+  practice.append(fb);
+  view.append(practice);
+
+  /* --- מצב מבחן (המוצע) --- */
+  view.append(sectionLabel('מצב מבחן — ההצעה', 'נייר. בלי צבע, בלי משוב, בלי רמזים. טיימר רץ. הציון רק בסוף.'));
+
+  const paper = el('div', 'paper');
+
+  const ph = el('div', 'paper-head');
+  const phL = el('div');
+  phL.append(el('div', 'paper-uni', 'אוניברסיטת בן-גוריון בנגב'));
+  phL.append(el('div', 'paper-fac', 'הפקולטה למדעי הבריאות · בית ספר לרפואה'));
+  ph.append(phL);
+  const phR = el('div', 'paper-meta');
+  phR.append(el('div', null, 'ביוכימיה 0-471-8-1004'));
+  phR.append(el('div', null, 'מועד א׳ · 15.07.2026'));
+  ph.append(phR);
+  paper.append(ph);
+
+  const bar = el('div', 'paper-bar');
+  bar.append(el('span', null, 'שאלה 15 מתוך 40'));
+  bar.append(el('span', 'paper-timer', '⏱ 1:47:12'));
+  paper.append(bar);
+
+  const body = el('div', 'paper-body');
+  const qn = el('p', 'paper-q');
+  qn.append(el('b', null, '.15 '));
+  qn.append(document.createTextNode(Q.text));
+  body.append(qn);
+
+  const ol = el('div', 'paper-opts');
+  Q.opts.forEach((t, i) => {
+    const o = el('label', 'paper-opt');
+    const radio = el('span', 'paper-radio');
+    o.append(radio);
+    o.append(el('span', 'paper-num', `.${i + 1}`));
+    o.append(el('span', null, t));
+    o.onclick = () => {
+      ol.querySelectorAll('.paper-opt').forEach((x) => x.classList.remove('picked'));
+      o.classList.add('picked');
+    };
+    ol.append(o);
+  });
+  body.append(ol);
+  paper.append(body);
+
+  const foot = el('div', 'paper-foot');
+  foot.append(el('span', null, 'אין משוב עד סיום המבחן.'));
+  const nextBtn = el('button', 'paper-btn', 'לשאלה הבאה ←');
+  foot.append(nextBtn);
+  paper.append(foot);
+
+  view.append(paper);
+
+  const note = el('div', 'q-note');
+  note.style.marginTop = '18px';
+  note.textContent = 'זו הדגמה סטטית. לחיצה על מסיח מסמנת אותו — ולא אומרת לך אם צדקת. זו כל הנקודה.';
+  view.append(note);
+
+  toTop();
+  updateFooter();
+}
+
+function sectionLabel(title, sub) {
+  const d = el('div', 'part-head');
+  d.style.marginTop = '34px';
+  const wrap = el('div');
+  wrap.append(el('h2', null, title));
+  const s = el('div');
+  s.style.cssText = 'font-size:13.5px; color:var(--dim); font-weight:600; margin-top:3px;';
+  s.textContent = sub;
+  wrap.append(s);
+  d.append(wrap);
+  return d;
 }
 
 /* ================= דף הבית — המקצועות ================= */
@@ -164,6 +382,9 @@ function renderHome() {
 
   const banner = introBanner();
   if (banner) view.append(banner);
+
+  const nextup = nextExamBanner();
+  if (nextup) view.append(nextup);
 
   let tq = 0, ta = 0, tc = 0;
   COURSES.forEach((c) => {
@@ -193,9 +414,20 @@ function courseCard(c) {
 
   const a = el('a', 'course');
   a.href = '#/course/' + c.id;
-  a.append(el('span', 'course-ico', c.icon || '📘'));
+
+  const top = el('div', 'course-top');
+  top.append(el('span', 'course-ico', c.icon || '📘'));
+  const nd = nextDate(c);
+  if (nd) {
+    const pill = el('span', 'cd-pill u-' + urgency(nd.ts), countdownText(nd.ts));
+    pill.title = `מועד ${nd.moed}׳ · ${fmtDate(nd.ts)} ${fmtTime(nd.ts)}`;
+    top.append(pill);
+  }
+  a.append(top);
+
   a.append(el('h2', null, c.name));
   a.append(el('p', 'blurb', c.blurb || ''));
+  if (nd) a.append(el('p', 'course-when', `מועד ${nd.moed}׳ · ${fmtDate(nd.ts)} · ${fmtTime(nd.ts)}`));
 
   const foot = el('div', 'course-foot');
   const bar = el('div', 'bar');
@@ -248,8 +480,25 @@ function renderCourse(courseId) {
 
   const head = el('div', 'page-head');
   head.append(el('h1', null, `${c.icon || ''} ${c.name}`.trim()));
-  head.append(el('p', null, c.blurb || ''));
+  head.append(el('p', null, [c.blurb, c.code].filter(Boolean).join(' · ')));
   view.append(head);
+
+  // לוח המועדים של המקצוע — כולם, גם מה שכבר עבר
+  if ((c.dates || []).length) {
+    const row = el('div', 'moadim');
+    c.dates
+      .map((d) => ({ ...d, ts: new Date(d.at).getTime() }))
+      .sort((a, b) => a.ts - b.ts)
+      .forEach((d) => {
+        const u = urgency(d.ts);
+        const card = el('div', 'moed u-' + u);
+        card.append(el('div', 'moed-label', `מועד ${d.moed}׳`));
+        card.append(el('div', 'moed-date', `${fmtDate(d.ts)} · ${fmtTime(d.ts)}`));
+        card.append(el('div', 'moed-cd', countdownText(d.ts)));
+        row.append(card);
+      });
+    view.append(row);
+  }
 
   const list = examsOf(courseId);
   if (!list.length) {

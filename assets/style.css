@@ -163,6 +163,102 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .stat span{font-size:12.5px; color:var(--dim); font-weight:700;}
 .stat.good b{color:var(--good);} .stat.bad b{color:var(--bad);} .stat.accent b{color:var(--accent);}
 
+/* ===== ספירה לאחור =====
+   רמות דחיפות: far (רגוע) → near (שבוע) → soon (3 ימים) → now (פחות מיממה).
+   הצבע הוא המידע — אתה אמור לדעת מה בוער בלי לקרוא מספר. */
+:root{
+  --u-far:  var(--accent);      --u-far-bg:  var(--accent-sl);   --u-far-ln:  var(--accent);
+  --u-near: #a86a06;            --u-near-bg: var(--warn-bg);     --u-near-ln: var(--warn-ln);
+  --u-soon: #c2410c;            --u-soon-bg: #fdece3;            --u-soon-ln: #f0b18c;
+  --u-now:  var(--bad);         --u-now-bg:  var(--bad-bg);      --u-now-ln:  var(--bad-ln);
+  --u-past: var(--dim);         --u-past-bg: var(--surface-2);   --u-past-ln: var(--line);
+}
+:root[data-theme="dark"]{
+  --u-soon: #fb923c;            --u-soon-bg: #3b1f0e;            --u-soon-ln: #7c4420;
+}
+
+/* --- באנר "המבחן הבא" --- */
+.nextup{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:20px; flex-wrap:wrap; margin-bottom:28px;
+  padding:22px 26px; border-radius:18px;
+  background:var(--u-far-bg); border:1px solid var(--u-far-ln);
+  box-shadow:var(--shadow); position:relative; overflow:hidden;
+}
+.nextup.u-near{background:var(--u-near-bg); border-color:var(--u-near-ln);}
+.nextup.u-soon{background:var(--u-soon-bg); border-color:var(--u-soon-ln);}
+.nextup.u-now {background:var(--u-now-bg);  border-color:var(--u-now-ln);}
+
+.nextup-label{
+  font-size:11.5px; font-weight:800; letter-spacing:1.2px;
+  text-transform:uppercase; color:var(--u-far); margin-bottom:7px;
+}
+.nextup.u-near .nextup-label{color:var(--u-near);}
+.nextup.u-soon .nextup-label{color:var(--u-soon);}
+.nextup.u-now  .nextup-label{color:var(--u-now);}
+
+.nextup-title{display:flex; align-items:center; gap:10px; font-size:21px; font-weight:800; letter-spacing:-.4px;}
+.nextup-ico{font-size:24px; line-height:1;}
+.nextup-when{font-size:14px; color:var(--muted); font-weight:600; margin-top:6px;}
+
+.nextup-clock{display:flex; gap:10px;}
+.cd-unit{
+  min-width:66px; padding:11px 8px; border-radius:12px; text-align:center;
+  background:var(--surface); border:1px solid var(--u-far-ln);
+}
+.nextup.u-near .cd-unit{border-color:var(--u-near-ln);}
+.nextup.u-soon .cd-unit{border-color:var(--u-soon-ln);}
+.nextup.u-now  .cd-unit{border-color:var(--u-now-ln);}
+.cd-unit b{
+  display:block; font-size:28px; font-weight:800; line-height:1.1;
+  letter-spacing:-1px; font-variant-numeric:tabular-nums; color:var(--u-far);
+}
+.nextup.u-near .cd-unit b{color:var(--u-near);}
+.nextup.u-soon .cd-unit b{color:var(--u-soon);}
+.nextup.u-now  .cd-unit b{color:var(--u-now);}
+.cd-unit span{font-size:11px; font-weight:700; color:var(--dim);}
+
+/* פחות מיממה — פעימה עדינה. לא מהבהב, רק נושם. */
+.nextup.u-now .cd-unit{animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.035);}
+}
+@media (prefers-reduced-motion:reduce){
+  .nextup.u-now .cd-unit{animation:none;}
+}
+
+.nextup-big{font-size:26px; font-weight:800; color:var(--u-now);}
+
+/* --- תג ספירה על כרטיס מקצוע --- */
+.cd-pill{
+  font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:99px;
+  white-space:nowrap; border:1px solid var(--u-far-ln);
+  background:var(--u-far-bg); color:var(--u-far);
+}
+.cd-pill.u-near{background:var(--u-near-bg); border-color:var(--u-near-ln); color:var(--u-near);}
+.cd-pill.u-soon{background:var(--u-soon-bg); border-color:var(--u-soon-ln); color:var(--u-soon);}
+.cd-pill.u-now {background:var(--u-now-bg);  border-color:var(--u-now-ln);  color:var(--u-now);}
+.cd-pill.u-past{background:var(--u-past-bg); border-color:var(--u-past-ln); color:var(--u-past);}
+
+/* --- לוח מועדים בדף המקצוע --- */
+.moadim{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:28px;}
+.moed{
+  padding:15px 17px; border-radius:var(--radius);
+  background:var(--u-far-bg); border:1px solid var(--u-far-ln);
+}
+.moed.u-near{background:var(--u-near-bg); border-color:var(--u-near-ln);}
+.moed.u-soon{background:var(--u-soon-bg); border-color:var(--u-soon-ln);}
+.moed.u-now {background:var(--u-now-bg);  border-color:var(--u-now-ln);}
+.moed.u-past{background:var(--u-past-bg); border-color:var(--u-past-ln); opacity:.65;}
+.moed-label{font-size:11.5px; font-weight:800; letter-spacing:.6px; color:var(--dim); margin-bottom:4px;}
+.moed-date{font-size:15px; font-weight:700; margin-bottom:6px;}
+.moed-cd{font-size:13.5px; font-weight:800; color:var(--u-far);}
+.moed.u-near .moed-cd{color:var(--u-near);}
+.moed.u-soon .moed-cd{color:var(--u-soon);}
+.moed.u-now  .moed-cd{color:var(--u-now);}
+.moed.u-past .moed-cd{color:var(--u-past);}
+
 /* ===== כרטיסי מקצוע (דף הבית) ===== */
 .courses{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;}
 .course{
@@ -177,9 +273,11 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--accent); opacity:.85;
 }
 .course:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--accent);}
-.course-ico{font-size:32px; line-height:1; display:block; margin-bottom:12px;}
+.course-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
+.course-ico{font-size:32px; line-height:1;}
 .course h2{font-size:21px; font-weight:800; letter-spacing:-.4px; margin-bottom:5px;}
-.course .blurb{font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:18px; min-height:2.6em;}
+.course .blurb{font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:8px; min-height:2.6em;}
+.course-when{font-size:12.5px; font-weight:700; color:var(--dim); margin-bottom:16px;}
 .course-foot{display:flex; align-items:center; gap:11px;}
 .course-foot .n{font-size:13px; font-weight:700; color:var(--dim); white-space:nowrap;}
 .course-foot .n.has{color:var(--accent);}
@@ -386,6 +484,75 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .bd-row .bar{flex:1; height:9px;}
 .bd-score{font-size:13.5px; font-weight:800; flex:none; width:46px; text-align:left; font-variant-numeric:tabular-nums;}
 .bd-score.ok{color:var(--good);} .bd-score.no{color:var(--bad);}
+
+/* ===== מצב מבחן (הדגמה) =====
+   נייר. צבעים קשיחים בכוונה — דף בחינה הוא שחור על לבן גם אם האתר כהה,
+   וזה בדיוק האות שאומר "עכשיו זה אמיתי". */
+.paper{
+  background:#fff; color:#111;
+  border:1px solid #bbb; border-radius:4px;
+  box-shadow:0 1px 3px rgba(0,0,0,.10), 0 12px 32px rgba(0,0,0,.13);
+  font-family:"Frank Ruhl Libre", "David Libre", Georgia, "Times New Roman", serif;
+  overflow:hidden; margin-bottom:8px;
+}
+
+.paper-head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+  padding:16px 22px; border-bottom:2px solid #111;
+}
+.paper-uni{font-size:15px; font-weight:700; letter-spacing:-.2px;}
+.paper-fac{font-size:12.5px; color:#444; margin-top:2px;}
+.paper-meta{font-size:12.5px; text-align:left; color:#333; line-height:1.7;}
+
+.paper-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 22px; border-bottom:1px solid #ddd;
+  background:#f4f4f4; font-size:12.5px; font-weight:700; color:#444;
+  font-family:var(--font);
+}
+.paper-timer{font-variant-numeric:tabular-nums; color:#b00; font-weight:800;}
+
+.paper-body{padding:24px 26px;}
+.paper-q{
+  font-size:16px; line-height:1.95; margin-bottom:20px;
+  max-width:76ch; text-align:justify;
+}
+.paper-q b{font-weight:700;}
+
+.paper-opts{display:flex; flex-direction:column; gap:2px;}
+.paper-opt{
+  display:flex; align-items:flex-start; gap:9px;
+  padding:9px 10px; border-radius:3px; cursor:pointer;
+  font-size:15px; line-height:1.75; transition:background .1s;
+}
+.paper-opt:hover{background:#f2f2f2;}
+.paper-opt.picked{background:#eaeaea;}
+.paper-radio{
+  flex:none; width:13px; height:13px; margin-top:6px;
+  border:1.5px solid #666; border-radius:50%; background:#fff;
+}
+.paper-opt.picked .paper-radio{border-color:#111; box-shadow:inset 0 0 0 2.5px #fff, inset 0 0 0 9px #111;}
+.paper-num{flex:none; font-weight:700; min-width:20px;}
+
+.paper-foot{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:13px 22px; border-top:1px solid #ddd; background:#fafafa;
+  font-family:var(--font); font-size:12.5px; color:#777;
+}
+.paper-btn{
+  padding:9px 18px; border-radius:4px; cursor:pointer;
+  background:#111; color:#fff; border:1px solid #111;
+  font-family:var(--font); font-size:13.5px; font-weight:700;
+}
+.paper-btn:hover{background:#333;}
+
+@media (max-width:640px){
+  .paper-head{flex-direction:column; gap:8px;}
+  .paper-meta{text-align:right;}
+  .paper-body{padding:18px 16px;}
+  .paper-q{font-size:15px; line-height:1.85; text-align:right;}
+  .paper-opt{font-size:14.5px;}
+}
 
 /* ===== ניידים ===== */
 @media (max-width:640px){
