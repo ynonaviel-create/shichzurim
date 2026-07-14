@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-14",
-  "version": "cb8eca75",
+  "version": "1593706c",
   "assets": {
     "css": "887aa692",
     "js": "f76d457f"
@@ -214,6 +214,19 @@
       "moed": "א",
       "added": "2026-07-14",
       "count": 55
+    },
+    {
+      "id": "molecular-mem-zayin-moed-a",
+      "file": "molecular-mem-zayin-moed-a.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור מ״ז — מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 47,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 54
     },
     {
       "id": "molecular-nun-alef-moed-a",
