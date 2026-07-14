@@ -1,2 +1,7 @@
 .DS_Store
-.claude/
+.claude/settings.local.json
+.claude/launch.json
+
+# קבצי המקור (PDF של שחזורים) — לא מתפרסמים לאינטרנט.
+# רק ה-JSON המחולץ עולה לאתר.
+sources/

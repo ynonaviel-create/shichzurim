@@ -412,6 +412,15 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   padding:10px 14px; margin-top:14px; line-height:1.65;
 }
 
+/* איור/גרף שחולץ מה-PDF. רקע לבן תמיד — הגרפים הם קווים שחורים על לבן,
+   ועל רקע כהה הם היו נעלמים. */
+.q-img{margin:18px 0 4px;}
+.q-img img{
+  display:block; max-width:100%; height:auto;
+  background:#fff; padding:10px; border-radius:8px;
+  border:1px solid var(--line);
+}
+
 .q-table{overflow-x:auto; margin:18px 0 4px;}
 .q-table table{border-collapse:collapse; width:100%; font-size:14px; min-width:340px;}
 .q-table th,.q-table td{border:1px solid var(--line); padding:10px 13px; text-align:center;}

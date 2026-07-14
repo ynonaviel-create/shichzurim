@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-14",
-  "version": "fd72e64e",
+  "version": "55bf5916",
   "assets": {
-    "css": "8319f1e3",
-    "js": "c66ad23d"
+    "css": "887aa692",
+    "js": "56d4d332"
   },
   "courses": [
     {
@@ -169,6 +169,18 @@
       "moed": null,
       "added": "2026-07-14",
       "count": 40
+    },
+    {
+      "id": "molecular-nun-alef-moed-a",
+      "file": "molecular-nun-alef-moed-a.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור נ״א — מועד א׳",
+      "kind": "shichzur",
+      "year": 2025,
+      "moed": "א",
+      "added": "2026-07-14",
+      "count": 28
     }
   ]
 }

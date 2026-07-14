@@ -669,6 +669,18 @@ function playQuestions(cfg) {
     if (src) card.append(el('div', 'q-origin', src));
 
     if (item.note) card.append(el('div', 'q-note', item.note));
+
+    // גרף/תמונה שחולצו מה-PDF. שאלות רבות בביומול ובאלקטרו בלתי פתירות בלעדיהם.
+    if (item.image) {
+      const wrap = el('div', 'q-img');
+      const img = el('img');
+      img.src = item.image;
+      img.alt = 'איור לשאלה';
+      img.loading = 'lazy';
+      wrap.append(img);
+      card.append(wrap);
+    }
+
     if (item.table) card.append(tableOf(item.table));
 
     const opts = el('div', 'opts');
