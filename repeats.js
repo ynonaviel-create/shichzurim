@@ -210,9 +210,10 @@ const ledger = fs.existsSync(LEDGER)
     };
 ledger.pairs ||= {};
 ledger.answers ||= {};
+ledger.truth ||= {};      // הכרעת NotebookLM: מה באמת התשובה הנכונה כשהמפתחות חלוקים
 
 const pairKey = (x, y) => [x, y].sort().join('|');
-const report = { pending: [], clashes: [], courses: [] };
+const report = { pending: [], clashes: [], unresolved: [], courses: [] };
 
 for (const courseId of COURSES) {
   const exams = loadCourse(courseId);
@@ -286,7 +287,7 @@ for (const courseId of COURSES) {
          true   — אותה תשובה בניסוח אחר
          "opts" — ערכות המסיחים היו שונות; כל תשובה נכונה למסיחים שלה
          false  — סתירה אמיתית: אחד המפתחות טועה */
-    let conflict = false, optsDiffer = false;
+    let conflict = false, optsDiffer = false, ruling = null;
 
     for (let x = 0; x < g.length; x++)
       for (let y = x + 1; y < g.length; y++) {
@@ -298,12 +299,26 @@ for (const courseId of COURSES) {
         const verdict = ledger.answers[key];
         if (verdict === true) continue;
         if (verdict === 'opts') { optsDiffer = true; continue; }
-        if (verdict === false) { conflict = true; continue; }
+        if (verdict === false) {
+          conflict = true;
+          /* סתירה אמיתית. מי צודק? זו שאלת תוכן — NotebookLM מכריע, לא אנחנו. */
+          if (ledger.truth[key]) ruling = ledger.truth[key];
+          else report.unresolved.push({ x: p, y: q, key });
+          continue;
+        }
         report.clashes.push({ x: p, y: q, key });                // טרם הוכרע — לא מוצג
       }
 
-    /* הנציג למבחן ה-High Yield: השחזור האמין ביותר; בשוויון — הקרוב ביותר למבחן. */
-    const rep = [...g].sort((a, b) => b._trust - a._trust || b._cycle - a._cycle)[0];
+    /* הנציג למבחן ה-High Yield: השחזור האמין ביותר; בשוויון — הקרוב ביותר למבחן.
+
+       אבל אם NotebookLM הכריע מה התשובה הנכונה, חייבים לבחור נציג שבו התשובה
+       הזאת בכלל *הוצעה* כמסיח. אחרת נקבל שאלה שההערה שלה מכריזה על תשובה אחת
+       והמסיח המסומן בה הוא אחר. (קרה בפועל: ההכרעה הייתה "מתחלק בתדירות גבוהה",
+       והנציג הנבחר היה מ״ח — שבו המסיח היחיד הוא "בתדירות נמוכה".) */
+    const fits = ruling ? g.filter((q) => q.opts.some((o) => sameStatement(o, ruling.answer))) : [];
+    const rep = (fits.length ? fits : [...g]).sort(
+      (a, b) => b._trust - a._trust || b._cycle - a._cycle
+    )[0];
 
     const stamp = { n: cycles.length, in: labels, span: Math.max(...cycles) - Math.min(...cycles) };
     if (flipped) stamp.flipped = true;
@@ -340,21 +355,42 @@ for (const courseId of COURSES) {
       );
     }
 
+    const { qid, _exam, _n, _cycle, _trust, repeat, ...clean } = rep;
+
     if (conflict) {
       const disagree = [...g]
         .sort((a, b) => b._trust - a._trust)
         .map((q) => `${q._exam.label} → "${q.opts[q.a]}"`)
         .join('  |  ');
-      notes.push(
-        `⚠️ המחזורים חלוקים על התשובה: ${disagree}. ` +
-        `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
-          rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
-        }. אחד המפתחות טועה — שווה ללמוד את השאלה הזאת לעומק ולא לשנן.`
-      );
+
+      const at = ruling ? clean.opts.findIndex((o) => sameStatement(o, ruling.answer)) : -1;
+
+      if (ruling && at >= 0) {
+        clean.a = at;                       // מתקנים את המפתח בפועל, לא רק מעירים
+        notes.push(
+          `⚠️ המחזורים היו חלוקים על התשובה: ${disagree}. ` +
+          `✅ הוכרע מול חומרי הקורס: הנכונה היא "${ruling.answer}". ${ruling.why || ''}`.trim()
+        );
+        stamp.resolved = true;
+      } else if (ruling) {
+        /* הוכרע, אבל התשובה הנכונה לא הופיעה כמסיח באף אחד מהמחזורים —
+           כלומר בכל הגרסאות שיש לנו השאלה פגומה. זה עצמו ממצא. */
+        notes.push(
+          `⚠️ המחזורים חלוקים: ${disagree}. ` +
+          `❗ לפי חומרי הקורס התשובה הנכונה היא "${ruling.answer}" — והיא לא הוצעה כמסיח באף אחד ` +
+          `מהמחזורים ששוחזרו. ${ruling.why || ''}`.trim()
+        );
+      } else {
+        notes.push(
+          `⚠️ המחזורים חלוקים על התשובה: ${disagree}. ` +
+          `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
+            rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
+          } — אבל טרם הוכרע מי צודק. אל תשנן את השאלה הזאת; תבין אותה.`
+        );
+      }
     }
     if (rep.note) notes.push(rep.note);
 
-    const { qid, _exam, _n, _cycle, _trust, repeat, ...clean } = rep;
     hy.push({ ...clean, qid, note: notes.join(' '), repeat: stamp, source: `שחזור מחזור ${rep._exam.label}` });
   });
 
@@ -420,14 +456,100 @@ if (process.env.QUIET !== '1') {
     if (c.conflicts) console.log(`        ⚠️  ${c.conflicts} עם סתירה בין המפתחות`);
   });
 
-  const undecided = report.clashes.filter((c) => ledger.answers[c.key] == null).length;
+  const undecided = report.clashes.length;
   if (report.pending.length || undecided) {
     console.log(
-      `\n   ⏳ ממתין לשיפוט אדם — הרץ:  node repeats.js --review\n` +
+      `\n   ⏳ ממתין להכרעה טקסטואלית — הרץ:  node repeats.js --review\n` +
       `        ${report.pending.length} זוגות גבוליים (אותה שאלה?)\n` +
       `        ${undecided} תשובות חלוקות (סתירה אמיתית או רק ניסוח שונה?)\n`
     );
   }
+  if (report.unresolved.length) {
+    console.log(
+      `   ❓ ${report.unresolved.length} סתירות אמיתיות בלי הכרעה — מי צודק היא שאלת תוכן.\n` +
+      `        הרץ:  node repeats.js --ask   → פרומפט מוכן ל-NotebookLM\n`
+    );
+  }
+}
+
+/* ═══════════════ --ask: פרומפט מוכן ל-NotebookLM ═══════════════
+
+   "מי צודק כשהמפתחות חלוקים" היא שאלת *תוכן*, לא שאלת טקסט — ואת זה לא אני
+   ולא ינון מכריעים מהזיכרון. ל-NotebookLM שלו מחוברים חומרי הקורס עצמם.
+   כאן נבנה פרומפט עצמאי לגמרי (נוטבוק לא רואה את הקוד ולא את ה-JSON),
+   ומבוקש ממנו פורמט תשובה שאפשר להזין ישירות לפנקס. */
+
+if (process.argv.includes('--ask')) {
+  const open = report.unresolved;
+  if (!open.length) {
+    console.log('\n✅ אין סתירות פתוחות — אין מה לשאול.\n');
+    process.exit(0);
+  }
+
+  const cyc = (q) => `מחזור ${q._exam.label}`;
+  const block = (c, i) => {
+    const both = [c.x, c.y];
+    const opts = [...new Set(both.flatMap((q) => q.opts))];   // ערכת המסיחים המאוחדת
+    return [
+      `### שאלה ${i + 1}   (מזהה: ${c.key})`,
+      ``,
+      `**נושא:** ${c.x.topic || '—'}`,
+      ``,
+      `**השאלה כפי שנשאלה:**`,
+      ...both.map((q) => `- ב${cyc(q)}: "${q.q}"`),
+      ``,
+      `**המסיחים שהוצעו (איחוד של שני המחזורים):**`,
+      ...opts.map((o, k) => `${k + 1}. ${o}`),
+      ``,
+      `**מה שסימן כל מפתח:**`,
+      ...both.map((q) => `- ${cyc(q)} סימן: "${q.opts[q.a]}"`),
+      ``,
+      `**השאלה אליך:** המפתחות של שני המחזורים חלוקים. לפי חומרי הקורס — איזו טענה נכונה? ` +
+        `ייתכן גם ששתי הטענות נכונות (ואז השאלה פגומה), או ששתיהן שגויות.`,
+      ``,
+    ].join('\n');
+  };
+
+  const prompt = [
+    `# הכרעה בסתירות בין שחזורי מבחן — ביולוגיה מולקולרית`,
+    ``,
+    `אני בונה בנק שאלות משחזורי מבחן של סטודנטים לאורך כמה מחזורים. מצאתי שאלות`,
+    `שחזרו על עצמן בין מחזורים, אבל **מפתחות התשובות של המחזורים אינם מסכימים**`,
+    `על התשובה הנכונה. השחזורים נכתבו מהזיכרון ולכן אחד מהם עשוי לטעות.`,
+    ``,
+    `**הכרע לפי חומרי הקורס בלבד.** אם החומר אינו מכריע — אמור זאת במפורש`,
+    `ואל תנחש.`,
+    ``,
+    `---`,
+    ``,
+    ...open.map(block),
+    `---`,
+    ``,
+    `## פורמט התשובה — חשוב`,
+    ``,
+    `לכל שאלה, החזר בדיוק את השורות הבאות ותו לא:`,
+    ``,
+    '```',
+    `מזהה: <המזהה שמופיע בכותרת השאלה>`,
+    `התשובה הנכונה: <העתק את נוסח המסיח הנכון במדויק, מתוך הרשימה למעלה>`,
+    `נימוק: <משפט אחד או שניים, בהתבסס על חומרי הקורס>`,
+    '```',
+    ``,
+    `אם שתי הטענות נכונות, כתוב בשדה "התשובה הנכונה" את המסיח שהוא **הנכון ביותר**,`,
+    `וציין בנימוק שגם האחר נכון ולכן השאלה פגומה.`,
+    `אם החומר אינו מכריע, כתוב בשדה "התשובה הנכונה" את המילה: לא הוכרע`,
+    ``,
+  ].join('\n');
+
+  const out = path.join(__dirname, 'sources', 'ask-notebooklm.md');
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, prompt, 'utf8');
+
+  console.log(prompt);
+  console.log(`\n📋 נשמר גם ב-${path.relative(__dirname, out)} — העתק לנוטבוק.`);
+  console.log(`   כשתחזור התשובה, רשום אותה ב-exams/repeats-ledger.json תחת "truth":`);
+  console.log(`     "<מזהה>": { "answer": "<נוסח המסיח>", "why": "<הנימוק>" }\n`);
+  process.exit(0);
 }
 
 /* --- מצב סקירה: מציג את הגבוליים כדי להכריע ולרשום בפנקס --- */
