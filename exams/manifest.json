@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-15",
-  "version": "82b1c961",
+  "version": "e4df200b",
   "assets": {
     "css": "0ebbb7fc",
     "js": "2767e260"
@@ -230,6 +230,32 @@
       "count": 10
     },
     {
+      "id": "electro-2021-b1-nov",
+      "file": "electro-2021-b1-nov.json",
+      "course": "electro",
+      "part": null,
+      "title": "בוחן 1 — אקסיטביליות (נוב׳ 2021)",
+      "kind": "shichzur",
+      "year": 2021,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "count": 10
+    },
+    {
+      "id": "electro-2021-b2-dec",
+      "file": "electro-2021-b2-dec.json",
+      "course": "electro",
+      "part": null,
+      "title": "בוחן 2 — סינפסות (דצמ׳ 2021)",
+      "kind": "shichzur",
+      "year": 2021,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "count": 10
+    },
+    {
       "id": "electro-2021-b2",
       "file": "electro-2021-b2.json",
       "course": "electro",
@@ -254,6 +280,32 @@
       "moed": "א",
       "added": "2026-07-15",
       "count": 45
+    },
+    {
+      "id": "electro-2021-moed-b",
+      "file": "electro-2021-moed-b.json",
+      "course": "electro",
+      "part": null,
+      "title": "מסטר מועד ב׳ 2021",
+      "kind": "shichzur",
+      "year": 2021,
+      "cycle": null,
+      "moed": "ב",
+      "added": "2026-07-15",
+      "count": 44
+    },
+    {
+      "id": "electro-2023-b2",
+      "file": "electro-2023-b2.json",
+      "course": "electro",
+      "part": null,
+      "title": "בוחן 2 — סינפסות (מסטר, ינו׳ 2023)",
+      "kind": "shichzur",
+      "year": 2023,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "count": 10
     },
     {
       "id": "electro-2025-moed-a",
