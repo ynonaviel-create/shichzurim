@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-15",
-  "version": "85eff054",
+  "version": "5d81f55e",
   "assets": {
-    "css": "9499c5e3",
-    "js": "75a4565d"
+    "css": "0ebbb7fc",
+    "js": "2767e260"
   },
   "courses": [
     {
@@ -215,6 +215,19 @@
       "moed": null,
       "added": "2026-07-15",
       "count": 42
+    },
+    {
+      "id": "electro-2025-moed-a",
+      "file": "electro-2025-moed-a.json",
+      "course": "electro",
+      "part": null,
+      "title": "מבחן רשמי תשפ״ה — מועד א׳ (בנק שאלות, 38)",
+      "kind": "shichzur",
+      "year": 2025,
+      "cycle": null,
+      "moed": "א",
+      "added": "2026-07-15",
+      "count": 38
     },
     {
       "id": "molecular-high-yield",

@@ -526,6 +526,10 @@ function playQuestions(cfg) {
   const rec = persist ? store.exam(key) : { answers: {} };
   const answers = persist ? rec.answers : {};
 
+  /* שאלות "מחוץ לחומר" (offSyllabus) — נושא שיצא מהסילבוס (למשל הלב במחזור נ״ב).
+     מוצגות ומתורגלות להעשרה, אבל לא נספרות בציון, בהתקדמות ובפילוח הנושאים. */
+  const scoredCount = questions.filter((q) => !q.offSyllabus).length;
+
   view.append(crumb(back.text, back.href));
 
   const head = el('div', 'page-head');
@@ -570,6 +574,7 @@ function playQuestions(cfg) {
   function tally() {
     let good = 0, bad = 0;
     for (const [qi, oi] of Object.entries(answers)) {
+      if (questions[qi].offSyllabus) continue;   // מחוץ לחומר — לא נספר
       if (questions[qi].a === oi) good++; else bad++;
     }
     return { good, bad, answered: good + bad };
@@ -579,23 +584,23 @@ function playQuestions(cfg) {
     const { good, bad, answered } = tally();
     cGood.textContent = `✓ ${good}`;
     cBad.textContent = `✗ ${bad}`;
-    cLeft.textContent = `נותרו ${questions.length - answered}`;
-    fill.style.width = Math.round((answered / questions.length) * 100) + '%';
+    cLeft.textContent = `נותרו ${scoredCount - answered}`;
+    fill.style.width = Math.round((answered / scoredCount) * 100) + '%';
     fill.className = answered ? (good / answered >= 0.7 ? 'good' : 'bad') : '';
 
     if (persist) {
-      store.save(key, { answers, correct: good, done: answered === questions.length, at: Date.now() });
+      store.save(key, { answers, correct: good, done: answered === scoredCount, at: Date.now() });
     }
 
-    toResult.style.display = answered === questions.length ? '' : 'none';
+    toResult.style.display = answered === scoredCount ? '' : 'none';
 
     resultBox.innerHTML = '';
-    if (answered !== questions.length) return;
+    if (answered !== scoredCount) return;
 
-    const pct = Math.round((good / questions.length) * 100);
+    const pct = Math.round((good / scoredCount) * 100);
     const box = el('div', 'result');
     box.append(el('div', 'grade ' + (pct >= 80 ? 'good' : pct >= 60 ? 'mid' : 'bad'), pct + '%'));
-    box.append(el('div', 'sub', `${good} נכונות מתוך ${questions.length}. ${
+    box.append(el('div', 'sub', `${good} נכונות מתוך ${scoredCount}. ${
       pct >= 80 ? 'שליטה טובה בחומר.' : pct >= 60 ? 'יש בסיס, כדאי לחזור על הטעויות.' : 'שווה סבב נוסף על החומר.'
     }`));
     const row = el('div', 'btn-row');
@@ -619,7 +624,7 @@ function playQuestions(cfg) {
   function topicBreakdown() {
     const byTopic = {};
     questions.forEach((item, qi) => {
-      if (!item.topic || answers[qi] == null) return;
+      if (item.offSyllabus || !item.topic || answers[qi] == null) return;
       const t = (byTopic[item.topic] ||= { good: 0, total: 0 });
       t.total++;
       if (answers[qi] === item.a) t.good++;
@@ -668,13 +673,15 @@ function playQuestions(cfg) {
   }
 
   function questionCard(item, qi) {
-    const card = el('div', 'q');
+    const card = el('div', 'q' + (item.offSyllabus ? ' off-syllabus' : ''));
     card.id = 'q-' + qi;
 
     const top = el('div', 'q-top');
     top.append(el('span', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
 
     const tags = el('div', 'q-tags');
+
+    if (item.offSyllabus) tags.append(el('span', 'off-tag', '✦ מחוץ לחומר · לא נספר בציון'));
 
     /* תג החזרה — הסיגנל שבשבילו כל זה נבנה. מוצג בכל מקום שבו שאלה מוצגת:
        בתוך שחזור, בתרגול חופשי, ובמבחן ה-High Yield עצמו. */
@@ -694,6 +701,11 @@ function playQuestions(cfg) {
 
     card.append(el('div', 'q-text', item.q));
 
+    if (item.offSyllabus)
+      card.append(el('div', 'q-warn off',
+        '✦ שאלה זו עוסקת בנושא שיצא מסילבוס מחזור נ״ב (אלקטרופיזיולוגיה של הלב). ' +
+        'היא כאן להעשרה בלבד — אין צורך ללמוד אותה למבחן, והיא אינה נספרת בציון.'));
+
     if (r && r.conflict)
       card.append(
         r.resolved
@@ -711,12 +723,20 @@ function playQuestions(cfg) {
     if (item.note) card.append(el('div', 'q-note', item.note));
 
     // גרף/תמונה שחולצו מה-PDF. שאלות רבות בביומול ובאלקטרו בלתי פתירות בלעדיהם.
+    // באלקטרו הגרפים הם לב המבחן — לחיצה מגדילה אותם למסך מלא (זום).
     if (item.image) {
       const wrap = el('div', 'q-img');
       const img = el('img');
       img.src = item.image;
       img.alt = 'איור לשאלה';
       img.loading = 'lazy';
+      img.tabIndex = 0;
+      img.title = 'לחצו להגדלה';
+      const open = () => openLightbox(item.image);
+      img.addEventListener('click', open);
+      img.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
       wrap.append(img);
       card.append(wrap);
     }
@@ -742,7 +762,7 @@ function playQuestions(cfg) {
   function choose(qi, oi, card, opts, fb, item) {
     if (answers[qi] != null) return;
     answers[qi] = oi;
-    seen.mark(item, oi === item.a);   // נרשם גם במבחן וגם בתרגול
+    if (!item.offSyllabus) seen.mark(item, oi === item.a);   // מחוץ לחומר לא נכנס ל"טעויות שלי"
     paint(qi, oi, card, opts, fb, item);
     refresh();
 
@@ -863,6 +883,25 @@ function tableOf(t) {
   wrap.append(table);
   return wrap;
 }
+
+/* לייטבוקס לגרפים — לחיצה על תמונת שאלה פותחת אותה במסך מלא, ניתן להגדיל.
+   באלקטרו הגרפים הם עיקר המבחן והפרטים קטנים, לכן זום הוא חובה. */
+function openLightbox(src) {
+  const overlay = el('div', 'lightbox');
+  const img = el('img');
+  img.src = src;
+  img.alt = 'איור לשאלה — תצוגה מוגדלת';
+  overlay.append(img);
+  const close = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.body.append(overlay);
+}
+
 /* ================= תרגול חופשי =================
    לא כבול למבחן. בוחרים חלק (א׳/ב׳), נושאים, מצב, וכמות.
 
