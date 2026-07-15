@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-15",
-  "version": "3a52a032",
+  "version": "82b1c961",
   "assets": {
     "css": "0ebbb7fc",
     "js": "2767e260"
@@ -241,6 +241,19 @@
       "moed": null,
       "added": "2026-07-15",
       "count": 10
+    },
+    {
+      "id": "electro-2021-moed-a",
+      "file": "electro-2021-moed-a.json",
+      "course": "electro",
+      "part": null,
+      "title": "מסטר מועד א׳ 2021",
+      "kind": "shichzur",
+      "year": 2021,
+      "cycle": null,
+      "moed": "א",
+      "added": "2026-07-15",
+      "count": 45
     },
     {
       "id": "electro-2025-moed-a",
