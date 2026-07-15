@@ -903,6 +903,16 @@ async function renderPractice(courseId) {
   let minRepeat = 1;                    // 1 = הכול. 2/3/4 = רק שאלות שחזרו כך וכך פעמים
   let mode = 'new';                     // new | wrong | all
   let count = 20;
+  let query = '';                       // חיפוש חופשי — ריק = בלי סינון
+
+  /* חיפוש טקסט בעברית: מנקים ניקוד וגרשיים ומאחדים אותיות גדולות/קטנות,
+     כדי ש"טלומראז"/"הטלומראז" ו-"MDM2"/"mdm2" ייתפסו. מחפשים מחרוזת-משנה
+     על גוף השאלה + המסיחים + הנושא + ההסבר, כי המונח עשוי להופיע רק שם.
+     שדה החיפוש (_hay) מחושב פעם אחת לכל שאלה ונשמר. */
+  const normQ = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
+  const hay = (q) => (q._hay ??= normQ([q.q, ...(q.opts || []), q.topic, q.explain].filter(Boolean).join(' ')));
+  const queryTerms = () => normQ(query).split(/\s+/).filter(Boolean);
+  const matchesQuery = (q) => { const t = queryTerms(); return !t.length || t.every((w) => hay(q).includes(w)); };
 
   /* --- מד התקדמות בארכיון --- */
   const progress = el('div', 'dash');
@@ -946,6 +956,31 @@ async function renderPractice(courseId) {
   modeField.append(modeChips);
   form.append(modeField);
 
+  /* --- חיפוש חופשי --- */
+  const searchField = el('div', 'field');
+  searchField.append(el('label', null, 'חיפוש חופשי'));
+  const searchRow = el('div', 'search');
+  const searchBox = el('input', 'search-box');
+  searchBox.type = 'search';
+  searchBox.placeholder = 'מילה שמופיעה בשאלה — למשל טלומר, MDM2, אופרון…';
+  searchBox.autocomplete = 'off';
+  searchBox.setAttribute('enterkeyhint', 'search');
+  const searchClear = el('button', 'search-x', '✕');
+  searchClear.type = 'button';
+  searchClear.title = 'נקה חיפוש';
+  const runSearch = () => {
+    query = searchBox.value;
+    searchRow.classList.toggle('has', !!query.trim());
+    drawTopics();       // ספירת הנושאים תשקף רק את מה שתואם לחיפוש
+    update();
+  };
+  searchBox.oninput = runSearch;
+  searchClear.onclick = () => { searchBox.value = ''; runSearch(); searchBox.focus(); };
+  searchRow.append(searchBox, searchClear);
+  searchField.append(searchRow);
+  searchField.append(el('p', 'hint', 'מחפש בשאלה, במסיחים, בנושא ובהסבר. אפשר כמה מילים — כולן חייבות להופיע. משתלב עם שאר המסננים.'));
+  form.append(searchField);
+
   /* --- חלק --- */
   if (allParts.length > 1) {
     const partsField = el('div', 'field');
@@ -978,7 +1013,7 @@ async function renderPractice(courseId) {
 
   function drawTopics() {
     const counts = {};
-    pool.filter(inParts).forEach((q) => {
+    pool.filter((q) => inParts(q) && matchesQuery(q)).forEach((q) => {
       if (q.topic) counts[q.topic] = (counts[q.topic] || 0) + 1;
     });
     const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
@@ -1076,6 +1111,7 @@ async function renderPractice(courseId) {
     const map = seen.read();
     return pool.filter((q) => {
       if (!inParts(q)) return false;
+      if (!matchesQuery(q)) return false;
       if (selTopics.size && !selTopics.has(q.topic)) return false;
       if ((q.repeat?.n || 1) < minRepeat) return false;
       const s = map[qKey(q)];
@@ -1100,7 +1136,9 @@ async function renderPractice(courseId) {
     // בריכה ריקה — מסבירים למה, ומציעים מוצא
     go.disabled = true;
     go.textContent = 'אין שאלות';
-    if (mode === 'new') {
+    if (query.trim() && !pool.some((q) => inParts(q) && matchesQuery(q))) {
+      info.textContent = `אף שאלה לא מכילה "${query.trim()}". נסה מילה קצרה יותר (למשל "טלומר" במקום "טלומראז") או מונח אחר.`;
+    } else if (mode === 'new') {
       info.textContent = 'סיימת! ראית כבר את כל השאלות שמתאימות לסינון הזה. ' +
         'עבור ל"רק מה שטעיתי" כדי לחזור על החורים, או ל"הכול" לסבב נוסף.';
     } else if (mode === 'wrong') {

@@ -1,9 +1,9 @@
 {
-  "updated": "2026-07-14",
-  "version": "80e6ef75",
+  "updated": "2026-07-15",
+  "version": "26bcaea9",
   "assets": {
-    "css": "d1ab49bf",
-    "js": "57deab43"
+    "css": "46244a9f",
+    "js": "510a0a84"
   },
   "courses": [
     {
@@ -186,7 +186,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-14",
+      "added": "2026-07-15",
       "count": 42
     },
     {

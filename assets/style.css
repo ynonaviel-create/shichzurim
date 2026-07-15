@@ -526,6 +526,29 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .chip:hover{border-color:var(--accent); color:var(--accent-dk);}
 .chip.on{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
 
+/* חיפוש חופשי */
+.search{position:relative; display:flex; align-items:center;}
+.search-box{
+  width:100%; box-sizing:border-box;
+  padding:12px 44px 12px 16px;
+  border:1.5px solid var(--line); border-radius:var(--radius-sm);
+  background:var(--surface); color:var(--text);
+  font-size:15px; font-weight:600; font-family:inherit;
+  transition:.13s; -webkit-appearance:none; appearance:none;
+}
+.search-box::placeholder{color:var(--dim); font-weight:500;}
+.search-box:focus{outline:none; border-color:var(--accent); background:var(--accent-sl);}
+.search-box::-webkit-search-cancel-button{display:none;}   /* יש לנו כפתור ניקוי משלנו */
+.search-x{
+  position:absolute; inset-inline-start:8px;              /* RTL — צד שמאל של השדה */
+  display:none; align-items:center; justify-content:center;
+  width:28px; height:28px; border:none; border-radius:8px;
+  background:transparent; color:var(--dim); font-size:14px; cursor:pointer;
+}
+.search-x:hover{background:var(--surface-2); color:var(--text);}
+.search.has .search-x{display:flex;}
+.hint{font-size:12.5px; color:var(--dim); margin-top:8px; line-height:1.55;}
+
 .bd-title{font-size:17px; font-weight:800; margin-bottom:5px;}
 .bd-sub{font-size:13.5px; color:var(--dim); margin-bottom:18px;}
 .bd-row{display:flex; align-items:center; gap:14px; margin-bottom:12px;}
