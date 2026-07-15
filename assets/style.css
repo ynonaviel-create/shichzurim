@@ -435,6 +435,20 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   padding:10px 14px; margin-top:14px; line-height:1.65;
 }
 
+/* הסבר על הקורס והמבחנים — קופסת הקשר בעמוד המקצוע */
+.course-about{
+  background:var(--accent-sl); border:1px solid var(--accent);
+  border-radius:var(--radius); padding:18px 22px; margin:0 0 26px;
+}
+.course-about-title{
+  font-size:13px; font-weight:800; letter-spacing:.02em;
+  color:var(--accent-dk); margin-bottom:9px;
+}
+.course-about-body p{
+  font-size:15px; line-height:1.7; color:var(--text); max-width:70ch;
+}
+.course-about-body p + p{ margin-top:10px; }
+
 /* איור/גרף שחולץ מה-PDF. רקע לבן תמיד — הגרפים הם קווים שחורים על לבן,
    ועל רקע כהה הם היו נעלמים. */
 .q-img{margin:18px 0 4px;}

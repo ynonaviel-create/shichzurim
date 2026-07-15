@@ -382,6 +382,16 @@ function renderCourse(courseId) {
   head.append(el('p', null, [c.blurb, c.code].filter(Boolean).join(' · ')));
   view.append(head);
 
+  // הסבר על הקורס והמבחנים — הקשר ומקורות. מוצג רק אם הוגדר about ב-courses.json.
+  if (c.about) {
+    const box = el('div', 'course-about');
+    box.append(el('div', 'course-about-title', 'על הקורס והמבחנים'));
+    const body = el('div', 'course-about-body');
+    String(c.about).split('\n\n').forEach((para) => body.append(el('p', null, para)));
+    box.append(body);
+    view.append(box);
+  }
+
   // לוח המועדים של המקצוע — כולם, גם מה שכבר עבר
   if ((c.dates || []).length) {
     const row = el('div', 'moadim');
