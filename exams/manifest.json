@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-15",
-  "version": "1938abad",
+  "version": "74bc720f",
   "assets": {
     "css": "46244a9f",
     "js": "510a0a84"
@@ -200,7 +200,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
-      "count": 42
+      "count": 50
     },
     {
       "id": "molecular-lab-2026-moed-a",
@@ -266,6 +266,19 @@
       "moed": "א",
       "added": "2026-07-14",
       "count": 54
+    },
+    {
+      "id": "molecular-mem-zayin-moed-b",
+      "file": "molecular-mem-zayin-moed-b.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור מ״ז — מועד ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 47,
+      "moed": "ב",
+      "added": "2026-07-15",
+      "count": 11
     },
     {
       "id": "molecular-nun-alef-moed-a",
