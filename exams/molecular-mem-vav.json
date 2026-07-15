@@ -648,12 +648,13 @@
       "source": "שחזור מחזור מ״ו",
       "qid": "4d7b1b4c",
       "repeat": {
-        "n": 2,
+        "n": 3,
         "in": [
+          "52",
           "מ״ז",
           "מ״ו"
         ],
-        "span": 1,
+        "span": 6,
         "conflict": true,
         "resolved": true
       }

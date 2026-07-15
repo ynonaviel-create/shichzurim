@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-15",
-  "version": "26bcaea9",
+  "version": "1938abad",
   "assets": {
     "css": "46244a9f",
     "js": "510a0a84"
@@ -177,6 +177,19 @@
       "count": 40
     },
     {
+      "id": "clinical-mem-zayin",
+      "file": "clinical-mem-zayin.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מחזור מ״ז — 5 מקרים קליניים",
+      "kind": "practice",
+      "year": 2025,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "count": 42
+    },
+    {
       "id": "molecular-high-yield",
       "file": "molecular-high-yield.json",
       "course": "molecular",
@@ -188,6 +201,19 @@
       "moed": null,
       "added": "2026-07-15",
       "count": 42
+    },
+    {
+      "id": "molecular-lab-2026-moed-a",
+      "file": "molecular-lab-2026-moed-a.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מעבדה רפואית 2026 — מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 52,
+      "moed": "א",
+      "added": "2026-07-15",
+      "count": 28
     },
     {
       "id": "molecular-mem-het",

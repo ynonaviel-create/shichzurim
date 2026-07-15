@@ -819,12 +819,13 @@
       "source": "שחזור מחזור מ״ז — מועד א׳",
       "qid": "1e164c14",
       "repeat": {
-        "n": 2,
+        "n": 3,
         "in": [
+          "52",
           "מ״ז",
           "מ״ו"
         ],
-        "span": 1,
+        "span": 6,
         "conflict": true,
         "resolved": true
       }
