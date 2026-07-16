@@ -8,10 +8,17 @@ const path = require('path');
 const crypto = require('crypto');
 
 const EXAMS = path.join(__dirname, 'exams');
-const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards — לפי ה-kind, נבדק בהמשך
+const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards / units — לפי ה-kind, נבדק בהמשך
 /* cards = כרטיסיות קריאה (לא מבחן): question/short/deep במקום opts/a.
-   נכנס כדי לתת מקום לחומר שהמרצה מסר ישירות. */
-const KINDS = ['shichzur', 'practice', 'highyield', 'cards'];
+   נכנס כדי לתת מקום לחומר שהמרצה מסר ישירות.
+   guide = מפת חומרים (לא מבחן): units[] במקום questions[]. כל יחידה נתלית על
+   נושא קנוני מהטקסונומיה של המקצוע, וזה מה שמחבר אותה לשאלות בלי הזנת דאטה —
+   ראו GUIDE_BY_TOPIC ב-app.js. הנושא מאומת בהמשך מול הנושאים שבפועל בשאלות. */
+const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide'];
+/* עד כמה ידוע מה המרצה שואל: known = הדליף/מסר גבולות גזרה (קוקס), unknown = לא ידוע,
+   mixed = חלק מהנושא ידוע, new = נושא שעבר למרצה השנה ואין עליו היסטוריה.
+   מזין את דירוג העדיפויות במפה — ראו whatNow ב-app.js. */
+const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
@@ -38,6 +45,8 @@ const files = fs
   .sort();
 
 const exams = [];
+const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
+const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
 
 for (const file of files) {
   let data;
@@ -65,13 +74,27 @@ for (const file of files) {
     continue;
   }
   const isCards = data.kind === 'cards';
-  const items = isCards ? data.cards : data.questions;
+  const isGuide = data.kind === 'guide';
+  const items = isCards ? data.cards : isGuide ? data.units : data.questions;
   if (!Array.isArray(items) || !items.length) {
-    problems.push(`${file}: ${isCards ? 'אין כרטיסיות' : 'אין שאלות'}`);
+    problems.push(`${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : 'אין שאלות'}`);
     continue;
   }
 
-  if (isCards) {
+  if (isGuide) {
+    items.forEach((u, i) => {
+      const n = i + 1;
+      if (!u.topic) problems.push(`${file} · יחידה ${n}: אין נושא`);
+      if (!u.what) problems.push(`${file} · יחידה ${n}: אין תיאור (what)`);
+      if (!u.main || !u.main.src) problems.push(`${file} · יחידה ${n}: אין מקור ראשי (main.src)`);
+      if (!CERTAINTY.includes(u.certainty))
+        problems.push(`${file} · יחידה ${n}: certainty לא חוקי "${u.certainty}" (מותר: ${CERTAINTY.join(' / ')})`);
+    });
+    const dupes = items.map((u) => u.topic).filter((t, i, a) => t && a.indexOf(t) !== i);
+    if (dupes.length)
+      problems.push(`${file}: נושא חוזר ביותר מיחידה אחת — ${[...new Set(dupes)].join(', ')}. יחידה = נושא.`);
+    guides.push({ file, course: data.course, topics: items.map((u) => u.topic) });
+  } else if (isCards) {
     items.forEach((c, i) => {
       const n = i + 1;
       if (!c.q) problems.push(`${file} · כרטיסייה ${n}: אין טקסט שאלה`);
@@ -89,6 +112,14 @@ for (const file of files) {
     });
   }
 
+  /* הנושאים שבפועל בשאלות — מהם נבנית הטקסונומיה שמולה נבדקת המפה.
+     רק ממה שנכנס לבריכת התרגול: כרטיסיות מוחרגות מ-quizzesOf, ולכן נושא
+     שקיים רק בהן עדיין יוביל את הצ׳יפ לרשימה ריקה. */
+  if (!isGuide && !isCards) {
+    const set = (topicsByCourse[data.course] ??= new Set());
+    items.forEach((q) => q.topic && set.add(q.topic));
+  }
+
   exams.push({
     id: data.id,
     file,
@@ -104,6 +135,20 @@ for (const file of files) {
     count: items.length,
   });
 }
+
+/* יחידה במפה נתלית על נושא קנוני, ומשם מגיע הקישור לתרגול ולשאלות. נושא שלא
+   קיים באף שאלה = צ׳יפ שמוביל לרשימה ריקה. נבדק כאן ולא בלולאה, כי הטקסונומיה
+   נאספת מכל קבצי המקצוע וחלקם עוד לא נקראו כשהמפה נקראת. */
+guides.forEach((g) => {
+  const known = topicsByCourse[g.course] ?? new Set();
+  g.topics.forEach((t) => {
+    if (t && !known.has(t))
+      problems.push(
+        `${g.file}: הנושא "${t}" לא קיים באף שאלה של ${g.course} — הקישור לתרגול יוביל לריק. ` +
+        `תייג שאלות בנושא הזה, או תקן את השם. (קיימים: ${[...known].join(' · ')})`
+      );
+  });
+});
 
 const seen = {};
 exams.forEach((e) => {

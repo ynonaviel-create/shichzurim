@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-16",
-  "version": "8a5a92eb",
+  "version": "a0d402d9",
   "assets": {
-    "css": "5a6df748",
-    "js": "130c4b24"
+    "css": "99418506",
+    "js": "1ffece7b"
   },
   "courses": [
     {
@@ -546,6 +546,20 @@
       "added": "2026-07-16",
       "official": null,
       "count": 15
+    },
+    {
+      "id": "molecular-guide",
+      "file": "molecular-guide.json",
+      "course": "molecular",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-17",
+      "official": null,
+      "count": 12
     },
     {
       "id": "molecular-high-yield",

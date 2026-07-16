@@ -925,3 +925,223 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .sim-reset:hover:not(:disabled){background:var(--sim-bg); border-color:var(--sim);}
 .sim-reset:disabled{opacity:.4; cursor:default;}
 .sim-reset-ico{font-size:15px; line-height:1;}
+
+/* ═══════════ מפת החומרים ═══════════ */
+.tag.guide{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
+
+.guide-hero{background:linear-gradient(135deg, var(--accent-sl), var(--surface) 75%); border-color:var(--accent);}
+.guide-hero .lhero-eyebrow{color:var(--accent-dk);}
+.guide-hero h2{color:var(--accent-dk);}
+.guide-hero .lhero-side{border-inline-start-color:var(--accent);}
+.guide-hero .lhero-n{color:var(--accent-dk);}
+
+.g-head h1{margin:0 0 6px; font-size:26px;}
+.g-head-sub{margin:0 0 22px; font-size:13px; color:var(--dim); line-height:1.6; max-width:78ch;}
+.g-h2{font-size:19px; margin:34px 0 6px; padding-bottom:8px; border-bottom:2px solid var(--line);}
+.g-lbl{font-size:12px; font-weight:900; letter-spacing:.04em; color:var(--dim); margin:0 0 8px;}
+
+.g-headline{
+  background:linear-gradient(135deg, var(--accent-dk), var(--accent));
+  color:#fff; border-radius:var(--radius); padding:20px 24px; margin:0 0 18px;
+  box-shadow:var(--shadow-lg);
+}
+.g-headline h2{margin:0 0 8px; font-size:20px; color:#fff;}
+.g-headline p{margin:0; font-size:14px; line-height:1.7; color:rgba(255,255,255,.94);}
+.g-headline b{color:#ffe08a;}
+
+.g-stack{margin:0 0 18px;}
+.g-stack-row{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:11px 15px; margin-bottom:7px; font-size:14px; line-height:1.6;
+  border-inline-start:4px solid var(--line);
+}
+.g-stack-spine{border-inline-start-color:var(--good);}
+.g-stack-patch{border-inline-start-color:var(--accent);}
+.g-stack-warn{border-inline-start-color:var(--bad); background:var(--bad-bg);}
+
+.g-now{
+  background:var(--surface); border:2px solid var(--accent);
+  border-radius:var(--radius); padding:20px 24px; margin:0 0 20px; box-shadow:var(--shadow-lg);
+}
+.g-now-eyebrow{font-size:12px; font-weight:900; letter-spacing:.05em; color:var(--accent-dk);}
+.g-now h2{margin:4px 0 8px; font-size:24px;}
+.g-now-why{margin:0 0 14px; font-size:15px; line-height:1.65; color:var(--muted);}
+.g-now-why b{color:var(--text);}
+.g-now-acts{display:flex; flex-wrap:wrap; gap:10px;}
+.g-now-gap{
+  margin-top:14px; background:var(--warn-bg); border:1px solid var(--warn-ln);
+  color:var(--warn); border-radius:var(--radius-sm); padding:10px 14px;
+  font-size:13px; line-height:1.6;
+}
+.g-now-gap b{color:var(--warn);}
+
+.g-plan{margin:0 0 8px;}
+.g-plan-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:10px;}
+.g-day{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:12px 14px; display:flex; flex-direction:column; gap:6px;
+}
+.g-day-n{font-size:12px; font-weight:900; color:var(--dim);}
+.g-day-t{
+  font-size:13px; font-weight:700; color:var(--accent-dk); text-decoration:none;
+  padding:4px 0; border-bottom:1px solid var(--line-soft);
+}
+.g-day-t:last-child{border-bottom:none;}
+.g-day-t:hover{color:var(--accent);}
+.g-day-last{background:var(--accent-sl); border-color:var(--accent);}
+
+.g-units{display:flex; flex-direction:column; gap:14px;}
+.g-unit{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px 20px; box-shadow:var(--shadow);
+}
+.g-unit-head{display:flex; gap:14px; align-items:flex-start; justify-content:space-between;}
+.g-unit-ttl{min-width:0;}
+.g-unit-ttl h3{margin:0 0 7px; font-size:18px;}
+.g-unit-meta{display:flex; flex-wrap:wrap; gap:6px; align-items:center;}
+.g-lessons{font-size:12px; color:var(--dim);}
+.g-freq{text-align:center; flex-shrink:0;}
+.g-freq-n{font-size:22px; font-weight:900; color:var(--accent-dk); line-height:1;}
+.g-freq-l{font-size:11px; color:var(--dim); margin-top:2px;}
+.g-what{margin:12px 0 14px; font-size:14px; line-height:1.6; color:var(--muted);}
+.g-body{display:flex; flex-direction:column; gap:8px;}
+
+.g-src{background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm); padding:10px 13px;}
+.g-src.g-main{background:var(--good-bg); border-color:var(--good-ln);}
+.g-src-head{display:flex; gap:9px; align-items:baseline; flex-wrap:wrap;}
+.g-src-head b{font-size:14px;}
+.g-pages{font-size:13px; font-weight:800; color:var(--accent-dk);}
+.g-section{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5;}
+.g-anchor{margin-top:5px; display:flex; gap:7px; align-items:baseline; flex-wrap:wrap;}
+.g-anchor-lbl{font-size:11px; font-weight:800; color:var(--dim); flex-shrink:0;}
+/* בלי מונוספייס — הוא הורס את הריווח של העברית. הטקסט הזה נועד להעתקה
+   ל-Ctrl+F, אז מה שחשוב זה שיהיה קריא ומובחן, לא שייראה כמו קוד. */
+.g-anchor-txt{font-size:12.5px; color:var(--text); background:var(--surface); border:1px dashed var(--line);
+  border-radius:6px; padding:2px 8px; font-style:italic;}
+
+.g-gap{
+  background:var(--warn-bg); border:1px solid var(--warn-ln); color:var(--warn);
+  border-radius:var(--radius-sm); padding:10px 13px; font-size:13px; line-height:1.6;
+}
+.g-gap b{color:var(--warn);}
+
+.g-vids{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:9px;}
+.g-vid{background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm); overflow:hidden;}
+.g-vid-part{border-color:var(--warn-ln);}
+.g-vid-thumb{
+  display:block; width:100%; aspect-ratio:16/9; border:none; padding:0; cursor:pointer;
+  background-size:cover; background-position:center; position:relative;
+}
+.g-vid-play{
+  position:absolute; inset:0; margin:auto; width:44px; height:44px; border-radius:50%;
+  background:rgba(0,0,0,.65); color:#fff; display:grid; place-items:center; font-size:16px;
+  transition:background .12s;
+}
+.g-vid-thumb:hover .g-vid-play{background:var(--accent-dk);}
+.g-vid-frame{width:100%; aspect-ratio:16/9; border:none; display:block;}
+.g-vid-txt{padding:9px 11px; display:flex; flex-direction:column; gap:3px;}
+.g-vid-txt b{font-size:13px; line-height:1.4;}
+.g-vid-ok{font-size:11px; color:var(--good); line-height:1.45;}
+.g-vid-part-lbl{font-size:11px; color:var(--warn); line-height:1.45;}
+.g-vid-note{font-size:11px; color:var(--dim); line-height:1.45;}
+.g-vid-osmo{display:flex; align-items:center; gap:10px; padding:11px 13px;}
+.g-vid-ico{font-size:20px;}
+
+.g-intel{
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  border-radius:var(--radius-sm); padding:2px 13px;
+}
+.g-intel summary{cursor:pointer; font-size:13px; font-weight:800; color:var(--muted); padding:9px 0;}
+.g-intel summary:hover{color:var(--accent-dk);}
+.g-quote{padding:8px 0; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:4px;}
+.g-q{font-size:13px; line-height:1.6; color:var(--text);}
+.g-qsrc{font-size:11px; color:var(--dim);}
+
+.g-acts{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:4px;}
+.btn-sm{font-size:13px; padding:7px 14px;}
+.g-prog{font-size:12px; color:var(--dim);}
+
+/* --- מה לא ללמוד --- */
+.g-skip-sub{margin:8px 0 16px; font-size:13.5px; color:var(--muted); line-height:1.65; max-width:80ch;}
+.g-skip-cat{margin-bottom:20px;}
+.g-skip-cat h3{margin:0 0 4px; font-size:15px;}
+.g-skip-note{margin:0 0 10px; font-size:12.5px; color:var(--dim); line-height:1.55; max-width:80ch;}
+.g-skip-row{
+  display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:9px 13px; margin-bottom:6px;
+}
+.g-skip-row b{font-size:13.5px; flex-shrink:0;}
+.g-skip-why{font-size:12.5px; color:var(--muted); line-height:1.55; flex:1; min-width:180px;}
+.g-skip-src{font-size:11px; color:var(--dim); flex-shrink:0;}
+
+/* --- תיקי הסיכומים --- */
+.g-src-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:11px;}
+.g-scard{
+  background:var(--surface); border:1px solid var(--line); border-top:4px solid var(--line);
+  border-radius:var(--radius); padding:14px 16px;
+}
+.g-scard.tier-a{border-top-color:var(--good);}
+.g-scard.tier-b{border-top-color:var(--gold);}
+.g-scard.tier-c{border-top-color:var(--dim);}
+.g-tier{float:left; font-size:11px; font-weight:900; border-radius:999px; padding:2px 9px;
+  background:var(--surface-2); color:var(--muted);}
+.tier-a .g-tier{background:var(--good-bg); color:var(--good);}
+.tier-b .g-tier{background:var(--gold-bg); color:var(--gold);}
+.g-scard h4{margin:0 0 2px; font-size:15px;}
+.g-scard-meta{font-size:11.5px; color:var(--dim); margin-bottom:8px;}
+.g-scard-use{margin:0 0 8px; font-size:13px; line-height:1.6;}
+.g-scard-lack{
+  font-size:12.5px; line-height:1.55; color:var(--muted);
+  border-inline-start:3px solid var(--bad-ln); background:var(--surface-2);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:7px 11px;
+}
+
+.g-caveats{
+  margin-top:8px; background:var(--surface-2); border:1px dashed var(--line);
+  border-radius:var(--radius); padding:14px 18px;
+}
+.g-caveats p{margin:0 0 9px; font-size:12.5px; color:var(--muted); line-height:1.65;}
+.g-caveats p:last-child{margin-bottom:0;}
+
+/* מהשאלה למפה — יושב בתיבת המשוב ליד כפתור הסימולציה */
+.fb-guide{
+  display:inline-block; margin-top:10px; margin-inline-end:8px;
+  background:var(--topic-bg); border:1px solid var(--topic-ln); color:var(--topic-tx);
+  border-radius:999px; padding:6px 14px; font-size:13px; font-weight:800; text-decoration:none;
+}
+.fb-guide:hover{background:var(--topic-ln);}
+.bd-guide{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
+
+@media (max-width:620px){
+  .g-unit-head{flex-direction:column; gap:8px;}
+  .g-freq{text-align:start;}
+  .g-headline h2{font-size:17px;}
+  .g-now h2{font-size:20px;}
+}
+
+/* --- דיסקליימר האחריות ---
+   במפה שורה מתקפלת; בדף ההסבר סעיף פרוס; בפוטר שורה קבועה. */
+.disc-body{font-size:13.5px; line-height:1.7; color:var(--text);}
+.disc-body b{color:var(--warn);}
+.disc-body ul{margin:8px 0; padding-inline-start:20px;}
+.disc-body li{margin-bottom:4px;}
+
+.g-disc{
+  background:var(--surface); border:1px solid var(--warn-ln);
+  border-radius:var(--radius-sm); margin:0 0 16px; padding:0 16px;
+}
+.g-disc summary{
+  cursor:pointer; padding:10px 0; font-size:13px; font-weight:700; color:var(--warn);
+  list-style:none;
+}
+.g-disc summary::-webkit-details-marker{display:none;}
+.g-disc summary::after{content:" ▾"; color:var(--dim);}
+.g-disc[open] summary::after{content:" ▴";}
+.g-disc summary:hover{color:var(--text);}
+.g-disc .disc-body{padding:0 0 14px; border-top:1px solid var(--line-soft); padding-top:12px;}
+
+.about-disc{border-color:var(--warn-ln);}
+.about-disc .about-ico{filter:none;}
+
+.footer-disc{display:block; margin-top:6px; font-size:11.5px; color:var(--dim); line-height:1.5;}

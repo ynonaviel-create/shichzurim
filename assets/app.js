@@ -11,7 +11,7 @@
 const KEY = 'shichzurim.v1';
 const SEEN_KEY = 'shichzurim.seenIntro';
 const THEME_KEY = 'shichzurim.theme';
-const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה' };
+const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים' };
 
 const view = document.getElementById('view');
 const el = (tag, cls, txt) => {
@@ -149,9 +149,10 @@ const examsOf = (courseId) =>
       (b.year ?? 0) - (a.year ?? 0) ||
       a.title.localeCompare(b.title, 'he'),
   );
-/* רק מה שבאמת מבחן. כרטיסיות קריאה אין להן opts/a — הן לא נספרות בציון
-   ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
-const quizzesOf = (courseId) => examsOf(courseId).filter((e) => e.kind !== 'cards');
+/* רק מה שבאמת מבחן. כרטיסיות קריאה ומפת החומרים אין להן opts/a — הן לא נספרות
+   בציון ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
+const NOT_QUIZ = new Set(['cards', 'guide']);
+const quizzesOf = (courseId) => examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind));
 
 /* ---------- ספירה לאחור למבחנים ---------- */
 const MS = { min: 60000, hour: 3600000, day: 86400000 };
@@ -286,6 +287,8 @@ function router() {
   killSim();   // עמוד סימולציה משאיר אחריו ResizeObserver חי. router לא מפרק, אז מפרקים כאן.
   const [route, param, sub] = location.hash.replace(/^#\/?/, '').split('/');
   if (route === 'course' && param) return renderCourse(param);
+  // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
+  if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'cards' && param) return renderCards(param);
   if (route === 'sim' && param) return renderSim(param);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
@@ -472,7 +475,12 @@ function renderCourse(courseId) {
   /* כרטיסיות המרצה — לא מבחן, ולכן לא נכנסות לרשימת המבחנים אלא מקבלות
      באנר משלהן בראש העמוד. זה החומר הכי ישיר שיש: המרצה עצמו מסר אותו. */
   list.filter((e) => e.kind === 'cards').forEach((deck) => view.append(cardsHero(deck)));
-  const list2 = list.filter((e) => e.kind !== 'cards');
+
+  /* מפת החומרים — גם היא לא מבחן: באנר בראש, ולא שורה ברשימה. */
+  const gh = guideHero(courseId);
+  if (gh) view.append(gh);
+
+  const list2 = list.filter((e) => !NOT_QUIZ.has(e.kind));
 
   /* סימולציות — לא מבחן ולא ב-manifest, ולכן גם הן באנר ולא שורה ברשימה. */
   const sh = simsHero(courseId);
@@ -575,6 +583,9 @@ async function renderExam(id, focusIdx = null) {
     view.append(emptyState('⚠️', 'לא הצלחתי לטעון את המבחן', String(err.message)));
     return;
   }
+  /* GUIDE_BY_TOPIC מתמלא רק מ-loadGuide. בכניסה ישירה למבחן (קישור ששותף
+     בוואטסאפ) לא עברנו בעמוד הקורס, ובלי זה כפתור "איפה ללמוד" פשוט לא יופיע. */
+  await loadGuide(exam.course).catch(() => null);
 
   const c = courseOf(exam.course);
   playQuestions({
@@ -850,6 +861,13 @@ function playQuestions(cfg) {
         a.title = sim.title;
         r.append(a);
       }
+      const gh = GUIDE_BY_TOPIC[name];
+      if (gh) {
+        const a = el('a', 'bd-sim bd-guide', '📚 איפה ללמוד');
+        a.href = `#/guide/${gh.course}/${encodeURIComponent(name)}`;
+        a.title = 'מפת החומרים — ' + name;
+        r.append(a);
+      }
       box.append(r);
     });
     return box;
@@ -991,6 +1009,9 @@ function playQuestions(cfg) {
     if (item.explain) fb.append(el('div', 'explain', item.explain));
     const sim = SIM_BY_TOPIC[item.topic];
     if (sim) fb.append(simButton(sim));
+    /* טעית בשאלת שעתוק? הרגע הזה הוא בדיוק הרגע לדעת מאיזה עמוד ללמוד אותו. */
+    const gb = guideButton(item.topic);
+    if (gb) fb.append(gb);
     fb.append(notebookButton(item, oi));
   }
 
@@ -1133,6 +1154,7 @@ async function renderPractice(courseId, seedTopic = null) {
     toTop();
     return;
   }
+  await loadGuide(courseId).catch(() => null);   // בשביל כפתור "איפה ללמוד" במשוב
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען את בנק השאלות…</b></div>';
 
@@ -1465,6 +1487,7 @@ async function renderReview(courseId) {
     toTop();
     return;
   }
+  await loadGuide(courseId).catch(() => null);   // בשביל כפתור "איפה ללמוד" במשוב
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>אוסף את הטעויות…</b></div>';
 
@@ -1546,6 +1569,17 @@ function renderAbout() {
     c.append(el('p', null, s.body));
     view.append(c);
   });
+
+  /* בסוף, פרוס. מי שהגיע לדף הזה בא לקרוא — כאן אין סיבה להסתיר מאחורי לחיצה. */
+  const disc = el('div', 'about-card about-disc');
+  const h = el('div', 'about-head');
+  h.append(el('span', 'about-ico', '⚠️'));
+  h.append(el('h3', null, 'האחריות על הלמידה היא שלך בלבד'));
+  disc.append(h);
+  const db = el('div', 'disc-body');
+  db.innerHTML = DISC_HTML;
+  disc.append(db);
+  view.append(disc);
 
   const cta = el('div', 'result');
   cta.append(el('div', 'sub', 'זהו. עכשיו פשוט תבחר מקצוע ותתחיל.'));
@@ -2527,11 +2561,470 @@ function simsHero(courseId) {
   return box;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   מפת החומרים
+   ═══════════════════════════════════════════════════════════════════
+   הבעיה שזה פותר: יש תשעה סיכומים משבעה מחזורים, חמישה מרצים, וסילבוס
+   שזז כל שנה. השאלה "מאיפה ללמוד את זה" לקחה עד היום שיחת וואטסאפ.
+
+   העיקרון: יחידה במפה = נושא קנוני אחד מהטקסונומיה, בדיוק כמו ש-SIMS
+   נתלות על topics. משם מגיע הקישור הדו-כיווני בחינם — שאלה מתויגת בנושא
+   מקבלת כפתור "איפה ללמוד", והיחידה מקבלת כפתור תרגול. אין הזנת דאטה
+   לאף שאלה. sync.js מוודא שכל נושא במפה קיים בפועל, אחרת הצ׳יפ מוביל לריק.
+
+   התוכן ב-JSON ולא כאן: מפה היא תוכן, לא קוד (בשונה מהסימולציות, ששם
+   המשוואה עצמה היא הקוד). ככה היא מקבלת גם גיבוב-גרסה ו-cache-busting. */
+
+const guideCache = {};
+async function loadGuide(courseId) {
+  if (courseId in guideCache) return guideCache[courseId];
+  const meta = EXAMS.find((e) => e.course === courseId && e.kind === 'guide');
+  if (!meta) return (guideCache[courseId] = null);
+  try {
+    const res = await fetch(`exams/${meta.file}?v=${VERSION}`);
+    guideCache[courseId] = res.ok ? await res.json() : null;
+  } catch { guideCache[courseId] = null; }
+  const g = guideCache[courseId];
+  if (g) g.units.forEach((u) => (GUIDE_BY_TOPIC[u.topic] = { unit: u, course: courseId }));
+  return g;
+}
+
+/* נושא → יחידה. מתמלא ב-loadGuide, ולכן כל מסך שמציג שאלות טוען את המפה
+   לפני playQuestions — אחרת כניסה ישירה ל-#/exam/... לא תראה את הכפתור. */
+const GUIDE_BY_TOPIC = {};
+const guideOf = (courseId) => EXAMS.find((e) => e.course === courseId && e.kind === 'guide');
+
+/* כמה מהנושא אתה כבר יודע. שאלה שלא נענתה נספרת כלא-נשלטת — זו לא החמרה,
+   זה בדיוק המצב: לא ידוע אם אתה יודע אותה. */
+function masteryOf(courseId, topic) {
+  const d = seen.read();
+  let total = 0, correct = 0;
+  quizzesOf(courseId).forEach((m) => {
+    const q = cache[m.id];
+    if (!q) return;
+    (q.questions || []).forEach((qq, i) => {
+      if (qq.topic !== topic) return;
+      total++;
+      if (d[`${m.id}#${i}`] === 1) correct++;
+    });
+  });
+  return { total, correct, ratio: total ? correct / total : 0 };
+}
+
+/* משקל הוודאות: מרצה שמסר גבולות גזרה (קוקס) שווה פחות זמן לנקודה — לא כי
+   הנושא לא במבחן, אלא כי כבר ידוע מה בדיוק לקרוא. מרצה שלא הדליף = סיכון מלא. */
+const CERTAINTY_W = { known: 0.6, mixed: 0.85, unknown: 1.0, new: 0.75 };
+const CERTAINTY_TAG = {
+  known:   ['✓ ידוע',        'tag-known'],
+  mixed:   ['⚠️ חלקית ידוע', 'tag-risk'],
+  unknown: ['🎧 לא ידוע',    'tag-risk'],
+  new:     ['❓ חדש למרצה',  'tag-risk'],
+};
+
+function priorityList(courseId, g) {
+  return g.units
+    .map((u) => {
+      const m = masteryOf(courseId, u.topic);
+      return { u, m, score: u.freq * (1 - m.ratio) * (CERTAINTY_W[u.certainty] ?? 1) };
+    })
+    .sort((a, b) => b.score - a.score);
+}
+
+/* לוח הימים נגזר מהספירה לאחור ולא נכתב ביד — אחרת הוא נכון ליום אחד.
+   היום האחרון שמור תמיד ל-High Yield ולטעויות; את השאר ממלאים לפי עדיפות
+   בשיבוץ חמדני לדלי הכי ריק, כדי שהעומס יתחלק ולא ייפול הכל על יום אחד. */
+function dayPlan(courseId, ranked) {
+  const c = courseOf(courseId);
+  const next = nextDate(c);            // {moed, at, ts} — לא חותמת זמן
+  if (!next || !next.ts) return null;
+  const days = Math.max(1, Math.ceil((next.ts - Date.now()) / MS.day));
+  const studyDays = Math.max(1, Math.min(days - 1, 7));
+  const bins = Array.from({ length: studyDays }, () => ({ items: [], load: 0 }));
+  ranked.forEach((r) => {
+    const b = bins.reduce((min, x) => (x.load < min.load ? x : min), bins[0]);
+    b.items.push(r);
+    b.load += r.score;
+  });
+  return { days, bins };
+}
+
+/* ---------- הדיסקליימר ----------
+   שלושה מקומות, אף אחד מהם לא חוסם: שורה מתקפלת במפה (המסך היחיד שאומר
+   "אל תלמדו את זה"), סעיף פרוס בדף ההסבר, ושורה בפוטר של כל עמוד.
+   הדרישה היא שהוא ייקרא, לא שיתפוס מקום — קופסה קבועה בראש הדף נהיית
+   רעש שגוללים מעליו תוך יומיים, וזה בדיוק הכישלון של דיסקליימר. */
+const DISC_HTML =
+  'כל מה שכאן נבנה על ידי סטודנטים: השחזורים שוחזרו מהזיכרון, ההסברים והתיוגים נכתבו כאן, ' +
+  'ומפות החומרים מבוססות על סיכומים של מחזורים קודמים. ' +
+  '<b>זה לא רשמי, זה לא מטעם הפקולטה, ואף אחד לא מתחייב שמה שכתוב נכון, מדויק או מלא.</b>' +
+  '<ul>' +
+  '<li><b>התדירויות הן הערכה מהעבר</b> — נספרו משחזורים של מחזורים קודמים, שבחלקם המרצים והסילבוס היו אחרים. הן לא תחזית.</li>' +
+  '<li><b>הציטוטים הם ממחזורים קודמים</b> — מרצה יכול לשנות את דעתו, ולשנות את המבחן.</li>' +
+  '<li><b>"מה לא ללמוד" הוא אות, לא הבטחה.</b> "אין ראיה" פירושו שחיפשנו ולא מצאנו — לא שזה בוודאות לא יופיע.</li>' +
+  '<li><b>יש שחזורים שהמשחזרים עצמם כתבו שהתשובות בהם לא אומתו.</b> החומר הרשמי הוא ההרצאות, המצגות והסילבוס.</li>' +
+  '</ul>' +
+  'תשתמשו בזה כדי לחסוך זמן ולהחליט מאיפה להתחיל — לא כדי להחליט על מה לוותר. ' +
+  '<b>ההחלטה מה ללמוד, וההחלטה כמה לסמוך על מה שכאן, הן שלכם בלבד — והאחריות לתוצאה שלכם בלבד.</b>';
+
+/* במפה — שורה אחת שנפתחת. המפה היא המסך שאומר "אל תלמדו את זה",
+   אז היא לא מסתפקת בפוטר, אבל גם לא חוסמת את התוכן. */
+function guideDisclaimer() {
+  const d = el('details', 'g-disc');
+  const s = el('summary', null, '⚠️ האחריות על הלמידה היא שלך בלבד — מה המקור של כל דבר כאן, ומה הוא שווה');
+  d.append(s);
+  const body = el('div', 'disc-body');
+  body.innerHTML = DISC_HTML;
+  d.append(body);
+  return d;
+}
+
+function guideHero(courseId) {
+  const meta = guideOf(courseId);
+  if (!meta) return null;
+  const a = el('a', 'lhero guide-hero');
+  a.href = '#/guide/' + courseId;
+  const left = el('div', 'lhero-main');
+  left.append(el('div', 'lhero-eyebrow', '📚 מפת החומרים'));
+  left.append(el('h2', null, 'מאיפה ללמוד כל נושא — ומה לא ללמוד'));
+  left.append(el('p', 'lhero-sub',
+    'תשעה סיכומים משבעה מחזורים נסרקו מול הסילבוס הרשמי ומול כל השאלות בארכיון. ' +
+    'לכל נושא: מאיזה סיכום ומאיזה עמוד, איזה סרטון באמת מכסה אותו, ומה המרצה אמר במפורש שלא צריך.'));
+  a.append(left);
+  const right = el('div', 'lhero-side');
+  right.append(el('div', 'lhero-n', String(meta.count)));
+  right.append(el('div', 'lhero-n-lbl', 'יחידות'));
+  a.append(right);
+  return a;
+}
+
+function srcLine(s, cls) {
+  const d = el('div', 'g-src ' + (cls || ''));
+  const head = el('div', 'g-src-head');
+  head.append(el('b', null, s.src));
+  if (s.pages) head.append(el('span', 'g-pages', s.pages));
+  d.append(head);
+  if (s.section) d.append(el('div', 'g-section', '📑 ' + s.section));
+  if (s.anchor) {
+    const an = el('div', 'g-anchor');
+    an.append(el('span', 'g-anchor-lbl', '🔍 Ctrl+F'));
+    an.append(el('span', 'g-anchor-txt', '„' + s.anchor + '”'));
+    d.append(an);
+  }
+  return d;
+}
+
+/* הסרטון נטען רק בלחיצה. שנים-עשר iframes של יוטיוב בטעינת דף = דף מת,
+   ורוב הסטודנטים ממילא פותחים אחד. */
+function videoCard(v) {
+  if (v.src === 'osmosis') {
+    const d = el('div', 'g-vid g-vid-osmo');
+    d.append(el('span', 'g-vid-ico', '🧫'));
+    const t = el('div', 'g-vid-txt');
+    t.append(el('b', null, v.title));
+    t.append(el('span', 'g-vid-note', 'אוסמוזיס — חפשו בחשבון שלכם'));
+    d.append(t);
+    return d;
+  }
+  const d = el('div', 'g-vid' + (v.verified === 'partial' ? ' g-vid-part' : ''));
+  const thumb = el('button', 'g-vid-thumb');
+  thumb.type = 'button';
+  thumb.style.backgroundImage = `url(https://i.ytimg.com/vi/${v.id}/mqdefault.jpg)`;
+  thumb.append(el('span', 'g-vid-play', '▶'));
+  thumb.setAttribute('aria-label', 'נגן: ' + v.title);
+  thumb.onclick = () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0`;
+    f.title = v.title;
+    f.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    f.className = 'g-vid-frame';
+    thumb.replaceWith(f);
+  };
+  d.append(thumb);
+  const t = el('div', 'g-vid-txt');
+  t.append(el('b', null, v.title));
+  if (v.verified === true)
+    t.append(el('span', 'g-vid-ok', '✅ אומת מול התמלול · ' + (v.covers || []).join(' · ')));
+  else if (v.verified === 'partial') {
+    t.append(el('span', 'g-vid-part-lbl', '⚠️ מכסה חלקית · ' + (v.covers || []).join(' · ')));
+    if (v.missing) t.append(el('span', 'g-vid-note', v.missing));
+  } else t.append(el('span', 'g-vid-note', '⚠️ לא אומת — אין תמלול זמין'));
+  d.append(t);
+  return d;
+}
+
+function unitCard(courseId, r, focus) {
+  const u = r.u;
+  const sec = el('section', 'g-unit' + (focus ? ' q-flash' : ''));
+  sec.id = 'g-' + encodeURIComponent(u.topic);
+
+  const head = el('div', 'g-unit-head');
+  const ttl = el('div', 'g-unit-ttl');
+  ttl.append(el('h3', null, u.topic));
+  const meta = el('div', 'g-unit-meta');
+  u.lecturers.forEach((l) => meta.append(el('span', 'lecturer', l)));
+  const [tag, cls] = CERTAINTY_TAG[u.certainty] || CERTAINTY_TAG.unknown;
+  meta.append(el('span', 'lecturer ' + cls, tag));
+  meta.append(el('span', 'g-lessons', u.lessons));
+  ttl.append(meta);
+  head.append(ttl);
+  const freq = el('div', 'g-freq');
+  freq.append(el('div', 'g-freq-n', u.freq + '%'));
+  freq.append(el('div', 'g-freq-l', 'מהשאלות'));
+  head.append(freq);
+  sec.append(head);
+
+  sec.append(el('p', 'g-what', u.what));
+
+  const body = el('div', 'g-body');
+  body.append(el('div', 'g-lbl', '📖 מאיפה ללמוד'));
+  body.append(srcLine(u.main, 'g-main'));
+  (u.sup || []).forEach((s) => body.append(srcLine(s, 'g-sup')));
+
+  if (u.gap) {
+    const gap = el('div', 'g-gap');
+    gap.innerHTML = '<b>⚠️ פער:</b> ' + u.gap;
+    body.append(gap);
+  }
+
+  if ((u.videos || []).length) {
+    body.append(el('div', 'g-lbl', '▶️ סרטונים'));
+    const vs = el('div', 'g-vids');
+    u.videos.forEach((v) => vs.append(videoCard(v)));
+    body.append(vs);
+  }
+
+  if ((u.intel || []).length) {
+    const det = el('details', 'g-intel');
+    det.append(el('summary', null, `🔒 מה נאמר בהקלטות (${u.intel.length})`));
+    u.intel.forEach((it) => {
+      const q = el('div', 'g-quote');
+      q.innerHTML = '<span class="g-q">„' + it.quote + '”</span><span class="g-qsrc">📼 ' + it.src + '</span>';
+      det.append(q);
+    });
+    body.append(det);
+  }
+
+  const acts = el('div', 'g-acts');
+  const p = el('a', 'btn btn-sm');
+  p.href = `#/practice/${courseId}/${encodeURIComponent(u.topic)}`;
+  p.textContent = `🎲 תרגל ${u.topic}`;
+  acts.append(p);
+  const prog = el('span', 'g-prog');
+  prog.textContent = r.m.total ? `${r.m.correct}/${r.m.total} נכונות בארכיון` : 'טרם תרגלת';
+  acts.append(prog);
+  body.append(acts);
+
+  sec.append(body);
+  return sec;
+}
+
+async function renderGuide(courseId, focusTopic = null) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+  const c = courseOf(courseId);
+  if (!c) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  const g = await loadGuide(courseId);
+  if (!g) {
+    view.innerHTML = '';
+    view.append(emptyState('📭', 'אין מפת חומרים למקצוע הזה', 'היא נבנית לכל מקצוע בנפרד.'));
+    toTop();
+    return;
+  }
+
+  /* צריך את השאלות עצמן כדי לספור שליטה לפי נושא — המניפסט מחזיק רק מטא-דאטה. */
+  await Promise.all(quizzesOf(courseId).map((m) => loadExam(m.id).catch(() => null)));
+
+  view.innerHTML = '';
+  view.append(crumb(c.name, '#/course/' + courseId));
+  const h = el('header', 'g-head');
+  h.append(el('h1', null, '📚 מפת החומרים — ' + c.name));
+  h.append(el('p', 'g-head-sub', g.method));
+  view.append(h);
+
+  /* לא בקובץ התוכן אלא כאן, בכוונה: המסך הזה אומר לאנשים מה לא ללמוד, וזו
+     האמירה הכי מסוכנת באתר. מקודד ברינדור כדי שמפה של מקצוע חדש תקבל אותו
+     אוטומטית — אי אפשר לשכוח להוסיף אותו. */
+  view.append(guideDisclaimer());
+
+  if (g.headline) {
+    const hl = el('section', 'g-headline');
+    hl.append(el('h2', null, g.headline.title));
+    const p = el('p', null); p.innerHTML = g.headline.body;
+    hl.append(p);
+    view.append(hl);
+  }
+
+  if (g.stack) {
+    const st = el('section', 'g-stack');
+    st.append(el('div', 'g-lbl', '⚡ ההכרעה בשורה אחת'));
+    ['spine', 'patch', 'warn'].forEach((k) => {
+      if (!g.stack[k]) return;
+      const d = el('div', 'g-stack-row g-stack-' + k);
+      d.innerHTML = g.stack[k];
+      st.append(d);
+    });
+    view.append(st);
+  }
+
+  const ranked = priorityList(courseId, g);
+
+  /* "מה עכשיו" — הנושא עם הפער הגדול ביותר בין המשקל שלו במבחן למה שאתה
+     כבר יודע. מוצג עם החישוב גלוי, כי הנחיה בלי נימוק היא עוד מקור ללחץ. */
+  const top = ranked[0];
+  if (top) {
+    const now = el('section', 'g-now');
+    now.append(el('div', 'g-now-eyebrow', '⚡ מה עכשיו'));
+    now.append(el('h2', null, top.u.topic));
+    const why = el('p', 'g-now-why');
+    const pct = Math.round(top.m.ratio * 100);
+    why.innerHTML = `<b>${top.u.freq}%</b> מהמבחן` +
+      (top.m.total ? `, ואתה יודע <b>${pct}%</b> ממנו (${top.m.correct}/${top.m.total}).` : `, ועוד לא תרגלת אותו בכלל.`) +
+      (top.u.certainty === 'known'
+        ? ' המרצה מסר גבולות גזרה — תקרא את מסמך החזרה, תסמן וי, תעבור הלאה.'
+        : ' ומרצה שלא הדליף מה ייכנס.');
+    now.append(why);
+    const acts = el('div', 'g-now-acts');
+    const a1 = el('a', 'btn'); a1.href = '#/guide/' + courseId + '/' + encodeURIComponent(top.u.topic);
+    a1.textContent = '📖 ' + top.u.main.src + (top.u.main.pages ? ' · ' + top.u.main.pages : '');
+    const a2 = el('a', 'btn btn-ghost'); a2.href = `#/practice/${courseId}/${encodeURIComponent(top.u.topic)}`;
+    a2.textContent = '🎲 תרגל עכשיו';
+    acts.append(a1, a2);
+    now.append(acts);
+    if (top.u.gap) {
+      const gp = el('div', 'g-now-gap');
+      gp.innerHTML = '<b>⚠️ פער:</b> ' + top.u.gap;
+      now.append(gp);
+    }
+    view.append(now);
+  }
+
+  const plan = dayPlan(courseId, ranked);
+  if (plan) {
+    const sec = el('section', 'g-plan');
+    sec.append(el('div', 'g-lbl', `🗓️ ${plan.days} ימים למבחן — הצעה לחלוקה`));
+    const grid = el('div', 'g-plan-grid');
+    plan.bins.forEach((b, i) => {
+      const d = el('div', 'g-day');
+      d.append(el('div', 'g-day-n', 'יום ' + (i + 1)));
+      b.items.forEach((r) => {
+        const a = el('a', 'g-day-t');
+        a.href = '#/guide/' + courseId + '/' + encodeURIComponent(r.u.topic);
+        a.textContent = r.u.topic;
+        d.append(a);
+      });
+      grid.append(d);
+    });
+    const last = el('div', 'g-day g-day-last');
+    last.append(el('div', 'g-day-n', 'היום האחרון'));
+    const hy = EXAMS.find((e) => e.course === courseId && e.kind === 'highyield');
+    if (hy) { const a = el('a', 'g-day-t'); a.href = '#/exam/' + hy.id; a.textContent = '🎯 High Yield'; last.append(a); }
+    const rv = el('a', 'g-day-t'); rv.href = '#/review/' + courseId; rv.textContent = '❌ הטעויות שלי';
+    last.append(rv);
+    grid.append(last);
+    sec.append(grid);
+    view.append(sec);
+  }
+
+  const unitsSec = el('section', 'g-units');
+  unitsSec.append(el('h2', 'g-h2', '📖 הנושאים — לפי המשקל שלהם במבחן'));
+  ranked.slice().sort((a, b) => b.u.freq - a.u.freq)
+    .forEach((r) => unitsSec.append(unitCard(courseId, r, focusTopic === r.u.topic)));
+  view.append(unitsSec);
+
+  if ((g.skipList || []).length) view.append(skipPanel(g));
+  if ((g.sources || []).length) view.append(sourcesPanel(g));
+  if ((g.caveats || []).length) {
+    const cv = el('section', 'g-caveats');
+    cv.append(el('h2', 'g-h2', '🔬 איך זה נמדד — והסייגים'));
+    g.caveats.forEach((t) => { const p = el('p', null); p.innerHTML = t; cv.append(p); });
+    view.append(cv);
+  }
+
+  if (focusTopic) {
+    const t = document.getElementById('g-' + encodeURIComponent(focusTopic));
+    if (t) setTimeout(() => t.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
+  } else toTop();
+}
+
+/* המסך שמוריד את הלחץ. שלוש רמות ודאות, ולא מתחזים לוודאות שאין:
+   "ציטוט" = המרצה אמר את זה. "אין ראיה" = חיפשנו ולא מצאנו, וזה לא אותו דבר. */
+function skipPanel(g) {
+  const sec = el('section', 'g-skip');
+  sec.append(el('h2', 'g-h2', '🎯 מה לא ללמוד'));
+  sec.append(el('p', 'g-skip-sub',
+    'זה החלק שמחזיר לכם שעות. כל שורה כאן היא או ציטוט מפורש של המרצה, או נושא שחיפשנו בכל הסיכומים ובכל השאלות ולא מצאנו לו זכר.'));
+  const CATS = [
+    ['quoted', '🔒 המרצה אמר במפורש שלא', 'המילים שלו, לא הפרשנות שלנו.'],
+    ['no-evidence', '🕳️ אין לזה שום ראיה', 'אפס אזכורים בכל 8 הסיכומים ובכל 333 השאלות. <b>זה לא אומר "בוודאות לא במבחן"</b> — אף אחד לא מחזיק את שקופיות שיעורים 22 ו-26. זה אומר: אל תתחילו מכאן.'],
+    ['off-syllabus', '📕 לא בסילבוס של נ״ב', 'קיים בסיכום, אבל לא בקורס שלכם.'],
+  ];
+  CATS.forEach(([cat, title, sub]) => {
+    const items = g.skipList.filter((s) => s.cat === cat);
+    if (!items.length) return;
+    const box = el('div', 'g-skip-cat');
+    box.append(el('h3', null, title));
+    const p = el('p', 'g-skip-note'); p.innerHTML = sub; box.append(p);
+    items.forEach((s) => {
+      const d = el('div', 'g-skip-row');
+      d.append(el('b', null, s.term));
+      const w = el('span', 'g-skip-why'); w.innerHTML = s.why; d.append(w);
+      if (s.src) d.append(el('span', 'g-skip-src', '📼 ' + s.src));
+      box.append(d);
+    });
+    sec.append(box);
+  });
+  return sec;
+}
+
+function sourcesPanel(g) {
+  const sec = el('section', 'g-sources');
+  sec.append(el('h2', 'g-h2', '🗂️ תיק על כל סיכום'));
+  sec.append(el('p', 'g-skip-sub',
+    'מי כתב, מאיזה מחזור, ומה זה שווה לכם היום. הצלב שכדאי לזכור: מאז מ״ה כמעט כל נושא בקורס החליף מרצה — רק אלקבץ נשאר.'));
+  const grid = el('div', 'g-src-grid');
+  g.sources.forEach((s) => {
+    const d = el('div', 'g-scard tier-' + (s.cls || 'c'));
+    d.append(el('span', 'g-tier', s.tier));
+    d.append(el('h4', null, s.name));
+    d.append(el('div', 'g-scard-meta', `מחזור ${s.cycle} · ${s.pages} עמ׳`));
+    const u = el('p', 'g-scard-use'); u.innerHTML = s.use; d.append(u);
+    const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + s.lack; d.append(l);
+    grid.append(d);
+  });
+  sec.append(grid);
+  return sec;
+}
+
+/* מהשאלה למפה. נבחר אוטומטית לפי topic — ראו GUIDE_BY_TOPIC. */
+function guideButton(topic) {
+  const hit = GUIDE_BY_TOPIC[topic];
+  if (!hit) return null;
+  const a = el('a', 'fb-guide');
+  a.href = `#/guide/${hit.course}/${encodeURIComponent(topic)}`;
+  a.textContent = `📚 איפה ללמוד את ${topic}`;
+  return a;
+}
+
 /* ---------- כותרת תחתונה ---------- */
 function updateFooter() {
   const n = EXAMS.reduce((a, e) => a + e.count, 0);
-  document.getElementById('footerStats').textContent =
+  const f = document.getElementById('footerStats');
+  f.textContent =
     `${plural(COURSES.length, 'מקצוע', 'מקצועות')} · ${plural(EXAMS.length, 'מבחן', 'מבחנים')} · ${n} שאלות · ההתקדמות נשמרת בדפדפן הזה בלבד`;
+  /* מופיע בכל עמוד: הארכיון כולו הוא שחזורי סטודנטים, לא חומר רשמי. */
+  let d = document.getElementById('footerDisc');
+  if (!d) {
+    d = el('span', 'footer-disc');
+    d.id = 'footerDisc';
+    f.parentElement.append(d);
+  }
+  d.textContent = 'אתר לא רשמי מתוצרת סטודנטים · אינו מטעם הפקולטה · האחריות על הלמידה היא של הלומד בלבד';
 }
 
 /* ---------- מקשי קיצור: 1-9 ---------- */
