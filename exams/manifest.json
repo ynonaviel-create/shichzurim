@@ -1,9 +1,9 @@
 {
-  "updated": "2026-07-15",
-  "version": "e4df200b",
+  "updated": "2026-07-16",
+  "version": "843f107e",
   "assets": {
-    "css": "0ebbb7fc",
-    "js": "2767e260"
+    "css": "279376b9",
+    "js": "b60b1aee"
   },
   "courses": [
     {
@@ -308,6 +308,58 @@
       "count": 10
     },
     {
+      "id": "electro-2023-moed-a",
+      "file": "electro-2023-moed-a.json",
+      "course": "electro",
+      "part": null,
+      "title": "מסטר מועד א׳ 2023",
+      "kind": "shichzur",
+      "year": 2023,
+      "cycle": null,
+      "moed": "א",
+      "added": "2026-07-16",
+      "count": 48
+    },
+    {
+      "id": "electro-2023-moed-b",
+      "file": "electro-2023-moed-b.json",
+      "course": "electro",
+      "part": null,
+      "title": "מסטר מועד ב׳ 2023",
+      "kind": "shichzur",
+      "year": 2023,
+      "cycle": null,
+      "moed": "ב",
+      "added": "2026-07-16",
+      "count": 48
+    },
+    {
+      "id": "electro-2024-miluim-1",
+      "file": "electro-2024-miluim-1.json",
+      "course": "electro",
+      "part": null,
+      "title": "מבחן מילואים 2024 (18/02)",
+      "kind": "shichzur",
+      "year": 2024,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "count": 10
+    },
+    {
+      "id": "electro-2024-miluim-2",
+      "file": "electro-2024-miluim-2.json",
+      "course": "electro",
+      "part": null,
+      "title": "מבחן מילואים 2024 (10/03)",
+      "kind": "shichzur",
+      "year": 2024,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "count": 10
+    },
+    {
       "id": "electro-2025-moed-a",
       "file": "electro-2025-moed-a.json",
       "course": "electro",
@@ -330,7 +382,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-15",
+      "added": "2026-07-16",
       "count": 50
     },
     {

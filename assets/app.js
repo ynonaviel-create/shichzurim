@@ -105,11 +105,23 @@ async function loadManifest() {
      שהוגש לנו מהמטמון מצביע לגרסה ישנה של הקוד — אנחנו רצים כרגע כקוד ישן,
      והמשתמש רואה אתר "לא מעודכן" בלי לדעת. מרעננים פעם אחת עם עוקף מטמון.
      דגל ב-sessionStorage מבטיח שלא ניכנס ללולאת רענון אם משהו משתבש. */
-  const fresh = m.assets && m.assets.js;
-  if (BUILD && fresh && fresh !== BUILD && !sessionStorage.getItem('reloadedFor:' + fresh)) {
-    sessionStorage.setItem('reloadedFor:' + fresh, '1');
+  const freshJs = m.assets && m.assets.js;
+  const freshCss = m.assets && m.assets.css;
+  /* גם CSS: קוראים את ה-?v= מתגית ה-<link> שנטענה בפועל. כך גם שינוי של
+     CSS בלבד (בלי שינוי JS) מפעיל את הרענון החד-פעמי — אחרת עדכון עיצוב
+     נתקע במטמון ה-index.html הישן והמשתמש רואה גרסה ישנה. */
+  let curCss = '';
+  try {
+    const link = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
+    if (link) curCss = new URL(link.href, location.href).searchParams.get('v') || '';
+  } catch { /* התעלם */ }
+  const jsStale = BUILD && freshJs && freshJs !== BUILD;
+  const cssStale = curCss && freshCss && freshCss !== curCss;
+  const stampKey = 'reloadedFor:' + freshJs + ':' + freshCss;
+  if ((jsStale || cssStale) && !sessionStorage.getItem(stampKey)) {
+    sessionStorage.setItem(stampKey, '1');
     const u = new URL(location.href);
-    u.searchParams.set('b', fresh);
+    u.searchParams.set('b', String(freshJs || '') + String(freshCss || ''));
     location.replace(u.toString());
     await new Promise(() => {});   // עוצר את ההמשך עד שהדף מתחלף
   }

@@ -397,7 +397,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .topic{
   font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:99px;
   background:var(--topic-bg); border:1px solid var(--topic-ln); color:var(--topic-tx);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%;
+  white-space:nowrap;            /* מציג את שם הנושא במלואו; ה-flex-wrap ב-.q-tags יעביר אותו לשורה משלו אם צר */
 }
 
 /* תג "השאלה הזאת חזרה" — שאלה שהופיעה בכמה מחזורים היא ההימור הטוב ביותר
