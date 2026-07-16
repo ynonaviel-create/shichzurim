@@ -748,3 +748,169 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .lhero-n{font-size:24px;}
   .rel-chip{flex-direction:column; gap:2px;}
 }
+
+/* ===== סימולציות =====
+   סוג התוכן הרביעי, אחרי מבחנים/תרגול/כרטיסיות. צבוע באינדיגו:
+   הזהב כבר שייך לכרטיסיות המרצה, והטורקיז הוא צבע האתר עצמו. */
+:root{
+  --sim:     #3f51b5;
+  --sim-bg:  #eceef9;
+  --sim-ln:  #b9c0e8;
+  --sim-dp:  #2a3580;
+}
+:root[data-theme="dark"]{
+  --sim:     #8b9aec;
+  --sim-bg:  #1e2450;
+  --sim-ln:  #3f4a8f;
+  --sim-dp:  #b7c1f5;
+}
+
+/* --- הבאנר בדף המקצוע --- */
+.sim-hero{
+  padding:22px 24px; margin:0 0 28px; border-radius:var(--radius);
+  background:linear-gradient(135deg, var(--sim-bg), var(--surface) 75%);
+  border:1.5px solid var(--sim-ln); box-shadow:var(--shadow);
+}
+.sim-hero-eyebrow{font-size:12px; font-weight:900; letter-spacing:.04em; color:var(--sim); margin-bottom:6px;}
+.sim-hero-head h2{margin:0 0 6px; font-size:21px; color:var(--sim-dp);}
+.sim-hero-sub{margin:0 0 16px; font-size:14px; color:var(--muted); line-height:1.55; max-width:62ch;}
+.sim-hero-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px;}
+.sim-card{
+  display:flex; align-items:flex-start; gap:11px; padding:13px 15px;
+  border-radius:var(--radius-sm); background:var(--surface);
+  border:1px solid var(--sim-ln); text-decoration:none; color:inherit;
+  transition:transform .12s, border-color .12s, box-shadow .12s;
+}
+.sim-card:hover{transform:translateY(-2px); border-color:var(--sim); box-shadow:var(--shadow);}
+.sim-card-ico{font-size:20px; line-height:1.2; flex-shrink:0;}
+.sim-card-txt{display:flex; flex-direction:column; gap:3px; min-width:0;}
+.sim-card-txt b{font-size:14.5px; font-weight:800; color:var(--text); line-height:1.35;}
+.sim-card-txt span{font-size:12px; color:var(--muted); line-height:1.45;}
+
+/* --- עמוד הסימולציה --- */
+.sim{display:flex; flex-direction:column; gap:22px;}
+.sim-controls{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px;}
+.sim-group{
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; gap:13px;
+}
+.sim-group-t{
+  font-size:12px; font-weight:900; letter-spacing:.03em;
+  color:var(--sim); border-bottom:1px solid var(--line-soft); padding-bottom:9px;
+}
+.sim-slider{display:flex; flex-direction:column; gap:7px;}
+.sim-slider label{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+.sim-sl-name{font-size:13px; font-weight:700; color:var(--muted); line-height:1.3;}
+.sim-sl-val{
+  font-size:13px; font-weight:800; color:var(--sim-dp);
+  background:var(--sim-bg); border-radius:6px; padding:2px 8px;
+  white-space:nowrap; flex-shrink:0; font-variant-numeric:tabular-nums;
+  /* "150 MΩ" בהקשר RTL מתהפך ל-"MΩ 150", ומספר שלילי גרוע יותר:
+     "-25 mV" הופך ל-"mV 25-". גודל פיזיקלי הוא תמיד LTR. */
+  direction:ltr;
+}
+
+/* שורת הפקד: מינוס, טווח, פלוס. direction:ltr כי הסליידר עצמו LTR
+   (מינימום משמאל), וכפתור צעד שמצביע בכיוון ההפוך לסליידר הוא מלכודת. */
+.sim-sl-row{display:flex; align-items:center; gap:9px; direction:ltr;}
+.sim-sl-row input[type=range]{flex:1; margin:0;}
+.sim-step{
+  flex-shrink:0; width:27px; height:27px; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px; border:1.5px solid var(--sim-ln); background:var(--surface);
+  color:var(--sim-dp); font:800 16px/1 var(--font);
+  cursor:pointer; transition:.12s; user-select:none;
+}
+.sim-step:hover:not(:disabled){background:var(--sim); border-color:var(--sim); color:#fff;}
+.sim-step:active:not(:disabled){transform:scale(.92);}
+.sim-step:disabled{opacity:.3; cursor:default;}
+.sim-step:focus-visible{outline:2px solid var(--sim); outline-offset:2px;}
+
+/* טווח — נבנה מאפס, לא היה באתר שום input[type=range] */
+.sim-slider input[type=range]{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:6px; margin:4px 0; padding:0;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  border-radius:99px; cursor:pointer; direction:ltr;
+}
+.sim-slider input[type=range]:focus-visible{outline:2px solid var(--sim); outline-offset:3px;}
+.sim-slider input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:19px; height:19px; border-radius:50%;
+  background:var(--sim); border:2.5px solid var(--surface);
+  box-shadow:0 1px 4px rgba(0,0,0,.28); cursor:grab; transition:transform .1s;
+}
+.sim-slider input[type=range]::-webkit-slider-thumb:active{transform:scale(1.18); cursor:grabbing;}
+.sim-slider input[type=range]::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%;
+  background:var(--sim); border:2.5px solid var(--surface);
+  box-shadow:0 1px 4px rgba(0,0,0,.28); cursor:grab;
+}
+.sim-slider input[type=range]::-moz-range-track{background:transparent;}
+
+.sim-dash{margin:0;}
+.sim-dash .stat b{direction:ltr; text-align:right;}   /* אותה סיבה — ראו sim-sl-val */
+.sim-btns{margin:0;}
+
+.sim-panel{
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); padding:16px 18px 10px; box-shadow:var(--shadow);
+}
+.sim-panel-t{font-size:13.5px; font-weight:800; color:var(--text); margin-bottom:10px;}
+.sim-cv{display:block; width:100%; height:260px;}
+
+.sim-insight{
+  background:var(--sim-bg); border:1.5px solid var(--sim-ln);
+  border-radius:var(--radius); padding:16px 19px;
+  font-size:14px; color:var(--text); line-height:1.65; max-width:78ch;
+}
+.sim-insight-t{font-size:12.5px; font-weight:900; color:var(--sim-dp); margin-bottom:6px; letter-spacing:.02em;}
+
+/* הכפתור שמופיע אחרי מענה על שאלה בנושא שיש לו סימולציה */
+.nb-btn.sim-link{text-decoration:none; border-color:var(--sim-ln); color:var(--sim-dp);}
+.nb-btn.sim-link:hover{background:var(--sim-bg); border-color:var(--sim);}
+
+@media (max-width:640px){
+  .sim-controls{grid-template-columns:1fr;}
+  .sim-step{width:34px; height:34px; font-size:18px;}
+  .sim-cv{height:220px;}
+  .sim-panel{padding:14px 12px 8px;}
+  .sim-hero{padding:18px 16px;}
+}
+
+/* --- נקודות כניסה נוספות לסימולציות --- */
+/* רצועה בעמוד התרגול */
+.sim-strip{
+  background:linear-gradient(135deg, var(--sim-bg), var(--surface) 80%);
+  border:1.5px solid var(--sim-ln); border-radius:var(--radius);
+  padding:14px 17px; margin:0 0 22px;
+}
+.sim-strip-t{font-size:12.5px; font-weight:900; color:var(--sim-dp); margin-bottom:10px;}
+.sim-strip-row{display:flex; flex-wrap:wrap; gap:8px;}
+.sim-chip{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 14px; border-radius:99px;
+  background:var(--surface); border:1.5px solid var(--sim-ln);
+  font-size:13px; font-weight:700; color:var(--text);
+  text-decoration:none; transition:.13s;
+}
+.sim-chip:hover{border-color:var(--sim); color:var(--sim-dp); transform:translateY(-1px);}
+.sim-chip-ico{font-size:14px;}
+
+/* קישור בפילוח הנושאים שבסוף מבחן */
+.bd-sim{
+  flex-shrink:0; font-size:11.5px; font-weight:800; white-space:nowrap;
+  color:var(--sim-dp); background:var(--sim-bg); border:1px solid var(--sim-ln);
+  border-radius:99px; padding:3px 10px; text-decoration:none; transition:.13s;
+}
+.bd-sim:hover{background:var(--sim); border-color:var(--sim); color:#fff;}
+
+/* רמז בכרטיס המקצוע בדף הבית */
+.course-sims{margin:6px 0 0; font-size:12px; font-weight:700; color:var(--sim);}
+
+@media (max-width:640px){
+  .sim-strip-row{flex-direction:column; align-items:stretch;}
+  .sim-chip{justify-content:flex-start;}
+  .bd-sim{display:none;}   /* השורה צפופה ממילא במסך צר */
+}

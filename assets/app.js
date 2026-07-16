@@ -27,6 +27,8 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   if (btn) btn.title = t === 'dark' ? 'מעבר למצב בהיר' : 'מעבר למצב כהה';
+  // קנבס לא יורש צבעים מ-CSS. אם סימולציה על המסך — לצייר מחדש.
+  if (simRepaint) simRepaint();
 }
 function initTheme() {
   const saved = localStorage.getItem(THEME_KEY);
@@ -281,12 +283,15 @@ function crumb(text, href) {
 }
 
 function router() {
+  killSim();   // עמוד סימולציה משאיר אחריו ResizeObserver חי. router לא מפרק, אז מפרקים כאן.
   const [route, param, sub] = location.hash.replace(/^#\/?/, '').split('/');
   if (route === 'course' && param) return renderCourse(param);
   if (route === 'cards' && param) return renderCards(param);
+  if (route === 'sim' && param) return renderSim(param);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
-  if (route === 'practice' && param) return renderPractice(param);
+  // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
+  if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'about') return renderAbout();
   return renderHome();
@@ -350,6 +355,10 @@ function courseCard(c) {
   a.append(el('h2', null, c.name));
   a.append(el('p', 'blurb', c.blurb || ''));
   if (nd) a.append(el('p', 'course-when', `מועד ${nd.moed}׳ · ${fmtDate(nd.ts)} · ${fmtTime(nd.ts)}`));
+
+  // שיידעו שזה קיים עוד לפני שנכנסים למקצוע
+  const ns = simsOf(c.id).length;
+  if (ns) a.append(el('p', 'course-sims', `🎛️ ${plural(ns, 'סימולציה אינטראקטיבית', 'סימולציות אינטראקטיביות')}`));
 
   const foot = el('div', 'course-foot');
   const bar = el('div', 'bar');
@@ -464,6 +473,10 @@ function renderCourse(courseId) {
      באנר משלהן בראש העמוד. זה החומר הכי ישיר שיש: המרצה עצמו מסר אותו. */
   list.filter((e) => e.kind === 'cards').forEach((deck) => view.append(cardsHero(deck)));
   const list2 = list.filter((e) => e.kind !== 'cards');
+
+  /* סימולציות — לא מבחן ולא ב-manifest, ולכן גם הן באנר ולא שורה ברשימה. */
+  const sh = simsHero(courseId);
+  if (sh) view.append(sh);
 
   /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו.
      מבחנים בלי חלק נופלים לקבוצה אחת. */
@@ -828,6 +841,15 @@ function playQuestions(cfg) {
       track.append(f);
       r.append(track);
       r.append(el('span', 'bd-score ' + (pct >= 70 ? 'ok' : 'no'), `${t.good}/${t.total}`));
+      /* "נפלת בפוטנציאל הפעולה" ומיד לידו הדרך לראות אותו קורה.
+         זה הרגע שבו הפילוח מפסיק להיות ציון ומתחיל להיות הוראה מה לעשות. */
+      const sim = SIM_BY_TOPIC[name];
+      if (sim) {
+        const a = el('a', 'bd-sim', sim.icon + ' לסימולציה');
+        a.href = '#/sim/' + sim.id;
+        a.title = sim.title;
+        r.append(a);
+      }
       box.append(r);
     });
     return box;
@@ -967,6 +989,8 @@ function playQuestions(cfg) {
     fb.innerHTML = '';
     fb.append(el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`));
     if (item.explain) fb.append(el('div', 'explain', item.explain));
+    const sim = SIM_BY_TOPIC[item.topic];
+    if (sim) fb.append(simButton(sim));
     fb.append(notebookButton(item, oi));
   }
 
@@ -1029,6 +1053,17 @@ async function copyText(text) {
   }
 }
 
+/* מהשאלה לסימולציה. נבחר אוטומטית לפי topic — ראו SIM_BY_TOPIC.
+   הרגע שאחרי טעות הוא הרגע שבו סליידר שווה יותר מפסקת הסבר. */
+function simButton(sim) {
+  const a = el('a', 'nb-btn sim-link');
+  a.href = '#/sim/' + sim.id;
+  a.append(el('span', 'nb-ico', sim.icon));
+  a.append(el('span', null, `שחקו עם זה — ${sim.title}`));
+  a.title = sim.blurb;
+  return a;
+}
+
 function notebookButton(item, chosen) {
   const btn = el('button', 'nb-btn');
   const label = el('span', null, 'העתק ל-NotebookLM');
@@ -1089,7 +1124,7 @@ function openLightbox(src) {
 
    ברירת המחדל היא "שאלות חדשות" — שאלות שעוד לא ראית באף מקום באתר.
    זה מה שמאפשר להתקדם דרך הארכיון במקום לחזור באקראי על אותן שאלות. */
-async function renderPractice(courseId) {
+async function renderPractice(courseId, seedTopic = null) {
   setNav('home');
   const c = courseOf(courseId);
   if (!c) {
@@ -1127,10 +1162,15 @@ async function renderPractice(courseId) {
     return;
   }
 
+  const strip = simStrip(courseId, '🎛️ להתנסות לפני שמתחילים — גררו סליידר וראו מה קורה');
+  if (strip) view.append(strip);
+
   /* --- מצב הסינון --- */
   const allParts = [...new Set(pool.map((q) => q.part))].filter(Boolean).sort();
   const selParts = new Set(allParts);
-  const selTopics = new Set();          // ריק = כל הנושאים
+  /* ריק = כל הנושאים. מגיע מלא כשנכנסים מעמוד סימולציה דרך
+     #/practice/<course>/<topic> — drawTopics ינקה נושא שלא קיים במאגר. */
+  const selTopics = new Set(seedTopic ? [seedTopic] : []);
   let minRepeat = 1;                    // 1 = הכול. 2/3/4 = רק שאלות שחזרו כך וכך פעמים
   let mode = 'new';                     // new | wrong | all
   let count = 20;
@@ -1539,6 +1579,918 @@ function introBanner() {
   acts.append(skip);
   b.append(acts);
   return b;
+}
+
+/* ================= סימולציות =================
+   סוג התוכן הרביעי. מבחן הוא דאטה ולכן יושב ב-JSON; סימולציה היא משוואה,
+   ומשוואה לא ניתן לבטא ב-JSON בלי להמציא שפת ביטויים. לכן ההצהרה
+   (סליידרים, נושא, קריאות) היא דאטה, והפיזיקה היא פונקציה — שתיהן כאן.
+
+   הסימולציות בכוונה לא רשומות ב-manifest: הן היו מזהמות את quizzesOf,
+   את אריחי ההתקדמות, ואת מאגר התרגול. sync.js לא יודע עליהן דבר.
+
+   הקישור לשאלות אוטומטי לפי topic — ראו SIM_BY_TOPIC. אין הזנת דאטה
+   פר-שאלה: כל שאלה שמתויגת בנושא של סימולציה מקבלת אליה כפתור בחינם. */
+
+/* קנבס לא יכול להשתמש ב-var(--x), ולכן קוראים את הערכים בזמן הציור.
+   זה גם מה שמאפשר החלפת ערכת נושא בלי לרענן. */
+function themeColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n) => cs.getPropertyValue(n).trim();
+  return {
+    text: v('--text'), muted: v('--muted'), dim: v('--dim'),
+    line: v('--line'), lineSoft: v('--line-soft'),
+    surface: v('--surface'), surface2: v('--surface-2'),
+    accent: v('--accent'), good: v('--good'), bad: v('--bad'),
+    warn: v('--warn'), topic: v('--topic-tx'), gold: v('--gold'),
+  };
+}
+
+/* מספרים קריאים: 45 ולא 45.00, 0.031 ולא 0.03 */
+const num = (v, d = 2) => {
+  if (!isFinite(v)) return '—';
+  const a = Math.abs(v);
+  const dd = a === 0 ? 0 : a < 0.01 ? 4 : a < 1 ? 3 : a < 100 ? d : a < 1000 ? 1 : 0;
+  return parseFloat(v.toFixed(dd)).toLocaleString('en-US');
+};
+
+/* ערכי ציר עגולים — 1/2/5 כפול חזקה של 10 */
+function ticks(min, max, n = 5) {
+  const raw = (max - min) / n;
+  if (!(raw > 0)) return [min];
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const k = raw / mag;
+  const step = (k < 1.5 ? 1 : k < 3 ? 2 : k < 7 ? 5 : 10) * mag;
+  const out = [];
+  for (let t = Math.ceil(min / step) * step; t <= max + step * 1e-9; t += step) out.push(t);
+  return out;
+}
+
+/* ציור גרף. זה גוף העבודה — כל הסימולציות יושבות עליו.
+   הקנבס נשאר LTR גם באתר RTL: גרף מדעי עם ציר x שגדל שמאלה
+   לא קיים בשום ספר, ובוודאי לא בגרפים של המבחן. */
+function plot(g, o) {
+  const { ctx, w, h } = g;
+  const C = o.C;
+  const padL = o.padL ?? 54, padR = o.padR ?? 16, padT = 18, padB = 36;
+  const x0 = padL, x1 = w - padR, yB = h - padB, yT = padT;
+  const sx = (x) => x0 + ((x - o.xMin) / (o.xMax - o.xMin)) * (x1 - x0);
+  const sy = (y) => yB - ((y - o.yMin) / (o.yMax - o.yMin)) * (yB - yT);
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '11px ' + FONT;
+  ctx.textBaseline = 'middle';
+  /* הקנבס יורש dir=rtl מהמסמך, ואז "-70" מצויר "70-". עברית בתוך
+     פסקה LTR עדיין מסודרת נכון מעצמה, אז LTR הוא הבחירה הנכונה כאן. */
+  ctx.direction = 'ltr';
+
+  // רשת
+  ctx.strokeStyle = C.lineSoft; ctx.lineWidth = 1;
+  ctx.fillStyle = C.dim;
+  ticks(o.yMin, o.yMax).forEach((t) => {
+    const y = Math.round(sy(t)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.textAlign = 'right';
+    ctx.fillText(num(t), x0 - 8, y);
+  });
+  ticks(o.xMin, o.xMax).forEach((t) => {
+    const x = Math.round(sx(t)) + 0.5;
+    ctx.beginPath(); ctx.moveTo(x, yT); ctx.lineTo(x, yB); ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillText(num(t), x, yB + 13);
+  });
+
+  // צירים
+  ctx.strokeStyle = C.line; ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(x0 + 0.5, yT); ctx.lineTo(x0 + 0.5, yB); ctx.lineTo(x1, yB);
+  ctx.stroke();
+
+  // תוויות צירים
+  ctx.fillStyle = C.muted;
+  ctx.font = '600 11.5px ' + FONT;
+  if (o.xLabel) { ctx.textAlign = 'center'; ctx.fillText(o.xLabel, (x0 + x1) / 2, h - 6); }
+  if (o.yLabel) {
+    ctx.save();
+    ctx.translate(11, (yT + yB) / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.fillText(o.yLabel, 0, 0);
+    ctx.restore();
+  }
+
+  // קווי ייחוס אופקיים (E_K, סף, מנוחה…)
+  (o.marks || []).forEach((m) => {
+    if (m.y < o.yMin || m.y > o.yMax) return;
+    const y = sy(m.y);
+    ctx.save();
+    ctx.strokeStyle = m.color; ctx.lineWidth = 1.3; ctx.setLineDash(m.dash || [5, 4]);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.restore();
+    if (m.label) {
+      ctx.fillStyle = m.color; ctx.font = '700 10.5px ' + FONT;
+      ctx.textAlign = 'left';
+      ctx.fillText(m.label, x0 + 5, y - 7);
+    }
+  });
+
+  // עקומות
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  (o.series || []).forEach((s) => {
+    if (!s.pts || s.pts.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2.2;
+    if (s.dash) ctx.setLineDash(s.dash);
+    ctx.beginPath();
+    s.pts.forEach(([x, y], i) => {
+      const px = sx(x), py = sy(Math.max(o.yMin, Math.min(o.yMax, y)));
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    });
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // נקודות מסומנות
+  (o.dots || []).forEach((d) => {
+    ctx.fillStyle = d.color;
+    ctx.beginPath(); ctx.arc(sx(d.x), sy(d.y), d.r || 4, 0, 7); ctx.fill();
+    if (d.label) {
+      ctx.font = '700 10.5px ' + FONT; ctx.textAlign = 'center';
+      ctx.fillText(d.label, sx(d.x), sy(d.y) - 12);
+    }
+  });
+
+  // עמודות (היסטוגרמה)
+  (o.bars || []).forEach((b) => {
+    const bx = sx(b.x - b.w / 2), bw = Math.max(1, sx(b.x + b.w / 2) - bx);
+    const by = sy(b.y);
+    ctx.fillStyle = b.color;
+    ctx.fillRect(bx, by, bw, yB - by);
+  });
+
+  // מקרא
+  if (o.legend && o.legend.length) {
+    ctx.font = '700 11px ' + FONT; ctx.textAlign = 'left';
+    let lx = x0 + 10;
+    o.legend.forEach((L) => {
+      ctx.fillStyle = L.color;
+      ctx.fillRect(lx, yT + 3, 12, 3);
+      ctx.fillText(L.label, lx + 17, yT + 5);
+      lx += 24 + ctx.measureText(L.label).width;
+    });
+  }
+
+  return { sx, sy, x0, x1, yT, yB };
+}
+
+const FONT = '"Assistant", system-ui, sans-serif';
+
+/* קנבס מודע ל-DPR. בלי זה הכל מטושטש במסכי רטינה. */
+function fitCanvas(cv) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+/* ---------- הפיזיקה ---------- */
+
+/* נרנסט: E = (RT/zF)·ln(out/in). RT/F ב-37° = 26.73mV. */
+const RToverF = (tC) => (8.314 * (tC + 273.15)) / 96485 * 1000;   // mV
+const nernst = (tC, z, out, inn) => (RToverF(tC) / z) * Math.log(out / inn);
+
+/* גולדמן. שימו לב שכלור הפוך — הוא שלילי, ולכן out/in מתחלפים. */
+function ghk(tC, P, ion) {
+  const top = P.K * ion.Ko + P.Na * ion.Nao + P.Cl * ion.Cli;
+  const bot = P.K * ion.Ki + P.Na * ion.Nai + P.Cl * ion.Clo;
+  return RToverF(tC) * Math.log(top / bot);
+}
+
+/* הודג'קין-האקסלי, קונבנציה מודרנית (מנוחה ≈ -65mV, 6.3°C).
+   α_n ו-α_m הן 0/0 בדיוק ב--55 ו--40; בלי הגבול מקבלים NaN
+   ובדיוק שם עובר הסף, כך שזה היה נופל על כל פוטנציאל פעולה. */
+const HH = {
+  gNa: 120, gK: 36, gL: 0.3,
+  ENa: 50, EK: -77, EL: -54.387,
+  Cm: 1, Vrest: -65,
+  an: (V) => (Math.abs(V + 55) < 1e-6 ? 0.1 : 0.01 * (V + 55) / (1 - Math.exp(-(V + 55) / 10))),
+  bn: (V) => 0.125 * Math.exp(-(V + 65) / 80),
+  am: (V) => (Math.abs(V + 40) < 1e-6 ? 1.0 : 0.1 * (V + 40) / (1 - Math.exp(-(V + 40) / 10))),
+  bm: (V) => 4 * Math.exp(-(V + 65) / 18),
+  ah: (V) => 0.07 * Math.exp(-(V + 65) / 20),
+  bh: (V) => 1 / (1 + Math.exp(-(V + 35) / 10)),
+};
+
+/* מריצים את המודל מראש ומציירים את כל העקבה בבת אחת.
+   זה עדיף על אנימציה: רואים את שרשרת הסיבתיות (מתח → מוליכות → שערים)
+   מיושרת על אותו ציר זמן במבט אחד, וזה בדיוק מה שהמבחן שואל עליו. */
+function runHH({ dur = 30, dt = 0.01, I = 0, tOn = 5, tOff = 5.5, ttx = false, tea = false, clamp = null }) {
+  const H = HH;
+  let V = H.Vrest;
+  let n = H.an(V) / (H.an(V) + H.bn(V));
+  let m = H.am(V) / (H.am(V) + H.bm(V));
+  let h = H.ah(V) / (H.ah(V) + H.bh(V));
+  const out = { t: [], V: [], m: [], h: [], n: [], gNa: [], gK: [], INa: [], IK: [], Im: [] };
+  const gNaMax = ttx ? 0 : H.gNa;
+  const gKMax = tea ? 0 : H.gK;
+  const steps = Math.round(dur / dt);
+  const every = Math.max(1, Math.round(steps / 1200));   // ~1200 נקודות זה יותר מדי פיקסלים ממילא
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i * dt;
+    const gNa = gNaMax * m * m * m * h;
+    const gK = gKMax * n * n * n * n;
+    const INa = gNa * (V - H.ENa);
+    const IK = gK * (V - H.EK);
+    const IL = H.gL * (V - H.EL);
+    const Iinj = t >= tOn && t < tOff ? I : 0;
+
+    if (i % every === 0) {
+      out.t.push(t); out.V.push(V); out.m.push(m); out.h.push(h); out.n.push(n);
+      out.gNa.push(gNa); out.gK.push(gK); out.INa.push(INa); out.IK.push(IK);
+      out.Im.push(INa + IK + IL);
+    }
+
+    // שערים מתקדמים תמיד; המתח — רק אם לא מקובע.
+    const dn = H.an(V) * (1 - n) - H.bn(V) * n;
+    const dm = H.am(V) * (1 - m) - H.bm(V) * m;
+    const dh = H.ah(V) * (1 - h) - H.bh(V) * h;
+    n += dn * dt; m += dm * dt; h += dh * dt;
+
+    if (clamp) V = clamp(t);
+    else V += ((Iinj - INa - IK - IL) / H.Cm) * dt;
+  }
+  return out;
+}
+
+/* ---------- הסימולציות ---------- */
+const SIMS = [
+  {
+    id: 'cable',
+    course: 'electro',
+    icon: '📉',
+    title: 'קבוע הזמן וקבוע המרחב',
+    blurb: 'למה ממברנה מגיבה לאט, ולמה אות דועך לפני שהוא מגיע לגוף התא',
+    topics: ['תכונות פאסיביות של הממברנה'],
+    insight: 'הכפילו את קוטר האקסון פי 4 — λ גדל רק פי 2, כי λ ∝ √d. ' +
+             'ועכשיו שימו לב למה שלא קרה: τ לא זז בכלל. קוטר משפיע על המרחק, לא על הזמן.',
+    params: [
+      { k: 'Rin', label: 'התנגדות כניסה Rin', unit: 'MΩ', min: 10, max: 400, step: 5, val: 150, group: 'תא איזופוטנציאלי — קבוע הזמן' },
+      { k: 'Cm', label: 'קיבול הממברנה Cmem', unit: 'pF', min: 50, max: 600, step: 10, val: 300, group: 'תא איזופוטנציאלי — קבוע הזמן' },
+      { k: 'I', label: 'זרם מוזרק I', unit: 'pA', min: 50, max: 800, step: 10, val: 300, group: 'תא איזופוטנציאלי — קבוע הזמן' },
+      { k: 'd', label: 'קוטר הדנדריט d', unit: 'µm', min: 0.5, max: 20, step: 0.5, val: 4, group: 'כבל — קבוע המרחב' },
+      { k: 'Rm', label: 'התנגדות ממברנה סגולית Rm', unit: 'kΩ·cm²', min: 1, max: 100, step: 1, val: 20, group: 'כבל — קבוע המרחב' },
+      { k: 'Ri', label: 'התנגדות ציטופלזמית Ri', unit: 'Ω·cm', min: 50, max: 400, step: 10, val: 100, group: 'כבל — קבוע המרחב' },
+    ],
+    readouts: (p) => {
+      const tau = (p.Rin * p.Cm) / 1000;               // MΩ·pF = µs → ms
+      const Vinf = (p.I * p.Rin) / 1000;               // pA·MΩ = µV → mV
+      const lam = Math.sqrt((p.d * p.Rm) / (40 * p.Ri)) * 10;   // cm → mm
+      return [
+        { v: num(tau) + ' ms', label: 'τ = Rin · Cmem', cls: 'accent' },
+        { v: num(Vinf) + ' mV', label: 'V∞ = I · Rin', cls: '' },
+        { v: num(lam) + ' mm', label: 'λ = √(d·Rm / 4·Ri)', cls: 'accent' },
+        { v: num(-70 + Vinf) + ' mV', label: 'מתח סופי', cls: '' },
+      ];
+    },
+    panels: [
+      {
+        label: 'טעינת הממברנה בזמן — V(t) = V∞·(1 − e^(−t/τ))',
+        draw: (g, p, C) => {
+          const tau = (p.Rin * p.Cm) / 1000, Vinf = (p.I * p.Rin) / 1000;
+          const dur = Math.max(30, tau * 4);
+          const pts = [];
+          for (let i = 0; i <= 300; i++) {
+            const t = (i / 300) * dur;
+            pts.push([t, -70 + Vinf * (1 - Math.exp(-t / tau))]);
+          }
+          plot(g, {
+            C, xMin: 0, xMax: dur, yMin: -75, yMax: Math.max(-40, -70 + Vinf * 1.15),
+            xLabel: 'זמן (ms)', yLabel: 'מתח (mV)',
+            marks: [
+              { y: -70 + Vinf, label: 'V∞', color: C.dim },
+              { y: -70 + Vinf * 0.632, label: '63%  ·  t = τ', color: C.accent },
+              { y: -50, label: 'סף', color: C.bad, dash: [3, 3] },
+            ],
+            series: [{ pts, color: C.accent, width: 2.6 }],
+            dots: [{ x: tau, y: -70 + Vinf * 0.632, color: C.accent }],
+          });
+        },
+      },
+      {
+        label: 'דעיכת האות במרחק — V(x) = V₀·e^(−x/λ)',
+        draw: (g, p, C) => {
+          const lam = Math.sqrt((p.d * p.Rm) / (40 * p.Ri)) * 10;
+          const dur = Math.max(1, lam * 4);
+          const pts = [];
+          for (let i = 0; i <= 300; i++) {
+            const x = (i / 300) * dur;
+            pts.push([x, 100 * Math.exp(-x / lam)]);
+          }
+          plot(g, {
+            C, xMin: 0, xMax: dur, yMin: 0, yMax: 105,
+            xLabel: 'מרחק מהסינפסה (mm)', yLabel: 'אחוז מהמשרעת המקורית',
+            marks: [{ y: 37, label: '37%  ·  x = λ', color: C.accent }],
+            series: [{ pts, color: C.warn, width: 2.6 }],
+            dots: [{ x: lam, y: 37, color: C.accent }],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'nernst',
+    course: 'electro',
+    icon: '⚖️',
+    title: 'נרנסט וגולדמן — פוטנציאל המנוחה',
+    blurb: 'איפה יושב מתח המנוחה, ולמה הוא נמשך ליון בעל החדירות הגבוהה',
+    topics: ['פוטנציאל מנוחה', 'תנועת חלקיקים ודיפוזיה'],
+    insight: 'גררו את האשלגן החוץ-תאי מ-4 ל-10 mM — זו היפרקלמיה, והתא מתדפלר. ' +
+             'עכשיו העלו את P_Na לגובה P_K: המתח קופץ לכיוון E_Na. הממברנה תמיד נמשכת ליון שהיא הכי חדירה לו.',
+    params: [
+      { k: 'Ko', label: 'אשלגן חוץ-תאי [K⁺]out', unit: 'mM', min: 1, max: 20, step: 0.5, val: 4, group: 'ריכוזים' },
+      { k: 'Ki', label: 'אשלגן תוך-תאי [K⁺]in', unit: 'mM', min: 100, max: 160, step: 5, val: 140, group: 'ריכוזים' },
+      { k: 'Nao', label: 'נתרן חוץ-תאי [Na⁺]out', unit: 'mM', min: 100, max: 160, step: 5, val: 145, group: 'ריכוזים' },
+      { k: 'Nai', label: 'נתרן תוך-תאי [Na⁺]in', unit: 'mM', min: 5, max: 30, step: 1, val: 12, group: 'ריכוזים' },
+      { k: 'pNa', label: 'חדירות יחסית לנתרן P_Na/P_K', unit: '', min: 0.005, max: 1, step: 0.005, val: 0.03, group: 'חדירות וטמפרטורה' },
+      { k: 'pCl', label: 'חדירות יחסית לכלור P_Cl/P_K', unit: '', min: 0, max: 2, step: 0.05, val: 0.45, group: 'חדירות וטמפרטורה' },
+      { k: 'T', label: 'טמפרטורה', unit: '°C', min: 0, max: 45, step: 1, val: 37, group: 'חדירות וטמפרטורה' },
+    ],
+    readouts: (p) => {
+      const ion = { Ko: p.Ko, Ki: p.Ki, Nao: p.Nao, Nai: p.Nai, Clo: 110, Cli: 10 };
+      const vm = ghk(p.T, { K: 1, Na: p.pNa, Cl: p.pCl }, ion);
+      return [
+        { v: num(nernst(p.T, 1, p.Ko, p.Ki)) + ' mV', label: 'E_K', cls: 'accent' },
+        { v: num(nernst(p.T, 1, p.Nao, p.Nai)) + ' mV', label: 'E_Na', cls: 'bad' },
+        { v: num(nernst(p.T, -1, 110, 10)) + ' mV', label: 'E_Cl', cls: '' },
+        { v: num(vm) + ' mV', label: 'Vm (גולדמן)', cls: 'good' },
+      ];
+    },
+    panels: [
+      {
+        label: 'איפה יושב Vm ביחס לפוטנציאלי שיווי המשקל',
+        h: 150,
+        draw: (g, p, C) => {
+          const ion = { Ko: p.Ko, Ki: p.Ki, Nao: p.Nao, Nai: p.Nai, Clo: 110, Cli: 10 };
+          const vm = ghk(p.T, { K: 1, Na: p.pNa, Cl: p.pCl }, ion);
+          const EK = nernst(p.T, 1, p.Ko, p.Ki);
+          const ENa = nernst(p.T, 1, p.Nao, p.Nai);
+          const ECl = nernst(p.T, -1, 110, 10);
+          const { ctx, w, h } = g;
+          ctx.clearRect(0, 0, w, h);
+          ctx.direction = 'ltr';
+          const x0 = 30, x1 = w - 30, mid = h / 2 + 6;
+          const lo = -110, hi = 70;
+          const sx = (v) => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
+
+          ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(x0, mid); ctx.lineTo(x1, mid); ctx.stroke();
+          ctx.font = '11px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ticks(lo, hi, 6).forEach((t) => {
+            ctx.strokeStyle = C.lineSoft;
+            ctx.beginPath(); ctx.moveTo(sx(t), mid - 5); ctx.lineTo(sx(t), mid + 5); ctx.stroke();
+            ctx.fillStyle = C.dim; ctx.fillText(num(t), sx(t), mid + 18);
+          });
+
+          [[EK, 'E_K', C.accent], [ECl, 'E_Cl', C.dim], [ENa, 'E_Na', C.bad]].forEach(([v, lb, col]) => {
+            ctx.strokeStyle = col; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(sx(v), mid - 20); ctx.lineTo(sx(v), mid + 20); ctx.stroke();
+            ctx.fillStyle = col; ctx.font = '700 11px ' + FONT;
+            ctx.fillText(lb, sx(v), mid - 30);
+          });
+
+          // המחוג — Vm
+          const x = sx(vm);
+          ctx.fillStyle = C.good;
+          ctx.beginPath();
+          ctx.moveTo(x, mid - 9); ctx.lineTo(x - 7, mid - 22); ctx.lineTo(x + 7, mid - 22);
+          ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.arc(x, mid, 5, 0, 7); ctx.fill();
+          ctx.font = '800 13px ' + FONT;
+          ctx.fillText(num(vm) + ' mV', x, mid + 36);
+          ctx.font = '700 10.5px ' + FONT; ctx.fillStyle = C.muted;
+          ctx.fillText('Vm', x, mid - 32);
+        },
+      },
+      {
+        label: 'מתח המנוחה כתלות באשלגן החוץ-תאי — עקומת ההיפרקלמיה',
+        draw: (g, p, C) => {
+          const pts = [], nrn = [];
+          for (let i = 0; i <= 200; i++) {
+            const ko = 1 + (i / 200) * 19;
+            const ion = { Ko: ko, Ki: p.Ki, Nao: p.Nao, Nai: p.Nai, Clo: 110, Cli: 10 };
+            pts.push([ko, ghk(p.T, { K: 1, Na: p.pNa, Cl: p.pCl }, ion)]);
+            nrn.push([ko, nernst(p.T, 1, ko, p.Ki)]);
+          }
+          const ion = { Ko: p.Ko, Ki: p.Ki, Nao: p.Nao, Nai: p.Nai, Clo: 110, Cli: 10 };
+          plot(g, {
+            C, xMin: 1, xMax: 20, yMin: -110, yMax: 10,
+            xLabel: 'אשלגן חוץ-תאי [K⁺]out (mM)', yLabel: 'מתח (mV)',
+            legend: [{ label: 'Vm — גולדמן', color: C.good }, { label: 'E_K — נרנסט', color: C.accent }],
+            series: [
+              { pts: nrn, color: C.accent, width: 2, dash: [5, 4] },
+              { pts, color: C.good, width: 2.6 },
+            ],
+            dots: [{ x: p.Ko, y: ghk(p.T, { K: 1, Na: p.pNa, Cl: p.pCl }, ion), color: C.good, r: 5 }],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'ap',
+    course: 'electro',
+    icon: '⚡',
+    title: 'פוטנציאל הפעולה — הודג׳קין והאקסלי',
+    blurb: 'שרשרת הסיבתיות המלאה: סף → m נפתח → h נסגר → n נפתח → מנוחה',
+    topics: ['פוטנציאל הפעולה'],
+    insight: 'הורידו את הזרם ל-6.9 — שום דבר. העלו ל-7.0 — פוטנציאל פעולה מלא של ‎+35mV. ' +
+             'שינוי של אחוז אחד בגירוי, והתגובה קופצת ב-90mV: זו הכל-או-כלום, ואפשר למצוא את הסף בעצמכם. ' +
+             'ואז הסתכלו בלוח השערים: m נפתח ראשון, ורק אחר כך h נסגר ו-n נפתח — שניהם יחד עושים את הרפרקטוריות.',
+    params: [
+      { k: 'I', label: 'זרם מוזרק', unit: 'µA/cm²', min: 0, max: 40, step: 0.1, val: 10, group: 'הגירוי' },
+      { k: 'durI', label: 'משך הגירוי', unit: 'ms', min: 0.1, max: 5, step: 0.1, val: 1, group: 'הגירוי' },
+      { k: 'gNa', label: 'ḡNa — צפיפות תעלות נתרן', unit: 'mS/cm²', min: 0, max: 200, step: 5, val: 120, group: 'הממברנה' },
+      { k: 'gK', label: 'ḡK — צפיפות תעלות אשלגן', unit: 'mS/cm²', min: 0, max: 80, step: 2, val: 36, group: 'הממברנה' },
+    ],
+    run: (p) => {
+      const save = { gNa: HH.gNa, gK: HH.gK };
+      HH.gNa = p.gNa; HH.gK = p.gK;
+      const r = runHH({ dur: 25, I: p.I, tOn: 3, tOff: 3 + p.durI });
+      HH.gNa = save.gNa; HH.gK = save.gK;
+      return r;
+    },
+    readouts: (p, r) => {
+      const peak = Math.max(...r.V);
+      const trough = Math.min(...r.V.slice(r.V.indexOf(peak)));
+      const fired = peak > 0;
+      const iPk = r.V.indexOf(peak);
+      return [
+        { v: fired ? '✓ נורה' : '✗ לא נורה', label: 'פוטנציאל פעולה', cls: fired ? 'good' : 'bad' },
+        { v: num(peak) + ' mV', label: 'שיא המתח', cls: '' },
+        { v: num(trough) + ' mV', label: 'היפר-פולריזציה', cls: '' },
+        { v: fired ? num(r.t[iPk] - 3) + ' ms' : '—', label: 'זמן לשיא', cls: '' },
+      ];
+    },
+    panels: [
+      {
+        label: 'מתח הממברנה',
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: 25, yMin: -90, yMax: 60,
+            xLabel: 'זמן (ms)', yLabel: 'Vm (mV)',
+            marks: [
+              { y: -65, label: 'מנוחה', color: C.dim, dash: [4, 4] },
+              { y: HH.ENa, label: 'E_Na', color: C.bad },
+              { y: HH.EK, label: 'E_K', color: C.accent },
+            ],
+            series: [{ pts: r.t.map((t, i) => [t, r.V[i]]), color: C.text, width: 2.6 }],
+          });
+        },
+      },
+      {
+        label: 'מוליכות — מה שגורם למתח לזוז',
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: 25, yMin: 0, yMax: Math.max(5, Math.max(...r.gNa, ...r.gK) * 1.15),
+            xLabel: 'זמן (ms)', yLabel: 'מוליכות (mS/cm²)',
+            legend: [{ label: 'gNa', color: C.bad }, { label: 'gK', color: C.accent }],
+            series: [
+              { pts: r.t.map((t, i) => [t, r.gNa[i]]), color: C.bad, width: 2.4 },
+              { pts: r.t.map((t, i) => [t, r.gK[i]]), color: C.accent, width: 2.4 },
+            ],
+          });
+        },
+      },
+      {
+        label: 'השערים עצמם — m נפתח מהר, h נסגר, n מאחר',
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: 25, yMin: 0, yMax: 1.05,
+            xLabel: 'זמן (ms)', yLabel: 'הסתברות שהשער פתוח',
+            legend: [
+              { label: 'm — אקטיבציה של Na', color: C.bad },
+              { label: 'h — אינאקטיבציה של Na', color: C.warn },
+              { label: 'n — אקטיבציה של K', color: C.accent },
+            ],
+            series: [
+              { pts: r.t.map((t, i) => [t, r.m[i]]), color: C.bad, width: 2.2 },
+              { pts: r.t.map((t, i) => [t, r.h[i]]), color: C.warn, width: 2.2 },
+              { pts: r.t.map((t, i) => [t, r.n[i]]), color: C.accent, width: 2.2 },
+            ],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'vclamp',
+    course: 'electro',
+    icon: '🔬',
+    title: 'קיבוע מתח — TTX ו-TEA',
+    blurb: 'הניסוי שפירק את פוטנציאל הפעולה לשני זרמים נפרדים',
+    topics: ['שיטות מחקר'],
+    insight: 'קפצו ל-0mV: קודם זרם נתרן מהיר פנימה (שלילי, כלפי מטה), אחריו זרם אשלגן איטי החוצה. ' +
+             'הוסיפו TTX — נשאר רק החוצה. הוסיפו TEA במקום — נשאר רק פנימה. ' +
+             'בקיבוע מתח dV/dt=0, ולכן הזרם הקיבולי נעלם ומה שנמדד הוא הזרם היוני בלבד.',
+    params: [
+      { k: 'Vc', label: 'מתח הפקודה Vc', unit: 'mV', min: -80, max: 60, step: 5, val: 0, group: 'הפקודה' },
+    ],
+    toggles: [
+      { k: 'ttx', label: 'TTX — חוסם נתרן' },
+      { k: 'tea', label: 'TEA — חוסם אשלגן' },
+    ],
+    run: (p) => runHH({
+      dur: 20, ttx: p.ttx, tea: p.tea,
+      clamp: (t) => (t >= 2 && t < 14 ? p.Vc : HH.Vrest),
+    }),
+    readouts: (p, r) => {
+      const w = r.t.map((t, i) => (t >= 2 && t < 14 ? i : -1)).filter((i) => i >= 0);
+      const IN = Math.min(...w.map((i) => r.Im[i]));
+      const OUT = Math.max(...w.map((i) => r.Im[i]));
+      return [
+        { v: num(IN) + ' µA/cm²', label: 'שיא הזרם פנימה (Na⁺)', cls: 'bad' },
+        { v: num(OUT) + ' µA/cm²', label: 'זרם החוצה בפלאטו (K⁺)', cls: 'accent' },
+        { v: num(p.Vc - HH.ENa) + ' mV', label: 'כוח מניע לנתרן (Vc − E_Na)', cls: '' },
+        { v: num(p.Vc - HH.EK) + ' mV', label: 'כוח מניע לאשלגן (Vc − E_K)', cls: '' },
+      ];
+    },
+    panels: [
+      {
+        label: 'מתח הפקודה',
+        h: 120,
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: 20, yMin: -90, yMax: 70,
+            xLabel: '', yLabel: 'Vc (mV)',
+            series: [{ pts: r.t.map((t, i) => [t, r.V[i]]), color: C.dim, width: 2.2 }],
+          });
+        },
+      },
+      {
+        label: 'זרם הממברנה הנמדד — Im',
+        draw: (g, p, C, st, r) => {
+          const lo = Math.min(-50, Math.min(...r.Im) * 1.15);
+          const hi = Math.max(50, Math.max(...r.Im) * 1.15);
+          plot(g, {
+            C, xMin: 0, xMax: 20, yMin: lo, yMax: hi,
+            xLabel: 'זמן (ms)', yLabel: 'זרם (µA/cm²)',
+            marks: [{ y: 0, label: '', color: C.line, dash: [] }],
+            legend: [
+              { label: 'זרם כולל', color: C.text },
+              { label: 'I_Na', color: C.bad },
+              { label: 'I_K', color: C.accent },
+            ],
+            series: [
+              { pts: r.t.map((t, i) => [t, r.INa[i]]), color: C.bad, width: 1.6, dash: [4, 3] },
+              { pts: r.t.map((t, i) => [t, r.IK[i]]), color: C.accent, width: 1.6, dash: [4, 3] },
+              { pts: r.t.map((t, i) => [t, r.Im[i]]), color: C.text, width: 2.6 },
+            ],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'quantal',
+    course: 'electro',
+    icon: '📊',
+    title: 'התאוריה הקוונטלית של כץ',
+    blurb: 'למה ההיסטוגרמה מתפצלת לפיקים בכפולות שלמות — וסיקולה אחת, שתיים, שלוש',
+    topics: ['התאוריה הקוונטאלית'],
+    insight: 'הורידו את הסידן ל-0.5 mM ולחצו ×200: רוב הגירויים הם כישלונות, והפיקים יוצאים ב-0, q, 2q. ' +
+             'זו ההוכחה שהשחרור קוונטלי. שימו לב ש-p תלוי בסידן בחזקה ~4 — הכפלת הסידן מכפילה את השחרור הרבה יותר מפי 2.',
+    params: [
+      { k: 'n', label: 'מספר אתרי שחרור n', unit: '', min: 1, max: 20, step: 1, val: 6, group: 'הסינפסה' },
+      { k: 'Ca', label: 'סידן חוץ-תאי [Ca²⁺]', unit: 'mM', min: 0.2, max: 5, step: 0.1, val: 1, group: 'הסינפסה' },
+      { k: 'q', label: 'גודל קוונטלי q', unit: 'mV', min: 0.2, max: 2, step: 0.1, val: 0.8, group: 'הסינפסה' },
+    ],
+    init: () => ({ trials: [] }),
+    buttons: (st, p, refresh) => [
+      { label: 'גירוי בודד', cls: 'primary', run: () => { quantalDraw(st, p, 1); refresh(); } },
+      { label: '×50', cls: '', run: () => { quantalDraw(st, p, 50); refresh(); } },
+      { label: '×200', cls: '', run: () => { quantalDraw(st, p, 200); refresh(); } },
+      { label: 'אפס', cls: 'ghost', run: () => { st.trials = []; refresh(); } },
+    ],
+    readouts: (p, r, st) => {
+      const pr = quantalP(p.Ca);
+      const N = st.trials.length;
+      const fails = st.trials.filter((k) => k === 0).length;
+      const obs = N ? st.trials.reduce((a, k) => a + k, 0) / N : 0;
+      return [
+        { v: num(pr, 3), label: 'p — הסתברות שחרור לאתר', cls: 'accent' },
+        { v: num(p.n * pr), label: 'm = n · p (תוחלת)', cls: 'accent' },
+        { v: N ? num(obs) : '—', label: `m נמדד (${N} גירויים)`, cls: 'good' },
+        { v: N ? num((100 * fails) / N) + '%' : '—', label: 'כישלונות', cls: 'bad' },
+      ];
+    },
+    panels: [
+      {
+        label: 'היסטוגרמת המשרעות — כל עמודה היא מספר וסיקולות שלם',
+        draw: (g, p, C, st) => {
+          const N = st.trials.length;
+          const counts = {};
+          st.trials.forEach((k) => { counts[k] = (counts[k] || 0) + 1; });
+          const maxK = Math.max(p.n, 1);
+          const maxC = Math.max(1, ...Object.values(counts));
+          const bars = [];
+          for (let k = 0; k <= maxK; k++) {
+            if (!counts[k]) continue;
+            bars.push({ x: k * p.q, y: counts[k], w: p.q * 0.45, color: k === 0 ? C.bad : C.accent });
+          }
+          plot(g, {
+            C, xMin: -p.q * 0.6, xMax: (maxK + 0.6) * p.q, yMin: 0, yMax: maxC * 1.15,
+            xLabel: 'משרעת התגובה הפוסט-סינפטית (mV)', yLabel: 'מספר גירויים',
+            bars,
+            marks: N ? [] : [],
+          });
+          if (!N) {
+            const { ctx, w, h } = g;
+            ctx.fillStyle = C.dim; ctx.font = '600 13px ' + FONT;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('לחצו "גירוי" כדי להתחיל לבנות את ההיסטוגרמה', w / 2, h / 2);
+          }
+        },
+      },
+      {
+        label: 'הסתברות השחרור כתלות בסידן — שיתופיות בחזקת 4',
+        h: 170,
+        draw: (g, p, C) => {
+          const pts = [];
+          for (let i = 0; i <= 200; i++) {
+            const ca = 0.2 + (i / 200) * 4.8;
+            pts.push([ca, quantalP(ca)]);
+          }
+          plot(g, {
+            C, xMin: 0.2, xMax: 5, yMin: 0, yMax: 1,
+            xLabel: 'סידן חוץ-תאי (mM)', yLabel: 'p',
+            series: [{ pts, color: C.warn, width: 2.6 }],
+            dots: [{ x: p.Ca, y: quantalP(p.Ca), color: C.warn, r: 5 }],
+          });
+        },
+      },
+    ],
+  },
+];
+
+/* הסתברות שחרור מסידן — היל בחזקת 4. השיתופיות היא העיקר:
+   ארבעה יוני סידן נדרשים לקשירה, ולכן התלות כה תלולה. */
+const quantalP = (ca) => Math.pow(ca, 4) / (Math.pow(ca, 4) + Math.pow(1.4, 4));
+
+function quantalDraw(st, p, times) {
+  const pr = quantalP(p.Ca);
+  for (let i = 0; i < times; i++) {
+    let k = 0;
+    for (let s = 0; s < p.n; s++) if (Math.random() < pr) k++;
+    st.trials.push(k);
+  }
+  if (st.trials.length > 4000) st.trials = st.trials.slice(-4000);
+}
+
+const simOf = (id) => SIMS.find((s) => s.id === id);
+const simsOf = (courseId) => SIMS.filter((s) => s.course === courseId);
+
+/* topic → סימולציה. זה כל מנגנון הקישור מהשאלות: אין שדה חדש בקבצי
+   המבחן, ואין הזנת דאטה. שאלה שמתויגת בנושא מקבלת כפתור בחינם. */
+const SIM_BY_TOPIC = (() => {
+  const m = {};
+  SIMS.forEach((s) => (s.topics || []).forEach((t) => (m[t] = s)));
+  return m;
+})();
+
+/* מנקים אחרינו: router לא מפרק עמודים אף פעם, ובלי זה כל ביקור בעמוד
+   סימולציה משאיר עוד ResizeObserver חי על אלמנט שכבר לא במסמך. */
+let simTeardown = null;
+function killSim() {
+  if (simTeardown) { simTeardown(); simTeardown = null; }
+}
+
+/* ה-hook שדרכו החלפת ערכת נושא מציירת מחדש את הקנבסים. */
+let simRepaint = null;
+
+function renderSim(id) {
+  setNav('home');
+  killSim();
+  const s = simOf(id);
+  if (!s) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'סימולציה לא נמצאה', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  const c = courseOf(s.course);
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + s.course));
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `${s.icon} ${s.title}`));
+  head.append(el('p', null, s.blurb));
+  view.append(head);
+
+  const p = {};
+  s.params.forEach((q) => (p[q.k] = q.val));
+  (s.toggles || []).forEach((t) => (p[t.k] = false));
+  const st = s.init ? s.init() : {};
+
+  const wrap = el('div', 'sim');
+
+  /* --- פקדים --- */
+  const controls = el('div', 'sim-controls');
+  const groups = [...new Set(s.params.map((q) => q.group || ''))];
+  groups.forEach((gname) => {
+    const box = el('div', 'sim-group');
+    if (gname) box.append(el('div', 'sim-group-t', gname));
+    s.params.filter((q) => (q.group || '') === gname).forEach((q) => {
+      const f = el('div', 'sim-slider');
+      const lab = el('label');
+      lab.append(el('span', 'sim-sl-name', q.label));
+      const val = el('span', 'sim-sl-val', num(q.val) + (q.unit ? ' ' + q.unit : ''));
+      lab.append(val);
+      f.append(lab);
+
+      const inp = el('input');
+      inp.type = 'range';
+      inp.min = q.min; inp.max = q.max; inp.step = q.step; inp.value = q.val;
+
+      const minus = el('button', 'sim-step', '−');
+      const plus = el('button', 'sim-step', '+');
+      minus.type = 'button'; plus.type = 'button';
+      minus.title = `פחות ${q.step}`; plus.title = `עוד ${q.step}`;
+      minus.setAttribute('aria-label', `הקטן ${q.label}`);
+      plus.setAttribute('aria-label', `הגדל ${q.label}`);
+
+      /* redraw=false בטעינה בלבד: הפקדים נבנים לפני הקנבסים ולפני dash,
+         ו-refresh היה מתפוצץ עליהם. */
+      const upd = (redraw = true) => {
+        p[q.k] = parseFloat(inp.value);
+        val.textContent = num(p[q.k]) + (q.unit ? ' ' + q.unit : '');
+        minus.disabled = p[q.k] <= q.min + 1e-9;
+        plus.disabled = p[q.k] >= q.max - 1e-9;
+        if (redraw) refresh();
+      };
+
+      /* צעד בכפתור. העיגול למספר הספרות של ה-step הוא לא קוסמטיקה:
+         0.03 + 0.005 = 0.034999999999999996 בנקודה צפה, וזה גם היה
+         מוצג ככה וגם מרחיק את הערך מרשת הצעדים בכל לחיצה. */
+      const dec = (String(q.step).split('.')[1] || '').length;
+      const stepBy = (dir) => {
+        const next = parseFloat(inp.value) + dir * q.step;
+        inp.value = Math.min(q.max, Math.max(q.min, +next.toFixed(dec)));
+        upd();
+      };
+      minus.onclick = () => stepBy(-1);
+      plus.onclick = () => stepBy(1);
+      inp.oninput = () => upd();
+
+      /* הסליידר עצמו LTR (מינימום משמאל), אז מינוס שמאלה ופלוס ימינה —
+         גם בעמוד RTL. כפתור בכיוון ההפוך לסליידר הוא מלכודת. */
+      const row = el('div', 'sim-sl-row');
+      row.append(minus, inp, plus);
+      f.append(row);
+      box.append(f);
+      upd(false);   // רק כדי לכוון את מצב הכפתורים בקצוות
+    });
+    controls.append(box);
+  });
+
+  if (s.toggles) {
+    const box = el('div', 'sim-group');
+    box.append(el('div', 'sim-group-t', 'רעלנים'));
+    const chips = el('div', 'chips');
+    s.toggles.forEach((t) => {
+      const b = el('button', 'chip', t.label);
+      b.onclick = () => {
+        p[t.k] = !p[t.k];
+        b.classList.toggle('on', p[t.k]);
+        refresh();
+      };
+      chips.append(b);
+    });
+    box.append(chips);
+    controls.append(box);
+  }
+  wrap.append(controls);
+
+  /* --- קריאות --- */
+  const dash = el('div', 'dash sim-dash');
+  wrap.append(dash);
+
+  /* --- כפתורי פעולה --- */
+  if (s.buttons) {
+    const row = el('div', 'btn-row sim-btns');
+    s.buttons(st, p, () => refresh()).forEach((b) => {
+      const n = el('button', 'btn ' + (b.cls || ''), b.label);
+      n.onclick = b.run;
+      row.append(n);
+    });
+    wrap.append(row);
+  }
+
+  /* --- לוחות --- */
+  const canvases = [];
+  s.panels.forEach((pan) => {
+    const box = el('div', 'sim-panel');
+    box.append(el('div', 'sim-panel-t', pan.label));
+    const cv = el('canvas', 'sim-cv');
+    cv.style.height = (pan.h || 260) + 'px';
+    box.append(cv);
+    wrap.append(box);
+    canvases.push(cv);
+  });
+
+  /* --- תובנה --- */
+  if (s.insight) {
+    const ins = el('div', 'sim-insight');
+    ins.append(el('div', 'sim-insight-t', '💡 נסו את זה'));
+    ins.append(el('div', null, s.insight));
+    wrap.append(ins);
+  }
+
+  /* --- הקישור חזרה לשאלות --- */
+  if (s.topics && s.topics.length && c) {
+    const row = el('div', 'btn-row');
+    s.topics.forEach((t) => {
+      const a = el('a', 'btn primary', `תרגלו את "${t}"`);
+      a.href = `#/practice/${s.course}/${encodeURIComponent(t)}`;
+      row.append(a);
+    });
+    wrap.append(row);
+  }
+
+  view.append(wrap);
+
+  function refresh() {
+    const C = themeColors();
+    const r = s.run ? s.run(p) : null;
+
+    dash.innerHTML = '';
+    s.readouts(p, r, st).forEach((o) => dash.append(stat(o.v, o.label, o.cls)));
+
+    s.panels.forEach((pan, i) => {
+      const g = fitCanvas(canvases[i]);
+      pan.draw(g, p, C, st, r);
+    });
+  }
+
+  simRepaint = refresh;
+  const ro = new ResizeObserver(() => refresh());
+  ro.observe(wrap);
+  simTeardown = () => { ro.disconnect(); simRepaint = null; };
+
+  refresh();
+  toTop();
+  updateFooter();
+}
+
+/* רצועה קומפקטית לעמודי התרגול. הבאנר של דף המקצוע תופס חצי מסך ולא
+   מתאים שם — אבל דווקא בתרגול, לפני שמתחילים לענות, זה הרגע שבו כדאי
+   ללכת לראות את הדבר עצמו. */
+function simStrip(courseId, title) {
+  const list = simsOf(courseId);
+  if (!list.length) return null;
+  const box = el('div', 'sim-strip');
+  box.append(el('div', 'sim-strip-t', title));
+  const row = el('div', 'sim-strip-row');
+  list.forEach((s) => {
+    const a = el('a', 'sim-chip');
+    a.href = '#/sim/' + s.id;
+    a.append(el('span', 'sim-chip-ico', s.icon));
+    a.append(el('span', null, s.title));
+    row.append(a);
+  });
+  box.append(row);
+  return box;
+}
+
+/* באנר הסימולציות בדף המקצוע */
+function simsHero(courseId) {
+  const list = simsOf(courseId);
+  if (!list.length) return null;
+  const box = el('section', 'sim-hero');
+  const head = el('div', 'sim-hero-head');
+  head.append(el('div', 'sim-hero-eyebrow', '🎛️ סימולציות'));
+  head.append(el('h2', null, 'שחקו עם המשוואות'));
+  head.append(el('p', 'sim-hero-sub',
+    'האלקטרו שואל בעיקר "מה יקרה ל-X אם נשנה את Y". כאן גוררים את Y ורואים.'));
+  box.append(head);
+  const grid = el('div', 'sim-hero-grid');
+  list.forEach((s) => {
+    const a = el('a', 'sim-card');
+    a.href = '#/sim/' + s.id;
+    a.append(el('span', 'sim-card-ico', s.icon));
+    const t = el('div', 'sim-card-txt');
+    t.append(el('b', null, s.title));
+    t.append(el('span', null, s.blurb));
+    a.append(t);
+    grid.append(a);
+  });
+  box.append(grid);
+  return box;
 }
 
 /* ---------- כותרת תחתונה ---------- */
