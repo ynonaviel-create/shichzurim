@@ -914,3 +914,14 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .sim-chip{justify-content:flex-start;}
   .bd-sim{display:none;}   /* השורה צפופה ממילא במסך צר */
 }
+
+/* --- ריסט הסימולציה --- */
+.sim-reset-row{display:flex; justify-content:flex-end; margin:-8px 0 0;}
+.sim-reset{
+  display:inline-flex; align-items:center; gap:7px;
+  border-color:var(--sim-ln); color:var(--sim-dp);
+  font-size:13.5px; padding:8px 15px;
+}
+.sim-reset:hover:not(:disabled){background:var(--sim-bg); border-color:var(--sim);}
+.sim-reset:disabled{opacity:.4; cursor:default;}
+.sim-reset-ico{font-size:15px; line-height:1;}

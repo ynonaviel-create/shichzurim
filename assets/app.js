@@ -2299,6 +2299,11 @@ function renderSim(id) {
 
   const wrap = el('div', 'sim');
 
+  /* כל פקד רושם כאן איך לחזור לברירת המחדל שלו, ו-resetAll מריץ את כולם.
+     ריסט אחד לסימולציה ולא אחד לכל סליידר: אחרי שמשחקים עם שישה
+     סליידרים, לחזור לנקודת התחלה שפויה צריך להיות לחיצה אחת. */
+  const resets = [];
+
   /* --- פקדים --- */
   const controls = el('div', 'sim-controls');
   const groups = [...new Set(s.params.map((q) => q.group || ''))];
@@ -2354,6 +2359,7 @@ function renderSim(id) {
       f.append(row);
       box.append(f);
       upd(false);   // רק כדי לכוון את מצב הכפתורים בקצוות
+      resets.push(() => { inp.value = q.val; upd(false); });
     });
     controls.append(box);
   });
@@ -2370,11 +2376,37 @@ function renderSim(id) {
         refresh();
       };
       chips.append(b);
+      resets.push(() => { p[t.k] = false; b.classList.remove('on'); });
     });
     box.append(chips);
     controls.append(box);
   }
   wrap.append(controls);
+
+  /* --- ריסט --- */
+  const resetBtn = el('button', 'btn ghost sim-reset');
+  resetBtn.type = 'button';
+  resetBtn.append(el('span', 'sim-reset-ico', '↺'));
+  resetBtn.append(el('span', null, 'אפס לערכי ההתחלה'));
+  resetBtn.onclick = () => {
+    resets.forEach((f) => f());
+    /* st עצמו חייב להישאר אותו אובייקט — הלוחות סוגרים עליו. */
+    if (s.init) {
+      Object.keys(st).forEach((k) => delete st[k]);
+      Object.assign(st, s.init());
+    }
+    refresh();
+  };
+  const resetRow = el('div', 'sim-reset-row');
+  resetRow.append(resetBtn);
+  wrap.append(resetRow);
+
+  /* משהו שונה מברירת המחדל? אם לא — אין מה לאפס, והכפתור כבוי.
+     זה גם אומר לך במבט אחד אם אתה על ההגדרות המקוריות. */
+  const isDirty = () =>
+    s.params.some((q) => Math.abs(p[q.k] - q.val) > 1e-9) ||
+    (s.toggles || []).some((t) => p[t.k]) ||
+    (st.trials || []).length > 0;
 
   /* --- קריאות --- */
   const dash = el('div', 'dash sim-dash');
@@ -2427,6 +2459,8 @@ function renderSim(id) {
   function refresh() {
     const C = themeColors();
     const r = s.run ? s.run(p) : null;
+
+    resetBtn.disabled = !isDirty();
 
     dash.innerHTML = '';
     s.readouts(p, r, st).forEach((o) => dash.append(stat(o.v, o.label, o.cls)));
