@@ -87,6 +87,7 @@ for (const file of files) {
     cycle: data.cycle ?? null,
     moed: data.moed ?? null,
     added: data.added ?? null,
+    official: data.official ?? null,   // מאסטר רשמי מהמודל / שחזור סטודנטים — מוצג כתג בכרטיס
     count: data.questions.length,
   });
 }

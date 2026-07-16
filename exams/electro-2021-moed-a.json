@@ -1,10 +1,11 @@
 {
   "id": "electro-2021-moed-a",
   "course": "electro",
-  "part": null,
-  "title": "מסטר מועד א׳ 2021",
+  "part": "מבחני גמר",
+  "title": "מועד א׳",
   "kind": "shichzur",
   "trust": "verified",
+  "official": true,
   "year": 2021,
   "cycle": null,
   "moed": "א",

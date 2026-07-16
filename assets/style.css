@@ -313,6 +313,11 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .tag.shichzur{background:var(--accent-sl); border-color:var(--accent); color:var(--accent-dk);}
 .tag.practice{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
 .tag.highyield{background:var(--warn-bg); border-color:var(--warn-ln); color:var(--warn);}
+/* השנה — העוגן שלפיו סורקים את הרשימה, ולכן מודגשת יותר משאר התגים (גבול ניטרלי, טקסט מלא). */
+.tag.year{background:var(--surface); color:var(--text); font-weight:900;}
+/* מפתח רשמי מהמודל מול שחזור מהזיכרון — סימן אמינות, ולכן ירוק/ניטרלי. */
+.tag.official{background:var(--good-bg); border-color:var(--good-ln); color:var(--good);}
+.tag.recon{background:var(--surface-2); border-color:var(--line); color:var(--dim);}
 
 .card-foot{display:flex; align-items:center; justify-content:space-between; gap:11px;}
 .card-score{font-size:12.5px; font-weight:800; color:var(--dim); white-space:nowrap;}

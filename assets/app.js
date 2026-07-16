@@ -137,10 +137,15 @@ async function loadExam(id) {
 }
 
 const courseOf = (id) => COURSES.find((c) => c.id === id);
-// מבחנים של מקצוע, מהמחזור החדש לישן. מבחן בלי מחזור (בנק שאלות, high-yield) בסוף.
+/* מבחנים של מקצוע, מהמחזור החדש לישן. מבחן בלי מחזור (בנק שאלות, high-yield) בסוף.
+   מקצוע שאין בו מחזורים (מבחנים רשמיים, כמו אלקטרו) — כולם שווים ב-cycle, ואז
+   השנה מכריעה: מהחדש לישן. בלי זה הם ממוינים אלפביתית, שזה סדר חסר משמעות. */
 const examsOf = (courseId) =>
   EXAMS.filter((e) => e.course === courseId).sort(
-    (a, b) => (b.cycle ?? -1) - (a.cycle ?? -1) || a.title.localeCompare(b.title, 'he'),
+    (a, b) =>
+      (b.cycle ?? -1) - (a.cycle ?? -1) ||
+      (b.year ?? 0) - (a.year ?? 0) ||
+      a.title.localeCompare(b.title, 'he'),
   );
 
 /* ---------- ספירה לאחור למבחנים ---------- */
@@ -449,14 +454,16 @@ function renderCourse(courseId) {
   actions.append(rv);
   view.append(actions);
 
-  // קיבוץ לפי חלק (א׳ / ב׳). מבחנים בלי חלק נופלים לקבוצה אחת.
+  /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו.
+     מבחנים בלי חלק נופלים לקבוצה אחת. */
   const byPart = {};
   list.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
 
   Object.keys(byPart).sort().forEach((part) => {
     const sec = el('section', 'part');
     const ph = el('div', 'part-head');
-    ph.append(el('h2', null, part ? `${c.name} ${part}` : c.name));
+    // שם המקצוע כבר בכותרת העמוד — בסקשן מספיק שם החלק עצמו.
+    ph.append(el('h2', null, part || c.name));
     const n = byPart[part].reduce((a, e) => a + e.count, 0);
     ph.append(el('span', 'pill', `${plural(byPart[part].length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
     sec.append(ph);
@@ -478,9 +485,15 @@ function examCard(m) {
   a.append(el('h3', null, m.title));
 
   const meta = el('div', 'card-meta');
+  if (m.year) meta.append(el('span', 'tag year', m.year));
   meta.append(el('span', 'tag ' + m.kind, KIND_LABEL[m.kind] || m.kind));
-  if (m.moed) meta.append(el('span', 'tag', `מועד ${m.moed}׳`));
+  // רק אם הכותרת לא אומרת את זה כבר ("מועד א׳" ככותרת + תג "מועד א׳" = רעש).
+  if (m.moed && !m.title.includes(`מועד ${m.moed}`)) meta.append(el('span', 'tag', `מועד ${m.moed}׳`));
   meta.append(el('span', 'tag', `${m.count} שאלות`));
+  /* מאסטר רשמי מהמודל מול שחזור שכתבו סטודנטים מהזיכרון — הבדל מהותי באמינות
+     המפתח, ועד עכשיו הוא היה קבור ב-note שנראה רק אחרי שנכנסים למבחן. */
+  if (m.official === true) meta.append(el('span', 'tag official', '✓ מאסטר רשמי'));
+  else if (m.official === false) meta.append(el('span', 'tag recon', 'שחזור סטודנטים'));
   a.append(meta);
 
   const foot = el('div', 'card-foot');

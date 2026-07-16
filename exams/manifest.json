@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-16",
-  "version": "843f107e",
+  "version": "cd8f728a",
   "assets": {
-    "css": "279376b9",
-    "js": "b60b1aee"
+    "css": "0e9667d5",
+    "js": "5abf70f0"
   },
   "courses": [
     {
@@ -110,6 +110,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-14",
+      "official": null,
       "count": 100
     },
     {
@@ -123,6 +124,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-14",
+      "official": null,
       "count": 50
     },
     {
@@ -136,6 +138,7 @@
       "cycle": null,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 40
     },
     {
@@ -149,6 +152,7 @@
       "cycle": null,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 40
     },
     {
@@ -162,6 +166,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-14",
+      "official": null,
       "count": 30
     },
     {
@@ -175,6 +180,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-14",
+      "official": null,
       "count": 40
     },
     {
@@ -188,6 +194,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": null,
       "count": 50
     },
     {
@@ -201,6 +208,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": null,
       "count": 50
     },
     {
@@ -214,162 +222,175 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": null,
       "count": 42
     },
     {
-      "id": "electro-2020-b1",
-      "file": "electro-2020-b1.json",
+      "id": "electro-2020-boch1",
+      "file": "electro-2020-boch1.json",
       "course": "electro",
-      "part": null,
-      "title": "בוחן 1 — אקסיטביליות (נוב׳ 2020)",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
       "kind": "shichzur",
       "year": 2020,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": true,
       "count": 10
     },
     {
-      "id": "electro-2021-b1-nov",
-      "file": "electro-2021-b1-nov.json",
+      "id": "electro-2021-boch1",
+      "file": "electro-2021-boch1.json",
       "course": "electro",
-      "part": null,
-      "title": "בוחן 1 — אקסיטביליות (נוב׳ 2021)",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": true,
       "count": 10
     },
     {
-      "id": "electro-2021-b2-dec",
-      "file": "electro-2021-b2-dec.json",
+      "id": "electro-2021-boch2-dec",
+      "file": "electro-2021-boch2-dec.json",
       "course": "electro",
-      "part": null,
-      "title": "בוחן 2 — סינפסות (דצמ׳ 2021)",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות (דצמ׳)",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": true,
       "count": 10
     },
     {
-      "id": "electro-2021-b2",
-      "file": "electro-2021-b2.json",
+      "id": "electro-2021-boch2-jan",
+      "file": "electro-2021-boch2-jan.json",
       "course": "electro",
-      "part": null,
-      "title": "בוחן 2 — סינפסות (ינו׳ 2021)",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות (ינו׳)",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": true,
       "count": 10
     },
     {
       "id": "electro-2021-moed-a",
       "file": "electro-2021-moed-a.json",
       "course": "electro",
-      "part": null,
-      "title": "מסטר מועד א׳ 2021",
+      "part": "מבחני גמר",
+      "title": "מועד א׳",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
       "moed": "א",
       "added": "2026-07-15",
+      "official": true,
       "count": 45
     },
     {
       "id": "electro-2021-moed-b",
       "file": "electro-2021-moed-b.json",
       "course": "electro",
-      "part": null,
-      "title": "מסטר מועד ב׳ 2021",
+      "part": "מבחני גמר",
+      "title": "מועד ב׳",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
       "moed": "ב",
       "added": "2026-07-15",
+      "official": true,
       "count": 44
     },
     {
-      "id": "electro-2023-b2",
-      "file": "electro-2023-b2.json",
+      "id": "electro-2023-boch2",
+      "file": "electro-2023-boch2.json",
       "course": "electro",
-      "part": null,
-      "title": "בוחן 2 — סינפסות (מסטר, ינו׳ 2023)",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות",
       "kind": "shichzur",
       "year": 2023,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
+      "official": true,
       "count": 10
     },
     {
       "id": "electro-2023-moed-a",
       "file": "electro-2023-moed-a.json",
       "course": "electro",
-      "part": null,
-      "title": "מסטר מועד א׳ 2023",
+      "part": "מבחני גמר",
+      "title": "מועד א׳",
       "kind": "shichzur",
       "year": 2023,
       "cycle": null,
       "moed": "א",
       "added": "2026-07-16",
+      "official": true,
       "count": 48
     },
     {
       "id": "electro-2023-moed-b",
       "file": "electro-2023-moed-b.json",
       "course": "electro",
-      "part": null,
-      "title": "מסטר מועד ב׳ 2023",
+      "part": "מבחני גמר",
+      "title": "מועד ב׳",
       "kind": "shichzur",
       "year": 2023,
       "cycle": null,
       "moed": "ב",
       "added": "2026-07-16",
+      "official": true,
       "count": 48
     },
     {
-      "id": "electro-2024-miluim-1",
-      "file": "electro-2024-miluim-1.json",
+      "id": "electro-2024-miluim-a",
+      "file": "electro-2024-miluim-a.json",
       "course": "electro",
-      "part": null,
-      "title": "מבחן מילואים 2024 (18/02)",
+      "part": "מבחני גמר",
+      "title": "מילואים (18/02)",
       "kind": "shichzur",
       "year": 2024,
       "cycle": null,
       "moed": null,
       "added": "2026-07-16",
+      "official": true,
       "count": 10
     },
     {
-      "id": "electro-2024-miluim-2",
-      "file": "electro-2024-miluim-2.json",
+      "id": "electro-2024-miluim-b",
+      "file": "electro-2024-miluim-b.json",
       "course": "electro",
-      "part": null,
-      "title": "מבחן מילואים 2024 (10/03)",
+      "part": "מבחני גמר",
+      "title": "מילואים (10/03)",
       "kind": "shichzur",
       "year": 2024,
       "cycle": null,
       "moed": null,
       "added": "2026-07-16",
+      "official": true,
       "count": 10
     },
     {
       "id": "electro-2025-moed-a",
       "file": "electro-2025-moed-a.json",
       "course": "electro",
-      "part": null,
-      "title": "מבחן רשמי תשפ״ה — מועד א׳",
+      "part": "מבחני גמר",
+      "title": "מועד א׳",
       "kind": "shichzur",
       "year": 2025,
       "cycle": null,
       "moed": "א",
       "added": "2026-07-15",
+      "official": true,
       "count": 31
     },
     {
@@ -383,6 +404,7 @@
       "cycle": null,
       "moed": null,
       "added": "2026-07-16",
+      "official": null,
       "count": 50
     },
     {
@@ -396,6 +418,7 @@
       "cycle": 52,
       "moed": "א",
       "added": "2026-07-15",
+      "official": null,
       "count": 28
     },
     {
@@ -409,6 +432,7 @@
       "cycle": 48,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 59
     },
     {
@@ -422,6 +446,7 @@
       "cycle": 49,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 38
     },
     {
@@ -435,6 +460,7 @@
       "cycle": 46,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 55
     },
     {
@@ -448,6 +474,7 @@
       "cycle": 47,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 54
     },
     {
@@ -461,6 +488,7 @@
       "cycle": 47,
       "moed": "ב",
       "added": "2026-07-15",
+      "official": null,
       "count": 11
     },
     {
@@ -474,6 +502,7 @@
       "cycle": 51,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 28
     },
     {
@@ -487,6 +516,7 @@
       "cycle": 50,
       "moed": "א",
       "added": "2026-07-14",
+      "official": null,
       "count": 60
     }
   ]
