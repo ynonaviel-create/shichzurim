@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-16",
-  "version": "b272e520",
+  "version": "8a5a92eb",
   "assets": {
     "css": "5a6df748",
     "js": "130c4b24"
@@ -198,46 +198,74 @@
       "count": 42
     },
     {
+      "id": "clinical-2021-moodle",
+      "file": "clinical-2021-moodle.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מבחן התרגול הרשמי 2021 (Moodle)",
+      "kind": "practice",
+      "year": 2021,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 35
+    },
+    {
+      "id": "clinical-2022-moodle",
+      "file": "clinical-2022-moodle.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מבחן התרגול הרשמי 2022 (Moodle)",
+      "kind": "practice",
+      "year": 2022,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 34
+    },
+    {
       "id": "clinical-ai-set-1",
       "file": "clinical-ai-set-1.json",
       "course": "clinical",
       "part": null,
-      "title": "שאלות AI — סט ראשון (50)",
+      "title": "שאלות AI — סט ראשון (46)",
       "kind": "practice",
       "year": 2026,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
       "official": null,
-      "count": 50
+      "count": 46
     },
     {
       "id": "clinical-ai-set-2",
       "file": "clinical-ai-set-2.json",
       "course": "clinical",
       "part": null,
-      "title": "שאלות AI — סט שני (מחודד למבחן, 50)",
+      "title": "שאלות AI — סט שני (מחודד למבחן, 49)",
       "kind": "practice",
       "year": 2026,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
       "official": null,
-      "count": 50
+      "count": 49
     },
     {
       "id": "clinical-mem-zayin",
       "file": "clinical-mem-zayin.json",
       "course": "clinical",
       "part": null,
-      "title": "מחזור מ״ז — 5 מקרים קליניים",
+      "title": "מחזור מ״ז — 4 מקרים קליניים",
       "kind": "practice",
       "year": 2025,
       "cycle": null,
       "moed": null,
       "added": "2026-07-15",
       "official": null,
-      "count": 42
+      "count": 35
     },
     {
       "id": "electro-2021-boch1",
