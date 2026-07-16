@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-16",
-  "version": "af56fb91",
+  "version": "35d206b1",
   "assets": {
     "css": "661397b7",
-    "js": "e887fe4b"
+    "js": "01d4a4b2"
   },
   "courses": [
     {
@@ -476,6 +476,20 @@
       "added": "2026-07-16",
       "official": true,
       "count": 33
+    },
+    {
+      "id": "electro-high-yield",
+      "file": "electro-high-yield.json",
+      "course": "electro",
+      "part": "High Yield",
+      "title": "High Yield — השאלות שחוזרות",
+      "kind": "highyield",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": null,
+      "count": 26
     },
     {
       "id": "molecular-cox-cards",
