@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-16",
-  "version": "e082dee9",
+  "version": "d22d260a",
   "assets": {
     "css": "661397b7",
     "js": "e887fe4b"
@@ -378,6 +378,20 @@
       "added": "2026-07-16",
       "official": true,
       "count": 10
+    },
+    {
+      "id": "electro-2024-moed-a",
+      "file": "electro-2024-moed-a.json",
+      "course": "electro",
+      "part": "מבחני גמר",
+      "title": "מועד א׳",
+      "kind": "shichzur",
+      "year": 2024,
+      "cycle": null,
+      "moed": "א",
+      "added": "2026-07-16",
+      "official": true,
+      "count": 32
     },
     {
       "id": "electro-2025-boch1",
