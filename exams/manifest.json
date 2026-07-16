@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-16",
-  "version": "cd8f728a",
+  "version": "e1ba402c",
   "assets": {
     "css": "0e9667d5",
     "js": "5abf70f0"
@@ -226,20 +226,6 @@
       "count": 42
     },
     {
-      "id": "electro-2020-boch1",
-      "file": "electro-2020-boch1.json",
-      "course": "electro",
-      "part": "בחני אמצע",
-      "title": "בוחן 1 — אקסיטביליות",
-      "kind": "shichzur",
-      "year": 2020,
-      "cycle": null,
-      "moed": null,
-      "added": "2026-07-15",
-      "official": true,
-      "count": 10
-    },
-    {
       "id": "electro-2021-boch1",
       "file": "electro-2021-boch1.json",
       "course": "electro",
@@ -254,25 +240,11 @@
       "count": 10
     },
     {
-      "id": "electro-2021-boch2-dec",
-      "file": "electro-2021-boch2-dec.json",
+      "id": "electro-2021-boch2",
+      "file": "electro-2021-boch2.json",
       "course": "electro",
       "part": "בחני אמצע",
-      "title": "בוחן 2 — סינפסות (דצמ׳)",
-      "kind": "shichzur",
-      "year": 2021,
-      "cycle": null,
-      "moed": null,
-      "added": "2026-07-15",
-      "official": true,
-      "count": 10
-    },
-    {
-      "id": "electro-2021-boch2-jan",
-      "file": "electro-2021-boch2-jan.json",
-      "course": "electro",
-      "part": "בחני אמצע",
-      "title": "בוחן 2 — סינפסות (ינו׳)",
+      "title": "בוחן 2 — סינפסות",
       "kind": "shichzur",
       "year": 2021,
       "cycle": null,
@@ -308,6 +280,34 @@
       "added": "2026-07-15",
       "official": true,
       "count": 44
+    },
+    {
+      "id": "electro-2022-boch1",
+      "file": "electro-2022-boch1.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
+      "kind": "shichzur",
+      "year": 2022,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "official": true,
+      "count": 10
+    },
+    {
+      "id": "electro-2022-boch2",
+      "file": "electro-2022-boch2.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות",
+      "kind": "shichzur",
+      "year": 2022,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-15",
+      "official": true,
+      "count": 10
     },
     {
       "id": "electro-2023-boch2",
@@ -352,11 +352,11 @@
       "count": 48
     },
     {
-      "id": "electro-2024-miluim-a",
-      "file": "electro-2024-miluim-a.json",
+      "id": "electro-2024-boch1",
+      "file": "electro-2024-boch1.json",
       "course": "electro",
-      "part": "מבחני גמר",
-      "title": "מילואים (18/02)",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות (מילואים)",
       "kind": "shichzur",
       "year": 2024,
       "cycle": null,
@@ -366,13 +366,41 @@
       "count": 10
     },
     {
-      "id": "electro-2024-miluim-b",
-      "file": "electro-2024-miluim-b.json",
+      "id": "electro-2024-boch2",
+      "file": "electro-2024-boch2.json",
       "course": "electro",
-      "part": "מבחני גמר",
-      "title": "מילואים (10/03)",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות (מילואים)",
       "kind": "shichzur",
       "year": 2024,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 10
+    },
+    {
+      "id": "electro-2025-boch1",
+      "file": "electro-2025-boch1.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
+      "kind": "shichzur",
+      "year": 2025,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 10
+    },
+    {
+      "id": "electro-2025-boch2",
+      "file": "electro-2025-boch2.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות",
+      "kind": "shichzur",
+      "year": 2025,
       "cycle": null,
       "moed": null,
       "added": "2026-07-16",
