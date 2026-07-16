@@ -8,8 +8,10 @@ const path = require('path');
 const crypto = require('crypto');
 
 const EXAMS = path.join(__dirname, 'exams');
-const REQUIRED = ['id', 'course', 'title', 'kind', 'questions'];
-const KINDS = ['shichzur', 'practice', 'highyield'];
+const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards — לפי ה-kind, נבדק בהמשך
+/* cards = כרטיסיות קריאה (לא מבחן): question/short/deep במקום opts/a.
+   נכנס כדי לתת מקום לחומר שהמרצה מסר ישירות. */
+const KINDS = ['shichzur', 'practice', 'highyield', 'cards'];
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
@@ -62,19 +64,30 @@ for (const file of files) {
     problems.push(`${file}: kind לא חוקי "${data.kind}" (מותר: ${KINDS.join(' / ')})`);
     continue;
   }
-  if (!Array.isArray(data.questions) || !data.questions.length) {
-    problems.push(`${file}: אין שאלות`);
+  const isCards = data.kind === 'cards';
+  const items = isCards ? data.cards : data.questions;
+  if (!Array.isArray(items) || !items.length) {
+    problems.push(`${file}: ${isCards ? 'אין כרטיסיות' : 'אין שאלות'}`);
     continue;
   }
 
-  data.questions.forEach((q, i) => {
-    const n = i + 1;
-    if (!q.q) problems.push(`${file} · שאלה ${n}: אין טקסט שאלה`);
-    if (!Array.isArray(q.opts) || q.opts.length < 2)
-      problems.push(`${file} · שאלה ${n}: צריך לפחות שתי תשובות`);
-    if (typeof q.a !== 'number' || q.a < 0 || (q.opts && q.a >= q.opts.length))
-      problems.push(`${file} · שאלה ${n}: "a"=${q.a} מצביע על תשובה שלא קיימת`);
-  });
+  if (isCards) {
+    items.forEach((c, i) => {
+      const n = i + 1;
+      if (!c.q) problems.push(`${file} · כרטיסייה ${n}: אין טקסט שאלה`);
+      if (!c.short) problems.push(`${file} · כרטיסייה ${n}: אין תשובה קצרה`);
+      if (!c.topic) problems.push(`${file} · כרטיסייה ${n}: אין נושא`);
+    });
+  } else {
+    items.forEach((q, i) => {
+      const n = i + 1;
+      if (!q.q) problems.push(`${file} · שאלה ${n}: אין טקסט שאלה`);
+      if (!Array.isArray(q.opts) || q.opts.length < 2)
+        problems.push(`${file} · שאלה ${n}: צריך לפחות שתי תשובות`);
+      if (typeof q.a !== 'number' || q.a < 0 || (q.opts && q.a >= q.opts.length))
+        problems.push(`${file} · שאלה ${n}: "a"=${q.a} מצביע על תשובה שלא קיימת`);
+    });
+  }
 
   exams.push({
     id: data.id,
@@ -88,7 +101,7 @@ for (const file of files) {
     moed: data.moed ?? null,
     added: data.added ?? null,
     official: data.official ?? null,   // מאסטר רשמי מהמודל / שחזור סטודנטים — מוצג כתג בכרטיס
-    count: data.questions.length,
+    count: items.length,
   });
 }
 

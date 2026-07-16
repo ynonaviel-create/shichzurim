@@ -11,7 +11,7 @@
 const KEY = 'shichzurim.v1';
 const SEEN_KEY = 'shichzurim.seenIntro';
 const THEME_KEY = 'shichzurim.theme';
-const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield' };
+const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה' };
 
 const view = document.getElementById('view');
 const el = (tag, cls, txt) => {
@@ -147,6 +147,9 @@ const examsOf = (courseId) =>
       (b.year ?? 0) - (a.year ?? 0) ||
       a.title.localeCompare(b.title, 'he'),
   );
+/* רק מה שבאמת מבחן. כרטיסיות קריאה אין להן opts/a — הן לא נספרות בציון
+   ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
+const quizzesOf = (courseId) => examsOf(courseId).filter((e) => e.kind !== 'cards');
 
 /* ---------- ספירה לאחור למבחנים ---------- */
 const MS = { min: 60000, hour: 3600000, day: 86400000 };
@@ -255,7 +258,8 @@ function quickScore(meta) {
 
 function courseProgress(courseId) {
   let answered = 0, correct = 0, total = 0;
-  examsOf(courseId).forEach((e) => {
+  // כרטיסיות קריאה אינן שאלות — לא נספרות בהתקדמות ובאחוז ההצלחה.
+  quizzesOf(courseId).forEach((e) => {
     const s = quickScore(e);
     answered += s.answered; correct += s.correct; total += e.count;
   });
@@ -277,9 +281,11 @@ function crumb(text, href) {
 }
 
 function router() {
-  const [route, param] = location.hash.replace(/^#\/?/, '').split('/');
+  const [route, param, sub] = location.hash.replace(/^#\/?/, '').split('/');
   if (route === 'course' && param) return renderCourse(param);
-  if (route === 'exam' && param) return renderExam(param);
+  if (route === 'cards' && param) return renderCards(param);
+  // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
+  if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
   if (route === 'practice' && param) return renderPractice(param);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'about') return renderAbout();
@@ -325,7 +331,7 @@ function renderHome() {
 }
 
 function courseCard(c) {
-  const list = examsOf(c.id);
+  const list = quizzesOf(c.id);
   const p = courseProgress(c.id);
 
   const a = el('a', 'course');
@@ -438,7 +444,7 @@ function renderCourse(courseId) {
   const pct = p.answered ? Math.round((p.correct / p.answered) * 100) : 0;
 
   const dash = el('div', 'dash');
-  dash.append(stat(list.length, 'מבחנים', 'accent'));
+  dash.append(stat(list.filter((e) => e.kind !== 'cards').length, 'מבחנים', 'accent'));
   dash.append(stat(p.total, 'שאלות'));
   dash.append(stat(p.answered, 'שאלות שענית'));
   dash.append(stat(p.answered ? pct + '%' : '—', 'אחוז הצלחה', pct >= 70 ? 'good' : p.answered ? 'bad' : ''));
@@ -454,10 +460,15 @@ function renderCourse(courseId) {
   actions.append(rv);
   view.append(actions);
 
+  /* כרטיסיות המרצה — לא מבחן, ולכן לא נכנסות לרשימת המבחנים אלא מקבלות
+     באנר משלהן בראש העמוד. זה החומר הכי ישיר שיש: המרצה עצמו מסר אותו. */
+  list.filter((e) => e.kind === 'cards').forEach((deck) => view.append(cardsHero(deck)));
+  const list2 = list.filter((e) => e.kind !== 'cards');
+
   /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו.
      מבחנים בלי חלק נופלים לקבוצה אחת. */
   const byPart = {};
-  list.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
+  list2.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
 
   Object.keys(byPart).sort().forEach((part) => {
     const sec = el('section', 'part');
@@ -476,6 +487,28 @@ function renderCourse(courseId) {
 
   toTop();
   updateFooter();
+}
+
+/* הבאנר של כרטיסיות המרצה. נראה אחרת מכל השאר בכוונה — זה לא עוד מבחן
+   בערימה, זה מה שהמרצה אמר שיהיה במבחן. */
+function cardsHero(m) {
+  const done = Object.keys(cardsRead.read()).filter((k) => k.startsWith(m.id + '#')).length;
+  const a = el('a', 'lhero');
+  a.href = '#/cards/' + m.id;
+
+  const left = el('div', 'lhero-main');
+  left.append(el('div', 'lhero-eyebrow', '🎓 ישירות מהמרצה'));
+  left.append(el('h2', null, m.title));
+  left.append(el('p', 'lhero-sub',
+    'פרופ׳ תומר קוקס עבר איתנו בזום על השאלות שיהיו במבחן. כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.'));
+  a.append(left);
+
+  const right = el('div', 'lhero-side');
+  right.append(el('div', 'lhero-n', m.count));
+  right.append(el('div', 'lhero-n-lbl', 'כרטיסיות'));
+  if (done) right.append(el('div', 'lhero-done', `${done} נקראו`));
+  a.append(right);
+  return a;
 }
 
 function examCard(m) {
@@ -518,7 +551,7 @@ function examCard(m) {
 }
 
 /* ================= נגן מבחן ================= */
-async function renderExam(id) {
+async function renderExam(id, focusIdx = null) {
   setNav('home');
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
 
@@ -542,6 +575,127 @@ async function renderExam(id) {
     persist: true,
     back: { text: c ? c.name : 'חזרה', href: '#/course/' + exam.course },
   });
+
+  /* הגענו מקישור תרגול שבכרטיסיות המרצה — לקפוץ לשאלה ולסמן אותה רגע,
+     אחרת המשתמש נוחת בראש מבחן של 60 שאלות ולא מוצא את מה שחיפש.
+     שני rAF: הראשון נותן ל-toTop() של playQuestions לרוץ, ורק אז גוללים —
+     אחרת הוא דורס אותנו ונשארים בראש העמוד. */
+  if (focusIdx != null && !Number.isNaN(focusIdx)) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const target = document.getElementById('q-' + focusIdx);
+      if (!target) return;
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.classList.add('q-flash');
+      setTimeout(() => target.classList.remove('q-flash'), 2400);
+    }));
+  }
+}
+
+/* ================= כרטיסיות קריאה (מהמרצה) =================
+   לא מבחן ולא תרגול: חומר שהמרצה מסר ישירות. כל כרטיסייה היא
+   "מה יישאל · התשובה · למה", ומקושרת לשאלות מהארכיון לתרגול. */
+const CARDS_READ_KEY = 'shichzurim.cardsRead';
+const cardsRead = {
+  read() { try { return JSON.parse(localStorage.getItem(CARDS_READ_KEY)) || {}; } catch { return {}; } },
+  write(d) { localStorage.setItem(CARDS_READ_KEY, JSON.stringify(d)); },
+  is(id, i) { return !!this.read()[`${id}#${i}`]; },
+  set(id, i, v) { const d = this.read(); if (v) d[`${id}#${i}`] = 1; else delete d[`${id}#${i}`]; this.write(d); },
+  clear(id) { const d = this.read(); Object.keys(d).forEach((k) => k.startsWith(id + '#') && delete d[k]); this.write(d); },
+};
+
+async function renderCards(id) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+
+  let deck;
+  try { deck = await loadExam(id); }
+  catch (err) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err.message)));
+    return;
+  }
+
+  const c = courseOf(deck.course);
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, deck.title));
+  head.append(el('p', null, `${c ? c.name : ''} · ${deck.cards.length} כרטיסיות לקריאה`));
+  view.append(head);
+
+  if (deck.note) {
+    const n = el('div', 'cards-note');
+    n.textContent = deck.note;
+    view.append(n);
+  }
+
+  const bar = el('div', 'cards-bar');
+  const cnt = el('span', 'cards-count');
+  bar.append(cnt);
+  const reset = el('button', 'btn-ghost', 'איפוס הסימונים');
+  reset.onclick = () => { cardsRead.clear(deck.id); paint(); };
+  bar.append(reset);
+  view.append(bar);
+
+  const wrap = el('div', 'cards-wrap');
+  view.append(wrap);
+
+  function paint() {
+    wrap.innerHTML = '';
+    deck.cards.forEach((card, i) => wrap.append(cardEl(card, i)));
+    const done = deck.cards.filter((_, i) => cardsRead.is(deck.id, i)).length;
+    cnt.textContent = `${done} מתוך ${deck.cards.length} נקראו`;
+    cnt.className = 'cards-count' + (done === deck.cards.length ? ' all' : '');
+  }
+
+  function cardEl(card, i) {
+    const done = cardsRead.is(deck.id, i);
+    const box = el('div', 'lcard' + (done ? ' done' : ''));
+
+    const top = el('div', 'lcard-top');
+    top.append(el('span', 'lcard-num', `${i + 1}`));
+    top.append(el('span', 'lcard-topic', card.topic));
+    const chk = el('button', 'lcard-chk' + (done ? ' on' : ''), done ? '✓ נקרא' : 'סמן כנקרא');
+    chk.onclick = () => { cardsRead.set(deck.id, i, !cardsRead.is(deck.id, i)); paint(); };
+    top.append(chk);
+    box.append(top);
+
+    box.append(el('p', 'lcard-q', card.q));
+
+    const ans = el('div', 'lcard-ans');
+    ans.append(el('span', 'lcard-ans-lbl', 'התשובה'));
+    ans.append(el('p', null, card.short));
+    box.append(ans);
+
+    if (card.deep) {
+      const det = el('details', 'lcard-deep');
+      const sum = el('summary', null, 'הסבר מעמיק');
+      det.append(sum);
+      det.append(el('p', null, card.deep));
+      box.append(det);
+    }
+
+    if (card.related && card.related.length) {
+      const rel = el('div', 'lcard-rel');
+      rel.append(el('span', 'lcard-rel-lbl', `לתרגול — ${plural(card.related.length, 'שאלה', 'שאלות')} מהארכיון על הנושא`));
+      const list = el('div', 'lcard-rel-list');
+      card.related.forEach((r) => {
+        const a = el('a', 'rel-chip');
+        a.href = `#/exam/${r.exam}/${r.idx}`;
+        a.append(el('span', 'rel-q', r.q));
+        a.append(el('span', 'rel-src', r.examTitle));
+        list.append(a);
+      });
+      rel.append(list);
+      box.append(rel);
+    }
+    return box;
+  }
+
+  paint();
+  toTop();
+  updateFooter();
 }
 
 function playQuestions(cfg) {
@@ -947,7 +1101,7 @@ async function renderPractice(courseId) {
   /* מבחן ה-High Yield נבנה מהשאלות של השחזורים עצמם, ולכן אסור לו להיכנס
      למאגר — אחרת כל שאלה חוזרת הייתה מופיעה כאן פעמיים. */
   const pool = [];
-  for (const m of examsOf(courseId).filter((m) => m.kind !== 'highyield')) {
+  for (const m of quizzesOf(courseId).filter((m) => m.kind !== 'highyield')) {
     const exam = await loadExam(m.id);
     exam.questions.forEach((q, i) =>
       pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id, idx: i })
@@ -1275,7 +1429,7 @@ async function renderReview(courseId) {
   // ותשובה נכונה כאן מורידה את השאלה מהרשימה.
   const map = seen.read();
   const wrong = [];
-  for (const m of examsOf(courseId)) {
+  for (const m of quizzesOf(courseId)) {
     const exam = await loadExam(m.id);
     exam.questions.forEach((q, i) => {
       const item = { ...q, origin: exam.title, examId: m.id, idx: i };

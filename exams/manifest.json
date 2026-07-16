@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-16",
-  "version": "e412c9db",
+  "version": "e082dee9",
   "assets": {
-    "css": "0e9667d5",
-    "js": "5abf70f0"
+    "css": "661397b7",
+    "js": "e887fe4b"
   },
   "courses": [
     {
@@ -420,6 +420,34 @@
       "added": "2026-07-15",
       "official": true,
       "count": 31
+    },
+    {
+      "id": "electro-2025-moed-b",
+      "file": "electro-2025-moed-b.json",
+      "course": "electro",
+      "part": "מבחני גמר",
+      "title": "מועד ב׳",
+      "kind": "shichzur",
+      "year": 2025,
+      "cycle": null,
+      "moed": "ב",
+      "added": "2026-07-16",
+      "official": true,
+      "count": 33
+    },
+    {
+      "id": "molecular-cox-cards",
+      "file": "molecular-cox-cards.json",
+      "course": "molecular",
+      "part": null,
+      "title": "מהמרצה — 15 השאלות שיהיו במבחן",
+      "kind": "cards",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": null,
+      "count": 15
     },
     {
       "id": "molecular-high-yield",
