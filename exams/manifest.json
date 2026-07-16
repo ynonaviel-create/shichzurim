@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-16",
-  "version": "35d206b1",
+  "version": "b272e520",
   "assets": {
     "css": "5a6df748",
     "js": "130c4b24"
@@ -182,6 +182,20 @@
       "added": "2026-07-14",
       "official": null,
       "count": 40
+    },
+    {
+      "id": "clinical-2020-moodle",
+      "file": "clinical-2020-moodle.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מבחן התרגול הרשמי 2020 (Moodle)",
+      "kind": "practice",
+      "year": 2020,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 42
     },
     {
       "id": "clinical-ai-set-1",
