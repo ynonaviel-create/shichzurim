@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-16",
-  "version": "a0d402d9",
+  "version": "223598f7",
   "assets": {
-    "css": "99418506",
-    "js": "1ffece7b"
+    "css": "7b8c0e08",
+    "js": "cbf254af"
   },
   "courses": [
     {
@@ -518,6 +518,20 @@
       "added": "2026-07-16",
       "official": true,
       "count": 33
+    },
+    {
+      "id": "electro-guide",
+      "file": "electro-guide.json",
+      "course": "electro",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-17",
+      "official": null,
+      "count": 12
     },
     {
       "id": "electro-high-yield",

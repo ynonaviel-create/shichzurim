@@ -132,6 +132,7 @@ for (const file of files) {
     moed: data.moed ?? null,
     added: data.added ?? null,
     official: data.official ?? null,   // מאסטר רשמי מהמודל / שחזור סטודנטים — מוצג כתג בכרטיס
+    heroSub: data.heroSub ?? null,     // מפה בלבד: מה נסרק — נקרא בבאנר בעמוד המקצוע, לפני שהמפה עצמה נטענת
     count: items.length,
   });
 }

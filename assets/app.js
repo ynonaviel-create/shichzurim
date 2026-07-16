@@ -2614,12 +2614,19 @@ function masteryOf(courseId, topic) {
 /* משקל הוודאות: מרצה שמסר גבולות גזרה (קוקס) שווה פחות זמן לנקודה — לא כי
    הנושא לא במבחן, אלא כי כבר ידוע מה בדיוק לקרוא. מרצה שלא הדליף = סיכון מלא. */
 const CERTAINTY_W = { known: 0.6, mixed: 0.85, unknown: 1.0, new: 0.75 };
+
+/* ארבע הרמות מודדות תמיד את אותו דבר — כמה ידוע לנו מה ייכנס — אבל מה שמייצר
+   את הידיעה שונה לגמרי בין מקצועות: בביומול זה מרצה שמסר גבולות גזרה, ובאלקטרו
+   זה מאגר רשמי בן חמש שנים ששואל את אותו נושא באותו היקף כל שנה. אותה סקאלה,
+   אותם משקלים, ניסוח אחר — ולכן התוויות מגיעות מהנתונים (`certaintyTags`). */
 const CERTAINTY_TAG = {
   known:   ['✓ ידוע',        'tag-known'],
   mixed:   ['⚠️ חלקית ידוע', 'tag-risk'],
   unknown: ['🎧 לא ידוע',    'tag-risk'],
   new:     ['❓ חדש למרצה',  'tag-risk'],
 };
+const certaintyTag = (g, c) =>
+  (g.certaintyTags && g.certaintyTags[c]) || CERTAINTY_TAG[c] || CERTAINTY_TAG.unknown;
 
 function priorityList(courseId, g) {
   return g.units
@@ -2653,27 +2660,39 @@ function dayPlan(courseId, ranked) {
    "אל תלמדו את זה"), סעיף פרוס בדף ההסבר, ושורה בפוטר של כל עמוד.
    הדרישה היא שהוא ייקרא, לא שיתפוס מקום — קופסה קבועה בראש הדף נהיית
    רעש שגוללים מעליו תוך יומיים, וזה בדיוק הכישלון של דיסקליימר. */
-const DISC_HTML =
+const DISC_LEAD =
   'כל מה שכאן נבנה על ידי סטודנטים: השחזורים שוחזרו מהזיכרון, ההסברים והתיוגים נכתבו כאן, ' +
   'ומפות החומרים מבוססות על סיכומים של מחזורים קודמים. ' +
-  '<b>זה לא רשמי, זה לא מטעם הפקולטה, ואף אחד לא מתחייב שמה שכתוב נכון, מדויק או מלא.</b>' +
-  '<ul>' +
-  '<li><b>התדירויות הן הערכה מהעבר</b> — נספרו משחזורים של מחזורים קודמים, שבחלקם המרצים והסילבוס היו אחרים. הן לא תחזית.</li>' +
-  '<li><b>הציטוטים הם ממחזורים קודמים</b> — מרצה יכול לשנות את דעתו, ולשנות את המבחן.</li>' +
-  '<li><b>"מה לא ללמוד" הוא אות, לא הבטחה.</b> "אין ראיה" פירושו שחיפשנו ולא מצאנו — לא שזה בוודאות לא יופיע.</li>' +
-  '<li><b>יש שחזורים שהמשחזרים עצמם כתבו שהתשובות בהם לא אומתו.</b> החומר הרשמי הוא ההרצאות, המצגות והסילבוס.</li>' +
-  '</ul>' +
+  '<b>זה לא רשמי, זה לא מטעם הפקולטה, ואף אחד לא מתחייב שמה שכתוב נכון, מדויק או מלא.</b>';
+
+/* הסייגים עצמם משתנים בין מקצועות, והנוסח הזה נכון לשחזורים: "נספרו משחזורים",
+   "המשחזרים לא אימתו". באלקטרו המקור הוא מאגר רשמי, ולומר עליו שהוא שוחזר
+   מהזיכרון זה פשוט לא נכון — ולכן מפה יכולה לספק סייגים משלה ב-`disclaimer`. */
+const DISC_BULLETS = [
+  '<b>התדירויות הן הערכה מהעבר</b> — נספרו משחזורים של מחזורים קודמים, שבחלקם המרצים והסילבוס היו אחרים. הן לא תחזית.',
+  '<b>הציטוטים הם ממחזורים קודמים</b> — מרצה יכול לשנות את דעתו, ולשנות את המבחן.',
+  '<b>"מה לא ללמוד" הוא אות, לא הבטחה.</b> "אין ראיה" פירושו שחיפשנו ולא מצאנו — לא שזה בוודאות לא יופיע.',
+  '<b>יש שחזורים שהמשחזרים עצמם כתבו שהתשובות בהם לא אומתו.</b> החומר הרשמי הוא ההרצאות, המצגות והסילבוס.',
+];
+
+const DISC_TAIL =
   'תשתמשו בזה כדי לחסוך זמן ולהחליט מאיפה להתחיל — לא כדי להחליט על מה לוותר. ' +
   '<b>ההחלטה מה ללמוד, וההחלטה כמה לסמוך על מה שכאן, הן שלכם בלבד — והאחריות לתוצאה שלכם בלבד.</b>';
 
+const discHtml = (bullets) =>
+  DISC_LEAD + '<ul>' + (bullets ?? DISC_BULLETS).map((b) => '<li>' + b + '</li>').join('') + '</ul>' + DISC_TAIL;
+
+/* הנוסח הכללי — לדף ההסבר ולפוטר, שמדברים על האתר כולו ולא על מקצוע אחד. */
+const DISC_HTML = discHtml();
+
 /* במפה — שורה אחת שנפתחת. המפה היא המסך שאומר "אל תלמדו את זה",
    אז היא לא מסתפקת בפוטר, אבל גם לא חוסמת את התוכן. */
-function guideDisclaimer() {
+function guideDisclaimer(g) {
   const d = el('details', 'g-disc');
   const s = el('summary', null, '⚠️ האחריות על הלמידה היא שלך בלבד — מה המקור של כל דבר כאן, ומה הוא שווה');
   d.append(s);
   const body = el('div', 'disc-body');
-  body.innerHTML = DISC_HTML;
+  body.innerHTML = discHtml(g && g.disclaimer);
   d.append(body);
   return d;
 }
@@ -2686,7 +2705,9 @@ function guideHero(courseId) {
   const left = el('div', 'lhero-main');
   left.append(el('div', 'lhero-eyebrow', '📚 מפת החומרים'));
   left.append(el('h2', null, 'מאיפה ללמוד כל נושא — ומה לא ללמוד'));
-  left.append(el('p', 'lhero-sub',
+  /* מה נסרק ומה נמצא שונה בין מקצועות (לביומול יש סילבוס וסרטונים מאומתים,
+     לאלקטרו יש מאגר רשמי ואין אף אחד משניהם) — ולכן הכותרת מגיעה מהנתונים. */
+  left.append(el('p', 'lhero-sub', meta.heroSub ||
     'תשעה סיכומים משבעה מחזורים נסרקו מול הסילבוס הרשמי ומול כל השאלות בארכיון. ' +
     'לכל נושא: מאיזה סיכום ומאיזה עמוד, איזה סרטון באמת מכסה אותו, ומה המרצה אמר במפורש שלא צריך.'));
   a.append(left);
@@ -2753,7 +2774,7 @@ function videoCard(v) {
   return d;
 }
 
-function unitCard(courseId, r, focus) {
+function unitCard(courseId, g, r, focus) {
   const u = r.u;
   const sec = el('section', 'g-unit' + (focus ? ' q-flash' : ''));
   sec.id = 'g-' + encodeURIComponent(u.topic);
@@ -2763,7 +2784,7 @@ function unitCard(courseId, r, focus) {
   ttl.append(el('h3', null, u.topic));
   const meta = el('div', 'g-unit-meta');
   u.lecturers.forEach((l) => meta.append(el('span', 'lecturer', l)));
-  const [tag, cls] = CERTAINTY_TAG[u.certainty] || CERTAINTY_TAG.unknown;
+  const [tag, cls] = certaintyTag(g, u.certainty);
   meta.append(el('span', 'lecturer ' + cls, tag));
   meta.append(el('span', 'g-lessons', u.lessons));
   ttl.append(meta);
@@ -2810,6 +2831,17 @@ function unitCard(courseId, r, focus) {
   p.href = `#/practice/${courseId}/${encodeURIComponent(u.topic)}`;
   p.textContent = `🎲 תרגל ${u.topic}`;
   acts.append(p);
+  /* ליחידה ולסימולציה יש בדיוק אותו עוגן — הנושא הקנוני — ולכן החיבור בחינם,
+     בדיוק כמו הכפתור ההפוך שכבר קיים במשוב. "קרא את זה" ו"שחק עם זה" הם שתי
+     תשובות לגיטימיות לאותו נושא, וכאן הן עומדות זו לצד זו. */
+  const sim = SIM_BY_TOPIC[u.topic];
+  if (sim) {
+    const sa = el('a', 'btn btn-sm g-sim');
+    sa.href = '#/sim/' + sim.id;
+    sa.textContent = `${sim.icon} ${sim.title}`;
+    sa.title = sim.blurb;
+    acts.append(sa);
+  }
   const prog = el('span', 'g-prog');
   prog.textContent = r.m.total ? `${r.m.correct}/${r.m.total} נכונות בארכיון` : 'טרם תרגלת';
   acts.append(prog);
@@ -2850,7 +2882,7 @@ async function renderGuide(courseId, focusTopic = null) {
   /* לא בקובץ התוכן אלא כאן, בכוונה: המסך הזה אומר לאנשים מה לא ללמוד, וזו
      האמירה הכי מסוכנת באתר. מקודד ברינדור כדי שמפה של מקצוע חדש תקבל אותו
      אוטומטית — אי אפשר לשכוח להוסיף אותו. */
-  view.append(guideDisclaimer());
+  view.append(guideDisclaimer(g));
 
   if (g.headline) {
     const hl = el('section', 'g-headline');
@@ -2883,11 +2915,15 @@ async function renderGuide(courseId, focusTopic = null) {
     now.append(el('h2', null, top.u.topic));
     const why = el('p', 'g-now-why');
     const pct = Math.round(top.m.ratio * 100);
-    why.innerHTML = `<b>${top.u.freq}%</b> מהמבחן` +
-      (top.m.total ? `, ואתה יודע <b>${pct}%</b> ממנו (${top.m.correct}/${top.m.total}).` : `, ועוד לא תרגלת אותו בכלל.`) +
+    /* הנימוק למה דווקא הנושא הזה — תלוי במה שמייצר את הוודאות במקצוע,
+       ולכן ניתן לדריסה ב-`nowWhy` לפי רמת הוודאות. */
+    const nowWhy = (g.nowWhy && g.nowWhy[top.u.certainty]) ||
       (top.u.certainty === 'known'
         ? ' המרצה מסר גבולות גזרה — תקרא את מסמך החזרה, תסמן וי, תעבור הלאה.'
         : ' ומרצה שלא הדליף מה ייכנס.');
+    why.innerHTML = `<b>${top.u.freq}%</b> מהמבחן` +
+      (top.m.total ? `, ואתה יודע <b>${pct}%</b> ממנו (${top.m.correct}/${top.m.total}).` : `, ועוד לא תרגלת אותו בכלל.`) +
+      nowWhy;
     now.append(why);
     const acts = el('div', 'g-now-acts');
     const a1 = el('a', 'btn'); a1.href = '#/guide/' + courseId + '/' + encodeURIComponent(top.u.topic);
@@ -2934,7 +2970,7 @@ async function renderGuide(courseId, focusTopic = null) {
   const unitsSec = el('section', 'g-units');
   unitsSec.append(el('h2', 'g-h2', '📖 הנושאים — לפי המשקל שלהם במבחן'));
   ranked.slice().sort((a, b) => b.u.freq - a.u.freq)
-    .forEach((r) => unitsSec.append(unitCard(courseId, r, focusTopic === r.u.topic)));
+    .forEach((r) => unitsSec.append(unitCard(courseId, g, r, focusTopic === r.u.topic)));
   view.append(unitsSec);
 
   if ((g.skipList || []).length) view.append(skipPanel(g));
@@ -2959,11 +2995,12 @@ function skipPanel(g) {
   sec.append(el('h2', 'g-h2', '🎯 מה לא ללמוד'));
   sec.append(el('p', 'g-skip-sub',
     'זה החלק שמחזיר לכם שעות. כל שורה כאן היא או ציטוט מפורש של המרצה, או נושא שחיפשנו בכל הסיכומים ובכל השאלות ולא מצאנו לו זכר.'));
+  /* כמה סיכומים וכמה שאלות נסרקו — עובדה של המקצוע, לא של המנוע. */
   const CATS = [
     ['quoted', '🔒 המרצה אמר במפורש שלא', 'המילים שלו, לא הפרשנות שלנו.'],
     ['no-evidence', '🕳️ אין לזה שום ראיה', 'אפס אזכורים בכל 8 הסיכומים ובכל 333 השאלות. <b>זה לא אומר "בוודאות לא במבחן"</b> — אף אחד לא מחזיק את שקופיות שיעורים 22 ו-26. זה אומר: אל תתחילו מכאן.'],
     ['off-syllabus', '📕 לא בסילבוס של נ״ב', 'קיים בסיכום, אבל לא בקורס שלכם.'],
-  ];
+  ].map(([cat, title, sub]) => [cat, title, (g.skipNotes && g.skipNotes[cat]) || sub]);
   CATS.forEach(([cat, title, sub]) => {
     const items = g.skipList.filter((s) => s.cat === cat);
     if (!items.length) return;
@@ -2972,9 +3009,19 @@ function skipPanel(g) {
     const p = el('p', 'g-skip-note'); p.innerHTML = sub; box.append(p);
     items.forEach((s) => {
       const d = el('div', 'g-skip-row');
-      d.append(el('b', null, s.term));
-      const w = el('span', 'g-skip-why'); w.innerHTML = s.why; d.append(w);
-      if (s.src) d.append(el('span', 'g-skip-src', '📼 ' + s.src));
+      const top = el('div', 'g-skip-top');
+      top.append(el('b', null, s.term));
+      const w = el('span', 'g-skip-why'); w.innerHTML = s.why; top.append(w);
+      if (s.src) top.append(el('span', 'g-skip-src', '📼 ' + s.src));
+      d.append(top);
+      /* מה שהארכיון אומר על הפריט, באותה שורה. אמירת "אל תלמדו" בלי הראיה
+         הנגדית לידה היא בדיוק איך שטעות כזאת מסתתרת — וכבר קרה שדילגנו
+         על נושא שנשאל ארבע פעמים. */
+      if (s.asked) {
+        const a = el('div', 'g-skip-asked');
+        a.innerHTML = '<b>אבל בארכיון:</b> ' + s.asked;
+        d.append(a);
+      }
       box.append(d);
     });
     sec.append(box);
@@ -2985,7 +3032,7 @@ function skipPanel(g) {
 function sourcesPanel(g) {
   const sec = el('section', 'g-sources');
   sec.append(el('h2', 'g-h2', '🗂️ תיק על כל סיכום'));
-  sec.append(el('p', 'g-skip-sub',
+  sec.append(el('p', 'g-skip-sub', g.sourcesNote ||
     'מי כתב, מאיזה מחזור, ומה זה שווה לכם היום. הצלב שכדאי לזכור: מאז מ״ה כמעט כל נושא בקורס החליף מרצה — רק אלקבץ נשאר.'));
   const grid = el('div', 'g-src-grid');
   g.sources.forEach((s) => {
