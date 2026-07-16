@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-16",
-  "version": "d22d260a",
+  "version": "af56fb91",
   "assets": {
     "css": "661397b7",
     "js": "e887fe4b"
@@ -310,6 +310,20 @@
       "count": 10
     },
     {
+      "id": "electro-2023-boch1",
+      "file": "electro-2023-boch1.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
+      "kind": "shichzur",
+      "year": 2023,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-16",
+      "official": true,
+      "count": 10
+    },
+    {
       "id": "electro-2023-boch2",
       "file": "electro-2023-boch2.json",
       "course": "electro",
@@ -389,6 +403,20 @@
       "year": 2024,
       "cycle": null,
       "moed": "א",
+      "added": "2026-07-16",
+      "official": true,
+      "count": 32
+    },
+    {
+      "id": "electro-2024-moed-b",
+      "file": "electro-2024-moed-b.json",
+      "course": "electro",
+      "part": "מבחני גמר",
+      "title": "מועד ב׳",
+      "kind": "shichzur",
+      "year": 2024,
+      "cycle": null,
+      "moed": "ב",
       "added": "2026-07-16",
       "official": true,
       "count": 32
