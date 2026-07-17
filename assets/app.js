@@ -181,6 +181,10 @@ async function loadExam(id) {
   if (!res.ok) throw new Error('exam ' + res.status);
   const data = await res.json();
   migrateSeen(data);
+  /* qIndex נגזר מ-cache, אז מבחן חדש מייתר אותו. renderGuide טוען את הכול לפני
+     שהוא מרנדר ולכן זה לא אמור לקרות — אבל מטמון שנבנה על דאטה חלקי ונתקע
+     הוא בדיוק סוג הבאג שנראה כמו "לפעמים חסרות שאלות בקבלה". */
+  delete qIdxCache[data.course];
   return (cache[id] = data);
 }
 
@@ -3231,6 +3235,106 @@ function videoCard(v) {
   return d;
 }
 
+/* qid → איפה השאלה יושבת בפועל. נבנה מהמבחנים שכבר בזיכרון (renderGuide טוען
+   את כולם ממילא), ולכן לא עולה בקשה אחת.
+
+   ⚠️ ה-High Yield מוחרג. הוא עותק של שאלות שכבר קיימות ומאז 17/07 הוא חולק
+   איתן qid — בלי ההחרגה כל שאלה חוזרת הייתה נספרת פעמיים בקבלה ("נשאל
+   ב-3 מועדים" במקום 2), וזה בדיוק הניפוח שכבר תיקנו ב-masteryOf. */
+/* "שחזור מחזור מ״ז — מועד א׳" → "מ״ז א׳". התגית צריכה להיכנס בגלולה ברוחב
+   375px, וכל המילים שמוסרות מכאן זהות בכל הכותרות ולכן לא מבדילות בין מועד
+   למועד. נופל בחזרה לכותרת המלאה אם הדפוס לא מזוהה — עדיף ארוך מאשר שגוי. */
+const shortExam = (t) => (t || '')
+  .replace(/^שחזור\s+/, '')
+  .replace(/^מחזור\s+/, '')
+  .replace(/\s*—\s*מועד\s+/, ' ')
+  .trim() || t;
+
+const qIdxCache = {};
+function qIndex(courseId) {
+  /* נבנה פעם אחת למקצוע: unitCard נקרא לכל יחידה (12 בביומול), ובלי המטמון
+     היינו סורקים את כל 383 השאלות 12 פעמים לחינם. נמחק כשנטען מבחן חדש. */
+  if (qIdxCache[courseId]) return qIdxCache[courseId];
+  const idx = {};
+  quizzesOf(courseId).forEach((m) => {
+    if (m.kind === 'highyield') return;
+    const ex = cache[m.id];
+    if (!ex) return;
+    (ex.questions || []).forEach((q, i) => {
+      if (q.qid && !idx[q.qid]) idx[q.qid] = { examId: m.id, idx: i, title: ex.title };
+    });
+  });
+  return (qIdxCache[courseId] = idx);
+}
+
+/* "מה באמת נשאל" — הפרוזה נכתבה מראש, אבל **הקבלה נגזרת כאן ועכשיו**.
+   אם היה כתוב בדאטה "נשאל ב-4 מועדים", המספר היה מתיישן בשחזור הבא ונהיה
+   שקר שקט. במקום זה הנקודה מצביעה על qids, והספירה קורית בכל טעינה — אז היא
+   לא יכולה לשקר. אותו היגיון בדיוק שבגללו `asked` לא קיים בסכימה.
+
+   הנקודות ממוינות לפי מספר השאלות שבדקו אותן: מה שנשאל שש פעמים עולה למעלה.
+   זה מה שסיכום לא יכול לעשות — הוא לא יודע מה נשאל. */
+function pointsPanel(courseId, u, idx) {
+  if (!(u.points || []).length) return null;
+
+  const seenMap = seen.read();
+  const ranked = u.points
+    .map((p) => {
+      const hits = (p.qids || []).filter((q) => idx[q]).map((q) => ({ qid: q, ...idx[q] }));
+      return {
+        p, hits,
+        moadim: [...new Set(hits.map((h) => h.title))],
+        wrong: hits.filter((h) => seenMap[h.qid] === 0).length,
+      };
+    })
+    .sort((a, b) => b.hits.length - a.hits.length);
+
+  const det = el('details', 'g-points');
+  const nQ = new Set(u.points.flatMap((p) => p.qids || [])).size;
+  det.append(el('summary', null,
+    `📌 מה באמת נשאל — ${ranked.length} נקודות, מתוך ${nQ} שאלות שנשאלו בפועל`));
+
+  const lead = el('p', 'g-points-lead');
+  lead.textContent = 'כל שורה כאן היא משהו שבאמת נבחן, ולידה כמה פעמים ובאילו מועדים. ' +
+    'זה לא סיכום של הנושא — זה מה שהמבחן שאל עליו.';
+  det.append(lead);
+
+  ranked.forEach(({ p, hits, moadim, wrong }) => {
+    const row = el('div', 'g-point');
+    row.append(el('div', 'g-point-txt', p.point));
+
+    const meta = el('div', 'g-point-meta');
+    meta.append(el('span', 'g-point-n', hits.length === 1 ? 'נשאל פעם אחת' : `נשאל ${hits.length} פעמים`));
+    /* צביעה אישית: מגיעה בחינם מהמפתח היציב. "נפלת כאן" הוא בדיוק מה
+       שמבדיל בין רשימת עובדות לבין משהו שמדבר אליך. */
+    if (wrong) meta.append(el('span', 'g-point-bad', `✗ נפלת ב-${wrong}`));
+    row.append(meta);
+
+    if (p.trap) {
+      const t = el('div', 'g-point-trap');
+      t.innerHTML = '<b>המלכודת:</b> ' + p.trap;
+      row.append(t);
+    }
+
+    /* קישור דו-כיווני בחינם — ה-qids כבר יודעות איפה השאלה יושבת.
+       כל קישור נושא את שם המועד שלו, ולכן הוא **גם** הקבלה: אין צורך בשורת
+       "נשאל במ״ח · מ״ז · נ׳" נפרדת מעליהם. שורה כזאת הייתה חוזרת על אותו
+       מידע בלי להיות לחיצה. */
+    if (hits.length) {
+      const links = el('div', 'g-point-qs');
+      hits.forEach((h) => {
+        const a = el('a', 'g-point-q', shortExam(h.title) + ' ↗');
+        a.href = `#/exam/${h.examId}/${h.idx}`;
+        a.title = h.title;
+        links.append(a);
+      });
+      row.append(links);
+    }
+    det.append(row);
+  });
+  return det;
+}
+
 function unitCard(courseId, g, r, focus) {
   const u = r.u;
   const sec = el('section', 'g-unit' + (focus ? ' q-flash' : ''));
@@ -3264,6 +3368,14 @@ function unitCard(courseId, g, r, focus) {
     gap.innerHTML = '<b>⚠️ פער:</b> ' + u.gap;
     body.append(gap);
   }
+
+  /* יושב מיד אחרי "מאיפה ללמוד" ולפני הסרטונים, כי זה הדבר שמצדיק את הפתיחה
+     של הסיכום מלכתחילה. מקופל כברירת מחדל: בעמוד עם 12 יחידות, 22 נקודות
+     פתוחות היו הופכות אותו לגלילה אינסופית — כלומר לסיכום המשעמם, שוב.
+     יחידה בלי points פשוט לא מציגה כלום — אין fallback לרשימת הסברים, כי
+     רשימה כזאת היא הכישלון עצמו ולא גרסת ביניים. */
+  const pts = pointsPanel(courseId, u, qIndex(courseId));
+  if (pts) body.append(pts);
 
   if ((u.videos || []).length) {
     body.append(el('div', 'g-lbl', '▶️ סרטונים'));

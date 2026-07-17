@@ -47,6 +47,7 @@ const files = fs
 const exams = [];
 const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
 const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
+const qidTopic = {};                // course → Map(qid → topic). מאמת את ה-points שבמפה
 
 for (const file of files) {
   let data;
@@ -93,7 +94,26 @@ for (const file of files) {
     const dupes = items.map((u) => u.topic).filter((t, i, a) => t && a.indexOf(t) !== i);
     if (dupes.length)
       problems.push(`${file}: נושא חוזר ביותר מיחידה אחת — ${[...new Set(dupes)].join(', ')}. יחידה = נושא.`);
-    guides.push({ file, course: data.course, topics: items.map((u) => u.topic) });
+    /* points — "מה באמת נשאל": הנקודות שנבדקו בפועל בנושא, כל אחת עם ה-qid של
+       השאלות שבדקו אותה. הפרוזה נכתבת מראש בידי אדם; מי שאל אותה ומתי נגזר
+       בזמן ריצה מה-qids. הנקודות עצמן נבדקות אחרי הלולאה — הן מצביעות על
+       שאלות שאולי עוד לא נקראו. */
+    items.forEach((u, i) => {
+      if (u.points == null) return;
+      if (!Array.isArray(u.points))
+        return problems.push(`${file} · יחידה ${i + 1}: points חייב להיות מערך`);
+      u.points.forEach((p, j) => {
+        const at = `${file} · ${u.topic} · נקודה ${j + 1}`;
+        if (!p.point) problems.push(`${at}: אין טקסט (point)`);
+        if (!Array.isArray(p.qids) || !p.qids.length)
+          problems.push(`${at}: אין qids. נקודה בלי שאלה שבדקה אותה היא טענה בלי ראיה.`);
+      });
+    });
+    guides.push({
+      file, course: data.course,
+      topics: items.map((u) => u.topic),
+      units: items,
+    });
   } else if (isCards) {
     items.forEach((c, i) => {
       const n = i + 1;
@@ -118,6 +138,14 @@ for (const file of files) {
   if (!isGuide && !isCards) {
     const set = (topicsByCourse[data.course] ??= new Set());
     items.forEach((q) => q.topic && set.add(q.topic));
+
+    /* qid → הנושא שלו. זה מה שמאפשר לאמת ש-points מצביעות על שאלות אמיתיות,
+       ולספור כמה מהשאלות בנושא כבר ממופות. ה-High Yield מוחרג: הוא עותק של
+       שאלות שכבר נספרו, והוא היה מנפח את המכנה. */
+    if (data.kind !== 'highyield') {
+      const map = (qidTopic[data.course] ??= new Map());
+      items.forEach((q) => q.qid && map.set(q.qid, q.topic || null));
+    }
   }
 
   exams.push({
@@ -152,6 +180,57 @@ guides.forEach((g) => {
         `${g.file}: הנושא "${t}" לא קיים באף שאלה של ${g.course} — הקישור לתרגול יוביל לריק. ` +
         `תייג שאלות בנושא הזה, או תקן את השם. (קיימים: ${[...known].join(' · ')})`
       );
+  });
+
+  /* אימות ה-points. זה הלב של "מה באמת נשאל": כל נקודה מתיימרת להיות משהו
+     שבאמת נשאל, וה-qids הן הראיה. qid שלא קיים = טענה בלי ראיה, וזה נשבר כאן
+     ולא מגיע לאתר. הלקח מאחורי זה מפורש: מקורות חיצוניים בודים ראיות, ולכן
+     הראיה נבדקת מקומית מול הארכיון עצמו. */
+  const qmap = qidTopic[g.course] ?? new Map();
+  (g.units || []).forEach((u) => {
+    (u.points || []).forEach((p, j) => {
+      const at = `${g.file} · ${u.topic} · נקודה ${j + 1}`;
+      (p.qids || []).forEach((qid) => {
+        /* שתי סיבות אפשריות, ו-sync לא יכול להבחין ביניהן: או שהשאלה נמחקה
+           מהארכיון, או שהמציאו qid. שתיהן דורשות טיפול אנושי, ולכן זו שגיאה
+           חוסמת ולא אזהרה — נקודה שמתיימרת להישען על שאלה שאינה קיימת היא
+           טענה בלי ראיה, וזה בדיוק מה שהמנגנון הזה נועד למנוע. */
+        if (!qmap.has(qid))
+          problems.push(
+            `${at}: ה-qid "${qid}" לא קיים באף שאלה של ${g.course}.\n` +
+            `     אם מחקת שאלה — הסר אותה מה-qids של הנקודה (ואם זו הראיה האחרונה, הסר את הנקודה).\n` +
+            `     אם לא מחקת — ה-qid שגוי, והנקודה נשענת על ראיה שלא קיימת.`
+          );
+        else if (qmap.get(qid) !== u.topic)
+          problems.push(
+            `${at}: ה-qid "${qid}" שייך לנושא "${qmap.get(qid)}" ולא ל-"${u.topic}". ` +
+            `הקבלה תציג שאלה מנושא אחר.`
+          );
+      });
+    });
+    const dupe = (u.points || []).flatMap((p) => p.qids || [])
+      .filter((q, i, a) => a.indexOf(q) !== i);
+    if (dupe.length)
+      problems.push(
+        `${g.file} · ${u.topic}: אותה שאלה משמשת ראיה לשתי נקודות — ${[...new Set(dupe)].join(', ')}. ` +
+        `נקודה = טענה נפרדת, אחרת הספירה מנפחת את עצמה.`
+      );
+  });
+});
+
+/* כמה מהשאלות בנושא כבר ממופות לנקודה. **אזהרה ולא שגיאה** — כיסוי חלקי הוא
+   מצב לגיטימי (הכתיבה מתקדמת נושא-נושא), אבל בלי התזכורת הזאת שחזור חדש
+   נכנס והפיצ׳ר מרקיב בשקט: נקודות שמתארות עבר, ושאלות שאיש לא מיפה. */
+const coverage = [];
+guides.forEach((g) => {
+  const qmap = qidTopic[g.course] ?? new Map();
+  (g.units || []).forEach((u) => {
+    if (!u.points) return;
+    const mapped = new Set(u.points.flatMap((p) => p.qids || []));
+    let total = 0;
+    qmap.forEach((t) => { if (t === u.topic) total++; });
+    const miss = total - [...mapped].filter((q) => qmap.get(q) === u.topic).length;
+    if (miss > 0) coverage.push(`${g.file} · ${u.topic}: ${miss} מתוך ${total} השאלות לא ממופות לאף נקודה`);
   });
 });
 
@@ -222,6 +301,11 @@ html = html
   .replace(/assets\/style\.css(\?v=[a-f0-9]+)?/g, `assets/style.css?v=${cssV}`)
   .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`);
 fs.writeFileSync(indexPath, html, 'utf8');
+
+if (coverage.length) {
+  console.log('\n⚠️  כיסוי "מה באמת נשאל" — מה שנשאר למפות:');
+  coverage.forEach((c) => console.log('   • ' + c));
+}
 
 console.log('\n✅ manifest.json עודכן');
 console.log(`   נכסים נחתמו:  style.css?v=${cssV}   app.js?v=${jsV}\n`);
