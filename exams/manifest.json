@@ -1,9 +1,9 @@
 {
   "updated": "2026-07-17",
-  "version": "49f82aa6",
+  "version": "1a3ad756",
   "assets": {
-    "css": "f902031b",
-    "js": "4466b06e"
+    "css": "71d088cf",
+    "js": "93a3e0b7"
   },
   "courses": [
     {
@@ -13,7 +13,7 @@
       "icon": "🩺",
       "blurb": "המפגש עם החולה",
       "order": 1,
-      "about": "עימות קליני הוא קורס מבוסס סיפורי-מקרה (וינייטות): סיפור קליני קצר, ואחריו שאלות. המבחן אמריקאי — רב-ברירה עם תשובה אחת נכונה.\n\nבניגוד לשאר הקורסים בארכיון, המבחן עצמו אינו משוחזר מילה-במילה — ואין טעם לדקדק בניסוח. לכן כל המבחנים כאן הם דוגמאות ותרגול: הם נועדו להראות איך נראות השאלות, על אילו עקרונות שואלים, ולתרגל חשיבה קלינית — לא להיות העתק נאמן של מבחן.\n\nהמקורות: שחזור מחזור מ״ז, השחזור הרשמי של מועד א׳ 2025 מהפקולטה, חוברת הסטודנט המעודכנת 2026 (הסילבוס שעליו בנוי הקורס), ומצגות הקורס. שני סטים של שאלות נכתבו בעזרת AI — מחברת NotebookLM שהוזנה בכל חומרי הקורס והשחזורים.",
+      "about": "עימות קליני הוא קורס מבוסס סיפורי-מקרה (וינייטות): סיפור קליני קצר, ואחריו שאלות. המבחן אמריקאי — רב-ברירה עם תשובה אחת נכונה, והוא בנוי מתיאורי מקרה \"מתגלגלים\": כל שאלה מוסיפה מידע ומקדמת את ההערכה, מאנמנזה ועד טיפול. בדיוק בשביל זה יש כאן \"מקרים מתגלגלים\" — תרגול שבו האבחנה המבדלת מצטמצמת מול העיניים.\n\nבניגוד לשאר הקורסים בארכיון, המבחן עצמו אינו משוחזר מילה-במילה — ואין טעם לדקדק בניסוח. לכן כל המבחנים כאן הם דוגמאות ותרגול: הם נועדו להראות איך נראות השאלות, על אילו עקרונות שואלים, ולתרגל חשיבה קלינית — לא להיות העתק נאמן של מבחן.\n\nהמקורות: שחזור מחזור מ״ז, השחזור הרשמי של מועד א׳ 2025 מהפקולטה, חוברת הסטודנט המעודכנת 2026 (הסילבוס שעליו בנוי הקורס), ומצגות הקורס. שני סטים של שאלות נכתבו בעזרת AI — מחברת NotebookLM שהוזנה בכל חומרי הקורס והשחזורים.",
       "dates": [
         {
           "moed": "א",
@@ -113,6 +113,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 100
     },
     {
@@ -129,6 +130,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 50
     },
     {
@@ -145,6 +147,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 40
     },
     {
@@ -161,6 +164,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 40
     },
     {
@@ -177,6 +181,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 30
     },
     {
@@ -193,6 +198,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 40
     },
     {
@@ -209,6 +215,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 42
     },
     {
@@ -225,6 +232,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 35
     },
     {
@@ -241,6 +249,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 34
     },
     {
@@ -257,6 +266,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 46
     },
     {
@@ -273,7 +283,42 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "clinical-cases",
+      "file": "clinical-cases.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מקרים מתגלגלים — חשיבה קלינית",
+      "kind": "case",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-17",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 5
+    },
+    {
+      "id": "clinical-focus-cards",
+      "file": "clinical-focus-cards.json",
+      "course": "clinical",
+      "part": null,
+      "title": "המיקוד מהמתרגלים — נקודה נקודה",
+      "kind": "cards",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-17",
+      "official": null,
+      "trust": null,
+      "heroSub": "המתרגלים שלחו מיקוד למבחן. כאן הוא מפורק לכרטיסיות: מה בדיוק נשאל בכל נושא, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
+      "heroEyebrow": "🎯 המיקוד מהמתרגלים",
+      "count": 19
     },
     {
       "id": "clinical-mem-zayin",
@@ -289,6 +334,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 35
     },
     {
@@ -305,6 +351,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -321,6 +368,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -337,6 +385,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 45
     },
     {
@@ -353,6 +402,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 44
     },
     {
@@ -369,6 +419,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -385,6 +436,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -401,6 +453,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -417,6 +470,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -433,6 +487,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 48
     },
     {
@@ -449,6 +504,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 48
     },
     {
@@ -465,6 +521,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -481,6 +538,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -497,6 +555,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 32
     },
     {
@@ -513,6 +572,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 32
     },
     {
@@ -529,6 +589,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -545,6 +606,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 10
     },
     {
@@ -561,6 +623,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 31
     },
     {
@@ -577,6 +640,7 @@
       "official": true,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 33
     },
     {
@@ -593,6 +657,7 @@
       "official": null,
       "trust": null,
       "heroSub": "חמישה סיכומים (709 עמ׳) נסרקו מול 12 הנושאים ומול כל 413 השאלות של המאגר הרשמי, 2021–2025. לכל נושא: מאיזה סיכום ומאיזה עמוד, כמה אחוז מהמבחן הוא באמת, ומה בסיכומים לא נשאל מעולם.",
+      "heroEyebrow": null,
       "count": 12
     },
     {
@@ -609,6 +674,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 26
     },
     {
@@ -624,7 +690,8 @@
       "added": "2026-07-16",
       "official": null,
       "trust": null,
-      "heroSub": null,
+      "heroSub": "פרופ׳ תומר קוקס עבר איתנו בזום על השאלות שיהיו במבחן. כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
+      "heroEyebrow": "🎓 ישירות מהמרצה",
       "count": 15
     },
     {
@@ -641,6 +708,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 12
     },
     {
@@ -657,6 +725,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 50
     },
     {
@@ -673,6 +742,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 28
     },
     {
@@ -689,6 +759,7 @@
       "official": null,
       "trust": "partial",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 59
     },
     {
@@ -705,6 +776,7 @@
       "official": null,
       "trust": "unverified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 38
     },
     {
@@ -721,6 +793,7 @@
       "official": null,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 55
     },
     {
@@ -737,6 +810,7 @@
       "official": null,
       "trust": "verified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 54
     },
     {
@@ -753,6 +827,7 @@
       "official": null,
       "trust": null,
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 11
     },
     {
@@ -769,6 +844,7 @@
       "official": null,
       "trust": "partial",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 28
     },
     {
@@ -785,6 +861,7 @@
       "official": null,
       "trust": "unverified",
       "heroSub": null,
+      "heroEyebrow": null,
       "count": 60
     }
   ]

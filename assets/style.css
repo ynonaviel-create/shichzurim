@@ -1339,3 +1339,106 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--warn-bg); border:1px solid var(--warn-ln); color:var(--warn);
   border-radius:99px; padding:2px 9px;
 }
+
+/* ================= מקרה מתגלגל =================
+   המקרה נפרש שלב-שלב לצד לוח מבדלת שמתעדכן. הלוח דביק בדסקטופ: הוא הדבר
+   שאמור להיות מול העיניים כשמחליטים, לא משהו שגוללים אליו. */
+.lhero-case{
+  background:linear-gradient(135deg, var(--accent-sl), var(--surface) 75%);
+  border-color:var(--accent);
+}
+
+.case-layout{ display:grid; grid-template-columns:1fr 280px; gap:24px; align-items:start; }
+.case-main{ min-width:0; }
+.case-side{ position:sticky; top:18px; }
+
+/* --- לוח המבדלת --- */
+.ddx-board{
+  background:var(--surface); border:1.5px solid var(--accent);
+  border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);
+}
+.ddx-title{
+  font-size:12px; font-weight:800; color:var(--accent-dk);
+  letter-spacing:.02em; margin-bottom:10px;
+}
+.ddx-row{
+  display:flex; align-items:center; gap:8px;
+  padding:7px 0; border-top:1px solid var(--line-soft); font-size:14px;
+}
+.ddx-row:first-of-type{ border-top:0; }
+.ddx-ico{ width:16px; text-align:center; flex:none; font-size:12px; }
+.ddx-name{ flex:1; font-weight:600; color:var(--text); }
+.ddx-st{ font-size:11px; font-weight:800; color:var(--dim); flex:none; }
+
+.ddx-likely .ddx-name,.ddx-likely .ddx-st,.ddx-likely .ddx-ico{ color:var(--warn); }
+.ddx-confirmed .ddx-name,.ddx-confirmed .ddx-st,.ddx-confirmed .ddx-ico{ color:var(--good); }
+.ddx-unlikely{ opacity:.62; }
+.ddx-ruled_out{ opacity:.45; }
+.ddx-ruled_out .ddx-name{ text-decoration:line-through; }
+
+.ddx-foot{
+  margin-top:10px; padding-top:9px; border-top:1px solid var(--line);
+  font-size:12px; font-weight:700; color:var(--muted); text-align:center;
+}
+.case-reset{ margin-top:12px; width:100%; }
+
+/* --- הסיפור --- */
+.case-story{
+  background:var(--bg-tint); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px 18px; margin-bottom:22px;
+}
+.case-story p{ font-size:15px; line-height:1.75; color:var(--text); }
+.case-story p + p{ margin-top:10px; }
+/* מידע שנחשף בעקבות החלטה — נבדל מהפתיח, כי זה בדיוק מה ש"התגלגל". */
+.case-reveal{
+  border-inline-start:3px solid var(--accent);
+  padding-inline-start:11px; color:var(--muted) !important;
+}
+
+/* --- שלב --- */
+.case-stage{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:18px 20px; margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.case-stage.done{ border-color:var(--line-soft); }
+.case-phase{
+  display:inline-block; font-size:11px; font-weight:800; letter-spacing:.03em;
+  background:var(--accent-sl); color:var(--accent-dk);
+  border-radius:99px; padding:3px 11px; margin-bottom:10px;
+}
+.case-stem{ font-size:14.5px; line-height:1.7; color:var(--muted); margin-bottom:10px; }
+.case-ask{ font-size:16px; font-weight:700; line-height:1.6; color:var(--text); margin-bottom:14px; }
+
+/* --- סיכום --- */
+.case-wrap{
+  background:var(--good-bg); border:1.5px solid var(--good-ln);
+  border-radius:var(--radius); padding:18px 20px; margin:22px 0 16px;
+}
+.case-wrap-t{ font-size:13px; font-weight:800; color:var(--good); margin-bottom:8px; }
+.case-wrap p{ font-size:15px; line-height:1.75; color:var(--text); }
+
+/* --- בורר המקרים --- */
+.case-grid{ display:grid; gap:14px; }
+.case-card{
+  display:flex; gap:16px; align-items:flex-start;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow);
+  text-decoration:none; color:inherit; transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.case-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--accent); }
+.case-card-ico{ font-size:30px; line-height:1; flex:none; }
+.case-card-body{ min-width:0; flex:1; }
+.case-card-body h3{ font-size:17px; margin-bottom:6px; color:var(--text); }
+.case-card-body p{
+  font-size:14px; line-height:1.65; color:var(--muted); margin-bottom:10px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.tag.good{ background:var(--good-bg); border-color:var(--good-ln); color:var(--good); }
+
+@media (max-width:820px){
+  .case-layout{ grid-template-columns:1fr; }
+  /* בנייד הלוח עולה מעל המקרה ונשאר דביק בראש — עדיין מול העיניים. */
+  .case-side{ position:sticky; top:0; z-index:5; order:-1; padding-top:8px; background:var(--bg); }
+  .ddx-row{ padding:5px 0; font-size:13px; }
+}

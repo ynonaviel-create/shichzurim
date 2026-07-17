@@ -11,7 +11,15 @@
 const KEY = 'shichzurim.v1';
 const SEEN_KEY = 'shichzurim.seenIntro';
 const THEME_KEY = 'shichzurim.theme';
-const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים' };
+const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים', case: 'מקרה מתגלגל' };
+/* סטטוס אבחנה בלוח המבדלת של מקרה מתגלגל. הסדר כאן הוא סדר ההצגה. */
+const DDX_UI = {
+  open:      { icon: '⬜', label: 'פתוח' },
+  likely:    { icon: '🔺', label: 'סביר' },
+  unlikely:  { icon: '🔻', label: 'פחות סביר' },
+  ruled_out: { icon: '✕',  label: 'נשלל' },
+  confirmed: { icon: '✓',  label: 'אושר' },
+};
 
 /* עד כמה אפשר לסמוך על מפתח התשובות — מה שהמשחזרים עצמם הצהירו.
    "לא אומתו" אינו "שגוי": הוא אומר שאיש לא בדק, וזו בדיוק הידיעה שהלומד
@@ -227,7 +235,7 @@ const examsOf = (courseId) =>
   );
 /* רק מה שבאמת מבחן. כרטיסיות קריאה ומפת החומרים אין להן opts/a — הן לא נספרות
    בציון ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
-const NOT_QUIZ = new Set(['cards', 'guide']);
+const NOT_QUIZ = new Set(['cards', 'guide', 'case']);
 const quizzesOf = (courseId) => examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind));
 
 /* ---------- ספירה לאחור למבחנים ---------- */
@@ -367,6 +375,8 @@ function router() {
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'cards' && param) return renderCards(param);
+  // #/case/<id>/<caseId> — קופץ ישר למקרה מסוים בתוך הדק
+  if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
@@ -534,7 +544,9 @@ function renderCourse(courseId) {
   const pct = p.answered ? Math.round((p.correct / p.answered) * 100) : 0;
 
   const dash = el('div', 'dash');
-  dash.append(stat(list.filter((e) => e.kind !== 'cards').length, 'מבחנים', 'accent'));
+  /* NOT_QUIZ ולא רשימה ידנית: הספירה הזו החריגה 'cards' בלבד, ולכן מפת החומרים
+     כבר נספרה כמבחן. p.total ממילא נגזר מ-quizzesOf — הדשבורד סתר את עצמו. */
+  dash.append(stat(list.filter((e) => !NOT_QUIZ.has(e.kind)).length, 'מבחנים', 'accent'));
   dash.append(stat(p.total, 'שאלות'));
   dash.append(stat(p.answered, 'שאלות שענית'));
   dash.append(stat(p.answered ? pct + '%' : '—', 'אחוז הצלחה', pct >= 70 ? 'good' : p.answered ? 'bad' : ''));
@@ -555,6 +567,9 @@ function renderCourse(courseId) {
   /* כרטיסיות המרצה — לא מבחן, ולכן לא נכנסות לרשימת המבחנים אלא מקבלות
      באנר משלהן בראש העמוד. זה החומר הכי ישיר שיש: המרצה עצמו מסר אותו. */
   list.filter((e) => e.kind === 'cards').forEach((deck) => view.append(cardsHero(deck)));
+
+  /* מקרים מתגלגלים — הפורמט של המבחן עצמו. גם הם לא מבחן ברשימה אלא באנר. */
+  list.filter((e) => e.kind === 'case').forEach((deck) => view.append(casesHero(deck)));
 
   /* מפת החומרים — גם היא לא מבחן: באנר בראש, ולא שורה ברשימה. */
   const gh = guideHero(courseId);
@@ -598,10 +613,12 @@ function cardsHero(m) {
   a.href = '#/cards/' + m.id;
 
   const left = el('div', 'lhero-main');
-  left.append(el('div', 'lhero-eyebrow', '🎓 ישירות מהמרצה'));
+  /* הטקסט הזה היה קשיח ומדבר על קוקס והזום שלו — נכון לביומול בלבד. דק
+     כרטיסיות של מקצוע אחר היה מציג טענה שקרית, ולכן הוא מגיע מהקובץ. */
+  left.append(el('div', 'lhero-eyebrow', m.heroEyebrow || '🎓 ישירות מהמרצה'));
   left.append(el('h2', null, m.title));
   left.append(el('p', 'lhero-sub',
-    'פרופ׳ תומר קוקס עבר איתנו בזום על השאלות שיהיו במבחן. כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.'));
+    m.heroSub || 'כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.'));
   a.append(left);
 
   const right = el('div', 'lhero-side');
@@ -809,6 +826,236 @@ async function renderCards(id) {
   }
 
   paint();
+  toTop();
+  updateFooter();
+}
+
+/* ================= מקרה מתגלגל =================
+   המבחן בעימות קליני בנוי מתיאורי מקרה שמתגלגלים: כל שאלה מוסיפה מידע ומקדמת
+   את ההערכה. שאלה בודדת ועצמאית — מה שיש בכל שאר הארכיון — לא מתרגלת את זה.
+   כאן המקרה נפרש בשלבים, וכל החלטה חושפת מידע חדש ומזיזה את לוח המבדלת.
+   הלוח הוא העיקר: הוא הופך את "האבחנה משתנה עם הנתונים" למשהו שרואים. */
+const CASE_KEY = 'shichzurim.caseProg';
+const caseProg = {
+  read() { try { return JSON.parse(localStorage.getItem(CASE_KEY)) || {}; } catch { return {}; } },
+  write(d) { localStorage.setItem(CASE_KEY, JSON.stringify(d)); },
+  get(deck, cs) { return this.read()[`${deck}#${cs}`] || []; },
+  set(deck, cs, arr) { const d = this.read(); d[`${deck}#${cs}`] = arr; this.write(d); },
+  clear(deck, cs) { const d = this.read(); delete d[`${deck}#${cs}`]; this.write(d); },
+};
+const caseDone = (deck, cs) => caseProg.get(deck.id, cs.id).filter((v) => v != null).length >= cs.stages.length;
+
+/* הבאנר בעמוד המקצוע. */
+function casesHero(m) {
+  const a = el('a', 'lhero lhero-case');
+  a.href = '#/case/' + m.id;
+  const left = el('div', 'lhero-main');
+  left.append(el('div', 'lhero-eyebrow', '🩺 תרגול חשיבה קלינית'));
+  left.append(el('h2', null, m.title));
+  left.append(el('p', 'lhero-sub',
+    'המבחן בנוי מתיאורי מקרה מתגלגלים. כאן המקרה נפרש שלב-שלב — אנמנזה, בדיקה, בירור, אבחנה, טיפול — ' +
+    'וכל החלטה שלך חושפת מידע חדש ומצמצמת את האבחנה המבדלת מול העיניים.'));
+  a.append(left);
+  const right = el('div', 'lhero-side');
+  right.append(el('div', 'lhero-n', m.count));
+  right.append(el('div', 'lhero-n-lbl', plural(m.count, 'מקרה', 'מקרים')));
+  a.append(right);
+  return a;
+}
+
+async function renderCase(id, caseId = null) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+
+  let deck;
+  try { deck = await loadExam(id); }
+  catch (err) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err.message)));
+    return;
+  }
+
+  const c = courseOf(deck.course);
+  const cs = caseId ? deck.cases.find((x) => x.id === caseId) : null;
+  view.innerHTML = '';
+
+  if (!cs) return casePicker(deck, c);
+
+  view.append(crumb('כל המקרים', '#/case/' + deck.id));
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `${cs.icon || '🩺'} ${cs.title}`));
+  if (cs.topic) head.append(el('p', null, cs.topic));
+  view.append(head);
+
+  const layout = el('div', 'case-layout');
+  const main = el('div', 'case-main');
+  const side = el('div', 'case-side');
+  layout.append(main, side);
+  view.append(layout);
+
+  /* answers[i] = האינדקס שנבחר בשלב i, או null אם עוד לא נענה.
+     נורמליזציה לאורך המלא היא קריטית ולא קוסמטית: findIndex על מערך ריק מחזיר
+     -1, וזה בדיוק הערך שאומר "הכול נענה" — כך כל השלבים היו נחשפים מיד. */
+  const stored = caseProg.get(deck.id, cs.id);
+  let answers = cs.stages.map((_, i) => (stored[i] == null ? null : stored[i]));
+
+  const save = () => caseProg.set(deck.id, cs.id, answers);
+
+  /* לוח המבדלת נגזר מהתשובות — לא נשמר בנפרד. מצב שנגזר לא יכול להיסתר
+     מהמקור שלו: מאפסים תשובה, והלוח חוזר אחורה נכון בלי טיפול מיוחד. */
+  function ddxState() {
+    const st = {};
+    (cs.ddx || []).forEach((d) => (st[d] = 'open'));
+    cs.stages.forEach((s, i) => {
+      if (answers[i] == null) return;
+      Object.entries(s.ddxUpdate || {}).forEach(([dx, v]) => { if (dx in st) st[dx] = v; });
+    });
+    return st;
+  }
+
+  function paint() {
+    /* --- לוח המבדלת --- */
+    side.innerHTML = '';
+    const board = el('div', 'ddx-board');
+    board.append(el('div', 'ddx-title', 'אבחנה מבדלת'));
+    const st = ddxState();
+    (cs.ddx || []).forEach((dx) => {
+      const s = st[dx] || 'open';
+      const row = el('div', 'ddx-row ddx-' + s);
+      row.append(el('span', 'ddx-ico', DDX_UI[s].icon));
+      row.append(el('span', 'ddx-name', dx));
+      row.append(el('span', 'ddx-st', DDX_UI[s].label));
+      board.append(row);
+    });
+    const answered = answers.filter((v) => v != null).length;
+    board.append(el('div', 'ddx-foot', `שלב ${Math.min(answered + 1, cs.stages.length)} מתוך ${cs.stages.length}`));
+    side.append(board);
+
+    if (answered) {
+      const rst = el('button', 'btn-ghost case-reset', 'התחל את המקרה מחדש');
+      rst.onclick = () => {
+        answers = cs.stages.map(() => null);
+        caseProg.clear(deck.id, cs.id);
+        paint();
+        toTop();
+      };
+      side.append(rst);
+    }
+
+    /* --- הסיפור והשלבים --- */
+    main.innerHTML = '';
+    const story = el('div', 'case-story');
+    story.append(el('p', null, cs.opening));
+    /* כל reveal של שלב שנענה מצטרף לסיפור — ככה המקרה "מתגלגל". */
+    cs.stages.forEach((s, i) => {
+      if (answers[i] != null && s.reveal) story.append(el('p', 'case-reveal', s.reveal));
+    });
+    main.append(story);
+
+    const upto = answers.findIndex((v) => v == null);
+    const last = upto === -1 ? cs.stages.length - 1 : upto;
+
+    cs.stages.forEach((s, i) => {
+      if (i > last) return;                       // שלב עתידי — לא נחשף עד שעונים על הקודם
+      main.append(stageEl(s, i));
+    });
+
+    if (answers.filter((v) => v != null).length === cs.stages.length) {
+      const w = el('div', 'case-wrap');
+      w.append(el('div', 'case-wrap-t', '🎯 סיכום המקרה'));
+      w.append(el('p', null, cs.wrap));
+      main.append(w);
+      if (cs.topic) {
+        const pr = el('a', 'btn', `🎲 תרגול שאלות ב${cs.topic}`);
+        pr.href = '#/practice/' + deck.course + '/' + encodeURIComponent(cs.topic);
+        main.append(pr);
+      }
+    }
+  }
+
+  function stageEl(s, i) {
+    const card = el('div', 'case-stage' + (answers[i] != null ? ' done' : ''));
+    card.id = 'stage-' + i;
+    card.append(el('div', 'case-phase', s.phase));
+    if (s.stem) card.append(el('div', 'case-stem', s.stem));
+    card.append(el('div', 'case-ask', s.ask));
+
+    const opts = el('div', 'opts');
+    s.opts.forEach((text, oi) => {
+      const o = el('div', 'opt');
+      o.append(el('span', 'key', String(oi + 1)));
+      o.append(el('span', null, text));
+      if (answers[i] != null) {
+        o.classList.add('locked');
+        if (oi === s.a) o.classList.add('correct');
+        else if (oi === answers[i]) o.classList.add('wrong');
+        if (oi === answers[i]) o.classList.add('chosen');
+      } else {
+        o.onclick = () => {
+          answers[i] = oi;
+          save();
+          paint();
+          /* אחרי מענה גוללים לשלב שנענה — לא לראש. הרגע שאחרי הבחירה הוא
+             שבו לומדים, וקפיצה לראש העמוד מושכת משם. */
+          requestAnimationFrame(() => {
+            const t = document.getElementById('stage-' + i);
+            if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          });
+        };
+      }
+      opts.append(o);
+    });
+    card.append(opts);
+
+    if (answers[i] != null) {
+      const ok = answers[i] === s.a;
+      const fb = el('div', 'fb show ' + (ok ? 'ok' : 'no'));
+      fb.append(el('div', null, ok ? '✓ נכון' : `✗ לא — הנכון: ${s.opts[s.a]}`));
+      fb.append(el('div', 'explain', s.why));
+      card.append(fb);
+    }
+    return card;
+  }
+
+  paint();
+  toTop();
+  updateFooter();
+}
+
+/* בורר המקרים — הדף שרואים כשנכנסים לדק בלי מקרה מסוים. */
+function casePicker(deck, c) {
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, deck.title));
+  head.append(el('p', null, `${c ? c.name : ''} · ${plural(deck.cases.length, 'מקרה', 'מקרים')}`));
+  view.append(head);
+
+  if (deck.note) {
+    const n = el('div', 'cards-note');
+    n.textContent = deck.note;
+    view.append(n);
+  }
+
+  const grid = el('div', 'case-grid');
+  deck.cases.forEach((cs) => {
+    const a = el('a', 'case-card');
+    a.href = '#/case/' + deck.id + '/' + encodeURIComponent(cs.id);
+    a.append(el('div', 'case-card-ico', cs.icon || '🩺'));
+    const b = el('div', 'case-card-body');
+    b.append(el('h3', null, cs.title));
+    b.append(el('p', null, cs.opening));
+    const meta = el('div', 'card-meta');
+    meta.append(el('span', 'tag', `${cs.stages.length} שלבים`));
+    if (cs.topic) meta.append(el('span', 'topic', cs.topic));
+    const done = caseProg.get(deck.id, cs.id).filter((v) => v != null).length;
+    if (caseDone(deck, cs)) meta.append(el('span', 'tag good', '✓ הושלם'));
+    else if (done) meta.append(el('span', 'tag', `${done}/${cs.stages.length}`));
+    b.append(meta);
+    a.append(b);
+    grid.append(a);
+  });
+  view.append(grid);
   toTop();
   updateFooter();
 }
@@ -2715,6 +2962,84 @@ const SIMS = [
       },
     ],
   },
+
+  /* המיקוד מבקש במפורש: "תרגלו לחשב זאת על נתוני מטופל". חמישה ספים, שלושה
+     מהם תלויי-מין, ואבחנה שנקבעת בספירה — בדיוק מה שסליידרים עושים טוב. */
+  {
+    id: 'mets',
+    course: 'clinical',
+    icon: '⚖️',
+    title: 'תסמונת מטבולית — חשבו על נתוני מטופל',
+    blurb: 'חמישה קריטריונים, צריך 3 כדי לאבחן. הזיזו את הנתונים וראו מה מתקיים',
+    topics: ['גורמי סיכון'],
+    insight: 'קבעו גבר עם היקף מותניים 100 ו-HDL 45 — אפס קריטריונים. עכשיו לחצו על "מטופלת": ' +
+             'אותם מספרים בדיוק, ופתאום שניים מתקיימים. שלושה מתוך חמשת הספים תלויי-מין, ' +
+             'ולכן קריאת המין בווינייטה היא לא פרט רקע — היא חלק מהחישוב.',
+    togglesTitle: 'מין המטופל',
+    toggles: [{ k: 'female', label: '♀ מטופלת (ספים לנשים)' }],
+    params: [
+      { k: 'waist', label: 'היקף מותניים', unit: 'ס״מ', min: 60, max: 140, step: 1, val: 96, group: 'מדידות' },
+      { k: 'sbp', label: 'לחץ דם סיסטולי', unit: 'mmHg', min: 90, max: 190, step: 1, val: 128, group: 'מדידות' },
+      { k: 'dbp', label: 'לחץ דם דיאסטולי', unit: 'mmHg', min: 50, max: 120, step: 1, val: 82, group: 'מדידות' },
+      { k: 'tg', label: 'טריגליצרידים', unit: 'mg/dL', min: 50, max: 350, step: 5, val: 140, group: 'מעבדה (בצום)' },
+      { k: 'hdl', label: 'HDL', unit: 'mg/dL', min: 20, max: 90, step: 1, val: 45, group: 'מעבדה (בצום)' },
+      { k: 'glu', label: 'גלוקוז בצום', unit: 'mg/dL', min: 70, max: 180, step: 1, val: 95, group: 'מעבדה (בצום)' },
+    ],
+    run: (p) => {
+      const f = !!p.female;
+      const c = [
+        { name: 'היקף מותניים', val: p.waist + ' ס״מ', thr: f ? '> 88' : '> 102', met: p.waist > (f ? 88 : 102), sex: true },
+        { name: 'טריגליצרידים', val: p.tg + ' mg/dL', thr: '> 150', met: p.tg > 150, sex: false },
+        { name: 'HDL', val: p.hdl + ' mg/dL', thr: f ? '< 50' : '< 40', met: p.hdl < (f ? 50 : 40), sex: true },
+        { name: 'לחץ דם', val: p.sbp + '/' + p.dbp, thr: '> 130/85', met: p.sbp > 130 || p.dbp > 85, sex: false },
+        { name: 'גלוקוז בצום', val: p.glu + ' mg/dL', thr: '> 100', met: p.glu > 100, sex: false },
+      ];
+      const n = c.filter((x) => x.met).length;
+      return { c, n, dx: n >= 3 };
+    },
+    readouts: (p, r) => [
+      { v: r.n + ' / 5', label: 'קריטריונים שהתקיימו', cls: r.dx ? 'bad' : 'accent' },
+      { v: r.dx ? 'כן' : 'לא', label: 'תסמונת מטבולית? (נדרשים 3)', cls: r.dx ? 'bad' : 'good' },
+      { v: p.female ? '♀ אישה' : '♂ גבר', label: 'קובע 2 מהספים', cls: '' },
+    ],
+    panels: [
+      {
+        label: 'חמשת הקריטריונים — מה מתקיים ומה לא',
+        h: 250,
+        draw: (g, p, C, st, r) => {
+          const { ctx, w, h } = g;
+          ctx.clearRect(0, 0, w, h);
+          const pad = 8;
+          const rowH = (h - pad * 2) / r.c.length;
+          ctx.textBaseline = 'middle';
+          r.c.forEach((c, i) => {
+            const y = pad + i * rowH + rowH / 2;
+            /* "מתקיים" כאן = ממצא פתולוגי, ולכן אדום ולא ירוק. */
+            const col = c.met ? C.bad : C.good;
+            ctx.globalAlpha = 0.09;
+            ctx.fillStyle = col;
+            ctx.fillRect(pad, y - rowH / 2 + 3, w - pad * 2, rowH - 6);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = col;
+            ctx.fillRect(w - pad - 4, y - rowH / 2 + 3, 4, rowH - 6);   // פס בקצה הימני (RTL)
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = C.text;
+            ctx.font = '700 14px ' + FONT;
+            ctx.fillText(c.name + (c.sex ? ' ⚥' : ''), w - pad - 14, y - 8);
+            ctx.fillStyle = C.muted;
+            ctx.font = '600 12px ' + FONT;
+            ctx.fillText('הסף: ' + c.thr, w - pad - 14, y + 9);
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = col;
+            ctx.font = '800 15px ' + FONT;
+            ctx.fillText((c.met ? '✓  ' : '✗  ') + c.val, pad + 12, y);
+          });
+        },
+      },
+    ],
+  },
 ];
 
 /* הסתברות שחרור מסידן — היל בחזקת 4. השיתופיות היא העיקר:
@@ -2845,7 +3170,8 @@ function renderSim(id) {
 
   if (s.toggles) {
     const box = el('div', 'sim-group');
-    box.append(el('div', 'sim-group-t', 'רעלנים'));
+    /* היה קשיח "רעלנים" — נכון ל-HH ולא לשום סימולציה אחרת. */
+    box.append(el('div', 'sim-group-t', s.togglesTitle || 'רעלנים'));
     const chips = el('div', 'chips');
     s.toggles.forEach((t) => {
       const b = el('button', 'chip', t.label);

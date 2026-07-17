@@ -14,11 +14,19 @@ const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards / uni
    guide = מפת חומרים (לא מבחן): units[] במקום questions[]. כל יחידה נתלית על
    נושא קנוני מהטקסונומיה של המקצוע, וזה מה שמחבר אותה לשאלות בלי הזנת דאטה —
    ראו GUIDE_BY_TOPIC ב-app.js. הנושא מאומת בהמשך מול הנושאים שבפועל בשאלות. */
-const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide'];
+/* case = מקרה מתגלגל (לא מבחן): cases[] במקום questions[]. כל מקרה נפרש בשלבים
+   (אנמנזה → בדיקה → בירור → אבחנה → טיפול), וכל שלב מעדכן לוח אבחנה מבדלת חי.
+   זה הפורמט של המבחן עצמו בעימות קליני — שאלה בודדת לא מתרגלת רצף. */
+const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide', 'case'];
+const DDX_STATUS = ['open', 'likely', 'unlikely', 'ruled_out', 'confirmed'];
 /* עד כמה ידוע מה המרצה שואל: known = הדליף/מסר גבולות גזרה (קוקס), unknown = לא ידוע,
    mixed = חלק מהנושא ידוע, new = נושא שעבר למרצה השנה ואין עליו היסטוריה.
    מזין את דירוג העדיפויות במפה — ראו whatNow ב-app.js. */
 const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
+/* מה שאינו מבחן — כרטיסיות, מפת חומרים ומקרים. הפריטים שלהם אינם שאלות, ולכן
+   הם לא נספרים בסיכומי ה"שאלות" (כמו NOT_QUIZ ב-app.js). */
+const NOT_QUIZ = new Set(['cards', 'guide', 'case']);
+const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e) => a + e.count, 0);
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
@@ -76,9 +84,12 @@ for (const file of files) {
   }
   const isCards = data.kind === 'cards';
   const isGuide = data.kind === 'guide';
-  const items = isCards ? data.cards : isGuide ? data.units : data.questions;
+  const isCase = data.kind === 'case';
+  const items = isCards ? data.cards : isGuide ? data.units : isCase ? data.cases : data.questions;
   if (!Array.isArray(items) || !items.length) {
-    problems.push(`${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : 'אין שאלות'}`);
+    problems.push(
+      `${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : isCase ? 'אין מקרים' : 'אין שאלות'}`
+    );
     continue;
   }
 
@@ -121,6 +132,41 @@ for (const file of files) {
       if (!c.short) problems.push(`${file} · כרטיסייה ${n}: אין תשובה קצרה`);
       if (!c.topic) problems.push(`${file} · כרטיסייה ${n}: אין נושא`);
     });
+  } else if (isCase) {
+    const seen = new Set();
+    items.forEach((cs, i) => {
+      const at = `${file} · מקרה ${i + 1}`;
+      if (!cs.id) problems.push(`${at}: אין מזהה (id)`);
+      else if (seen.has(cs.id)) problems.push(`${at}: מזהה כפול "${cs.id}"`);
+      else seen.add(cs.id);
+      if (!cs.title) problems.push(`${at}: אין כותרת`);
+      if (!cs.opening) problems.push(`${at}: אין פתיח (opening)`);
+      if (!cs.wrap) problems.push(`${at}: אין סיכום (wrap) — בלעדיו המקרה נגמר בלי הכרעה`);
+      if (!Array.isArray(cs.ddx) || cs.ddx.length < 2)
+        problems.push(`${at}: צריך לפחות שתי אבחנות ב-ddx — בלי מבדלת אין מה לצמצם`);
+      if (!Array.isArray(cs.stages) || !cs.stages.length) {
+        problems.push(`${at}: אין שלבים`);
+        return;
+      }
+      const ddx = new Set(cs.ddx || []);
+      cs.stages.forEach((s, j) => {
+        const sAt = `${at} · שלב ${j + 1}`;
+        if (!s.phase) problems.push(`${sAt}: אין שלב (phase)`);
+        if (!s.ask) problems.push(`${sAt}: אין שאלה (ask)`);
+        if (!s.why) problems.push(`${sAt}: אין הסבר (why) — ה"למה" הוא כל העניין`);
+        if (!Array.isArray(s.opts) || s.opts.length < 2)
+          problems.push(`${sAt}: צריך לפחות שתי אפשרויות`);
+        if (typeof s.a !== 'number' || s.a < 0 || (s.opts && s.a >= s.opts.length))
+          problems.push(`${sAt}: "a"=${s.a} מצביע על אפשרות שלא קיימת`);
+        /* לוח מבדלת שמצביע על אבחנה שלא ברשימה = לוח שמשקר. */
+        Object.entries(s.ddxUpdate || {}).forEach(([dx, st]) => {
+          if (!ddx.has(dx))
+            problems.push(`${sAt}: ddxUpdate מזכיר "${dx}" שלא קיים ב-ddx של המקרה`);
+          if (!DDX_STATUS.includes(st))
+            problems.push(`${sAt}: סטטוס לא חוקי "${st}" ל-"${dx}" (מותר: ${DDX_STATUS.join(' / ')})`);
+        });
+      });
+    });
   } else {
     items.forEach((q, i) => {
       const n = i + 1;
@@ -135,7 +181,7 @@ for (const file of files) {
   /* הנושאים שבפועל בשאלות — מהם נבנית הטקסונומיה שמולה נבדקת המפה.
      רק ממה שנכנס לבריכת התרגול: כרטיסיות מוחרגות מ-quizzesOf, ולכן נושא
      שקיים רק בהן עדיין יוביל את הצ׳יפ לרשימה ריקה. */
-  if (!isGuide && !isCards) {
+  if (!isGuide && !isCards && !isCase) {
     const set = (topicsByCourse[data.course] ??= new Set());
     items.forEach((q) => q.topic && set.add(q.topic));
 
@@ -164,7 +210,8 @@ for (const file of files) {
        והוא בדיוק מה שהלומד צריך לדעת לפני שהוא סומך על מפתח. יש שחזורים
        שהמשחזרים עצמם כתבו בהם "כלל התשובות לא אומתו בחשיפה". */
     trust: data.trust ?? null,
-    heroSub: data.heroSub ?? null,     // מפה בלבד: מה נסרק — נקרא בבאנר בעמוד המקצוע, לפני שהמפה עצמה נטענת
+    heroSub: data.heroSub ?? null,     // מפה/כרטיסיות: הטקסט בבאנר שבעמוד המקצוע, לפני שהקובץ עצמו נטען
+    heroEyebrow: data.heroEyebrow ?? null,   // כרטיסיות: מי מסר את החומר — מרצה או מתרגלים
     count: items.length,
   });
 }
@@ -315,11 +362,11 @@ courses.forEach((c) => {
     console.log(`   ${c.icon} ${c.name} — אין עדיין מבחנים`);
     return;
   }
-  console.log(`   ${c.icon} ${c.name}  (${mine.reduce((a, e) => a + e.count, 0)} שאלות)`);
+  console.log(`   ${c.icon} ${c.name}  (${qCount(mine)} שאלות)`);
   mine.forEach((e) =>
     console.log(`        ${e.part ? e.part + '  ' : '   '}${e.title}  — ${e.count}`)
   );
 });
 console.log(
-  `\n   סה״כ: ${exams.length} מבחנים, ${exams.reduce((a, e) => a + e.count, 0)} שאלות\n`
+  `\n   סה״כ: ${exams.filter((e) => !NOT_QUIZ.has(e.kind)).length} מבחנים, ${qCount(exams)} שאלות\n`
 );
