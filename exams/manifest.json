@@ -1,9 +1,9 @@
 {
-  "updated": "2026-07-16",
-  "version": "046ffad4",
+  "updated": "2026-07-17",
+  "version": "225056df",
   "assets": {
-    "css": "0c37ee13",
-    "js": "2c04449a"
+    "css": "46f57dee",
+    "js": "dbd1171e"
   },
   "courses": [
     {
@@ -111,6 +111,7 @@
       "moed": null,
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 100
     },
@@ -126,6 +127,7 @@
       "moed": null,
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 50
     },
@@ -141,6 +143,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 40
     },
@@ -156,6 +159,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 40
     },
@@ -171,6 +175,7 @@
       "moed": null,
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 30
     },
@@ -186,6 +191,7 @@
       "moed": null,
       "added": "2026-07-14",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 40
     },
@@ -201,6 +207,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 42
     },
@@ -216,6 +223,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 35
     },
@@ -231,6 +239,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 34
     },
@@ -246,6 +255,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 46
     },
@@ -261,6 +271,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 49
     },
@@ -276,6 +287,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 35
     },
@@ -291,6 +303,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -306,6 +319,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -321,6 +335,7 @@
       "moed": "א",
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 45
     },
@@ -336,6 +351,7 @@
       "moed": "ב",
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 44
     },
@@ -351,6 +367,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -366,6 +383,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -381,6 +399,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -396,6 +415,7 @@
       "moed": null,
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -411,6 +431,7 @@
       "moed": "א",
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 48
     },
@@ -426,6 +447,7 @@
       "moed": "ב",
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 48
     },
@@ -441,6 +463,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -456,6 +479,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -471,6 +495,7 @@
       "moed": "א",
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 32
     },
@@ -486,6 +511,7 @@
       "moed": "ב",
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 32
     },
@@ -501,6 +527,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -516,6 +543,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 10
     },
@@ -531,6 +559,7 @@
       "moed": "א",
       "added": "2026-07-15",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 31
     },
@@ -546,6 +575,7 @@
       "moed": "ב",
       "added": "2026-07-16",
       "official": true,
+      "trust": "verified",
       "heroSub": null,
       "count": 33
     },
@@ -561,6 +591,7 @@
       "moed": null,
       "added": "2026-07-17",
       "official": null,
+      "trust": null,
       "heroSub": "חמישה סיכומים (709 עמ׳) נסרקו מול 12 הנושאים ומול כל 413 השאלות של המאגר הרשמי, 2021–2025. לכל נושא: מאיזה סיכום ומאיזה עמוד, כמה אחוז מהמבחן הוא באמת, ומה בסיכומים לא נשאל מעולם.",
       "count": 12
     },
@@ -574,8 +605,9 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-16",
+      "added": "2026-07-17",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 26
     },
@@ -591,6 +623,7 @@
       "moed": null,
       "added": "2026-07-16",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 15
     },
@@ -606,6 +639,7 @@
       "moed": null,
       "added": "2026-07-17",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 12
     },
@@ -619,8 +653,9 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-16",
+      "added": "2026-07-17",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 50
     },
@@ -636,6 +671,7 @@
       "moed": "א",
       "added": "2026-07-15",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 28
     },
@@ -651,6 +687,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "partial",
       "heroSub": null,
       "count": 59
     },
@@ -666,6 +703,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "unverified",
       "heroSub": null,
       "count": 38
     },
@@ -681,6 +719,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "verified",
       "heroSub": null,
       "count": 55
     },
@@ -696,6 +735,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "verified",
       "heroSub": null,
       "count": 54
     },
@@ -711,6 +751,7 @@
       "moed": "ב",
       "added": "2026-07-15",
       "official": null,
+      "trust": null,
       "heroSub": null,
       "count": 11
     },
@@ -726,6 +767,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "partial",
       "heroSub": null,
       "count": 28
     },
@@ -741,6 +783,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
+      "trust": "unverified",
       "heroSub": null,
       "count": 60
     }

@@ -318,6 +318,9 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 /* מפתח רשמי מהמודל מול שחזור מהזיכרון — סימן אמינות, ולכן ירוק/ניטרלי. */
 .tag.official{background:var(--good-bg); border-color:var(--good-ln); color:var(--good);}
 .tag.recon{background:var(--surface-2); border-color:var(--line); color:var(--dim);}
+/* אמינות מפתח התשובות. כתום ולא אדום: "לא אומת" הוא חוסר ידיעה, לא שגיאה. */
+.tag.trust-ok{background:var(--good-bg); border-color:var(--good-ln); color:var(--good);}
+.tag.trust-warn{background:var(--warn-bg); border-color:var(--warn-ln); color:var(--warn);}
 
 .card-foot{display:flex; align-items:center; justify-content:space-between; gap:11px;}
 .card-score{font-size:12.5px; font-weight:800; color:var(--dim); white-space:nowrap;}
@@ -484,11 +487,36 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   display:flex; align-items:center; justify-content:center;
   padding:20px; cursor:zoom-out;
 }
-.lightbox img{
+/* העוטף גולל, ולכן התמונה יכולה להיות גדולה מהמסך ואפשר לנוע בה — זה מה
+   שהופך "תצוגה מוגדלת" לזום. touch-action:pinch-zoom משאיר לדפדפן את
+   הצביטה בטלפון במקום להילחם בה. */
+.lb-pane{
   max-width:100%; max-height:100%;
+  overflow:auto; -webkit-overflow-scrolling:touch;
+  touch-action:pinch-zoom;
+  border-radius:8px;
+}
+.lightbox img{
+  display:block; max-width:100%; max-height:100%;
   background:#fff; padding:12px; border-radius:8px;
   box-shadow:0 8px 40px rgba(0,0,0,.5);
+  cursor:zoom-in;
 }
+/* מצב מוגדל: התמונה משתחררת מגבולות המסך לרוחב מלא, והעוטף מספק את הגלילה. */
+.lightbox.zoomed .lb-pane{width:100%; height:100%;}
+.lightbox.zoomed img{
+  max-width:none; max-height:none;
+  width:220%; cursor:zoom-out;
+}
+.lb-close{
+  position:absolute; top:14px; inset-inline-end:14px;
+  width:40px; height:40px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.35); background:rgba(0,0,0,.55);
+  color:#fff; font-size:17px; font-weight:800; line-height:1;
+  cursor:pointer; transition:.13s;
+}
+.lb-close:hover{background:rgba(0,0,0,.85);}
+.lb-close:focus-visible{outline:2px solid #fff; outline-offset:2px;}
 
 .q-table{overflow-x:auto; margin:18px 0 4px;}
 .q-table table{border-collapse:collapse; width:100%; font-size:14px; min-width:340px;}
@@ -503,6 +531,9 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   cursor:pointer; transition:.13s;
   font-size:15.5px; line-height:1.65;
 }
+/* מסיח ננעל אחרי מענה ויוצא מסבב הטאב, אז המסגרת הזאת מופיעה רק כשיש
+   באמת מה לבחור. בלי סימון נראה, ניווט המקלדת קיים אבל עיוור. */
+.opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 .opt:hover:not(.locked){border-color:var(--accent); background:var(--accent-sl);}
 .opt .key{
   flex:none; width:27px; height:27px; border-radius:7px;
@@ -569,6 +600,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   font-size:14px; font-weight:700; color:var(--muted);
   cursor:pointer; transition:.13s; user-select:none;
 }
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 .chip:hover{border-color:var(--accent); color:var(--accent-dk);}
 .chip.on{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
 
@@ -912,7 +944,11 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 @media (max-width:640px){
   .sim-strip-row{flex-direction:column; align-items:stretch;}
   .sim-chip{justify-content:flex-start;}
-  .bd-sim{display:none;}   /* השורה צפופה ממילא במסך צר */
+  /* קישור הסימולציה יורד — השורה צפופה ממילא במסך צר. אבל "איפה ללמוד"
+     נשאר: הוא חולק את המחלקה רק בשביל צורת הגלולה, והוא הדבר היחיד בשורה
+     שאומר מה לעשות עכשיו. הטלפון הוא המסך שבו לומדים הכי הרבה — להסתיר בו
+     דווקא את הגשר אל החומר זה להסתיר את העיקר. */
+  .bd-sim:not(.bd-guide){display:none;}
 }
 
 /* --- ריסט הסימולציה --- */

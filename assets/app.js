@@ -13,6 +13,16 @@ const SEEN_KEY = 'shichzurim.seenIntro';
 const THEME_KEY = 'shichzurim.theme';
 const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים' };
 
+/* עד כמה אפשר לסמוך על מפתח התשובות — מה שהמשחזרים עצמם הצהירו.
+   "לא אומתו" אינו "שגוי": הוא אומר שאיש לא בדק, וזו בדיוק הידיעה שהלומד
+   צריך לפני שהוא בונה עליה. לכן שניהם כתומים ולא אדומים — אדום היה טוען
+   שהתשובה שגויה, וזה לא מה שידוע לנו. */
+const TRUST_TAG = {
+  verified:   ['✓ אומתו בחשיפה',    'trust-ok'],
+  partial:    ['⚠️ אומת חלקית',      'trust-warn'],
+  unverified: ['⚠️ תשובות לא אומתו', 'trust-warn'],
+};
+
 const view = document.getElementById('view');
 const el = (tag, cls, txt) => {
   const n = document.createElement(tag);
@@ -22,6 +32,21 @@ const el = (tag, cls, txt) => {
 };
 const plural = (n, one, many) => (n === 1 ? `${one} אחד` : `${n} ${many}`);
 
+/* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
+   בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
+   מחלקה כן נוצרת כ-button (ראו s.toggles) — הפער הזה הוא הסיבה שזה נשמט.
+   אין כאן aria-pressed בכוונה: מצב ה-on מתחלף דרך classList בשישה מקומות
+   שונים, ותכונה שלא מסונכרנת גרועה מתכונה חסרה — היא משקרת לקורא המסך. */
+const chipEl = (cls, txt) => {
+  const c = el('div', cls, txt);
+  c.setAttribute('role', 'button');
+  c.tabIndex = 0;
+  c.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+  });
+  return c;
+};
+
 /* ---------- ערכת נושא ---------- */
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
@@ -30,9 +55,15 @@ function applyTheme(t) {
   // קנבס לא יורש צבעים מ-CSS. אם סימולציה על המסך — לצייר מחדש.
   if (simRepaint) simRepaint();
 }
+/* בלי בחירה מפורשת — הולכים אחרי המכשיר. רוב הלמידה כאן קורית בלילה, ומסך
+   לבן בוהק ב-2 לפנות בוקר הוא לא ברירת מחדל ניטרלית. בחירה מפורשת של המשתמש
+   תמיד גוברת ונשמרת, ולכן מי שבחר בהיר יקבל בהיר גם על מכשיר כהה. */
+const systemTheme = () =>
+  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
 function initTheme() {
   const saved = localStorage.getItem(THEME_KEY);
-  applyTheme(saved || 'light');
+  applyTheme(saved || systemTheme());
   document.getElementById('themeBtn').onclick = () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     localStorage.setItem(THEME_KEY, next);
@@ -548,6 +579,16 @@ function examCard(m) {
      המפתח, ועד עכשיו הוא היה קבור ב-note שנראה רק אחרי שנכנסים למבחן. */
   if (m.official === true) meta.append(el('span', 'tag official', '✓ מאסטר רשמי'));
   else if (m.official === false) meta.append(el('span', 'tag recon', 'שחזור סטודנטים'));
+  /* האם התשובות אומתו במעמד החשיפה. עד עכשיו זה נאסף בכל ייבוא ולא הוצג
+     בשום מקום — כלומר יש שחזורים שהמשחזרים עצמם כתבו בהם "כלל התשובות לא
+     אומתו בחשיפה", והלומד תרגל 60 שאלות כאילו המפתח ודאי.
+
+     על מאסטר רשמי לא מוסיפים תג: בדאטה official===true חופף בדיוק ל-
+     trust==='verified', ושני תגים ירוקים זה אותו מידע פעמיים.
+     היעדר תג = לא ידוע, וזה בכוונה — 13 מבחנים עוד לא סומנו, ולומר עליהם
+     "אומת" יהיה שקר ולומר "לא אומת" יהיה הכפשה. */
+  const tr = m.official !== true && TRUST_TAG[m.trust];
+  if (tr) meta.append(el('span', 'tag ' + tr[1], tr[0]));
   a.append(meta);
 
   const foot = el('div', 'card-foot');
@@ -968,11 +1009,20 @@ function playQuestions(cfg) {
     const opts = el('div', 'opts');
     const fb = el('div', 'fb');
 
+    /* מסיח הוא div ולא button כי button דורס את הטיפוגרפיה והעטיפה של טקסט
+       ארוך בעברית. המחיר הוא שהתפקיד והמקלדת לא מגיעים בחינם — ובלעדיהם
+       אפשר לענות רק בעכבר או בקיצור 1-9, וקורא מסך לא יודע שזו בחירה. */
     item.opts.forEach((text, oi) => {
       const o = el('div', 'opt');
+      o.setAttribute('role', 'button');
+      o.tabIndex = 0;
       o.append(el('span', 'key', String(oi + 1)));
       o.append(el('span', null, text));
-      o.onclick = () => choose(qi, oi, card, opts, fb, item);
+      const pick = () => choose(qi, oi, card, opts, fb, item);
+      o.onclick = pick;
+      o.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+      });
       opts.append(o);
     });
 
@@ -998,6 +1048,10 @@ function playQuestions(cfg) {
     const isRight = oi === item.a;
     opts.querySelectorAll('.opt').forEach((o, i) => {
       o.classList.add('locked');
+      /* אחרי המענה אין יותר מה לבחור. בלי זה הטאב ממשיך לעצור על ארבעה
+         "כפתורים" מתים בדרך להסבר — שהוא מה שבאמת רוצים להגיע אליו. */
+      o.tabIndex = -1;
+      o.setAttribute('aria-disabled', 'true');
       if (i === item.a) o.classList.add('correct');
       else if (i === oi) o.classList.add('wrong');
       if (i === oi) o.classList.add('chosen');
@@ -1126,18 +1180,50 @@ function tableOf(t) {
    באלקטרו הגרפים הם עיקר המבחן והפרטים קטנים, לכן זום הוא חובה. */
 function openLightbox(src) {
   const overlay = el('div', 'lightbox');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'איור לשאלה — תצוגה מוגדלת');
+
+  /* גלילה חיה בתוך העוטף היא מה שהופך את זה לזום אמיתי: התמונה יכולה לחרוג
+     מהמסך, ואפשר לנוע בה. בלי זה גרף של פוטנציאל פעולה נכנס למסך הטלפון
+     ונעצר שם כבול קטן — וזה כל מה שהיה כאן קודם. */
+  const pane = el('div', 'lb-pane');
   const img = el('img');
   img.src = src;
   img.alt = 'איור לשאלה — תצוגה מוגדלת';
-  overlay.append(img);
-  const close = () => {
+
+  /* לחיצה על התמונה עצמה סגרה את החלון — הקליק בעבע לרקע. זה הפך כל ניסיון
+     להתמקד בגרף לסגירה, בדיוק בפעולה שהכי טבעי לעשות. */
+  img.addEventListener('click', (e) => {
+    e.stopPropagation();
+    overlay.classList.toggle('zoomed');
+  });
+  img.title = 'לחיצה — הגדלה / התאמה למסך';
+
+  const btn = el('button', 'lb-close', '✕');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'סגירה');
+  btn.onclick = close;
+
+  pane.append(img);
+  overlay.append(pane, btn);
+
+  const prev = document.activeElement;
+  function close() {
     overlay.remove();
     document.removeEventListener('keydown', onKey);
+    if (prev && prev.focus) prev.focus();   // חזרה לתמונה שממנה נפתחנו
+  }
+  /* המיקוד נלכד בכפתור הסגירה: זה היחיד שאפשר לעשות כאן, ובלי זה הטאב
+     ממשיך לרוץ על המבחן שמאחורי החלון. */
+  const onKey = (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'Tab') { e.preventDefault(); btn.focus(); }
   };
-  const onKey = (e) => { if (e.key === 'Escape') close(); };
-  overlay.addEventListener('click', close);
+  overlay.addEventListener('click', close);   // רקע בלבד — התמונה עוצרת בעבוע
   document.addEventListener('keydown', onKey);
   document.body.append(overlay);
+  btn.focus();
 }
 
 /* ================= תרגול חופשי =================
@@ -1160,13 +1246,18 @@ async function renderPractice(courseId, seedTopic = null) {
 
   /* מבחן ה-High Yield נבנה מהשאלות של השחזורים עצמם, ולכן אסור לו להיכנס
      למאגר — אחרת כל שאלה חוזרת הייתה מופיעה כאן פעמיים. */
+  /* במקביל ולא בטור. באלקטרו יש 19 קבצים (חצי מגה); await בתוך לולאה הפך
+     אותם ל-19 הלוך-ושוב רצופים, כל אחד ממתין לקודמו — בטלפון על סלולרי זו
+     המתנה של שניות מול "טוען את בנק השאלות…". loadExam כבר מקאש, אז קריאה
+     כפולה לאותו מבחן לא עולה כלום. */
+  const metas = quizzesOf(courseId).filter((m) => m.kind !== 'highyield');
+  const loaded = await Promise.all(metas.map((m) => loadExam(m.id)));
   const pool = [];
-  for (const m of quizzesOf(courseId).filter((m) => m.kind !== 'highyield')) {
-    const exam = await loadExam(m.id);
-    exam.questions.forEach((q, i) =>
-      pool.push({ ...q, part: m.part || '', origin: exam.title, examId: m.id, idx: i })
+  metas.forEach((m, mi) => {
+    loaded[mi].questions.forEach((q, i) =>
+      pool.push({ ...q, part: m.part || '', origin: loaded[mi].title, examId: m.id, idx: i })
     );
-  }
+  });
 
   view.innerHTML = '';
   view.append(crumb(c.name, '#/course/' + courseId));
@@ -1237,7 +1328,7 @@ async function renderPractice(courseId, seedTopic = null) {
     { id: 'all',   label: '🔁 הכול, כולל מה שראיתי' },
   ];
   MODES.forEach((m) => {
-    const ch = el('div', 'chip' + (m.id === mode ? ' on' : ''), m.label);
+    const ch = chipEl('chip' + (m.id === mode ? ' on' : ''), m.label);
     ch.onclick = () => {
       mode = m.id;
       modeChips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -1280,7 +1371,7 @@ async function renderPractice(courseId, seedTopic = null) {
     partsField.append(el('label', null, 'חלק'));
     const chips = el('div', 'chips');
     allParts.forEach((p) => {
-      const ch = el('div', 'chip on', `${c.name} ${p}`);
+      const ch = chipEl('chip on', `${c.name} ${p}`);
       ch.onclick = () => {
         if (selParts.has(p) && selParts.size > 1) { selParts.delete(p); ch.classList.remove('on'); }
         else if (!selParts.has(p)) { selParts.add(p); ch.classList.add('on'); }
@@ -1317,12 +1408,12 @@ async function renderPractice(courseId, seedTopic = null) {
     topicsField.style.display = '';
     topicsLabel.textContent = `נושאים ${selTopics.size ? `(${selTopics.size} נבחרו)` : '(הכול)'}`;
 
-    const all = el('div', 'chip' + (selTopics.size === 0 ? ' on' : ''), 'כל הנושאים');
+    const all = chipEl('chip' + (selTopics.size === 0 ? ' on' : ''), 'כל הנושאים');
     all.onclick = () => { selTopics.clear(); drawTopics(); update(); };
     topicChips.append(all);
 
     names.forEach((t) => {
-      const ch = el('div', 'chip' + (selTopics.has(t) ? ' on' : ''), `${t} · ${counts[t]}`);
+      const ch = chipEl('chip' + (selTopics.has(t) ? ' on' : ''), `${t} · ${counts[t]}`);
       ch.onclick = () => {
         if (selTopics.has(t)) selTopics.delete(t); else selTopics.add(t);
         drawTopics();
@@ -1346,7 +1437,7 @@ async function renderPractice(courseId, seedTopic = null) {
     ].forEach(({ n, label }) => {
       const have = repeatCounts(n);
       if (n > 1 && !have) return;                       // אל תציע מסנן שמחזיר אפס
-      const ch = el('div', 'chip' + (n === minRepeat ? ' on' : ''), n === 1 ? label : `${label} · ${have}`);
+      const ch = chipEl('chip' + (n === minRepeat ? ' on' : ''), n === 1 ? label : `${label} · ${have}`);
       ch.onclick = () => {
         minRepeat = n;
         rc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -1364,7 +1455,7 @@ async function renderPractice(courseId, seedTopic = null) {
   countField.append(el('label', null, 'כמה שאלות'));
   const cc = el('div', 'chips');
   [10, 20, 30, 50, 0].forEach((n) => {
-    const ch = el('div', 'chip' + (n === 20 ? ' on' : ''), n === 0 ? 'הכול' : String(n));
+    const ch = chipEl('chip' + (n === 20 ? ' on' : ''), n === 0 ? 'הכול' : String(n));
     ch.onclick = () => {
       count = n;
       cc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -1494,14 +1585,15 @@ async function renderReview(courseId) {
   // נשען על מפת ה"נראו" — לכן טעות שנעשתה בתרגול חופשי מגיעה לכאן גם היא,
   // ותשובה נכונה כאן מורידה את השאלה מהרשימה.
   const map = seen.read();
+  const metas = quizzesOf(courseId);
+  const loaded = await Promise.all(metas.map((m) => loadExam(m.id)));   // במקביל, לא בטור
   const wrong = [];
-  for (const m of quizzesOf(courseId)) {
-    const exam = await loadExam(m.id);
-    exam.questions.forEach((q, i) => {
-      const item = { ...q, origin: exam.title, examId: m.id, idx: i };
+  metas.forEach((m, mi) => {
+    loaded[mi].questions.forEach((q, i) => {
+      const item = { ...q, origin: loaded[mi].title, examId: m.id, idx: i };
       if (map[qKey(item)] === 0) wrong.push(item);
     });
-  }
+  });
 
   view.innerHTML = '';
 
