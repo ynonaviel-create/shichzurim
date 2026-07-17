@@ -93,7 +93,20 @@ const store = {
 
    נכתב גם ממבחן וגם מתרגול — שאלה שראית במבחן לא תחזור כ"חדשה" בתרגול. */
 const SEEN_Q_KEY = 'shichzurim.seen';
-const qKey = (item) => `${item.examId}#${item.idx}`;
+
+/* המפתח הוא זהות השאלה, לא מקומה.
+
+   עד 17/07 זה היה `examId#idx` — מיקום. כל עוד אף אחד לא נוגע בקבצים זה עובד,
+   אבל הארכיון נערך כל יום: כשהוסרו שאלות הלב מאלקטרו תשפ״ה והמבחן ירד מ-38
+   ל-31, כל השאלות שאחרי המחיקה זזו מקום — וההתקדמות זזה איתן. האתר הציג
+   "כבר ראית" על שאלה שלא נראתה, והסתיר שאלה שכן. הכשל היה שקט לחלוטין.
+
+   `qid` הוא md5 של הטקסט והמסיחים, מוטבע פעם אחת ואז קפוא (repeats.js) —
+   הוא נשאר צמוד לשאלה גם אחרי תיקון ניסוח, ולא זז כשמוחקים שאלה אחרת.
+
+   הנפילה ל-idx אינה זמנית: שאלה בלי qid (kind עתידי, קובץ שטרם עבר sync)
+   עדיין צריכה מפתח כלשהו, ומיקום עדיף על כלום. */
+const qKey = (item) => item.qid || `${item.examId}#${item.idx}`;
 
 const seen = {
   read() {
@@ -166,7 +179,35 @@ async function loadExam(id) {
   if (!meta) throw new Error('לא נמצא מבחן: ' + id);
   const res = await fetch(`exams/${meta.file}?v=${VERSION}`);
   if (!res.ok) throw new Error('exam ' + res.status);
-  return (cache[id] = await res.json());
+  const data = await res.json();
+  migrateSeen(data);
+  return (cache[id] = data);
+}
+
+/* העברת ההתקדמות ממפתח-מיקום למפתח-זהות.
+
+   יושבת כאן ולא באתחול, כי כאן — ורק כאן — יש ביד גם את ההתקדמות הישנה וגם
+   את המיפוי מיקום→qid שמפענח אותה. מיגרציה גורפת הייתה מחייבת למשוך 1.6MB
+   של שאלות בכל טעינת דף, על נייד, לפני שרואים משהו.
+
+   אידמפוטנטית בבנייה: מעתיקה ואז מוחקת את הישן, אז אין צורך בדגל גרסה.
+   ה-qid מנצח אם שניהם קיימים — הוא החדש והנכון.
+
+   ⚠️ מה שכבר אבד נשאר אבוד: המיפוי הוא לפי הסדר של *היום*, וההתקדמות שכבר
+   הוזזה כשקוצר אלקטרו תשפ״ה אינה ניתנת לשחזור — אין רישום של הסדר הישן.
+   זה עוצר את הדימום, לא מרפא. */
+function migrateSeen(exam) {
+  if (!Array.isArray(exam.questions)) return;
+  const d = seen.read();
+  let touched = false;
+  exam.questions.forEach((q, i) => {
+    const old = `${exam.id}#${i}`;
+    if (!q.qid || d[old] === undefined) return;
+    if (d[q.qid] === undefined) d[q.qid] = d[old];
+    delete d[old];
+    touched = true;
+  });
+  if (touched) seen.write(d);
 }
 
 const courseOf = (id) => COURSES.find((c) => c.id === id);
@@ -763,12 +804,48 @@ async function renderCards(id) {
   updateFooter();
 }
 
+/* תרגום בגבול הנגן: מה ששמור ב-localStorage ממופתח qid (v:2), ומה שהנגן
+   עובד איתו ממופתח אינדקס. שתי הפונקציות האלה הן הגשר, והן היחידות שיודעות
+   ששתי הצורות קיימות.
+
+   רשומה ישנה (בלי v) נקראת כפי שהיא — המפתחות בה *הם* אינדקסים, וזו בדיוק
+   המיגרציה: בשמירה הבאה היא נכתבת מחדש לפי qid. שאלה שנמחקה מהקובץ פשוט לא
+   נמצאת ב-byQid והתשובה עליה נופלת בשקט, וזה הנכון — היא לא קיימת יותר. */
+function fromStore(rec, questions) {
+  const src = rec.answers || {};
+  if (rec.v !== 2) return { ...src };            // ישן: המפתחות כבר אינדקסים
+  const out = {};
+  questions.forEach((q, i) => {
+    if (q.qid && src[q.qid] !== undefined) out[i] = src[q.qid];
+  });
+  return out;
+}
+
+function toStore(answers, questions) {
+  const out = {};
+  let all = true;
+  Object.entries(answers).forEach(([qi, oi]) => {
+    const q = questions[qi];
+    if (q && q.qid) out[q.qid] = oi;
+    else { all = false; out[qi] = oi; }         // בלי qid — נשאר אינדקס
+  });
+  return { answers: out, v: all ? 2 : undefined };
+}
+
 function playQuestions(cfg) {
   const { key, title, subtitle, note, questions, persist, back } = cfg;
   view.innerHTML = '';
 
+  /* התשובות פר-מבחן סבלו מאותה תקלה כמו ההתקדמות: הן ממופתחות באינדקס, אז
+     אחרי שנמחקת שאלה מאמצע הקובץ הן מוצגות על השאלה הלא-נכונה — הפעם באופן
+     גלוי לעין. אבל answers[qi] מופיע בשמונה מקומות בנגן הזה, והוא הנתיב החם
+     של האתר. לכן מתרגמים *בגבול* בלבד: הכניסה והשמירה עוברות דרך qid,
+     והפנימיות של הנגן ממשיכות לעבוד באינדקס כאילו כלום.
+
+     `v:2` מסמן שהמפתחות כבר qid. בלי הדגל אין דרך להבחין — qid בן 8 תווים
+     יכול להיות "12345678", ומפתח אינדקס נראה בדיוק אותו דבר. */
   const rec = persist ? store.exam(key) : { answers: {} };
-  const answers = persist ? rec.answers : {};
+  const answers = persist ? fromStore(rec, questions) : {};
 
   /* שאלות "מחוץ לחומר" (offSyllabus) — נושא שיצא מהסילבוס (למשל הלב במחזור נ״ב).
      מוצגות ומתורגלות להעשרה, אבל לא נספרות בציון, בהתקדמות ובפילוח הנושאים. */
@@ -833,7 +910,10 @@ function playQuestions(cfg) {
     fill.className = answered ? (good / answered >= 0.7 ? 'good' : 'bad') : '';
 
     if (persist) {
-      store.save(key, { answers, correct: good, done: answered === scoredCount, at: Date.now() });
+      store.save(key, {
+        ...toStore(answers, questions),        // אינדקס → qid, בגבול בלבד
+        correct: good, done: answered === scoredCount, at: Date.now(),
+      });
     }
 
     toResult.style.display = answered === scoredCount ? '' : 'none';
@@ -1588,10 +1668,22 @@ async function renderReview(courseId) {
   const metas = quizzesOf(courseId);
   const loaded = await Promise.all(metas.map((m) => loadExam(m.id)));   // במקביל, לא בטור
   const wrong = [];
+  /* שאלה חוזרת קיימת גם בשחזור וגם במבחן ה-High Yield שנבנה ממנו. מאז
+     שהשניים חולקים qid הן גם חולקות מפתח התקדמות — ולכן *שתיהן* עוברות את
+     התנאי, ובלי הסינון הזה אותה טעות מוצגת פעמיים. renderPractice מחריג את
+     ה-HY לגמרי, אבל כאן אסור: הטעות עצמה אמיתית וצריכה להופיע — פעם אחת.
+     המופע הראשון מנצח, וזה השחזור עצמו: examsOf ממיין לפי מחזור/שנה יורד,
+     ול-HY אין אף אחד מהם — הוא נופל לסוף (אומת: אחרון מ-9 במולקולרית,
+     אחרון מ-19 באלקטרו). ה-HY של ביוכימיה נכתב ביד ולא נבנה משחזור, ולכן
+     יש לו qid משלו וממילא אין מה לאחד. */
+  const shown = new Set();
   metas.forEach((m, mi) => {
     loaded[mi].questions.forEach((q, i) => {
       const item = { ...q, origin: loaded[mi].title, examId: m.id, idx: i };
-      if (map[qKey(item)] === 0) wrong.push(item);
+      const k = qKey(item);
+      if (map[k] !== 0 || shown.has(k)) return;
+      shown.add(k);
+      wrong.push(item);
     });
   });
 
@@ -2691,13 +2783,28 @@ const guideOf = (courseId) => EXAMS.find((e) => e.course === courseId && e.kind 
 function masteryOf(courseId, topic) {
   const d = seen.read();
   let total = 0, correct = 0;
+  /* לפי מפתח ייחודי ולא לפי מופע. שאלה חוזרת קיימת גם בשחזור וגם במבחן ה-
+     High Yield שנבנה ממנו, ולכן נספרה כאן פעמיים — המכנה של שעתוק היה 79
+     במקום 67, ו"כמה אתה יודע" יצא נמוך מהאמת. הדירוג במפה נגזר מזה ישירות
+     (freq × (1-mastery)), אז הטעות דחפה נושאים למעלה בלי סיבה.
+
+     דה-דופליקציה דרך qKey ולא החרגה של ה-HY: שני שחזורים שונים שבהם אותה
+     שאלה מקבלים qid שונה (ה-examId בגיבוב) — ואלה באמת שני מופעים נפרדים
+     שראוי לספור פעמיים. רק העותק שה-HY לקח מהמקור הוא כפילות אמיתית. */
+  const counted = new Set();
   quizzesOf(courseId).forEach((m) => {
     const q = cache[m.id];
     if (!q) return;
+    /* דרך qKey ולא במפתח ידני. זה המקום היחיד שבנה את המפתח בעצמו, ולכן
+       הוא המקום שהכי קל היה לשכוח — והכישלון שלו שקט: דירוג העדיפויות במפה
+       ולוח הימים היו מתאפסים בלי שום הודעת שגיאה. */
     (q.questions || []).forEach((qq, i) => {
       if (qq.topic !== topic) return;
+      const k = qKey({ ...qq, examId: m.id, idx: i });
+      if (counted.has(k)) return;
+      counted.add(k);
       total++;
-      if (d[`${m.id}#${i}`] === 1) correct++;
+      if (d[k] === 1) correct++;
     });
   });
   return { total, correct, ratio: total ? correct / total : 0 };
