@@ -1197,3 +1197,78 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:7px 11px;
 }
 .g-skip-asked b{color:var(--warn);}
+
+/* ================= סיור ההיכרות =================
+   הזרקור הוא box-shadow ענק על אלמנט ריק: החור עצמו שקוף, וכל השאר מוחשך
+   בצל אחד. היתרון על פני ארבעה divים שמקיפים את היעד הוא שהפינות המעוגלות
+   יוצאות נכון, והמעבר בין שלבים מונפש בחינם — אותו אלמנט פשוט זז. */
+.tour{position:fixed; inset:0; z-index:1200;}
+.tour-hole{
+  position:absolute; border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(4,10,16,.72);
+  transition:top .28s cubic-bezier(.4,0,.2,1), left .28s cubic-bezier(.4,0,.2,1),
+             width .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+/* הגלילה **לא** ננעלת. הניסיון הראשון נעל אותה כדי שהבועה לא תתנתק מהיעד,
+   וזה שבר את הסיור עצמו: scrollIntoView לא מצליח לגלול בגוף עם overflow:hidden,
+   אז שלבים שיושבים נמוך בעמוד (מפת החומרים) פשוט לא הגיעו למסך.
+   במקום נעילה — מאזין scroll שמזיז את הזרקור. עדיף גם למשתמש: אפשר להסתכל
+   סביב באמצע הסיור והזרקור נשאר צמוד. */
+
+.tour-pop{
+  position:absolute; width:340px; max-width:calc(100vw - 24px);
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:18px 20px 15px;
+  box-shadow:0 18px 50px rgba(0,0,0,.4);
+  animation:tour-in .22s ease-out;
+}
+.tour-pop.center{
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  width:min(420px, calc(100vw - 32px));
+}
+@keyframes tour-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+.tour-pop.center{animation:tour-in-c .22s ease-out;}
+@keyframes tour-in-c{from{opacity:0;} to{opacity:1;}}
+
+/* החץ — משולש שנשען על גבול הבועה, והופך כיוון כשהבועה נאלצת לשבת מעל היעד. */
+.tour-pop::before{
+  content:''; position:absolute; inset-inline-start:calc(50% - 8px);
+  border:8px solid transparent; border-bottom-color:var(--surface);
+  top:-16px;
+}
+.tour-pop.up::before{top:auto; bottom:-16px; border-bottom-color:transparent; border-top-color:var(--surface);}
+.tour-pop.center::before,.tour-pop.no-arrow::before{display:none;}
+
+.tour-step{font-size:11.5px; font-weight:800; color:var(--accent); margin-bottom:5px;}
+.tour-pop h4{margin:0 0 7px; font-size:17px; font-weight:800; color:var(--text); line-height:1.4;}
+.tour-pop p{margin:0 0 15px; font-size:14px; line-height:1.7; color:var(--muted);}
+.tour-pop p b{color:var(--text);}
+
+.tour-acts{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.tour-nav{display:flex; gap:8px;}
+.tour-acts .btn{padding:8px 16px; font-size:13.5px;}
+.tour-skip{
+  background:none; border:none; padding:6px 2px; cursor:pointer;
+  font-size:13px; font-weight:700; color:var(--dim); text-decoration:underline;
+}
+.tour-skip:hover{color:var(--text);}
+.tour-skip:focus-visible,.tour-pop .btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+@media (max-width:640px){
+  .tour-pop{padding:16px 17px 13px;}
+  .tour-pop h4{font-size:16px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .tour-hole{transition:none;}
+  .tour-pop{animation:none;}
+}
+
+.about-tour{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin:0 0 30px;
+  padding:16px 20px; border-radius:var(--radius);
+  background:var(--accent-sl); border:1px solid var(--accent);
+}
+.about-tour b{display:block; font-size:15px; font-weight:800; margin-bottom:2px;}
+.about-tour span{font-size:13.5px; color:var(--muted);}

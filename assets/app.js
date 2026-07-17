@@ -281,6 +281,7 @@ function nextExamBanner() {
   if (!next) return null;
 
   const box = el('div', 'nextup u-' + urgency(next.ts));
+  box.dataset.tour = 'countdown';
 
   const left = el('div', 'nextup-info');
   left.append(el('div', 'nextup-label', 'המבחן הבא'));
@@ -415,6 +416,7 @@ function courseCard(c) {
   const p = courseProgress(c.id);
 
   const a = el('a', 'course');
+  a.dataset.tour = 'course';     // הסיור מצביע על הראשון שהוא מוצא
   a.href = '#/course/' + c.id;
 
   const top = el('div', 'course-top');
@@ -537,9 +539,11 @@ function renderCourse(courseId) {
   const actions = el('div', 'btn-row');
   actions.style.marginBottom = '30px';
   const pr = el('a', 'btn primary', `🎲 תרגול חופשי ב${c.name}`);
+  pr.dataset.tour = 'practice';
   pr.href = '#/practice/' + courseId;
   actions.append(pr);
   const rv = el('a', 'btn', `🎯 הטעויות שלי ב${c.name}`);
+  rv.dataset.tour = 'review';
   rv.href = '#/review/' + courseId;
   actions.append(rv);
   view.append(actions);
@@ -607,6 +611,7 @@ function cardsHero(m) {
 function examCard(m) {
   const s = quickScore(m);
   const a = el('a', 'card');
+  a.dataset.tour = 'exam';       // הסיור מצביע על הראשון שהוא מוצא
   a.href = '#/exam/' + m.id;
   a.append(el('h3', null, m.title));
 
@@ -1724,6 +1729,18 @@ function renderAbout() {
   head.append(el('p', null, 'דקה של קריאה, ואז אתה יודע להשתמש בכל מה שיש כאן.'));
   view.append(head);
 
+  /* הסיור נשאר נגיש גם אחרי שרצה. מי שדילג בפעם הראשונה — וזה רוב האנשים —
+     צריך מקום אחד וידוע לחזור אליו, אחרת הוא אבד לתמיד. */
+  const tourCta = el('div', 'about-tour');
+  const tt = el('div');
+  tt.append(el('b', null, '🧭 מעדיף שיראו לך?'));
+  tt.append(el('span', null, 'סיור קצר שמצביע על כל דבר במקום שבו הוא נמצא.'));
+  tourCta.append(tt);
+  const tb = el('button', 'btn primary', 'התחל סיור');
+  tb.onclick = () => startTour();
+  tourCta.append(tb);
+  view.append(tourCta);
+
   [
     { icon: '🧬', title: 'ארכיון שחזורים, לא עוד קובץ במחשב',
       body: 'שחזורים של מבחנים, מסודרים לפי מקצוע. נכנסים למקצוע — ורואים רק אותו. במקום לחפש ' +
@@ -1785,18 +1802,258 @@ function introBanner() {
   const b = el('div', 'intro');
   const txt = el('div');
   txt.append(el('b', null, '👋 פעם ראשונה כאן?'));
-  txt.append(el('span', null, 'דקה של הסבר על מה שאפשר לעשות באתר — ואיך להוציא ממנו הכי הרבה.'));
+  txt.append(el('span', null, 'סיור של דקה — נעבור יחד על מה שאפשר לעשות כאן, ואיך להוציא מזה הכי הרבה.'));
   b.append(txt);
 
   const acts = el('div', 'btn-row');
-  const read = el('a', 'btn primary', 'ספר לי');
-  read.href = '#/about';
+  const read = el('button', 'btn primary', 'קחו אותי לסיור');
+  read.onclick = () => startTour();
   acts.append(read);
   const skip = el('button', 'btn ghost', 'תודה, אני מסתדר');
   skip.onclick = () => { localStorage.setItem(SEEN_KEY, '1'); b.remove(); };
   acts.append(skip);
   b.append(acts);
   return b;
+}
+
+/* ================= סיור ההיכרות =================
+   רוב מי שנכנס לכאן לא נשלח לאתר — קיבל קישור בוואטסאפ, ואין לו מושג שיש
+   מפת חומרים, תרגול חוצה-מבחנים, או תג שאומר אם התשובות אומתו. ינון עונה על
+   אותן שאלות בפרטי שוב ושוב. דף טקסט לא פותר את זה: אף אחד לא קורא "מה זה?".
+
+   לכן הסיור מצביע על הדברים **במקום שבו הם באמת נמצאים**, ומנווט בין הדפים
+   כדי להראות אותם. הוא נדלג בכל רגע, ורץ פעם אחת — אבל תמיד אפשר להריץ שוב
+   מדף ההסבר.
+
+   העוגנים הם `data-tour` ולא מחלקות CSS: מחלקה משנה שם כשמעצבים מחדש, ואז
+   הסיור מצביע על כלום בשקט. שלב שהעוגן שלו לא נמצא פשוט מדולג — כך מקצוע
+   בלי מפת חומרים לא שובר את הסיור.
+
+   הסיור בונה את עצמו סביב **המבחן הקרוב שלך**, לא סביב מקצוע קבוע. */
+const TOUR_KEY = 'shichzurim.tourDone';
+
+/* על איזה מקצוע להעביר את הסיור.
+
+   האינטואיציה הראשונה הייתה "המבחן הקרוב שלך" — אישי ונחמד. אבל בפועל המבחן
+   הקרוב עשוי להיות מקצוע בלי מפת חומרים (קליני), ואז דווקא הפיצ׳ר שהכי צריך
+   הסבר הוא היחיד שלא מוצג. הסיור נועד ללמד את האתר, לא לשקף את הלו״ז.
+
+   לכן: המבחן הקרוב מנצח רק אם יש לו גם מפה. אחרת מקצוע שיש לו. */
+function tourCourse() {
+  const full = (id) => quizzesOf(id).length && guideOf(id);
+  const next = nextExamOverall();
+  if (next && full(next.course.id)) return next.course.id;
+  const withGuide = COURSES.find((c) => full(c.id));
+  if (withGuide) return withGuide.id;
+  if (next && quizzesOf(next.course.id).length) return next.course.id;
+  const any = COURSES.find((c) => quizzesOf(c.id).length);
+  return any ? any.id : null;
+}
+
+function tourSteps() {
+  const cid = tourCourse();
+  const c = cid ? courseOf(cid) : null;
+  const name = c ? c.name : 'המקצוע';
+  return [
+    { route: '#/', center: true,
+      title: '👋 ברוך הבא לארכיון',
+      body: 'כאן יושבים כל מבחני השחזור, בכל המקצועות — שאלות אמיתיות ממועדים קודמים, עם הסבר לכל אחת. ' +
+            'הסיור הזה לוקח דקה ומראה לך מה אפשר לעשות. אפשר לדלג בכל רגע.' },
+    { route: '#/', sel: '[data-tour="countdown"]',
+      title: '⏳ המבחן הבא שלך',
+      body: 'השעון רץ למועד האמיתי הקרוב, והצבע מתחלף ככל שמתקרבים. הוא לקוח מלוח הבחינות, לא מנוחש.' },
+    { route: '#/', sel: '[data-tour="course"]',
+      title: '📚 מקצוע אחד בכל פעם',
+      body: 'כל מקצוע והמבחנים שלו. הפס מראה כמה כבר ענית, והוא נצבע ירוק כשאתה מעל 70%.' },
+    { route: cid ? '#/course/' + cid : '#/', sel: '[data-tour="exam"]',
+      title: '📄 כל שחזור — וכמה אפשר לסמוך עליו',
+      body: 'לוחצים ופותרים. שימו לב לתגים: "✓ מאסטר רשמי" הוא מבחן מהמודל, ואילו ' +
+            '"⚠️ תשובות לא אומתו" אומר שהמשחזרים עצמם כתבו שהמפתח לא נבדק בחשיפה. זה משנה כמה להאמין לתשובה.' },
+    { route: cid ? '#/course/' + cid : '#/', sel: '[data-tour="guide"]',
+      title: '🗺️ מאיפה ללמוד כל נושא',
+      body: 'זה הדבר שהכי מפספסים. לכל נושא: מאיזה סיכום ומאיזה עמוד, מה המרצה אמר במפורש, ' +
+            'ומה <b>לא</b> צריך ללמוד. יש גם דירוג — מה הכי כדאי לפתוח עכשיו לפי מה שכבר ידוע לך.' },
+    { route: cid ? '#/course/' + cid : '#/', sel: '[data-tour="practice"]',
+      title: '🎲 תרגול שחוצה את כל המבחנים',
+      body: `לא כבול למבחן אחד — שואב מכל השאלות ב${name} יחד. אפשר לסנן לפי נושא, לחפש מילה, ` +
+            'ולבקש רק שאלות שחזרו בכמה מחזורים. כברירת מחדל תקבל רק שאלות שעוד לא ראית.' },
+    { route: cid ? '#/course/' + cid : '#/', sel: '[data-tour="review"]',
+      title: '🎯 הטעויות שלי',
+      body: 'כל שאלה שטעית בה — בכל מקום באתר — נאספת לכאן לבד. תענה עליה נכון והיא יורדת מהרשימה.' },
+    { route: cid ? '#/course/' + cid : '#/', center: true,
+      title: '✅ זהו, אתה מוכן',
+      body: 'עוד שני דברים ששווה לדעת: אחרי כל תשובה יש כפתור שמעתיק שאלה מוכנה ל-NotebookLM ' +
+            'אם רוצים להעמיק, ובאלקטרו יש סימולציות אינטראקטיביות. ' +
+            'רוצה לראות את הסיור שוב? הוא מחכה בעמוד "מה זה?".' },
+  ];
+}
+
+/* ממתין שהאלמנט יופיע. הניווט בין דפים הוא אסינכרוני (הראוטר מרנדר מחדש, וחלק
+   מהמסכים טוענים קבצים), ולכן אי אפשר פשוט למדוד מיד אחרי שינוי ה-hash. */
+/* פולינג ב-setTimeout ולא ב-requestAnimationFrame: rAF לא פועל כשהלשונית
+   מוסתרת, ומי שעובר לשונית באמצע הסיור היה חוזר ומוצא אותו תקוע לנצח. */
+function waitFor(sel, ms = 1200) {
+  return new Promise((done) => {
+    const t0 = Date.now();
+    (function look() {
+      const n = document.querySelector(sel);
+      if (n) return done(n);
+      if (Date.now() - t0 > ms) return done(null);
+      setTimeout(look, 40);
+    })();
+  });
+}
+
+/* ממתין שהגלילה החלקה תיעצר, במקום להמר על מספר קבוע של אלפיות. המרחק שיש
+   לגלול משתנה בין שלב לשלב, וטיימר קבוע או מודד מוקדם מדי (והזרקור נוחת ליד
+   היעד) או מבזבז זמן. בלשונית מוסתרת גלילה חלקה לא רצה כלל — ואז זה נגמר
+   בתקרה ופשוט ממשיך, כי מאזין ה-scroll ממקם מחדש ממילא. */
+function scrollSettled(max = 900) {
+  return new Promise((done) => {
+    const t0 = Date.now();
+    let last = window.scrollY, still = 0;
+    (function look() {
+      if (window.scrollY === last) still++; else { still = 0; last = window.scrollY; }
+      if (still >= 3 || Date.now() - t0 > max) return done();
+      setTimeout(look, 50);
+    })();
+  });
+}
+
+let tourStop = null;
+
+async function startTour() {
+  if (tourStop) return;                       // כבר רץ
+  localStorage.setItem(SEEN_KEY, '1');
+  const steps = tourSteps();
+  let i = 0;
+
+  const overlay = el('div', 'tour');
+  const hole = el('div', 'tour-hole');
+  const pop = el('div', 'tour-pop');
+  overlay.append(hole, pop);
+  document.body.append(overlay);
+
+  const end = () => {
+    localStorage.setItem(TOUR_KEY, '1');
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+    window.removeEventListener('resize', reflow);
+    window.removeEventListener('scroll', reflow);
+    tourStop = null;
+  };
+  tourStop = end;
+
+  const onKey = (e) => {
+    if (e.key === 'Escape') end();
+    else if (e.key === 'ArrowLeft') go(i + 1);    // RTL: שמאלה = קדימה
+    else if (e.key === 'ArrowRight') go(i - 1);
+  };
+  document.addEventListener('keydown', onKey);
+  /* הזרקור נמדד ב-viewport, אז כל גלילה מזיזה את היעד מתחתיו. passive — אין
+     preventDefault, ובלעדיו הדפדפן מאט את הגלילה בטלפון. */
+  const reflow = () => place(steps[i]);
+  window.addEventListener('resize', reflow);
+  window.addEventListener('scroll', reflow, { passive: true });
+
+  /* ממקם את החור ואת הבועה. אם אין יעד — בועה במרכז המסך והחור מתכווץ לאפס. */
+  function place(step) {
+    const t = step.sel ? document.querySelector(step.sel) : null;
+    if (!t || step.center) {
+      hole.style.cssText = 'width:0;height:0;top:50%;left:50%;';
+      pop.classList.add('center');
+      pop.style.cssText = '';
+      return;
+    }
+    pop.classList.remove('center');
+    const r = t.getBoundingClientRect();
+    const pad = 6;
+    hole.style.top = r.top - pad + 'px';
+    hole.style.left = r.left - pad + 'px';
+    hole.style.width = r.width + pad * 2 + 'px';
+    hole.style.height = r.height + pad * 2 + 'px';
+
+    /* מתחת ליעד אם יש מקום, אחרת מעליו — ובשני הצירים נצמדים לגבולות המסך.
+       ההצמדה האנכית אינה קישוט: אם הגלילה ליעד איחרה או נכשלה (המשתמש גלל
+       בעצמו, היעד ארוך מהמסך), הבועה הייתה נוחתת מחוץ למסך והסיור נראה שבור
+       בלי שום הודעה. עדיף שהיא תתנתק קצת מהיעד מאשר שתיעלם. */
+    const w = Math.min(340, window.innerWidth - 24);
+    pop.style.width = w + 'px';
+    let left = r.left + r.width / 2 - w / 2;
+    pop.style.left = Math.max(12, Math.min(left, window.innerWidth - w - 12)) + 'px';
+
+    const ph = pop.offsetHeight;
+    const below = window.innerHeight - r.bottom > ph + 24;
+    let top = below ? r.bottom + 14 : r.top - 14 - ph;
+    top = Math.max(12, Math.min(top, window.innerHeight - ph - 12));
+    pop.style.top = top + 'px';
+    pop.style.bottom = 'auto';
+    /* החץ מוצג רק כשהבועה באמת צמודה ליעד. אחרי הצמדה לגבול הוא היה מצביע
+       על כלום, וזה מבלבל יותר מאשר בלי חץ בכלל. */
+    pop.classList.toggle('up', !below);
+    const glued = below ? Math.abs(top - (r.bottom + 14)) < 2 : Math.abs(top - (r.top - 14 - ph)) < 2;
+    pop.classList.toggle('no-arrow', !glued);
+  }
+
+  /* שלב יכול לחכות עד 1.2 שניות לאלמנט שעוד נטען, וכל אותו זמן "הבא" עדיין
+     לחיץ. בלי הנעילה, שתי לחיצות מהירות מפעילות שני go() במקביל — הם דורסים
+     זה את ה-i של זה, והסיור מדלג שלבים או מצייר שלב אחד עם היעד של אחר. */
+  let busy = false;
+
+  async function go(n) {
+    if (busy || n < 0) return;
+    if (n >= steps.length) return end();
+    busy = true;
+    try { await run(n); } finally { busy = false; }
+  }
+
+  async function run(n) {
+    i = n;
+    const step = steps[i];
+
+    /* הכניסה הראשונה לאתר היא בלי hash כלל, ולכן '#/' הוא ברירת המחדל —
+       בלעדיה כל שלב בדף הבית היה מנווט מחדש ומאפס את הגלילה. */
+    if (step.route && (location.hash || '#/') !== step.route) location.hash = step.route;
+
+    if (step.sel) {
+      const t = await waitFor(step.sel);
+      /* שלב שהעוגן שלו לא קיים (מקצוע בלי מפה, למשל) — מדלגים הלאה בשקט
+         במקום להצביע על כלום. קריאה ל-run ולא ל-go: אנחנו כבר בתוך הנעילה,
+         ו-go היה חוסם את עצמו והסיור היה נתקע על השלב החסר. */
+      if (!t) return i + 1 < steps.length ? run(i + 1) : end();
+      t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      await scrollSettled();
+    } else {
+      await new Promise((r) => setTimeout(r, 60));
+    }
+    draw(step);
+    place(step);
+  }
+
+  function draw(step) {
+    pop.innerHTML = '';
+    pop.append(el('div', 'tour-step', `${i + 1} מתוך ${steps.length}`));
+    pop.append(el('h4', null, step.title));
+    const body = el('p');
+    body.innerHTML = step.body;               // מכיל <b> בלבד, מהמקור שלנו
+    pop.append(body);
+
+    const row = el('div', 'tour-acts');
+    const skip = el('button', 'tour-skip', 'דלג');
+    skip.onclick = end;
+    row.append(skip);
+
+    const right = el('div', 'tour-nav');
+    if (i > 0) { const b = el('button', 'btn ghost', 'הקודם'); b.onclick = () => go(i - 1); right.append(b); }
+    const nx = el('button', 'btn primary', i === steps.length - 1 ? 'סיימנו' : 'הבא');
+    nx.onclick = () => go(i + 1);
+    right.append(nx);
+    row.append(right);
+    pop.append(row);
+    nx.focus();
+  }
+
+  go(0);
 }
 
 /* ================= סימולציות =================
@@ -2900,6 +3157,7 @@ function guideHero(courseId) {
   const meta = guideOf(courseId);
   if (!meta) return null;
   const a = el('a', 'lhero guide-hero');
+  a.dataset.tour = 'guide';
   a.href = '#/guide/' + courseId;
   const left = el('div', 'lhero-main');
   left.append(el('div', 'lhero-eyebrow', '📚 מפת החומרים'));
