@@ -3261,7 +3261,11 @@ function qIndex(courseId) {
     const ex = cache[m.id];
     if (!ex) return;
     (ex.questions || []).forEach((q, i) => {
-      if (q.qid && !idx[q.qid]) idx[q.qid] = { examId: m.id, idx: i, title: ex.title };
+      /* `trust` נשמר כאן כי הקבלה חייבת לשאת אותו. נקודה יכולה להישען על
+         שחזור שהמשחזרים עצמם כתבו עליו שהתשובות לא אומתו — ובלי הסימון,
+         "נשאל 3 פעמים" נראה מוצק בדיוק כמו ראיה ממאסטר רשמי. התג כבר קיים
+         בכרטיס המבחן; כאן הוא פשוט נוסע עם הראיה. */
+      if (q.qid && !idx[q.qid]) idx[q.qid] = { examId: m.id, idx: i, title: ex.title, trust: m.trust };
     });
   });
   return (qIdxCache[courseId] = idx);
@@ -3281,10 +3285,16 @@ function pointsPanel(courseId, u, idx) {
   const ranked = u.points
     .map((p) => {
       const hits = (p.qids || []).filter((q) => idx[q]).map((q) => ({ qid: q, ...idx[q] }));
+      const solid = hits.filter((h) => h.trust !== 'unverified' && h.trust !== 'partial');
       return {
         p, hits,
         moadim: [...new Set(hits.map((h) => h.title))],
         wrong: hits.filter((h) => seenMap[h.qid] === 0).length,
+        /* כל הראיות מגיעות משחזורים שלא אומתו — כלומר הטענה עצמה נשענת על
+           מפתחות שאיש לא בדק. תגית על קישור בודד לא מספיקה כאן: ההבדל בין
+           "אחת מארבע ראיות רעועה" ל"כל הראיות רעועות" הוא ההבדל בין הערה
+           לבין אזהרה. */
+        allShaky: hits.length > 0 && solid.length === 0,
       };
     })
     .sort((a, b) => b.hits.length - a.hits.length);
@@ -3294,17 +3304,23 @@ function pointsPanel(courseId, u, idx) {
   det.append(el('summary', null,
     `📌 מה באמת נשאל — ${ranked.length} נקודות, מתוך ${nQ} שאלות שנשאלו בפועל`));
 
+  /* המסגור הזה הוא של ינון, אחרי שקרא את הפיילוט: **זו החזרה השנייה, לא
+     הראשונה.** זה גם מיישב את החשש המתודולוגי — הנקודות נדחסו מהשאלות שבארכיון,
+     ולכן הן לא "מלמדות" נושא מאפס; מי שיקרא רק אותן ילמד לענות ולא יבין.
+     אבל אחרי שקראת את הסיכום והבנת, "מה מתוך זה באמת נבחן" הוא בדיוק מה
+     שחזרה אמורה לעשות. לומר את זה במפורש עדיף על שהלומד יגלה לבד. */
   const lead = el('p', 'g-points-lead');
-  lead.textContent = 'כל שורה כאן היא משהו שבאמת נבחן, ולידה כמה פעמים ובאילו מועדים. ' +
-    'זה לא סיכום של הנושא — זה מה שהמבחן שאל עליו.';
+  lead.textContent = 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
+    'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
   det.append(lead);
 
-  ranked.forEach(({ p, hits, moadim, wrong }) => {
+  ranked.forEach(({ p, hits, wrong, allShaky }) => {
     const row = el('div', 'g-point');
     row.append(el('div', 'g-point-txt', p.point));
 
     const meta = el('div', 'g-point-meta');
     meta.append(el('span', 'g-point-n', hits.length === 1 ? 'נשאל פעם אחת' : `נשאל ${hits.length} פעמים`));
+    if (allShaky) meta.append(el('span', 'g-point-shaky', '⚠️ אף מפתח כאן לא אומת'));
     /* צביעה אישית: מגיעה בחינם מהמפתח היציב. "נפלת כאן" הוא בדיוק מה
        שמבדיל בין רשימת עובדות לבין משהו שמדבר אליך. */
     if (wrong) meta.append(el('span', 'g-point-bad', `✗ נפלת ב-${wrong}`));
@@ -3323,9 +3339,12 @@ function pointsPanel(courseId, u, idx) {
     if (hits.length) {
       const links = el('div', 'g-point-qs');
       hits.forEach((h) => {
-        const a = el('a', 'g-point-q', shortExam(h.title) + ' ↗');
+        const shaky = h.trust === 'unverified' || h.trust === 'partial';
+        const a = el('a', 'g-point-q' + (shaky ? ' shaky' : ''), (shaky ? '⚠️ ' : '') + shortExam(h.title) + ' ↗');
         a.href = `#/exam/${h.examId}/${h.idx}`;
-        a.title = h.title;
+        a.title = shaky
+          ? h.title + ' — התשובות בשחזור הזה לא אומתו בחשיפה'
+          : h.title;
         links.append(a);
       });
       row.append(links);

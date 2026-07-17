@@ -1325,3 +1325,17 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .g-point-q:hover{border-color:var(--accent); color:var(--accent);}
 .g-point-q:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+/* אמינות המפתח שמאחורי הראיה. הנקודה נכתבה מהשאלות, אבל חלק מהשאלות מגיעות
+   משחזורים שהמשחזרים עצמם כתבו עליהם שהתשובות לא אומתו בחשיפה. בלי הסימון
+   הזה, "נשאל 3 פעמים" נראה מוצק בדיוק כמו ראיה ממאסטר רשמי. כתום ולא אדום:
+   זה חוסר ידיעה, לא שגיאה — אותה החלטה כמו בתג שבכרטיס המבחן. */
+.g-point-q.shaky{
+  background:var(--warn-bg); border-color:var(--warn-ln); color:var(--warn);
+}
+.g-point-q.shaky:hover{border-color:var(--warn); color:var(--warn);}
+.g-point-shaky{
+  font-size:11px; font-weight:800; white-space:nowrap;
+  background:var(--warn-bg); border:1px solid var(--warn-ln); color:var(--warn);
+  border-radius:99px; padding:2px 9px;
+}
