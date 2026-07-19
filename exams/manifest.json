@@ -1,9 +1,9 @@
 {
-  "updated": "2026-07-17",
-  "version": "9e2c82e1",
+  "updated": "2026-07-19",
+  "version": "9924e0f7",
   "assets": {
-    "css": "71d088cf",
-    "js": "93a3e0b7"
+    "css": "2c980990",
+    "js": "7fa6c89a"
   },
   "courses": [
     {
@@ -670,7 +670,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-17",
+      "added": "2026-07-19",
       "official": null,
       "trust": null,
       "heroSub": null,
@@ -721,7 +721,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-17",
+      "added": "2026-07-19",
       "official": null,
       "trust": null,
       "heroSub": null,

@@ -378,6 +378,9 @@ function router() {
   // #/case/<id>/<caseId> — קופץ ישר למקרה מסוים בתוך הדק
   if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
+  if (route === 'drills' && param) return renderDrills(param);
+  if (route === 'drill' && param) return renderDrill(param);
+  if (route === 'formulas' && param) return renderFormulas(param, sub ? decodeURIComponent(sub) : null);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
@@ -580,6 +583,10 @@ function renderCourse(courseId) {
   /* סימולציות — לא מבחן ולא ב-manifest, ולכן גם הן באנר ולא שורה ברשימה. */
   const sh = simsHero(courseId);
   if (sh) view.append(sh);
+
+  /* תרגילי החישוב — גם הם באנר. באים אחרי הסימולציות: קודם מבינים, אז מחשבים. */
+  const dh = drillsHero(courseId);
+  if (dh) view.append(dh);
 
   /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו.
      מבחנים בלי חלק נופלים לקבוצה אחת. */
@@ -1245,6 +1252,13 @@ function playQuestions(cfg) {
         a.title = 'מפת החומרים — ' + name;
         r.append(a);
       }
+      const dr = DRILL_BY_TOPIC[name];
+      if (dr) {
+        const a = el('a', 'bd-sim bd-drill', '🧮 תרגל חישוב');
+        a.href = '#/drill/' + dr.id;
+        a.title = dr.title;
+        r.append(a);
+      }
       box.append(r);
     });
     return box;
@@ -1624,6 +1638,7 @@ async function renderPractice(courseId, seedTopic = null) {
   let mode = 'new';                     // new | wrong | all
   let count = 20;
   let query = '';                       // חיפוש חופשי — ריק = בלי סינון
+  let imagesOnly = false;               // "רק שאלות עם גרף" — הגרפים הם ליבת המבחן
 
   /* חיפוש טקסט בעברית: מנקים ניקוד וגרשיים ומאחדים אותיות גדולות/קטנות,
      כדי ש"טלומראז"/"הטלומראז" ו-"MDM2"/"mdm2" ייתפסו. מחפשים מחרוזת-משנה
@@ -1733,7 +1748,7 @@ async function renderPractice(courseId, seedTopic = null) {
 
   function drawTopics() {
     const counts = {};
-    pool.filter((q) => inParts(q) && matchesQuery(q)).forEach((q) => {
+    pool.filter((q) => inParts(q) && matchesQuery(q) && (!imagesOnly || q.image)).forEach((q) => {
       if (q.topic) counts[q.topic] = (counts[q.topic] || 0) + 1;
     });
     const names = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
@@ -1786,6 +1801,27 @@ async function renderPractice(courseId, seedTopic = null) {
     form.append(repField);
   }
 
+  /* --- רק גרפים --- */
+  /* הגרפים הם ליבת המבחן, אבל אין להם מצב משלהם — הם פזורים בין הנושאים.
+     צ׳יפ אחד שמסנן ל-q.image הופך את בריכת התרגול ל"תרגול קריאת גרפים".
+     מוצג רק אם באמת יש שאלות תמונה בבריכה. */
+  if (pool.some((q) => q.image)) {
+    const imgField = el('div', 'field');
+    imgField.append(el('label', null, 'גרפים'));
+    const ic = el('div', 'chips');
+    const ch = chipEl('chip', '🖼️ רק שאלות עם גרף');
+    ch.onclick = () => {
+      imagesOnly = !imagesOnly;
+      ch.classList.toggle('on', imagesOnly);
+      drawTopics();     // ספירת הנושאים תשקף רק שאלות עם גרף
+      update();
+    };
+    ic.append(ch);
+    imgField.append(ic);
+    imgField.append(el('p', 'hint', 'קריאת גרפי I/V, עקבות קיבוע-מתח ורישומי EPSP — 68 שאלות. משתלב עם שאר המסננים.'));
+    form.append(imgField);
+  }
+
   /* --- כמות --- */
   const countField = el('div', 'field');
   countField.append(el('label', null, 'כמה שאלות'));
@@ -1832,6 +1868,7 @@ async function renderPractice(courseId, seedTopic = null) {
     return pool.filter((q) => {
       if (!inParts(q)) return false;
       if (!matchesQuery(q)) return false;
+      if (imagesOnly && !q.image) return false;
       if (selTopics.size && !selTopics.has(q.topic)) return false;
       if ((q.repeat?.n || 1) < minRepeat) return false;
       const s = map[qKey(q)];
@@ -1878,6 +1915,7 @@ async function renderPractice(courseId, seedTopic = null) {
 
     const bits = [];
     bits.push(mode === 'new' ? 'שאלות חדשות' : mode === 'wrong' ? 'רק טעויות' : 'הכול');
+    if (imagesOnly) bits.push('🖼️ רק גרפים');
     if (allParts.length > 1 && selParts.size < allParts.length) bits.push([...selParts].join(', '));
     if (selTopics.size) bits.push(`${selTopics.size} נושאים`);
 
@@ -3256,6 +3294,14 @@ function renderSim(id) {
       a.href = `#/practice/${s.course}/${encodeURIComponent(t)}`;
       row.append(a);
     });
+    /* "שחקו עם המשוואה" ו"תרגלו לחשב אותה" הן שתי תשובות לאותו נושא — כאן,
+       זו לצד זו. הקישור אוטומטי לפי topic, בדיוק כמו הקישור לתרגול. */
+    const drill = s.topics.map((t) => DRILL_BY_TOPIC[t]).find(Boolean);
+    if (drill) {
+      const da = el('a', 'btn', `🧮 תרגל חישוב — ${drill.title}`);
+      da.href = '#/drill/' + drill.id;
+      row.append(da);
+    }
     wrap.append(row);
   }
 
@@ -3330,6 +3376,523 @@ function simsHero(courseId) {
   });
   box.append(grid);
   return box;
+}
+
+/* באנר תרגילי החישוב בדף המקצוע — מופיע רק אם יש למקצוע תרגילים. */
+function drillsHero(courseId) {
+  const list = drillsOf(courseId);
+  if (!list.length) return null;
+  const box = el('section', 'sim-hero drill-hero');
+  const head = el('div', 'sim-hero-head');
+  head.append(el('div', 'sim-hero-eyebrow', '🧮 תרגילי חישוב'));
+  head.append(el('h2', null, 'תרגלו את החישובים — עם פתרון'));
+  head.append(el('p', 'sim-hero-sub',
+    'נרנסט, קבועי הזמן והמרחק, אוסמולריות, תכולה קוונטית — מספרים חדשים בכל פעם, ופתרון שלב-אחר-שלב. ' +
+    'זה החלק של המבחן שמפסידים בו נקודות על דיוק.'));
+  box.append(head);
+  const grid = el('div', 'sim-hero-grid');
+  list.forEach((d) => {
+    const a = el('a', 'sim-card');
+    a.href = '#/drill/' + d.id;
+    a.append(el('span', 'sim-card-ico', d.icon));
+    const t = el('div', 'sim-card-txt');
+    t.append(el('b', null, d.title));
+    t.append(el('span', null, d.blurb));
+    a.append(t);
+    grid.append(a);
+  });
+  box.append(grid);
+  const row = el('div', 'btn-row');
+  row.style.marginTop = '12px';
+  const fa = el('a', 'btn', '📖 כרטיס הנוסחאות');
+  fa.href = '#/formulas/' + courseId;
+  row.append(fa);
+  box.append(row);
+  return box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   תרגילי חישוב
+   ═══════════════════════════════════════════════════════════════════
+   הבעיה שזה פותר: ~60 שאלות במבחן הן חישוב (נרנסט, τ, λ, אוסמולריות,
+   תכולה קוונטית), והמקום שמפסידים בו נקודות קלות הוא דיוק — לא הבנה.
+   שאלות רב-ברירה נותנות אימון אחד; מחולל נותן אינסוף, עם מספרים מתחלפים
+   בכל פעם ותשובה ידועה־בדיוק (מחושבת מאותם מנועים של הסימולציות).
+
+   העיקרון זהה ל-SIMS: כאן המשוואה עצמה היא התוכן, ולכן זה קוד ולא JSON.
+   כל drill נתלה על נושא קנוני (`topic`), ומשם מגיע החיבור הדו-כיווני בחינם —
+   בדיוק כמו SIM_BY_TOPIC ו-GUIDE_BY_TOPIC. `solve` קורא למנוע קיים ומאומת
+   (`nernst`, נוסחאות ה-cable, `quantalP`) — אפס מתמטיקה חדשה שאפשר לטעות בה.
+
+   ⚠️ נכונות: נרנסט גוזר RT/zF מ-T בפועל (לא קבוע 58/61); GHK כאן הוא מודל
+   המוליכות המקבילית Σ(g·E)/Σg — הצורה שהמבחן מצפה לה כשנתונה מוליכות g,
+   בשונה מגולדמן שדורש חדירות P; λ משתמש בביטוי המדויק של סימולציית ה-cable. */
+
+const drnd = (min, max, step = 1) => {
+  const n = Math.round((min + Math.random() * (max - min)) / step) * step;
+  return +n.toFixed(6);
+};
+const dpick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/* יונים לתרגיל נרנסט — טווחים פיזיולוגיים שנותנים תשובות שפויות.
+   סידן הושמט בכוונה: ריכוז תוך-תאי ~100nM נותן מספרים מכוערים לתרגיל. */
+const NERNST_IONS = [
+  { name: 'אשלגן (K⁺)', z: 1, co: [3, 7, 0.5], ci: [120, 150, 5] },
+  { name: 'נתרן (Na⁺)', z: 1, co: [140, 160, 5], ci: [8, 20, 1] },
+  { name: 'כלור (Cl⁻)', z: -1, co: [100, 130, 5], ci: [5, 15, 1] },
+];
+
+const OSMO_COMPOUNDS = [
+  { name: 'NaCl', n: 2 }, { name: 'KCl', n: 2 }, { name: 'CaCl₂', n: 3 },
+  { name: 'AlCl₃', n: 4 }, { name: 'Na₂SO₄', n: 3 },
+  { name: 'גלוקוז', n: 1 }, { name: 'אוריאה', n: 1 }, { name: 'סוכרוז', n: 1 },
+];
+
+const DRILLS = [
+  {
+    id: 'nernst', course: 'electro', topic: 'פוטנציאל מנוחה', icon: '⚖️',
+    title: 'פוטנציאל נרנסט', unit: 'mV', floor: 0.6,
+    blurb: 'פוטנציאל שיווי המשקל של יון בודד — תלוי בטמפרטורה ובמטען',
+    gen() {
+      const ion = dpick(NERNST_IONS);
+      const T = dpick([20, 25, 37]);
+      return { ion: ion.name, z: ion.z, Co: drnd(...ion.co), Ci: drnd(...ion.ci), T };
+    },
+    solve: (v) => nernst(v.T, v.z, v.Co, v.Ci),
+    prompt: (v) => `יון <b>${v.ion}</b> (מטען z=${v.z}). ריכוז חוץ-תאי [out]=<b>${v.Co} mM</b>, תוך-תאי [in]=<b>${v.Ci} mM</b>, טמפרטורה <b>${v.T}°C</b>.<br>מהו פוטנציאל נרנסט של היון?`,
+    steps: (v, ans) => [
+      `נוסחת נרנסט: E = (RT/zF)·ln([out]/[in])`,
+      `RT/F בטמפרטורה ${v.T}°C = <b>${num(RToverF(v.T))} mV</b> · חלוקה ב-z=${v.z} → <b>${num(RToverF(v.T) / v.z)} mV</b>`,
+      `ln([out]/[in]) = ln(${v.Co}/${v.Ci}) = <b>${num(Math.log(v.Co / v.Ci), 3)}</b>`,
+      `E = ${num(RToverF(v.T) / v.z)} × ${num(Math.log(v.Co / v.Ci), 3)} = <b>${num(ans)} mV</b>`,
+    ],
+  },
+  {
+    id: 'ghk', course: 'electro', topic: 'פוטנציאל מנוחה', icon: '🔀', formula: 'vm',
+    title: 'מתח מנוחה — מוליכות מקבילית', unit: 'mV', floor: 0.6,
+    blurb: 'כשנתונה מוליכות g (ולא חדירות P) — הממברנה היא ממוצע משוקלל של הבטריות',
+    gen() {
+      const gK = drnd(4, 12, 1), gNa = drnd(1, 5, 1), gCl = drnd(2, 8, 1);
+      const EK = drnd(-95, -80, 5), ENa = drnd(50, 65, 5), ECl = drnd(-75, -60, 5);
+      return { gK, gNa, gCl, EK, ENa, ECl };
+    },
+    solve: (v) => (v.gK * v.EK + v.gNa * v.ENa + v.gCl * v.ECl) / (v.gK + v.gNa + v.gCl),
+    prompt: (v) => `במנוחה נתונות המוליכויות והבטריות:<br>אשלגן g=<b>${v.gK}</b>, E=<b>${v.EK} mV</b> · נתרן g=<b>${v.gNa}</b>, E=<b>${v.ENa} mV</b> · כלור g=<b>${v.gCl}</b>, E=<b>${v.ECl} mV</b>.<br>מהו מתח הממברנה (מודל המוליכות המקבילית)?`,
+    steps: (v, ans) => [
+      `נתונה <b>מוליכות (g)</b> → משתמשים בממוצע המשוקלל Vm = Σ(g·E) / Σg. (חדירות P הייתה מובילה לגולדמן.)`,
+      `מונה = Σ(g·E) = ${v.gK}·(${v.EK}) + ${v.gNa}·(${v.ENa}) + ${v.gCl}·(${v.ECl}) = <b>${num(v.gK * v.EK + v.gNa * v.ENa + v.gCl * v.ECl)}</b>`,
+      `מכנה = Σg = ${v.gK}+${v.gNa}+${v.gCl} = <b>${v.gK + v.gNa + v.gCl}</b>`,
+      `Vm = מונה/מכנה = <b>${num(ans)} mV</b>`,
+    ],
+  },
+  {
+    id: 'tau', course: 'electro', topic: 'תכונות פאסיביות של הממברנה', icon: '⏱️',
+    title: 'קבוע הזמן τ', unit: 'ms', floor: 0.1,
+    blurb: 'כמה מהר הממברנה נטענת — τ = Rin · Cmem',
+    gen: () => ({ Rin: drnd(50, 300, 10), Cm: drnd(100, 500, 20) }),
+    solve: (v) => (v.Rin * v.Cm) / 1000,      // MΩ·pF → ms (זהה לסימולציית ה-cable)
+    prompt: (v) => `תא איזופוטנציאלי: התנגדות כניסה Rin=<b>${v.Rin} MΩ</b>, קיבול הממברנה Cmem=<b>${v.Cm} pF</b>.<br>מהו קבוע הזמן τ?`,
+    steps: (v, ans) => [
+      `τ = Rin · Cmem`,
+      `שימו לב ליחידות: MΩ · pF = 10⁶ · 10⁻¹² שנ׳ = מיקרו-שנייה, לכן מחלקים ב-1000 ל-ms.`,
+      `τ = (${v.Rin} × ${v.Cm}) / 1000 = <b>${num(ans)} ms</b>`,
+    ],
+  },
+  {
+    id: 'lambda', course: 'electro', topic: 'תכונות פאסיביות של הממברנה', icon: '📏',
+    title: 'קבוע המרחק λ', unit: 'mm', floor: 0.02,
+    blurb: 'כמה רחוק אות דועך — λ = √(d·Rm / 4·Ri), ותלוי בשורש הקוטר',
+    gen: () => ({ d: drnd(1, 15, 0.5), Rm: drnd(5, 50, 1), Ri: drnd(50, 300, 10) }),
+    solve: (v) => Math.sqrt((v.d * v.Rm) / (40 * v.Ri)) * 10,   // ביטוי מדויק של סימולציית ה-cable
+    prompt: (v) => `אקסון: קוטר d=<b>${v.d} µm</b>, התנגדות ממברנה סגולית Rm=<b>${v.Rm} kΩ·cm²</b>, התנגדות ציטופלזמית Ri=<b>${v.Ri} Ω·cm</b>.<br>מהו קבוע המרחק λ?`,
+    steps: (v, ans) => [
+      `λ = √(d·Rm / 4·Ri) — שימו לב שזו נוסחת הקוטר d (עם רדיוס a זה √(a·Rm / 2·Ri), אותו דבר).`,
+      `λ ∝ √d — פי 4 בקוטר נותן רק פי 2 ב-λ.`,
+      `λ = √(${v.d}·${v.Rm} / (4·${v.Ri})) = <b>${num(ans)} mm</b> (אחרי המרת יחידות ל-mm)`,
+    ],
+  },
+  {
+    id: 'rin', course: 'electro', topic: 'תכונות פאסיביות של הממברנה', icon: '🔌',
+    title: 'התנגדות כניסה מרישום', unit: 'MΩ', floor: 1,
+    blurb: 'קוראים Rin ישירות מגרף מתח־זרם — חוק אוהם על ההיסט',
+    gen() {
+      const V0 = dpick([-60, -65, -70]);
+      const Rin = drnd(50, 300, 10);           // MΩ
+      const I = drnd(0.1, 0.4, 0.05);          // nA, מהפעל (מהפולריזציה)
+      const dV = Rin * I;                       // mV
+      return { V0, I, V1: +(V0 - dV).toFixed(1), dV: +dV.toFixed(1) };
+    },
+    solve: (v) => v.dV / v.I,                   // mV / nA = MΩ
+    prompt: (v) => `מזריקים לתא זרם קבוע של <b>${v.I} nA</b> (מהפעל). מתח המנוחה היה <b>${v.V0} mV</b> וירד בהתייצבות ל-<b>${v.V1} mV</b>.<br>מהי התנגדות הכניסה Rin?`,
+    steps: (v, ans) => [
+      `Rin = ΔV / ΔI (חוק אוהם על ההיסט במצב היציב).`,
+      `ΔV = |${v.V1} − (${v.V0})| = <b>${num(v.dV)} mV</b>`,
+      `Rin = ${num(v.dV)} mV / ${v.I} nA = <b>${num(ans)} MΩ</b> (mV/nA = MΩ)`,
+    ],
+  },
+  {
+    id: 'osmo', course: 'electro', topic: 'תנועת חלקיקים ודיפוזיה', icon: '🧂',
+    title: 'אוסמולריות — פירוק חלקיקים', unit: 'mOsm', floor: 0.5,
+    blurb: 'המלכודת הקבועה: כמה חלקיקים החומר מתפרק אליהם',
+    gen() {
+      const cmp = dpick(OSMO_COMPOUNDS);
+      return { name: cmp.name, factor: cmp.n, C: drnd(50, 200, 10) };
+    },
+    solve: (v) => v.C * v.factor,
+    prompt: (v) => `מהי האוסמולריות של תמיסה של <b>${v.C} mM ${v.name}</b>? (הניחו פירוק מלא)`,
+    steps: (v, ans) => [
+      `אוסמולריות = ריכוז מולרי × מספר החלקיקים שהחומר מתפרק אליהם.`,
+      `<b>${v.name}</b> מתפרק ל-<b>${v.factor}</b> חלקיקים${v.factor === 1 ? ' (אינו מתפרק — חומר לא-אלקטרוליטי)' : ''}.`,
+      `אוסמולריות = ${v.C} × ${v.factor} = <b>${num(ans)} mOsm</b>`,
+    ],
+  },
+  {
+    id: 'quantal', course: 'electro', topic: 'התאוריה הקוונטאלית', icon: '🔬',
+    title: 'תכולה קוונטית m = n·p·q', unit: 'mV', floor: 0.05,
+    blurb: 'משרעת התגובה הממוצעת = מספר הווזיקולות × הסתברות השחרור × גודל הקוונטום',
+    gen: () => ({ n: drnd(5, 40, 1), p: drnd(0.1, 0.6, 0.05), q: drnd(0.2, 1, 0.1) }),
+    solve: (v) => v.n * v.p * v.q,
+    prompt: (v) => `בסינפסה: מספר וזיקולות זמינות לשחרור n=<b>${v.n}</b>, הסתברות שחרור p=<b>${v.p}</b>, וגודל קוונטום בודד q=<b>${v.q} mV</b>.<br>מהי משרעת התגובה הפוסט-סינפטית הממוצעת?`,
+    steps: (v, ans) => [
+      `התכולה הקוונטית m = n · p = ${v.n} × ${v.p} = <b>${num(v.n * v.p)}</b> קוונטות משתחררות בממוצע.`,
+      `משרעת ממוצעת = m · q = ${num(v.n * v.p)} × ${v.q} mV = <b>${num(ans)} mV</b>`,
+    ],
+  },
+];
+
+const drillOf = (id) => DRILLS.find((d) => d.id === id);
+const drillsOf = (courseId) => DRILLS.filter((d) => d.course === courseId);
+
+/* נושא → תרגיל, בדיוק כמו SIM_BY_TOPIC. נותן חיבור דו-כיווני בחינם:
+   מפילוח-לפי-נושא ומעמוד הסימולציה ישר לתרגיל החישוב של אותו נושא. */
+const DRILL_BY_TOPIC = (() => {
+  const m = {};
+  DRILLS.forEach((d) => { if (!m[d.topic]) m[d.topic] = d; });
+  return m;
+})();
+
+/* עמוד אינדקס — כל תרגילי החישוב של המקצוע ככרטיסיות. */
+function renderDrills(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  const list = drillsOf(courseId);
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '🧮 תרגילי חישוב'));
+  head.append(el('p', null,
+    'מספרים אקראיים בכל פעם, תשובה מדויקת, ופתרון שלב-אחר-שלב. ' +
+    'זה החלק של המבחן שמפסידים בו נקודות על דיוק — לא על הבנה.'));
+  view.append(head);
+
+  if (!list.length) {
+    view.append(emptyState('🔢', 'אין עדיין תרגילי חישוב למקצוע הזה', 'הם נבנים לכל מקצוע בנפרד.'));
+    toTop();
+    return;
+  }
+
+  const grid = el('div', 'sim-hero-grid');
+  list.forEach((d) => {
+    const a = el('a', 'sim-card');
+    a.href = '#/drill/' + d.id;
+    a.append(el('span', 'sim-card-ico', d.icon));
+    const t = el('div', 'sim-card-txt');
+    t.append(el('b', null, d.title));
+    t.append(el('span', null, d.blurb));
+    a.append(t);
+    grid.append(a);
+  });
+  view.append(grid);
+
+  const row = el('div', 'btn-row');
+  row.style.marginTop = '18px';
+  const fa = el('a', 'btn', '📖 כרטיס הנוסחאות');
+  fa.href = '#/formulas/' + courseId;
+  row.append(fa);
+  view.append(row);
+
+  toTop();
+  updateFooter();
+}
+
+/* תרגיל בודד — הגרל, ענה, קבל פתרון, הגרל שוב. */
+function renderDrill(id) {
+  setNav('home');
+  const d = drillOf(id);
+  if (!d) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'תרגיל לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  const c = courseOf(d.course);
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + d.course));
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `${d.icon} ${d.title}`));
+  head.append(el('p', null, d.blurb));
+  view.append(head);
+
+  const tally = { ok: 0, total: 0 };
+  const score = el('div', 'drill-score');
+  view.append(score);
+
+  const card = el('div', 'drill-card');
+  const promptBox = el('div', 'drill-prompt');
+  card.append(promptBox);
+
+  const answerRow = el('div', 'drill-answer');
+  const input = el('input', 'drill-input');
+  input.type = 'text';
+  input.inputMode = 'decimal';
+  input.autocomplete = 'off';
+  input.setAttribute('enterkeyhint', 'done');
+  input.dir = 'ltr';
+  const unit = el('span', 'drill-unit', d.unit);
+  const checkBtn = el('button', 'btn primary', 'בדוק');
+  checkBtn.type = 'button';
+  answerRow.append(input, unit, checkBtn);
+  card.append(answerRow);
+
+  const fb = el('div', 'drill-fb');
+  card.append(fb);
+  view.append(card);
+
+  const acts = el('div', 'btn-row');
+  const again = el('button', 'btn', '🎲 תרגיל נוסף');
+  again.type = 'button';
+  acts.append(again);
+  const fa = el('a', 'btn ghost', '📖 הנוסחה');
+  fa.href = `#/formulas/${d.course}/${d.formula || d.id}`;
+  acts.append(fa);
+  const sim = SIM_BY_TOPIC[d.topic];
+  if (sim) {
+    const sa = el('a', 'btn ghost', `${sim.icon} סימולציה`);
+    sa.href = '#/sim/' + sim.id;
+    acts.append(sa);
+  }
+  const pa = el('a', 'btn ghost', '🎯 שאלות אמת בנושא');
+  pa.href = `#/practice/${d.course}/${encodeURIComponent(d.topic)}`;
+  acts.append(pa);
+  view.append(acts);
+
+  let v, answered;
+  function fresh() {
+    v = d.gen();
+    answered = false;
+    promptBox.innerHTML = d.prompt(v);
+    input.value = '';
+    input.disabled = false;
+    checkBtn.disabled = false;
+    fb.className = 'drill-fb';
+    fb.innerHTML = '';
+    input.focus();
+  }
+
+  function check() {
+    if (answered) return;
+    const raw = input.value.trim().replace(',', '.');
+    if (raw === '' || isNaN(parseFloat(raw))) {
+      fb.className = 'drill-fb show warn';
+      fb.innerHTML = 'הזינו מספר כדי לבדוק.';
+      return;
+    }
+    answered = true;
+    input.disabled = true;
+    checkBtn.disabled = true;
+    const userAns = parseFloat(raw);
+    const ans = d.solve(v);
+    const tol = Math.max(d.floor || 0, 0.02 * Math.abs(ans));   // 2% + רצפה מוחלטת
+    const ok = Math.abs(userAns - ans) <= tol;
+    tally.total++;
+    if (ok) tally.ok++;
+    updateScore();
+
+    fb.className = 'drill-fb show ' + (ok ? 'ok' : 'no');
+    const verdict = el('div', 'drill-verdict');
+    verdict.innerHTML = ok
+      ? `✓ נכון! התשובה: <b>${num(ans)} ${d.unit}</b>`
+      : `✗ לא מדויק. ענית ${num(userAns)}, התשובה הנכונה: <b>${num(ans)} ${d.unit}</b>`;
+    fb.append(verdict);
+    const steps = el('ol', 'drill-steps');
+    d.steps(v, ans).forEach((s) => {
+      const li = el('li');
+      li.innerHTML = s;
+      steps.append(li);
+    });
+    fb.append(steps);
+  }
+
+  function updateScore() {
+    score.textContent = tally.total ? `נכונות: ${tally.ok}/${tally.total}` : '';
+  }
+
+  checkBtn.onclick = check;
+  input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); answered ? fresh() : check(); } };
+  again.onclick = fresh;
+
+  fresh();
+  updateScore();
+  toTop();
+  updateFooter();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   כרטיס הנוסחאות — עיון + מחשבון
+   ═══════════════════════════════════════════════════════════════════
+   אותן נוסחאות בדיוק של תרגילי החישוב, עם מחשבון־הצבה חי. `compute` קורא
+   לאותם ביטויים כמו `solve` בתרגיל — כך הכרטיס והתרגיל לא יכולים לסתור זה
+   את זה. נגיש מכל תרגיל ("📖 הנוסחה") ומעמוד המקצוע. */
+const FORMULAS = [
+  {
+    id: 'nernst', course: 'electro', title: 'פוטנציאל נרנסט', unit: 'mV',
+    expr: 'E = (RT/zF) · ln([out]/[in])',
+    note: 'פוטנציאל שיווי המשקל של יון בודד. RT/F ב-37°C ≈ 26.7 mV; ב-z=1 זה 61.5·log₁₀ ב-37°, 58·log₁₀ ב-20°.',
+    vars: [
+      { k: 'z', label: 'מטען היון z', default: 1, step: 1 },
+      { k: 'T', label: 'טמפרטורה', unit: '°C', default: 37, step: 1 },
+      { k: 'Co', label: '[out] חוץ-תאי', unit: 'mM', default: 145, step: 1 },
+      { k: 'Ci', label: '[in] תוך-תאי', unit: 'mM', default: 12, step: 1 },
+    ],
+    compute: (v) => nernst(v.T, v.z, v.Co, v.Ci),
+  },
+  {
+    id: 'vm', course: 'electro', title: 'מתח מנוחה — מוליכות מקבילית', unit: 'mV',
+    expr: 'Vm = Σ(g·E) / Σg',
+    note: 'כשנתונה מוליכות g — הממברנה היא ממוצע הבטריות משוקלל במוליכויות. (חדירות P → גולדמן, נוסחה אחרת.)',
+    vars: [
+      { k: 'gK', label: 'g אשלגן', default: 8, step: 1 }, { k: 'EK', label: 'E אשלגן', unit: 'mV', default: -90, step: 1 },
+      { k: 'gNa', label: 'g נתרן', default: 2, step: 1 }, { k: 'ENa', label: 'E נתרן', unit: 'mV', default: 60, step: 1 },
+      { k: 'gCl', label: 'g כלור', default: 4, step: 1 }, { k: 'ECl', label: 'E כלור', unit: 'mV', default: -70, step: 1 },
+    ],
+    compute: (v) => (v.gK * v.EK + v.gNa * v.ENa + v.gCl * v.ECl) / (v.gK + v.gNa + v.gCl),
+  },
+  {
+    id: 'tau', course: 'electro', title: 'קבוע הזמן τ', unit: 'ms',
+    expr: 'τ = Rin · Cmem',
+    note: 'כמה מהר הממברנה נטענת. MΩ·pF → מחלקים ב-1000 ל-ms.',
+    vars: [
+      { k: 'Rin', label: 'התנגדות כניסה Rin', unit: 'MΩ', default: 150, step: 5 },
+      { k: 'Cm', label: 'קיבול Cmem', unit: 'pF', default: 300, step: 10 },
+    ],
+    compute: (v) => (v.Rin * v.Cm) / 1000,
+  },
+  {
+    id: 'lambda', course: 'electro', title: 'קבוע המרחק λ', unit: 'mm',
+    expr: 'λ = √(d·Rm / 4·Ri)',
+    note: 'כמה רחוק אות דועך. λ ∝ √d — פי 4 בקוטר = פי 2 ב-λ. (עם רדיוס a: √(a·Rm/2·Ri).)',
+    vars: [
+      { k: 'd', label: 'קוטר d', unit: 'µm', default: 4, step: 0.5 },
+      { k: 'Rm', label: 'התנגדות ממברנה Rm', unit: 'kΩ·cm²', default: 20, step: 1 },
+      { k: 'Ri', label: 'התנגדות ציטופלזמה Ri', unit: 'Ω·cm', default: 100, step: 10 },
+    ],
+    compute: (v) => Math.sqrt((v.d * v.Rm) / (40 * v.Ri)) * 10,
+  },
+  {
+    id: 'rin', course: 'electro', title: 'התנגדות כניסה Rin', unit: 'MΩ',
+    expr: 'Rin = ΔV / ΔI',
+    note: 'חוק אוהם על ההיסט במצב היציב. mV/nA = MΩ.',
+    vars: [
+      { k: 'dV', label: 'היסט המתח ΔV', unit: 'mV', default: 30, step: 1 },
+      { k: 'dI', label: 'הזרם המוזרק ΔI', unit: 'nA', default: 0.2, step: 0.05 },
+    ],
+    compute: (v) => v.dV / v.dI,
+  },
+  {
+    id: 'osmo', course: 'electro', title: 'אוסמולריות', unit: 'mOsm',
+    expr: 'אוסמולריות = ריכוז × מספר חלקיקים',
+    note: 'המלכודת: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
+    vars: [
+      { k: 'C', label: 'ריכוז', unit: 'mM', default: 100, step: 10 },
+      { k: 'factor', label: 'חלקיקים לפירוק', options: OSMO_COMPOUNDS.map((c) => ({ label: `${c.name} (${c.n})`, val: c.n })) },
+    ],
+    compute: (v) => v.C * v.factor,
+  },
+  {
+    id: 'quantal', course: 'electro', title: 'תכולה קוונטית', unit: 'mV',
+    expr: 'תגובה ממוצעת = m·q = (n·p)·q',
+    note: 'משרעת התגובה = מספר הווזיקולות × הסתברות שחרור × גודל קוונטום.',
+    vars: [
+      { k: 'n', label: 'וזיקולות זמינות n', default: 20, step: 1 },
+      { k: 'p', label: 'הסתברות שחרור p', default: 0.3, step: 0.05 },
+      { k: 'q', label: 'גודל קוונטום q', unit: 'mV', default: 0.4, step: 0.1 },
+    ],
+    compute: (v) => v.n * v.p * v.q,
+  },
+];
+
+const formulasOf = (courseId) => FORMULAS.filter((f) => f.course === courseId);
+
+function renderFormulas(courseId, focusId = null) {
+  setNav('home');
+  const c = courseOf(courseId);
+  const list = formulasOf(courseId);
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '📖 כרטיס הנוסחאות'));
+  head.append(el('p', null, 'כל נוסחה עם מחשבון־הצבה חי — הציבו ערכים וראו את התוצאה משתנה. אלה בדיוק הנוסחאות של תרגילי החישוב.'));
+  view.append(head);
+
+  if (!list.length) {
+    view.append(emptyState('📖', 'אין עדיין כרטיס נוסחאות למקצוע הזה', 'הוא נבנה לכל מקצוע בנפרד.'));
+    toTop();
+    return;
+  }
+
+  list.forEach((f) => {
+    const box = el('section', 'formula-card');
+    box.id = 'f-' + f.id;
+    box.append(el('div', 'formula-title', f.title));
+    box.append(el('div', 'formula-expr', f.expr));
+    if (f.note) box.append(el('p', 'formula-note', f.note));
+
+    const p = {};
+    f.vars.forEach((q) => (p[q.k] = q.options ? q.options[0].val : q.default));
+
+    const result = el('div', 'formula-result');
+    const recompute = () => {
+      result.innerHTML = '';
+      result.append(stat(num(f.compute(p)) + ' ' + f.unit, 'תוצאה', 'accent'));
+    };
+
+    const grid = el('div', 'formula-vars');
+    f.vars.forEach((q) => {
+      const field = el('label', 'formula-var');
+      field.append(el('span', 'formula-var-lbl', q.label + (q.unit ? ` (${q.unit})` : '')));
+      let inp;
+      if (q.options) {
+        inp = el('select', 'formula-select');
+        q.options.forEach((o) => {
+          const opt = el('option', null, o.label);
+          opt.value = o.val;
+          inp.append(opt);
+        });
+        inp.value = q.options[0].val;
+        inp.onchange = () => { p[q.k] = parseFloat(inp.value); recompute(); };
+      } else {
+        inp = el('input', 'formula-num');
+        inp.type = 'number';
+        inp.step = q.step || 1;
+        inp.value = q.default;
+        inp.dir = 'ltr';
+        inp.oninput = () => { const x = parseFloat(inp.value); if (isFinite(x)) { p[q.k] = x; recompute(); } };
+      }
+      field.append(inp);
+      grid.append(field);
+    });
+    box.append(grid);
+    box.append(result);
+    recompute();
+    view.append(box);
+  });
+
+  if (focusId) {
+    const t = document.getElementById('f-' + focusId);
+    if (t) setTimeout(() => t.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
+  } else toTop();
+  updateFooter();
 }
 
 /* ═══════════════════════════════════════════════════════════════════

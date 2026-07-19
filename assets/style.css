@@ -899,6 +899,65 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .sim-insight-t{font-size:12.5px; font-weight:900; color:var(--sim-dp); margin-bottom:6px; letter-spacing:.02em;}
 
+/* ===== תרגילי חישוב ===== */
+.drill-score{font-size:13px; font-weight:800; color:var(--muted); text-align:end; min-height:18px; margin-bottom:8px;}
+.drill-card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:20px 22px; box-shadow:var(--shadow);
+}
+.drill-prompt{font-size:16px; line-height:1.75; color:var(--text); margin-bottom:18px;}
+.drill-prompt b{color:var(--accent-dk); font-weight:800;}
+.drill-answer{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.drill-input{
+  width:150px; padding:11px 14px; font-size:17px; font-weight:700; font-family:var(--font);
+  border:1.5px solid var(--line); border-radius:var(--radius-sm);
+  background:var(--surface-2); color:var(--text); text-align:center;
+}
+.drill-input:focus{outline:none; border-color:var(--accent); background:var(--accent-sl);}
+.drill-input:disabled{opacity:.7;}
+.drill-unit{font-size:15px; font-weight:800; color:var(--muted); min-width:38px;}
+.drill-answer .btn{margin-inline-start:auto;}
+.drill-fb{margin-top:16px; display:none;}
+.drill-fb.show{display:block;}
+.drill-verdict{
+  padding:12px 15px; border-radius:var(--radius-sm); font-size:15px; font-weight:800;
+}
+.drill-fb.ok .drill-verdict{background:var(--good-bg); border:1px solid var(--good-ln); color:var(--good);}
+.drill-fb.no .drill-verdict{background:var(--bad-bg); border:1px solid var(--bad-ln); color:var(--bad);}
+.drill-fb.warn .drill-verdict{background:var(--accent-sl); border:1px solid var(--accent); color:var(--accent-dk);}
+.drill-fb.warn{display:block;}
+.drill-verdict b{font-weight:900;}
+.drill-steps{
+  margin:14px 0 0; padding:14px 34px 4px; list-style:decimal;
+  background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+}
+.drill-steps li{font-size:14px; line-height:1.9; color:var(--text); margin-bottom:8px; padding-inline-start:4px;}
+.drill-steps li b{color:var(--accent-dk); font-weight:800;}
+
+/* ===== כרטיס הנוסחאות ===== */
+.formula-card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px;
+}
+.formula-title{font-size:15px; font-weight:800; color:var(--text); margin-bottom:8px;}
+.formula-expr{
+  font-size:18px; font-weight:800; color:var(--accent-dk); direction:ltr; text-align:center;
+  background:var(--accent-sl); border:1px solid var(--accent); border-radius:var(--radius-sm);
+  padding:12px 14px; margin-bottom:10px; letter-spacing:.01em;
+}
+.formula-note{font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:14px; max-width:74ch;}
+.formula-vars{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:14px;}
+.formula-var{display:flex; flex-direction:column; gap:5px;}
+.formula-var-lbl{font-size:12px; font-weight:700; color:var(--muted); line-height:1.4;}
+.formula-num, .formula-select{
+  padding:9px 11px; font-size:15px; font-weight:700; font-family:var(--font);
+  border:1.5px solid var(--line); border-radius:var(--radius-sm);
+  background:var(--surface-2); color:var(--text);
+}
+.formula-num{text-align:center;}
+.formula-num:focus, .formula-select:focus{outline:none; border-color:var(--accent); background:var(--accent-sl);}
+.formula-result .stat{margin:0;}
+
 /* הכפתור שמופיע אחרי מענה על שאלה בנושא שיש לו סימולציה */
 .nb-btn.sim-link{text-decoration:none; border-color:var(--sim-ln); color:var(--sim-dp);}
 .nb-btn.sim-link:hover{background:var(--sim-bg); border-color:var(--sim);}
@@ -1154,6 +1213,8 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .fb-guide:hover{background:var(--topic-ln);}
 .bd-guide{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
+.bd-drill{background:var(--accent-sl); border-color:var(--accent); color:var(--accent-dk);}
+.bd-drill:hover{background:var(--accent); border-color:var(--accent); color:#fff;}
 
 @media (max-width:620px){
   .g-unit-head{flex-direction:column; gap:8px;}
