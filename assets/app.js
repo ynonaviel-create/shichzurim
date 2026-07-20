@@ -1095,8 +1095,24 @@ function toStore(answers, questions) {
   return { answers: out, v: all ? 2 : undefined };
 }
 
+/* הכרעת תוכן גוברת על המפתח של השחזור.
+
+   המפתח בקובץ המקור נשאר כפי שהמבחן ההוא סימן — גם כשהוא שגוי — כי הוא הקלט
+   של גילוי הסתירות ב-repeats.js: שני מופעים נחשבים חלוקים רק אם המסיח המסומן
+   בהם שונה. "לתקן" אותו במקור גורם להם להסכים, והסתירה נעלמת בריצה הבאה יחד
+   עם האזהרה וההכרעה. לכן ההכרעה מוחלת כאן, בגבול שבין הדאטה לתצוגה: הקובץ
+   נשאר מסמך היסטורי, והנגן מדרג לפי מה שנכון. */
+const rulingA = (item) => {
+  const ans = item.repeat && item.repeat.ruling && item.repeat.ruling.answer;
+  if (!ans) return item;
+  const norm = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`\s]/g, '').toLowerCase();
+  const i = (item.opts || []).findIndex((o) => norm(o) === norm(ans));
+  return i >= 0 && i !== item.a ? { ...item, a: i } : item;
+};
+
 function playQuestions(cfg) {
-  const { key, title, subtitle, note, questions, persist, back } = cfg;
+  const { key, title, subtitle, note, persist, back } = cfg;
+  const questions = (cfg.questions || []).map(rulingA);
   view.innerHTML = '';
 
   /* התשובות פר-מבחן סבלו מאותה תקלה כמו ההתקדמות: הן ממופתחות באינדקס, אז
@@ -1319,15 +1335,29 @@ function playQuestions(cfg) {
         '✦ שאלה זו עוסקת בנושא שיצא מסילבוס מחזור נ״ב (אלקטרופיזיולוגיה של הלב). ' +
         'היא כאן להעשרה בלבד — אין צורך ללמוד אותה למבחן, והיא אינה נספרת בציון.'));
 
-    if (r && r.conflict)
-      card.append(
-        r.resolved
-          ? el('div', 'q-warn ok',
-              '✅ המפתחות סימנו תשובות שונות בשאלה הזאת, והיא הוכרעה מול חומרי הקורס. ' +
-              'המפתח כאן מתוקן — ההסבר בהערה שמתחת.')
-          : el('div', 'q-warn',
-              '⚠️ המפתחות חלוקים על התשובה הנכונה, וטרם הוכרע מי צודק. אל תשנן את השאלה הזאת — תבין אותה.')
-      );
+    if (r && r.conflict) {
+      if (r.resolved || r.ruling) {
+        /* הוכרע. בנציג ה-High Yield ההסבר יושב בהערה שמתחת; בשחזור עצמו אין
+           הערה כזאת, ולכן נושאים אותו כאן. */
+        const w = el('div', 'q-warn ok');
+        const rl = r.ruling;
+        w.textContent =
+          '✅ המפתחות סימנו תשובות שונות בשאלה הזאת, והיא הוכרעה מול חומרי הקורס. ' +
+          (rl ? 'התשובה המסומנת כאן היא המוכרעת.' : 'המפתח כאן מתוקן — ההסבר בהערה שמתחת.') +
+          (rl && rl.keys ? ` מה שסימן כל מפתח: ${rl.keys}.` : '') +
+          (rl && rl.why ? ` ${rl.why}` : '');
+        card.append(w);
+      } else if (r.rulingMissing) {
+        /* הוכרע — אבל התשובה הנכונה לא הוצעה כמסיח בגרסה הזאת. השאלה פגומה כאן,
+           וזה בדיוק מה שהסטודנט צריך לדעת לפני שהוא משנן את המסיח המסומן. */
+        card.append(el('div', 'q-warn',
+          `⚠️ הוכרע מול חומרי הקורס שהתשובה הנכונה היא "${r.rulingMissing}" — והיא לא הוצעה כמסיח ` +
+          'בגרסה הזאת של השאלה. כלומר השאלה כאן פגומה; אל תשנן את המסיח המסומן.'));
+      } else {
+        card.append(el('div', 'q-warn',
+          '⚠️ המפתחות חלוקים על התשובה הנכונה, וטרם הוכרע מי צודק. אל תשנן את השאלה הזאת — תבין אותה.'));
+      }
+    }
 
     // מקור השחזור והמבחן שממנו הגיעה השאלה — מידע רקע, לא אזהרה.
     const src = [item.source, item.origin].filter(Boolean).join(' · ');

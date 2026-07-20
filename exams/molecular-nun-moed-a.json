@@ -498,7 +498,7 @@
         "span": 2,
         "flipped": true,
         "conflict": true,
-        "resolved": true
+        "rulingMissing": "תא ללא יכולת חידוש עצמי (self-renewal)"
       }
     },
     {

@@ -424,11 +424,11 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
     if (optsDiffer) stamp.optsDiffer = true;
     if (conflict) stamp.conflict = true;
 
-    g.forEach((q) => {
-      const orig = q._exam.data.questions[q._n - 1];
-      orig.repeat = stamp;
-      q._exam.touched = true;
-    });
+    /* החתימה נכתבת לקבצי המקור רק בסוף, אחרי שידועה ההכרעה — ראו הלולאה
+       שאחרי בלוק ה-conflict. פעם אחת הוקצה כאן אותו אובייקט stamp לכל
+       המופעים, ואז `stamp.resolved = true` שנקבע בהמשך עבור ה-High Yield
+       דלף אליהם: שאלה במ״ח הציגה "המפתח כאן מתוקן" בזמן שהמפתח שלה נשאר
+       השגוי, וסטודנט שענה נכון סומן כטועה. */
 
     /* --- השאלה כפי שהיא תיכנס למבחן ה-High Yield --- */
     const others = labels.filter((l) => l !== rep._exam.label);
@@ -460,11 +460,14 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
 
     const { qid, _exam, _n, _cycle, _trust, repeat, ...clean } = rep;
 
+    /* מה סימן כל מפתח, מהאמין לפחות אמין. נקרא גם למטה, בכתיבה לקבצי המקור. */
+    const disagreeOf = (list) => [...list]
+      .sort((a, b) => b._trust - a._trust)
+      .map((q) => `${q._exam.label} → "${q.opts[q.a]}"`)
+      .join('  |  ');
+
     if (conflict) {
-      const disagree = [...g]
-        .sort((a, b) => b._trust - a._trust)
-        .map((q) => `${q._exam.label} → "${q.opts[q.a]}"`)
-        .join('  |  ');
+      const disagree = disagreeOf(g);
 
       const at = ruling ? clean.opts.findIndex((o) => sameStatement(o, ruling.answer)) : -1;
 
@@ -491,6 +494,32 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       }
     }
     if (rep.note) notes.push(rep.note);
+
+    /* עכשיו לקבצי המקור.
+
+       ‼️ אסור לגעת כאן ב-`a`. השדה הזה הוא הקלט של גילוי הסתירות עצמו: שני
+       מופעים נחשבים חלוקים רק אם `p.opts[p.a] !== q.opts[q.a]`. תיקון המפתח
+       במקור גורם למופעים להסכים, ובריצה הבאה הסתירה לא מתגלה — הדגל, האזהרה
+       וההכרעה נעלמים בשקט. התיקון מוחק את הראיה שהצדיקה אותו. (קרה בפועל.)
+
+       לכן: המקור נשאר כפי שהמפתח שלו אמר — הוא מסמך היסטורי — וההכרעה נוסעת
+       לצידו ב-`repeat.ruling`. שכבת התצוגה היא שמכריעה מה נחשב נכון; ראו
+       effectiveAnswer ב-app.js.
+
+       לכל מופע חתימה משלו, כי ההכרעה לא חלה על כולם: מסיח שקיים במ״ח עשוי לא
+       להופיע כלל בגרסה של מחזור אחר. */
+    g.forEach((q) => {
+      const orig = q._exam.data.questions[q._n - 1];
+      const own = { ...stamp };
+      delete own.resolved;                    // שייך לנציג ב-High Yield, לא למופע כאן
+      if (ruling) {
+        const i = orig.opts.findIndex((o) => sameStatement(o, ruling.answer));
+        if (i >= 0) own.ruling = { answer: ruling.answer, why: ruling.why || '', keys: disagreeOf(g) };
+        else own.rulingMissing = ruling.answer;   // ההכרעה לא הוצעה כמסיח כאן — השאלה פגומה בגרסה הזאת
+      }
+      orig.repeat = own;
+      q._exam.touched = true;
+    });
 
     hy.push({ ...clean, qid, note: notes.join(' '), repeat: stamp, source: cfg.source(rep._exam.label) });
   });

@@ -844,7 +844,7 @@
         ],
         "span": 6,
         "conflict": true,
-        "resolved": true
+        "rulingMissing": "מהווה חלק מתת-היחידה הגדולה של RNA Pol II."
       }
     },
     {
