@@ -665,6 +665,7 @@
           "מ״ו"
         ],
         "span": 6,
+        "optsDiffer": true,
         "conflict": true,
         "ruling": {
           "answer": "מהווה חלק מתת-היחידה הגדולה של RNA Pol II.",

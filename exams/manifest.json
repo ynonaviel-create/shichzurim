@@ -1,6 +1,6 @@
 {
-  "updated": "2026-07-20",
-  "version": "7f5f7b7d",
+  "updated": "2026-07-21",
+  "version": "14e4376b",
   "assets": {
     "css": "2c980990",
     "js": "cba803f7"
@@ -670,7 +670,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-20",
+      "added": "2026-07-21",
       "official": null,
       "trust": null,
       "heroSub": null,
@@ -721,12 +721,12 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-20",
+      "added": "2026-07-21",
       "official": null,
       "trust": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 51
+      "count": 53
     },
     {
       "id": "molecular-lab-2026-moed-a",
@@ -863,6 +863,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 60
+    },
+    {
+      "id": "molecular-pharma-2026-moed-a",
+      "file": "molecular-pharma-2026-moed-a.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור רוקחות — מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": "א",
+      "added": "2026-07-21",
+      "official": null,
+      "trust": "partial",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 39
     }
   ]
 }
