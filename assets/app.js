@@ -11,6 +11,12 @@
 const KEY = 'shichzurim.v1';
 const SEEN_KEY = 'shichzurim.seenIntro';
 const THEME_KEY = 'shichzurim.theme';
+
+/* המתג של "אתר סגור": כשדולק, כל האתר (חוץ מ"מה זה?") דורש התחברות.
+   ההשקה דו-צעדית — קודם ההתחברות אופציונלית וכולם ממשיכים כרגיל, ורק אחרי
+   שהסנכרון הוכח יציב על משתמשים אמיתיים הופכים את זה ל-true. קומיט של שורה
+   אחת, בבוקר שקט, לא בערב מבחן. כיבוי חזרה = אותה שורה. */
+const REQUIRE_LOGIN = false;
 const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים', case: 'מקרה מתגלגל' };
 /* סטטוס אבחנה בלוח המבדלת של מקרה מתגלגל. הסדר כאן הוא סדר ההצגה. */
 const DDX_UI = {
@@ -115,8 +121,8 @@ const store = {
   },
   write(d) { localStorage.setItem(KEY, JSON.stringify(d)); },
   exam(id) { return this.read()[id] || { answers: {} }; },
-  save(id, rec) { const d = this.read(); d[id] = rec; this.write(d); },
-  reset(id) { const d = this.read(); delete d[id]; this.write(d); },
+  save(id, rec) { const d = this.read(); d[id] = rec; this.write(d); window.Cloud?.queue('progress', id, rec); },
+  reset(id) { const d = this.read(); delete d[id]; this.write(d); window.Cloud?.queueDelete('progress', id); },
 };
 
 /* ---------- מה כבר ראית ----------
@@ -155,9 +161,10 @@ const seen = {
     const d = this.read();
     d[qKey(item)] = correct ? 1 : 0;
     this.write(d);
+    window.Cloud?.queue('seen', qKey(item), correct ? 1 : 0);
   },
   status(item) { return this.read()[qKey(item)]; },  // undefined | 0 | 1
-  clear() { localStorage.removeItem(SEEN_Q_KEY); },
+  clear() { localStorage.removeItem(SEEN_Q_KEY); window.Cloud?.queueClear('seen'); },
 };
 
 /* ---------- נתונים ---------- */
@@ -197,10 +204,18 @@ async function loadManifest() {
     const link = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
     if (link) curCss = new URL(link.href, location.href).searchParams.get('v') || '';
   } catch { /* התעלם */ }
+  /* גם cloud.js נחתם ומושווה — עדכון בלוגיקת הסנכרון חייב להגיע לכולם. */
+  const freshCloud = m.assets && m.assets.cloud;
+  let curCloud = '';
+  try {
+    const sc = document.querySelector('script[src*="cloud.js"]');
+    if (sc) curCloud = new URL(sc.src, location.href).searchParams.get('v') || '';
+  } catch { /* התעלם */ }
   const jsStale = BUILD && freshJs && freshJs !== BUILD;
   const cssStale = curCss && freshCss && freshCss !== curCss;
-  const stampKey = 'reloadedFor:' + freshJs + ':' + freshCss;
-  if ((jsStale || cssStale) && !sessionStorage.getItem(stampKey)) {
+  const cloudStale = curCloud && freshCloud && freshCloud !== curCloud;
+  const stampKey = 'reloadedFor:' + freshJs + ':' + freshCss + ':' + (freshCloud || '');
+  if ((jsStale || cssStale || cloudStale) && !sessionStorage.getItem(stampKey)) {
     sessionStorage.setItem(stampKey, '1');
     const u = new URL(location.href);
     u.searchParams.set('b', String(freshJs || '') + String(freshCss || ''));
@@ -239,15 +254,21 @@ async function loadExam(id) {
 function migrateSeen(exam) {
   if (!Array.isArray(exam.questions)) return;
   const d = seen.read();
-  let touched = false;
+  const moved = [];   // המיגרציה כותבת דרך write ההמוני, לא דרך mark — הענן צריך לשמוע עליה בנפרד
   exam.questions.forEach((q, i) => {
     const old = `${exam.id}#${i}`;
     if (!q.qid || d[old] === undefined) return;
     if (d[q.qid] === undefined) d[q.qid] = d[old];
     delete d[old];
-    touched = true;
+    moved.push({ qid: q.qid, val: d[q.qid], old });
   });
-  if (touched) seen.write(d);
+  if (moved.length) {
+    seen.write(d);
+    moved.forEach((m) => {
+      window.Cloud?.queue('seen', m.qid, m.val);
+      window.Cloud?.queueDelete('seen', m.old);
+    });
+  }
 }
 
 const courseOf = (id) => COURSES.find((c) => c.id === id);
@@ -399,6 +420,11 @@ function crumb(text, href) {
 function router() {
   killSim();   // עמוד סימולציה משאיר אחריו ResizeObserver חי. router לא מפרק, אז מפרקים כאן.
   const [route, param, sub] = location.hash.replace(/^#\/?/, '').split('/');
+  /* שער הכניסה של האתר הסגור. "מה זה?" נשאר פתוח — שאפשר יהיה להבין מה
+     האתר לפני שמתחברים. כשהענן כבוי (קונפיג ריק / file://) אין את מי לשאול
+     מי מחובר, אז השער לא נאכף — האתר לא ננעל בטעות על עצמו. */
+  if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
+  if (route === 'account') return renderAccount();
   if (route === 'course' && param) return renderCourse(param);
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
@@ -430,6 +456,11 @@ function renderHome() {
 
   const banner = introBanner();
   if (banner) view.append(banner);
+  /* הצעת ההתחברות מחכה בתור: קודם הסיור למי שחדש, ורק אחריו הענן. */
+  if (!banner) {
+    const lb = loginBanner();
+    if (lb) view.append(lb);
+  }
 
   /* "פוש" חד-פעמי — מוצג אחרי שהעמוד התיישב, ורק אם הסיור לא רץ. */
   setTimeout(themeAnnounce, 700);
@@ -769,8 +800,14 @@ const cardsRead = {
   read() { try { return JSON.parse(localStorage.getItem(CARDS_READ_KEY)) || {}; } catch { return {}; } },
   write(d) { localStorage.setItem(CARDS_READ_KEY, JSON.stringify(d)); },
   is(id, i) { return !!this.read()[`${id}#${i}`]; },
-  set(id, i, v) { const d = this.read(); if (v) d[`${id}#${i}`] = 1; else delete d[`${id}#${i}`]; this.write(d); },
-  clear(id) { const d = this.read(); Object.keys(d).forEach((k) => k.startsWith(id + '#') && delete d[k]); this.write(d); },
+  set(id, i, v) {
+    const d = this.read(); if (v) d[`${id}#${i}`] = 1; else delete d[`${id}#${i}`]; this.write(d);
+    if (v) window.Cloud?.queue('cardsRead', `${id}#${i}`, 1); else window.Cloud?.queueDelete('cardsRead', `${id}#${i}`);
+  },
+  clear(id) {
+    const d = this.read(); Object.keys(d).forEach((k) => k.startsWith(id + '#') && delete d[k]); this.write(d);
+    window.Cloud?.queueClearPrefix('cardsRead', id + '#');
+  },
 };
 
 async function renderCards(id) {
@@ -878,8 +915,8 @@ const caseProg = {
   read() { try { return JSON.parse(localStorage.getItem(CASE_KEY)) || {}; } catch { return {}; } },
   write(d) { localStorage.setItem(CASE_KEY, JSON.stringify(d)); },
   get(deck, cs) { return this.read()[`${deck}#${cs}`] || []; },
-  set(deck, cs, arr) { const d = this.read(); d[`${deck}#${cs}`] = arr; this.write(d); },
-  clear(deck, cs) { const d = this.read(); delete d[`${deck}#${cs}`]; this.write(d); },
+  set(deck, cs, arr) { const d = this.read(); d[`${deck}#${cs}`] = arr; this.write(d); window.Cloud?.queue('caseProg', `${deck}#${cs}`, arr); },
+  clear(deck, cs) { const d = this.read(); delete d[`${deck}#${cs}`]; this.write(d); window.Cloud?.queueDelete('caseProg', `${deck}#${cs}`); },
 };
 const caseDone = (deck, cs) => caseProg.get(deck.id, cs.id).filter((v) => v != null).length >= cs.stages.length;
 
@@ -2164,6 +2201,158 @@ function introBanner() {
   acts.append(skip);
   b.append(acts);
   return b;
+}
+
+/* ================= חשבון וענן =================
+   הענן עצמו חי ב-cloud.js; כאן רק הממשק. כל הפניות דרך window.Cloud?. —
+   כשהענן כבוי שום דבר מזה לא מופיע והאתר נראה בדיוק כמו קודם. */
+
+/* כפתור G של גוגל — הצבעים הרשמיים, על כפתור לבן. */
+function googleLoginBtn(label) {
+  const btn = el('button', 'btn btn-google');
+  btn.innerHTML =
+    '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">' +
+    '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
+    '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
+    '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
+    '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
+    '</svg>';
+  btn.append(el('span', null, label || 'המשך עם Google'));
+  btn.onclick = () => window.Cloud?.login();
+  return btn;
+}
+
+/* מסך הכניסה של האתר הסגור. מוצג מהראוטר כש-REQUIRE_LOGIN דולק ואין משתמש. */
+function renderLogin() {
+  setNav('home');
+  view.innerHTML = '';
+
+  const wrap = el('div', 'login-hero');
+  wrap.append(el('div', 'login-mark', '🧬'));
+  wrap.append(el('h1', null, 'ארכיון השחזורים'));
+  wrap.append(el('p', 'login-sub',
+    'הארכיון פתוח לסטודנטים של הפקולטה — נכנסים עם חשבון Google, וההתקדמות ' +
+    'שלך נשמרת בחשבון וממשיכה מכל מכשיר: טלפון, מחשב, ספרייה.'));
+  wrap.append(googleLoginBtn('התחברות עם Google'));
+
+  const about = el('a', 'login-about', 'מה זה האתר הזה? →');
+  about.href = '#/about';
+  wrap.append(about);
+
+  view.append(wrap);
+  toTop();
+}
+
+/* עמוד החשבון: מי מחובר, מצב הסנכרון, התנתקות, וייצוא גיבוי ידני. */
+function renderAccount() {
+  setNav('home');
+  view.innerHTML = '';
+  const C = window.Cloud;
+
+  if (!C || !C.enabled) {
+    view.append(emptyState('☁️', 'הסנכרון עוד לא הופעל',
+      'הגרסה הזו של האתר רצה בלי חיבור לענן — ההתקדמות נשמרת בדפדפן הזה בלבד.'));
+    return;
+  }
+  if (!C.user) return renderLogin();
+
+  view.append(crumb('לארכיון', '#/'));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, 'החשבון שלי'));
+  view.append(head);
+
+  const card = el('div', 'account-card');
+  const who = el('div', 'account-who');
+  who.append(el('div', 'account-avatar', (C.user.name || C.user.email || '?').trim().charAt(0).toUpperCase()));
+  const ident = el('div');
+  ident.append(el('b', null, C.user.name || ''));
+  ident.append(el('div', 'account-email', C.user.email));
+  who.append(ident);
+  card.append(who);
+
+  /* שורת מצב חיה — מתעדכנת מאירועי cloud:sync כל עוד העמוד מוצג. */
+  const syncLine = el('div', 'account-sync');
+  const renderSync = () => {
+    const s = C.status();
+    if (s.syncing) syncLine.textContent = '⏳ מסנכרן…';
+    else if (s.pending > 0) syncLine.textContent = `⬆️ ${s.pending} שינויים ממתינים לשליחה`;
+    else syncLine.textContent = '✅ ההתקדמות מסונכרנת לחשבון';
+  };
+  renderSync();
+  const onSync = () => { if (document.body.contains(syncLine)) renderSync(); else document.removeEventListener('cloud:sync', onSync); };
+  document.addEventListener('cloud:sync', onSync);
+  card.append(syncLine);
+
+  const acts = el('div', 'btn-row');
+  const exp = el('button', 'btn ghost', 'העתקת גיבוי התקדמות');
+  exp.onclick = async () => {
+    const dump = {};
+    [KEY, SEEN_Q_KEY, CARDS_READ_KEY, CASE_KEY].forEach((k) => { dump[k] = localStorage.getItem(k); });
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(dump));
+      exp.textContent = '✓ הועתק ללוח';
+    } catch { exp.textContent = 'ההעתקה נחסמה'; }
+  };
+  acts.append(exp);
+  const out = el('button', 'btn ghost logout', 'התנתקות');
+  out.onclick = async () => {
+    out.disabled = true;
+    await C.logout();
+    location.hash = '#/';
+    router();
+  };
+  acts.append(out);
+  card.append(acts);
+
+  card.append(el('p', 'account-note',
+    'ההתקדמות נשמרת גם במכשיר וגם בחשבון. התנתקות לא מוחקת כלום — ' +
+    'ההתחברות הבאה תאחה בין המכשיר לחשבון.'));
+
+  view.append(card);
+  toTop();
+  updateFooter();
+}
+
+/* הצעת התחברות בדף הבית — רק למי שעוד לא התחבר, פעם אחת. */
+const LOGIN_NUDGE_KEY = 'shichzurim.loginNudge';
+function loginBanner() {
+  const C = window.Cloud;
+  if (!C || !C.enabled || C.user) return null;
+  if (localStorage.getItem(LOGIN_NUDGE_KEY)) return null;
+
+  const b = el('div', 'intro cloud-nudge');
+  const txt = el('div');
+  txt.append(el('b', null, '☁️ ההתקדמות שלך שמורה רק בדפדפן הזה'));
+  txt.append(el('span', null, 'התחברות עם Google מגבה אותה, וממשיכה אותה מכל מכשיר — טלפון, מחשב, ספרייה.'));
+  b.append(txt);
+
+  const acts = el('div', 'btn-row');
+  acts.append(googleLoginBtn('התחברות עם Google'));
+  const later = el('button', 'btn ghost', 'אולי אחר כך');
+  later.onclick = () => { localStorage.setItem(LOGIN_NUDGE_KEY, '1'); b.remove(); };
+  acts.append(later);
+  b.append(acts);
+  return b;
+}
+
+/* כפתור החשבון ב-topbar: "התחברות" כשמנותקים, עיגול עם אות כשמחוברים. */
+function updateAccountBtn() {
+  const btn = document.getElementById('accountBtn');
+  if (!btn) return;
+  const C = window.Cloud;
+  if (!C || !C.enabled) { btn.hidden = true; return; }
+  btn.hidden = false;
+  if (C.user) {
+    btn.textContent = (C.user.name || C.user.email || '?').trim().charAt(0).toUpperCase();
+    btn.classList.add('in');
+    btn.title = C.user.email;
+    btn.onclick = () => { location.hash = '#/account'; };
+  } else {
+    btn.textContent = 'התחברות';
+    btn.classList.remove('in');
+    btn.title = 'התחברות עם Google';
+    btn.onclick = () => C.login();
+  }
 }
 
 /* ================= הודעה חד-פעמית לכל המשתמשים =================
@@ -4706,8 +4895,30 @@ document.addEventListener('click', (e) => {
   }
 });
 
+/* אירועי הענן. appReady מגן מרינדור לפני שהמניפסט נטען, ו-lastCloudUid מוודא
+   שרינדור-מחדש קורה רק כשמצב ההתחברות באמת התהפך — לא על כל רענון טוקן שעתי
+   (רינדור באמצע מבחן היה זורק את המשתמש לראש העמוד). */
+let appReady = false;
+let lastCloudUid = null;
+
+document.addEventListener('cloud:user', () => {
+  updateAccountBtn();
+  const uid = window.Cloud?.user?.id || null;
+  if (appReady && uid !== lastCloudUid) router();
+  lastCloudUid = uid;
+});
+
+/* המיזוג הביא שינויים ממכשיר אחר — המסך צריך להראות אותם. changed=false
+   (המצב המקומי כבר עדכני) לא מרנדר, כדי לא להזיז למשתמש את העמוד סתם. */
+document.addEventListener('cloud:merged', (e) => {
+  if (appReady && e.detail && e.detail.changed) router();
+});
+
 (async function init() {
   initTheme();
+  /* הענן מתאתחל במקביל לטעינת המניפסט — לא מוסיף זמן המתנה. ל-Cloud.init
+     יש קציבת זמן פנימית: Supabase איטי לא מעכב את הציור הראשון. */
+  const cloudInit = window.Cloud?.init?.()?.catch?.(() => {});
   try {
     await loadManifest();
   } catch {
@@ -4716,5 +4927,9 @@ document.addEventListener('click', (e) => {
       'אם פתחת את הקובץ ישירות מהמחשב (file://), הדפדפן חוסם קריאת קבצים. הרץ את start.command בתיקייה, או פתח את האתר מהכתובת המקוונת.'));
     return;
   }
+  if (cloudInit) await cloudInit;
+  lastCloudUid = window.Cloud?.user?.id || null;
+  updateAccountBtn();
+  appReady = true;
   router();
 })();

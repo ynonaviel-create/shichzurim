@@ -1,0 +1,34 @@
+# פרויקט Supabase חינמי מושהה אחרי ~שבוע ללא פעילות — וזה יקרה בדיוק
+# בחופשת סמסטר, כשאף אחד לא נכנס. הדגימה הזו נחשבת "פעילות" ומונעת את זה.
+#
+# דורש שני Secrets בריפו (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL      — https://<project-ref>.supabase.co
+#   SUPABASE_ANON_KEY — המפתח הציבורי (anon) של הפרויקט
+# עד שהם מוגדרים — הריצה מדלגת בשקט ולא נכשלת.
+
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 6 * * 1,4'   # פעמיים בשבוע (שני וחמישי), שוליים בטוחים מתחת לשבוע
+  workflow_dispatch: {}       # הרצה ידנית לבדיקה
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Secrets not configured yet — skipping."
+            exit 0
+          fi
+          # שאילתה על טבלה עם RLS מחזירה [] ל-anon — וזה בסדר גמור, העיקר שהפרויקט נגע.
+          curl -sf "$SUPABASE_URL/rest/v1/user_kv?select=user_id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -o /dev/null
+          echo "Supabase pinged successfully."

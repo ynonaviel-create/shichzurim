@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="assets/style.css?v=c0b02bc6">
+<link rel="stylesheet" href="assets/style.css?v=40acd6b0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🧬</text></svg>">
 </head>
 <body>
@@ -46,6 +46,8 @@
   <nav class="topnav">
     <a href="#/" data-nav="home">מקצועות</a>
     <a href="#/about" data-nav="about">מה זה?</a>
+    <!-- כפתור החשבון: מוסתר עד ש-cloud.js מאשר שהענן פעיל (updateAccountBtn ב-app.js). -->
+    <button class="account-btn" id="accountBtn" hidden aria-label="חשבון"></button>
     <button class="theme-btn" id="themeBtn" title="ערכת נושא: אוטומטי (לפי המכשיר)" aria-label="ערכת נושא">
       <svg class="ico-auto" viewBox="0 0 24 24" width="17" height="17" fill="none"
            stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -71,6 +73,10 @@
   <span id="footerStats"></span>
 </footer>
 
-<script src="assets/app.js?v=dabe3df5"></script>
+<!-- הענן: הספרייה מוקמת מקומית (בלי CDN בזמן ריצה) ונעוצה בגרסה — לכן פין קבוע.
+     cloud.js נחתם ע"י sync.js כמו app.js. אם אחד מהם נכשל, app.js ממשיך מקומית. -->
+<script src="assets/vendor/supabase.js?v=2.110.8"></script>
+<script src="assets/cloud.js?v=eef87a5a"></script>
+<script src="assets/app.js?v=eb9b0860"></script>
 </body>
 </html>

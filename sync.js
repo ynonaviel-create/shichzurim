@@ -323,6 +323,7 @@ const stamp = (file) =>
    בלי זה כל דחיפה משאירה חלון של 10 דקות שבו משתמשים רואים גרסה ישנה. */
 const cssV = stamp('assets/style.css');
 const jsV = stamp('assets/app.js');
+const cloudV = stamp('assets/cloud.js');   // גשר הענן — נחתם כמו app.js; הספרייה שב-vendor נעוצה בפין ידני
 
 fs.writeFileSync(
   path.join(EXAMS, 'manifest.json'),
@@ -330,7 +331,7 @@ fs.writeFileSync(
     {
       updated: new Date().toISOString().slice(0, 10),
       version: contentHash,
-      assets: { css: cssV, js: jsV },
+      assets: { css: cssV, js: jsV, cloud: cloudV },
       courses,
       exams,
     },
@@ -346,7 +347,8 @@ const indexPath = path.join(__dirname, 'index.html');
 let html = fs.readFileSync(indexPath, 'utf8');
 html = html
   .replace(/assets\/style\.css(\?v=[a-f0-9]+)?/g, `assets/style.css?v=${cssV}`)
-  .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`);
+  .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`)
+  .replace(/assets\/cloud\.js(\?v=[a-f0-9]+)?/g, `assets/cloud.js?v=${cloudV}`);
 fs.writeFileSync(indexPath, html, 'utf8');
 
 if (coverage.length) {
@@ -355,7 +357,7 @@ if (coverage.length) {
 }
 
 console.log('\n✅ manifest.json עודכן');
-console.log(`   נכסים נחתמו:  style.css?v=${cssV}   app.js?v=${jsV}\n`);
+console.log(`   נכסים נחתמו:  style.css?v=${cssV}   app.js?v=${jsV}   cloud.js?v=${cloudV}\n`);
 courses.forEach((c) => {
   const mine = exams.filter((e) => e.course === c.id);
   if (!mine.length) {

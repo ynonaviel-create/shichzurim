@@ -1507,3 +1507,57 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .case-side{ position:sticky; top:0; z-index:5; order:-1; padding-top:8px; background:var(--bg); }
   .ddx-row{ padding:5px 0; font-size:13px; }
 }
+
+/* ===== חשבון וענן =====
+   כפתור החשבון ב-topbar, מסך הכניסה של האתר הסגור, ועמוד החשבון.
+   כמו כל הקובץ — אין צבע קשיח, הכל דרך המשתנים, עובד בבהיר ובכהה. */
+
+.account-btn{
+  height:38px; border-radius:99px; margin-inline-start:6px; padding:0 15px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid var(--line);
+  color:var(--muted); font-family:var(--font); font-size:14px; font-weight:700;
+  cursor:pointer; transition:.16s; white-space:nowrap;
+}
+.account-btn[hidden]{display:none;}   /* display מפורש גובר על hidden — בלי זה הכפתור מציץ ריק */
+.account-btn:hover{border-color:var(--accent); color:var(--accent); background:var(--accent-sl);}
+/* מחובר: עיגול עם האות הראשונה של השם — כמו אווטאר. */
+.account-btn.in{
+  width:38px; padding:0; border-radius:50%;
+  background:var(--accent-dk); border-color:var(--accent-dk);
+  color:#fff; font-size:16px; font-weight:800;
+}
+.account-btn.in:hover{background:var(--accent);}
+
+.btn-google{background:var(--surface); gap:10px;}
+.btn-google svg{flex:none;}
+
+.login-hero{
+  max-width:430px; margin:9vh auto 0; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); padding:42px 30px 34px; box-shadow:var(--shadow-lg);
+}
+.login-mark{font-size:44px; line-height:1;}
+.login-hero h1{font-size:26px; font-weight:800; letter-spacing:-.5px;}
+.login-sub{font-size:15px; color:var(--muted); line-height:1.8;}
+.login-hero .btn-google{margin-top:6px; padding:12px 26px; font-size:15.5px;}
+.login-about{font-size:13.5px; color:var(--dim); text-decoration:none; margin-top:4px;}
+.login-about:hover{color:var(--accent);}
+
+.account-card{
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; gap:18px; max-width:560px;
+}
+.account-who{display:flex; align-items:center; gap:14px;}
+.account-avatar{
+  width:46px; height:46px; border-radius:50%; flex:none;
+  display:grid; place-items:center;
+  background:var(--accent-dk); color:#fff; font-size:20px; font-weight:800;
+}
+.account-who b{font-size:16px;}
+.account-email{font-size:13.5px; color:var(--muted); direction:ltr; text-align:right;}
+.account-sync{font-size:14px; font-weight:700; color:var(--muted);}
+.account-note{font-size:13px; color:var(--dim); line-height:1.7;}
+.btn.logout:hover{border-color:var(--bad); color:var(--bad); background:var(--bad-bg);}
