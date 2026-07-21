@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-21",
-  "version": "14e4376b",
+  "version": "ca22ddf9",
   "assets": {
     "css": "2c980990",
     "js": "cba803f7"
@@ -869,9 +869,9 @@
       "file": "molecular-pharma-2026-moed-a.json",
       "course": "molecular",
       "part": null,
-      "title": "שחזור רוקחות — מועד א׳",
+      "title": "שחזור רוקחות 2026 — מועד א׳",
       "kind": "shichzur",
-      "year": null,
+      "year": 2026,
       "cycle": null,
       "moed": "א",
       "added": "2026-07-21",
