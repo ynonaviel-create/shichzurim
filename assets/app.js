@@ -426,6 +426,9 @@ function renderHome() {
   const banner = introBanner();
   if (banner) view.append(banner);
 
+  /* "פוש" חד-פעמי — מוצג אחרי שהעמוד התיישב, ורק אם הסיור לא רץ. */
+  setTimeout(themeAnnounce, 700);
+
   const nextup = nextExamBanner();
   if (nextup) view.append(nextup);
 
@@ -2156,6 +2159,72 @@ function introBanner() {
   acts.append(skip);
   b.append(acts);
   return b;
+}
+
+/* ================= הודעה חד-פעמית לכל המשתמשים =================
+   "פוש" בתוך האתר: הודעה שמופיעה פעם אחת לכל דפדפן (נשמר ב-localStorage),
+   עם זרקור על כפתור ערכת הנושא — אותו כיסוי-חור של הסיור. אין כאן שרת שידחוף
+   התראות; זו הדרך להגיע לכל מי שנכנס, בלי הרשמה. להודעה חדשה בעתיד: שנה את
+   המפתח (או הוסף אחד) והיא תופיע מחדש לכולם. */
+const ANNOUNCE_KEY = 'shichzurim.announce.autoTheme';
+
+function themeAnnounce() {
+  if (tourStop) return;                              // לא נתנגש עם הסיור — ננסה שוב בכניסה הבאה
+  if (localStorage.getItem(ANNOUNCE_KEY)) return;
+  const btn = document.getElementById('themeBtn');
+  if (!btn) return;
+  localStorage.setItem(ANNOUNCE_KEY, '1');           // מוצג פעם אחת בלבד
+
+  const overlay = el('div', 'tour');
+  const hole = el('div', 'tour-hole');
+  const pop = el('div', 'tour-pop no-arrow');        // הזרקור על הכפתור הוא ההצבעה; בלי חץ
+  overlay.append(hole, pop);
+  document.body.append(overlay);
+
+  pop.append(el('div', 'tour-step', '✨ חדש באתר'));
+  pop.append(el('h4', null, 'חברים יקרים 💚'));
+  const p = el('p');
+  p.innerHTML = 'תנו בראש עם השחזורים — אבל <b>אל תהרסו את העיניים</b>. ' +
+    'הכפתור המודגש הפך תלת-מצבי, והכי נוח להשאיר אותו על <b>אוטומטי</b>: ' +
+    'כשהמכשיר עובר ללילה, האתר עובר איתו לבד. 🌙';
+  pop.append(p);
+
+  const row = el('div', 'tour-acts');
+  row.style.justifyContent = 'flex-end';
+  const ok = el('button', 'btn primary', 'סבבה, יאללה 👍');
+  ok.onclick = close;
+  row.append(ok);
+  pop.append(row);
+
+  function close() {
+    overlay.remove();
+    window.removeEventListener('resize', place);
+    window.removeEventListener('scroll', place);
+    document.removeEventListener('keydown', onKey);
+  }
+  function onKey(e) { if (e.key === 'Escape') close(); }
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  /* ממקם את החור על הכפתור ואת הבועה מתחתיו — נמדד ב-viewport, אז גלילה/שינוי
+     גודל ממקמים מחדש (הכותרת דביקה, הכפתור זז מעט עם הגלילה). */
+  function place() {
+    const r = btn.getBoundingClientRect();
+    const pad = 6;
+    hole.style.top = r.top - pad + 'px';
+    hole.style.left = r.left - pad + 'px';
+    hole.style.width = r.width + pad * 2 + 'px';
+    hole.style.height = r.height + pad * 2 + 'px';
+    const w = Math.min(340, window.innerWidth - 24);
+    pop.style.width = w + 'px';
+    pop.style.left = Math.max(12, Math.min(r.left, window.innerWidth - w - 12)) + 'px';
+    pop.style.top = r.bottom + 14 + 'px';
+    pop.style.bottom = 'auto';
+  }
+  place();
+  window.addEventListener('resize', place);
+  window.addEventListener('scroll', place, { passive: true });
+  ok.focus();
 }
 
 /* ================= סיור ההיכרות =================
