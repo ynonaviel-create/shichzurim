@@ -127,10 +127,14 @@ body::before{
   border-color:var(--accent); color:var(--accent); background:var(--accent-sl);
 }
 .theme-btn svg{display:block;}
-/* מציגים ירח במצב בהיר (כלומר: "עבור לכהה"), ושמש במצב כהה. */
-.theme-btn .ico-sun{display:none;}
-:root[data-theme="dark"] .theme-btn .ico-moon{display:none;}
-:root[data-theme="dark"] .theme-btn .ico-sun{display:block;}
+/* שלושה מצבים — האייקון מציג את המצב הנוכחי: צג=אוטומטי, שמש=בהיר, ירח=כהה.
+   נשלט ב-data-theme-mode (המצב שנבחר), לא ב-data-theme (הצבע שנפתר בפועל). */
+.theme-btn .ico-moon,
+.theme-btn .ico-sun,
+.theme-btn .ico-auto{display:none;}
+:root[data-theme-mode="auto"] .theme-btn .ico-auto{display:block;}
+:root[data-theme-mode="light"] .theme-btn .ico-sun{display:block;}
+:root[data-theme-mode="dark"] .theme-btn .ico-moon{display:block;}
 
 /* ===== פריסה ===== */
 main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px;}

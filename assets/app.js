@@ -56,27 +56,50 @@ const chipEl = (cls, txt) => {
 };
 
 /* ---------- ערכת נושא ---------- */
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  const btn = document.getElementById('themeBtn');
-  if (btn) btn.title = t === 'dark' ? 'מעבר למצב בהיר' : 'מעבר למצב כהה';
-  // קנבס לא יורש צבעים מ-CSS. אם סימולציה על המסך — לצייר מחדש.
-  if (simRepaint) simRepaint();
-}
-/* בלי בחירה מפורשת — הולכים אחרי המכשיר. רוב הלמידה כאן קורית בלילה, ומסך
-   לבן בוהק ב-2 לפנות בוקר הוא לא ברירת מחדל ניטרלית. בחירה מפורשת של המשתמש
-   תמיד גוברת ונשמרת, ולכן מי שבחר בהיר יקבל בהיר גם על מכשיר כהה. */
+/* שלושה מצבים: 'auto' (לפי הגדרות המכשיר, מתעדכן חי), 'light', 'dark'. רוב
+   הלמידה כאן קורית בלילה, ומסך לבן בוהק ב-2 לפנות בוקר הוא לא ברירת מחדל
+   ניטרלית — ולכן ברירת המחדל היא 'auto': המכשיר עובר ללילה, האתר איתו. בחירה
+   מפורשת (בהיר/כהה) נשמרת וגוברת; לחיצה נוספת מחזירה בסוף ל'auto'. */
 const systemTheme = () =>
   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
+const THEME_TITLE = {
+  auto: 'ערכת נושא: אוטומטי (לפי המכשיר)',
+  light: 'ערכת נושא: בהיר',
+  dark: 'ערכת נושא: כהה',
+};
+
+/* mode = מה שנבחר (auto/light/dark); resolved = הצבע שנפתר בפועל (light/dark).
+   data-theme נושא את ה-resolved (כל צבעי ה-CSS תלויים בו), data-theme-mode נושא
+   את ה-mode (רק האייקון של הכפתור תלוי בו). */
+function applyTheme(mode) {
+  const resolved = mode === 'auto' ? systemTheme() : mode;
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.setAttribute('data-theme-mode', mode);
+  const btn = document.getElementById('themeBtn');
+  if (btn) { btn.title = THEME_TITLE[mode]; btn.setAttribute('aria-label', THEME_TITLE[mode]); }
+  // קנבס לא יורש צבעים מ-CSS. אם סימולציה על המסך — לצייר מחדש.
+  if (simRepaint) simRepaint();
+}
+
 function initTheme() {
   const saved = localStorage.getItem(THEME_KEY);
-  applyTheme(saved || systemTheme());
+  const mode = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : 'auto';
+  applyTheme(mode);
   document.getElementById('themeBtn').onclick = () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    localStorage.setItem(THEME_KEY, next);
+    const cur = document.documentElement.getAttribute('data-theme-mode') || 'auto';
+    const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+    if (next === 'auto') localStorage.removeItem(THEME_KEY);
+    else localStorage.setItem(THEME_KEY, next);
     applyTheme(next);
   };
+  /* מעקב חי: המכשיר עובר בין יום ללילה — ואם אנחנו במצב אוטומטי, האתר מתעדכן
+     מיד, בלי רענון. בחירה מפורשת של המשתמש לא מושפעת. */
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if ((document.documentElement.getAttribute('data-theme-mode') || 'auto') === 'auto') applyTheme('auto');
+    });
+  }
 }
 
 /* ---------- אחסון התקדמות ---------- */
