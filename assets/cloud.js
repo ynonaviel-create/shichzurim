@@ -16,8 +16,8 @@
      (ראו SETUP-SUPABASE.md). המפתח הוא ה-anon הציבורי — הוא מיועד להיחשף
      בדפדפן; ההגנה האמיתית היא ה-RLS על הטבלה. */
   const CONFIG = {
-    url: '',       // https://<project-ref>.supabase.co
-    anonKey: '',   // Project Settings → API → anon public
+    url: 'https://ucpgpbeodqfuqfjbolcx.supabase.co',
+    anonKey: 'sb_publishable_LXyYIHmPautTU8qKvH5EUA_qVz4nSaK',   // מפתח ציבורי (publishable) — מיועד לדפדפן; ההגנה היא ה-RLS
   };
 
   /* מיפוי המרחבים בענן אל מפתחות ה-localStorage שבאתר — אותם מפתחות שהעטיפות
