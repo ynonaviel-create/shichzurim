@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-21",
-  "version": "ca22ddf9",
+  "version": "e933803d",
   "assets": {
     "css": "2c980990",
     "js": "cba803f7"
@@ -726,7 +726,7 @@
       "trust": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 53
+      "count": 54
     },
     {
       "id": "molecular-lab-2026-moed-a",
@@ -872,7 +872,7 @@
       "title": "שחזור רוקחות 2026 — מועד א׳",
       "kind": "shichzur",
       "year": 2026,
-      "cycle": null,
+      "cycle": 52,
       "moed": "א",
       "added": "2026-07-21",
       "official": null,
