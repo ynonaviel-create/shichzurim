@@ -95,11 +95,16 @@ function initTheme() {
   };
   /* מעקב חי: המכשיר עובר בין יום ללילה — ואם אנחנו במצב אוטומטי, האתר מתעדכן
      מיד, בלי רענון. בחירה מפורשת של המשתמש לא מושפעת. */
+  const syncAuto = () => {
+    if ((document.documentElement.getAttribute('data-theme-mode') || 'auto') === 'auto') applyTheme('auto');
+  };
   if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if ((document.documentElement.getAttribute('data-theme-mode') || 'auto') === 'auto') applyTheme('auto');
-    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncAuto);
   }
+  /* גיבוי לאירוע ה-change (קפריזי בחלק מהדפדפנים/מערכות): כשחוזרים ללשונית או
+     למיקוד, מסנכרנים שוב — תופס את "שיניתי את הגדרות המכשיר ואז חזרתי לאתר". */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncAuto(); });
+  window.addEventListener('focus', syncAuto);
 }
 
 /* ---------- אחסון התקדמות ---------- */
