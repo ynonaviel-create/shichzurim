@@ -43,7 +43,7 @@
   if (disabled) {
     window.Cloud = {
       enabled: false, user: null, isAdmin: false,
-      init: async () => {}, login: () => {}, logout: async () => {},
+      init: async () => {}, login: () => {}, logout: async () => {}, setName: async () => {},
       queue: () => {}, queueDelete: () => {}, queueClear: () => {}, queueClearPrefix: () => {},
       track: () => {}, admin: {},
       status: () => ({ pending: 0, lastSync: 0, syncing: false }),
@@ -235,15 +235,26 @@
   }
 
   /* ---------- session ---------- */
+  const NAME_KEY = 'shichzurim.name';
   function setSession(session) {
     state.session = session || null;
-    Cloud.user = session
-      ? {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email || '',
-        }
-      : null;
+    if (session) {
+      const meta = session.user.user_metadata || {};
+      const full = meta.full_name || meta.name || '';
+      /* השם שהמשתמש בחר (display_name) גובר; אחרת השם הפרטי מגוגל. localStorage
+         הוא מטמון מיידי לפני שהטוקן מתרענן. namedByUser — האם בחר שם במפורש. */
+      const chosen = (meta.display_name || '').trim() || (localStorage.getItem(NAME_KEY) || '').trim();
+      const first = chosen || String(full).trim().split(/\s+/)[0] || (session.user.email || '').split('@')[0] || '';
+      Cloud.user = {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: full || session.user.email || '',
+        firstName: first,
+        namedByUser: !!(meta.display_name || localStorage.getItem(NAME_KEY)),
+      };
+    } else {
+      Cloud.user = null;
+    }
     Cloud.isAdmin = !!(Cloud.user && ADMIN_EMAILS.includes(Cloud.user.email));
   }
 
@@ -286,6 +297,17 @@
     async logout() {
       try { await sb.auth.signOut(); } catch { /* גם אם השרת לא ענה — מקומית נותקנו */ }
       outbox = []; saveOutbox();
+    },
+
+    /* שם התצוגה שהמשתמש בחר. נשמר גם ב-user_metadata (מסונכרן בין מכשירים)
+       וגם ב-localStorage (מיידי, לפני שהטוקן מתרענן). */
+    async setName(name) {
+      name = String(name || '').trim().slice(0, 40);
+      if (!name) return;
+      localStorage.setItem(NAME_KEY, name);
+      if (Cloud.user) { Cloud.user.firstName = name; Cloud.user.namedByUser = true; }
+      emit('cloud:user');
+      try { await sb.auth.updateUser({ data: { display_name: name } }); } catch { /* מטמון מקומי כבר עודכן */ }
     },
 
     /* הכניסות מהעטיפות שב-app.js */

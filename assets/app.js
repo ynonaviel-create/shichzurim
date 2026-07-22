@@ -452,15 +452,28 @@ function router() {
   return renderHome();
 }
 
+/* ברכה לפי שעה ביום. שם ריק → רק הברכה. */
+function timeGreeting() {
+  const h = new Date().getHours();
+  if (h < 5 || h >= 22) return 'לילה טוב';
+  if (h < 12) return 'בוקר טוב';
+  if (h < 17) return 'צהריים טובים';
+  return 'ערב טוב';
+}
+
 /* ================= דף הבית — המקצועות ================= */
 function renderHome() {
   setNav('home');
   view.innerHTML = '';
 
   const head = el('div', 'page-head');
-  head.append(el('h1', null, 'ארכיון השחזורים'));
+  const nm = window.Cloud?.user?.firstName;
+  head.append(el('h1', null, nm ? `${timeGreeting()}, ${nm} 👋` : 'ארכיון השחזורים'));
   head.append(el('p', null, 'בחר מקצוע. בתוכו תמצא את כל השחזורים, תרגול מעורב, ורשימת הטעויות שלך.'));
   view.append(head);
+
+  const namePr = namePrompt();
+  if (namePr) view.append(namePr);
 
   const banner = introBanner();
   if (banner) view.append(banner);
@@ -1279,9 +1292,11 @@ function playQuestions(cfg) {
     const pct = Math.round((good / scoredCount) * 100);
     const box = el('div', 'result');
     box.append(el('div', 'grade ' + (pct >= 80 ? 'good' : pct >= 60 ? 'mid' : 'bad'), pct + '%'));
-    box.append(el('div', 'sub', `${good} נכונות מתוך ${scoredCount}. ${
-      pct >= 80 ? 'שליטה טובה בחומר.' : pct >= 60 ? 'יש בסיס, כדאי לחזור על הטעויות.' : 'שווה סבב נוסף על החומר.'
-    }`));
+    /* פנייה אישית כשהצליח: "כל הכבוד, ___!" — רק כשיש שם וציון טוב. */
+    const nm = window.Cloud?.user?.firstName;
+    const praise = pct >= 80 ? (nm ? `כל הכבוד, ${nm}! שליטה טובה בחומר.` : 'שליטה טובה בחומר.')
+      : pct >= 60 ? 'יש בסיס, כדאי לחזור על הטעויות.' : 'שווה סבב נוסף על החומר.';
+    box.append(el('div', 'sub', `${good} נכונות מתוך ${scoredCount}. ${praise}`));
     const row = el('div', 'btn-row');
     row.style.justifyContent = 'center';
     const again = el('button', 'btn primary', 'סבב נוסף');
@@ -2280,6 +2295,26 @@ function renderAccount() {
   who.append(ident);
   card.append(who);
 
+  /* עריכת שם התצוגה — איך האתר פונה אליך. */
+  const nameRow = el('div', 'account-name');
+  nameRow.append(el('label', null, 'איך לקרוא לך?'));
+  const nameInp = el('input', 'name-input');
+  nameInp.type = 'text';
+  nameInp.value = C.user.firstName || '';
+  nameInp.maxLength = 40;
+  const nameSave = el('button', 'btn ghost', 'שמור');
+  const saveName = async () => {
+    const v = nameInp.value.trim();
+    if (!v) return;
+    nameSave.disabled = true; nameSave.textContent = 'נשמר ✓';
+    await C.setName(v);
+    setTimeout(() => { nameSave.disabled = false; nameSave.textContent = 'שמור'; }, 1500);
+  };
+  nameSave.onclick = saveName;
+  nameInp.onkeydown = (e) => { if (e.key === 'Enter') saveName(); };
+  nameRow.append(nameInp, nameSave);
+  card.append(nameRow);
+
   /* שורת מצב חיה — מתעדכנת מאירועי cloud:sync כל עוד העמוד מוצג. */
   const syncLine = el('div', 'account-sync');
   const renderSync = () => {
@@ -2555,6 +2590,42 @@ function loginBanner() {
   const later = el('button', 'btn ghost', 'אולי אחר כך');
   later.onclick = () => { localStorage.setItem(LOGIN_NUDGE_KEY, '1'); b.remove(); };
   acts.append(later);
+  b.append(acts);
+  return b;
+}
+
+/* בקשת שם חד-פעמית — למי שמחובר ועדיין לא בחר שם. ממולא מראש בשם מגוגל,
+   כך שזה אישור בלחיצה, לא מילוי מאפס. */
+const NAME_ASKED_KEY = 'shichzurim.nameAsked';
+function namePrompt() {
+  const C = window.Cloud;
+  if (!C || !C.enabled || !C.user || C.user.namedByUser) return null;
+  if (localStorage.getItem(NAME_ASKED_KEY)) return null;
+
+  const b = el('div', 'intro name-prompt');
+  const txt = el('div');
+  txt.append(el('b', null, '👋 איך שנקרא לך?'));
+  txt.append(el('span', null, 'כדי שנפנה אליך בשם. אפשר לשנות בכל רגע בעמוד החשבון.'));
+  b.append(txt);
+
+  const acts = el('div', 'btn-row');
+  const input = el('input', 'name-input');
+  input.type = 'text';
+  input.value = C.user.firstName || '';
+  input.maxLength = 40;
+  input.setAttribute('aria-label', 'השם שלך');
+  acts.append(input);
+  const save = el('button', 'btn primary', 'שמור');
+  const done = () => {
+    const v = input.value.trim();
+    localStorage.setItem(NAME_ASKED_KEY, '1');
+    if (v) window.Cloud?.setName(v);   // cloud:user יגרום ל-router לרנדר מחדש עם השם
+    b.remove();
+    router();
+  };
+  save.onclick = done;
+  input.onkeydown = (e) => { if (e.key === 'Enter') done(); };
+  acts.append(save);
   b.append(acts);
   return b;
 }
