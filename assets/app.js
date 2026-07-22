@@ -2336,24 +2336,76 @@ function renderAccount() {
    כל הנתונים אגרגטיביים ומגיעים מפונקציות admin_* בשרת, שנעולות מאחורי
    is_admin(). אין כאן שום מידע על סטודנט בודד — רק מספרים ומגמות. */
 
-/* עמודות פשוטות בשימוש חוזר בדפוס הפסים של האתר — בלי ספריית גרפים. */
-function barChart(rows, labelOf, valueOf, opts) {
+/* כרטיס KPI — אייקון, מספר גדול, תווית. */
+function kpiCard(n, label, icon, cls) {
+  const c = el('div', 'adm-kpi' + (cls ? ' ' + cls : ''));
+  c.append(el('span', 'adm-kpi-ico', icon));
+  c.append(el('b', 'adm-kpi-n', n == null ? '—' : String(n)));
+  c.append(el('span', 'adm-kpi-l', label));
+  return c;
+}
+
+/* כרטיס סקשן עם כותרת ורמז אופציונלי. */
+function admCard(title, hint) {
+  const c = el('section', 'adm-card');
+  const h = el('div', 'adm-card-head');
+  h.append(el('h3', null, title));
+  if (hint) h.append(el('span', 'adm-hint', hint));
+  c.append(h);
+  return c;
+}
+
+/* רשימה מדורגת עם פסים — "מה הכי בשימוש". */
+function rankBars(rows, labelOf, valueOf) {
   const max = Math.max(1, ...rows.map(valueOf));
-  const box = el('div', 'adm-chart');
-  if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים.')); return box; }
-  rows.forEach((r) => {
-    const row = el('div', 'bd-row');
-    row.append(el('span', 'bd-name', labelOf(r)));
-    const track = el('div', 'bar');
-    const f = el('i');
-    f.style.width = Math.round((valueOf(r) / max) * 100) + '%';
-    f.classList.add('good');
-    track.append(f);
-    row.append(track);
-    row.append(el('span', 'bd-score ok', String(valueOf(r))));
+  const box = el('div', 'rank');
+  if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים בטווח הזה.')); return box; }
+  rows.forEach((r, i) => {
+    const row = el('div', 'rank-row');
+    row.append(el('span', 'rank-i', String(i + 1)));
+    row.append(el('span', 'rank-name', labelOf(r)));
+    const track = el('div', 'rank-bar');
+    const f = el('i'); f.style.width = Math.round((valueOf(r) / max) * 100) + '%';
+    track.append(f); row.append(track);
+    row.append(el('span', 'rank-n', String(valueOf(r))));
     box.append(row);
   });
   return box;
+}
+
+/* היסטוגרמת עמודות קומפקטית (שעות/ימים). direction:ltr כדי שציר הזמן
+   יזרום שמאל→ימין כמקובל בגרף, גם בעמוד RTL. everyNth — כל כמה עמודות תווית. */
+function columnChart(rows, valueOf, labelOf, everyNth, accent) {
+  const max = Math.max(1, ...rows.map(valueOf));
+  const box = el('div', 'col-chart' + (accent ? ' accent' : ''));
+  if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים בטווח הזה.')); return box; }
+  rows.forEach((r, i) => {
+    const col = el('div', 'col');
+    col.title = labelOf(r, i) + ' · ' + valueOf(r);
+    const bar = el('div', 'col-bar');
+    const f = el('i'); f.style.height = Math.round((valueOf(r) / max) * 100) + '%';
+    bar.append(f); col.append(bar);
+    col.append(el('span', 'col-lab', i % everyNth === 0 ? labelOf(r, i) : ''));
+    box.append(col);
+  });
+  return box;
+}
+
+/* ציר של N הימים האחרונים (UTC, כדי להתאים ל-created_at::date בשרת), עם 0
+   לימים בלי פעילות — כך הגרף רציף ולא מדלג על ימים שקטים. */
+function lastDaysUTC(n) {
+  const out = [];
+  const t = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - i));
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+function fillDays(rows, n) {
+  const map = {};
+  (rows || []).forEach((r) => { map[String(r.day).slice(0, 10)] = Number(r.n); });
+  return lastDaysUTC(n).map((day) => ({ day, n: map[day] || 0 }));
 }
 
 async function renderAdmin() {
@@ -2370,77 +2422,96 @@ async function renderAdmin() {
   view.append(crumb('לארכיון', '#/'));
   const head = el('div', 'page-head');
   head.append(el('h1', null, '📊 לוח הבקרה'));
-  head.append(el('p', null, 'סטטיסטיקות שימוש אגרגטיביות — מספרים ומגמות בלבד, בלי מידע על משתמש בודד.'));
+  head.append(el('p', null, 'סטטיסטיקות שימוש אגרגטיביות — מספרים ומגמות בלבד, בלי מידע על משתמש בודד. מתעדכן בזמן אמת.'));
   view.append(head);
 
-  const loading = el('div', 'empty');
-  loading.innerHTML = '<span class="ico">⏳</span><b>טוען נתונים…</b>';
-  view.append(loading);
+  const kpis = el('div', 'adm-kpis');
+  view.append(kpis);
+
+  let days = 30;
+  const chipRow = el('div', 'adm-range');
+  view.append(chipRow);
+  const charts = el('div');
+  view.append(charts);
+
+  function drawChips() {
+    chipRow.innerHTML = '';
+    [[7, '7 ימים'], [30, '30 יום'], [90, '90 יום']].forEach(([d, l]) => {
+      const b = el('button', 'adm-chip' + (d === days ? ' on' : ''), l);
+      b.onclick = () => { if (days === d) return; days = d; drawChips(); loadCharts(); };
+      chipRow.append(b);
+    });
+  }
+
+  async function loadCharts() {
+    charts.innerHTML = '';
+    charts.append(el('div', 'adm-loading', 'טוען…'));
+    let targets, hourly, active, signups;
+    try {
+      [targets, hourly, active, signups] = await Promise.all([
+        C.admin.topTargets(days, 10),
+        C.admin.activeHourly(days),
+        C.admin.activeDaily(days),
+        C.admin.signupsDaily(days),
+      ]);
+    } catch (err) {
+      charts.innerHTML = '';
+      charts.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err && err.message || err)));
+      return;
+    }
+    charts.innerHTML = '';
+
+    // ── מה הכי בשימוש ──
+    const cT = admCard('🔥 מה הכי בשימוש', 'הקורסים, המבחנים והכלים הכי נפתחים');
+    cT.append(rankBars(
+      (targets.data || []).map((r) => ({ label: prettyTarget(r.target, r.type), n: r.n })),
+      (r) => r.label, (r) => r.n,
+    ));
+    charts.append(cT);
+
+    // ── שעות שיא ──
+    const byHour = {};
+    (hourly.data || []).forEach((r) => { byHour[r.hour] = Number(r.n); });
+    const hRows = Array.from({ length: 24 }, (_, h) => ({ h, n: byHour[h] || 0 }));
+    const cH = admCard('🕐 מתי משתמשים', 'שעה ביום · שעון ישראל');
+    cH.append(columnChart(hRows, (r) => r.n, (r) => String(r.h).padStart(2, '0'), 6));
+    charts.append(cH);
+
+    // ── פעילות יומית ──
+    const aRows = fillDays(active.data, days);
+    const nth = Math.max(1, Math.ceil(aRows.length / 6));
+    const cA = admCard('📈 פעילים ליום', `${days} הימים האחרונים`);
+    cA.append(columnChart(aRows, (r) => r.n, (r) => fmtDay(r.day), nth));
+    charts.append(cA);
+
+    // ── הרשמות יומיות ──
+    const sRows = fillDays(signups.data, days);
+    const cS = admCard('🆕 הצטרפות לפי יום', `${days} הימים האחרונים`);
+    cS.append(columnChart(sRows, (r) => r.n, (r) => fmtDay(r.day), nth, true));
+    charts.append(cS);
+  }
+
+  drawChips();
 
   try {
-    const [ov, signups, active, hourly, targets] = await Promise.all([
-      C.admin.overview(),
-      C.admin.signupsDaily(30),
-      C.admin.activeDaily(30),
-      C.admin.activeHourly(30),
-      C.admin.topTargets(30, 25),
-    ]);
-    loading.remove();
-
-    /* שגיאת הרשאה (משתמש רגיל שהגיע לכאן איכשהו) — עוצרים בכבוד. */
+    const ov = await C.admin.overview();
     if (ov.error) {
+      view.innerHTML = '';
       view.append(emptyState('🔒', 'אין גישה', 'השרת דחה את הבקשה — לוח הבקרה למנהל בלבד.'));
       return;
     }
     const o = ov.data || {};
-
-    // ── סיכום מהיר ──
-    const dash = el('div', 'dash');
-    dash.append(stat(o.total_users ?? '—', 'משתמשים רשומים', 'accent'));
-    dash.append(stat(o.active_today ?? '—', 'פעילים היום', 'good'));
-    dash.append(stat(o.active_7d ?? '—', 'פעילים השבוע'));
-    dash.append(stat(o.new_7d ?? '—', 'נרשמו השבוע'));
-    view.append(dash);
-
-    const sub = el('p', 'adm-note');
-    sub.textContent = `סה״כ ${o.events_total ?? 0} אירועים · ${o.active_30d ?? 0} פעילים ב-30 יום · ${o.new_30d ?? 0} הרשמות ב-30 יום.`;
-    view.append(sub);
-
-    // ── מה הכי בשימוש ──
-    const secT = el('section', 'adm-sec');
-    secT.append(el('h3', 'adm-h', '🔥 מה הכי בשימוש (30 יום)'));
-    const tRows = (targets.data || []).map((r) => ({
-      label: prettyTarget(r.target, r.type),
-      n: r.n,
-    }));
-    secT.append(barChart(tRows, (r) => r.label, (r) => r.n));
-    view.append(secT);
-
-    // ── שעות שיא ──
-    const secH = el('section', 'adm-sec');
-    secH.append(el('h3', 'adm-h', '🕐 שעות שיא (שעון ישראל, 30 יום)'));
-    const byHour = {};
-    (hourly.data || []).forEach((r) => { byHour[r.hour] = r.n; });
-    const hRows = Array.from({ length: 24 }, (_, h) => ({ h, n: byHour[h] || 0 }));
-    secH.append(barChart(hRows, (r) => String(r.h).padStart(2, '0') + ':00', (r) => r.n));
-    view.append(secH);
-
-    // ── פעילים ליום ──
-    const secA = el('section', 'adm-sec');
-    secA.append(el('h3', 'adm-h', '📈 פעילים ליום (30 יום)'));
-    secA.append(barChart(active.data || [], (r) => fmtDay(r.day), (r) => r.n));
-    view.append(secA);
-
-    // ── הרשמות ליום ──
-    const secS = el('section', 'adm-sec');
-    secS.append(el('h3', 'adm-h', '🆕 הרשמות ליום (30 יום)'));
-    secS.append(barChart(signups.data || [], (r) => fmtDay(r.day), (r) => r.n));
-    view.append(secS);
+    kpis.append(kpiCard(o.total_users ?? '—', 'משתמשים רשומים', '👥', 'accent'));
+    kpis.append(kpiCard(o.active_today ?? '—', 'פעילים היום', '🟢', 'good'));
+    kpis.append(kpiCard(o.active_7d ?? '—', 'פעילים השבוע', '📅'));
+    kpis.append(kpiCard(o.new_7d ?? '—', 'הצטרפו השבוע', '🆕'));
   } catch (err) {
-    loading.remove();
+    view.innerHTML = '';
     view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err && err.message || err)));
+    return;
   }
 
+  await loadCharts();
   toTop();
   updateFooter();
 }
