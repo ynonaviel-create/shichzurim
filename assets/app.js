@@ -63,6 +63,191 @@ const chipEl = (cls, txt) => {
   return c;
 };
 
+/* ═══════════════ שכבת התגמול — חגיגות, רצפים, פנייה אישית ═══════════════
+   משוב דופמינרגי על הצלחה, כדי לתת כוח להמשיך לאורך שעות לימוד. העיקרון:
+   הסלמה, לא חזרה — מיקרו-תגמול על כל תשובה נכונה, טוסט חוגג באבני-רצף,
+   ופיצוץ מלא ברגעים הגדולים (שיא אישי, מבחן מושלם, כיסוי מקצוע).
+   נשען על הפנייה האישית הקיימת (Cloud.user.firstName). הכל מכבד את מתג
+   הכיבוי ואת prefers-reduced-motion, והצליל כבוי כברירת מחדל. */
+
+const CELEBRATE_KEY = 'shichzurim.celebrate';   // דלוק כברירת מחדל
+const SFX_KEY       = 'shichzurim.sfx';         // כבוי כברירת מחדל
+const BEST_STREAK_KEY = 'shichzurim.bestStreak';
+const MILESTONES_KEY  = 'shichzurim.milestones';
+
+const prefOn = (key, dflt) => { const v = localStorage.getItem(key); return v == null ? dflt : v === '1'; };
+const celebrateOn = () => prefOn(CELEBRATE_KEY, true);
+const sfxOn = () => prefOn(SFX_KEY, false);
+const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const firstName = () => window.Cloud?.user?.firstName || '';
+
+const bestStreak = () => Number(localStorage.getItem(BEST_STREAK_KEY) || 0);
+const setBestStreak = (n) => localStorage.setItem(BEST_STREAK_KEY, String(n));
+
+/* אבני דרך שכבר נחגגו — כדי לירות פעם אחת בלבד, לתמיד. */
+const milestoneHit = (id) => (localStorage.getItem(MILESTONES_KEY) || '').split('|').includes(id);
+const markMilestone = (id) => {
+  const s = new Set((localStorage.getItem(MILESTONES_KEY) || '').split('|').filter(Boolean));
+  s.add(id);
+  localStorage.setItem(MILESTONES_KEY, [...s].join('|'));
+};
+
+/* מאגרי הודעות מתחלפות, בטעם רפואי. {name} מוזרק אם יש שם, אחרת נופל בחן. */
+const STREAK_LINES = {
+  low:  ['אבחנה מדויקת! 🎯', 'רפלקס מהיר ⚡', 'דופק חזק 💓', 'ישר בול 🎯', 'יפה, {name}! 👏', 'קולע/ת 💪'],
+  mid:  ['על גל, {name}! 🔥', 'בלתי עציר/ה 🚀', 'המוח מפריש דופמין — וגם אנחנו 🧠', 'רצף חם! 🔥', 'שולט/ת בחומר, {name}! 💪'],
+  high: ['וירטואוז/ית, {name}! 🩺', 'רצף מפלצתי 🐉', 'אין עליך, {name}! 👑', 'פרופסור/ית כבר עכשיו 🎓', 'על אש! 🔥🔥'],
+};
+const BEST_LINES = ['שיא אישי חדש! 🏆', 'שברת את השיא שלך, {name}! 🏆', 'הכי טוב שהיה לך אי פעם 🥇'];
+
+const formatLine = (line, name) =>
+  name
+    ? line.replace(/\{name\}/g, name)
+    : line.replace(/\{name\}\s*,\s*/g, '').replace(/[,\s]*\{name\}/g, '').replace(/\s{2,}/g, ' ').trim();
+
+const _lastLine = {};
+function pickLine(poolName, pool, name) {
+  let idx, tries = 0;
+  do { idx = Math.floor(Math.random() * pool.length); }
+  while (pool.length > 1 && idx === _lastLine[poolName] && ++tries < 6);
+  _lastLine[poolName] = idx;
+  return formatLine(pool[idx], name);
+}
+
+/* אבני-רצף. מתחת ל-3 אין טוסט (רק הפיל מתקדם); מעל 20 כל 5. */
+const STREAK_TIERS = [3, 5, 8, 12, 16, 20];
+const isStreakMilestone = (n) => STREAK_TIERS.includes(n) || (n > 20 && n % 5 === 0);
+const streakTier = (n) => (n >= 12 ? 'high' : n >= 5 ? 'mid' : 'low');
+
+/* --- קונפטי: CSS בלבד, בלי ספרייה ובלי canvas. מושתק ב-reduced-motion. --- */
+function confettiBurst(n = 16) {
+  if (reduceMotion()) return;
+  const box = el('div', 'confetti');
+  const colors = ['var(--good)', 'var(--accent)', 'var(--warn)', 'var(--topic-tx)', 'var(--bad)'];
+  for (let i = 0; i < n; i++) {
+    const p = el('i');
+    p.style.setProperty('--x', (Math.random() * 2 - 1).toFixed(2));
+    p.style.setProperty('--r', Math.floor(Math.random() * 720 - 360) + 'deg');
+    p.style.setProperty('--d', (0.9 + Math.random() * 0.7).toFixed(2) + 's');
+    p.style.setProperty('--delay', (Math.random() * 0.12).toFixed(2) + 's');
+    p.style.background = colors[i % colors.length];
+    p.style.left = (44 + Math.random() * 12) + '%';
+    box.append(p);
+  }
+  document.body.append(box);
+  setTimeout(() => box.remove(), 2100);
+}
+
+/* --- צליל מסונתז ב-WebAudio, בלי קובץ נכס. רק אם הודלק במפורש. --- */
+let _actx;
+function blip(kind) {
+  if (!sfxOn()) return;
+  try {
+    _actx = _actx || new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _actx;
+    if (ctx.state === 'suspended') ctx.resume();   // דפדפנים פותחים אותו רדום עד מחווה
+    const now = ctx.currentTime;
+    const notes = kind === 'big' ? [523.25, 659.25, 783.99] : [659.25, 987.77];
+    notes.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      const t = now + i * 0.075;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.14, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0008, t + 0.22);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.24);
+    });
+  } catch { /* דפדפן בלי WebAudio — פשוט בלי צליל */ }
+}
+
+/* --- הטוסט החוגג. לא חוסם, מכריז לקורא-מסך, מתחלף אם עוד מוצג. --- */
+let _toastTimer;
+function celebrate({ line, sub, tier = 'mid', confetti = 0, sound = 'pop' }) {
+  if (!celebrateOn()) return;
+  if (sound) blip(sound);
+  if (confetti) confettiBurst(confetti);
+
+  document.querySelector('.cheer')?.remove();
+  clearTimeout(_toastTimer);
+  const t = el('div', 'cheer t-' + tier);
+  t.setAttribute('role', 'status');
+  t.setAttribute('aria-live', 'polite');
+  t.append(el('div', 'cheer-line', line));
+  if (sub) t.append(el('div', 'cheer-sub', sub));
+  document.body.append(t);
+  requestAnimationFrame(() => t.classList.add('in'));
+  _toastTimer = setTimeout(() => {
+    t.classList.remove('in');
+    setTimeout(() => t.remove(), 320);
+  }, tier === 'high' ? 2600 : 1900);
+}
+
+function celebrateStreak(streak) {
+  const name = firstName(), tier = streakTier(streak);
+  celebrate({
+    line: pickLine(tier, STREAK_LINES[tier], name),
+    sub: `${streak} ברצף 🔥`,
+    tier,
+    confetti: tier === 'high' ? 28 : tier === 'mid' ? 16 : 8,
+    sound: tier === 'high' ? 'big' : 'pop',
+  });
+}
+
+function celebrateBest(streak) {
+  celebrate({
+    line: pickLine('best', BEST_LINES, firstName()),
+    sub: `${streak} ברצף — הכי הרבה שהיה לך`,
+    tier: 'high', confetti: 32, sound: 'big',
+  });
+}
+
+/* אבן דרך: כיסית את כל שאלות המקצוע. נבדק מול המפה הגלובלית של seen,
+   ונחגג פעם אחת בלבד לתמיד (markMilestone). m = {courseId, courseName, total, qids}. */
+function checkCourseMilestone(m) {
+  if (!m || !m.total) return;
+  const id = `${m.courseId}:cov100`;
+  if (milestoneHit(id)) return;
+  const map = seen.read();
+  const done = m.qids.filter((k) => map[k] !== undefined).length;
+  if (done < m.total) return;
+  markMilestone(id);
+  const name = firstName();
+  celebrate({
+    line: `🎓 כיסית את כל ${m.courseName}${name ? ', ' + name : ''}!`,
+    sub: `${m.total} שאלות — ראית את כולן`,
+    tier: 'high', confetti: 36, sound: 'big',
+  });
+}
+
+/* חגיגת סיום סבב — נקראת ממסך התוצאה על ציון גבוה. */
+function celebrateResult(pct, scoredCount, name) {
+  if (pct < 90) return;
+  const perfect = pct === 100 && scoredCount >= 5;
+  celebrate({
+    line: perfect
+      ? (name ? `מושלם, ${name}! 💯` : 'מושלם! 💯')
+      : (name ? `כמעט מושלם, ${name}! 🌟` : 'כמעט מושלם! 🌟'),
+    sub: `${pct}% בסבב הזה`,
+    tier: 'high', confetti: perfect ? 40 : 26, sound: 'big',
+  });
+}
+
+/* מתגי שליטה לסרגל הנגן: צליל (כבוי כברירת מחדל) וכיבוי כללי. */
+function rewardToggles() {
+  const wrap = el('div', 'reward-toggles');
+  const mk = (key, dflt, on, off, title) => {
+    const b = el('button', 'bar-toggle');
+    const sync = () => { const v = prefOn(key, dflt); b.textContent = v ? on : off; b.title = title + (v ? ' — דלוק' : ' — כבוי'); b.setAttribute('aria-pressed', String(v)); };
+    b.onclick = () => { localStorage.setItem(key, prefOn(key, dflt) ? '0' : '1'); sync(); };
+    sync();
+    return b;
+  };
+  wrap.append(mk(SFX_KEY, false, '🔔', '🔕', 'צליל'));
+  wrap.append(mk(CELEBRATE_KEY, true, '🎉', '😴', 'חגיגות'));
+  return wrap;
+}
+
 /* ---------- ערכת נושא ---------- */
 /* שלושה מצבים: 'auto' (לפי הגדרות המכשיר, מתעדכן חי), 'light', 'dark'. רוב
    הלמידה כאן קורית בלילה, ומסך לבן בוהק ב-2 לפנות בוקר הוא לא ברירת מחדל
@@ -1238,7 +1423,11 @@ function playQuestions(cfg) {
   const cGood = el('span', 'c-good');
   const cBad = el('span', 'c-bad');
   const cLeft = el('span', 'c-left');
-  counts.append(cGood, cBad, cLeft);
+  /* פיל הרצף — מנגנון האנטיציפציה. מופיע מ-2 ומעלה ומתקתק בפופ קטן, כדי
+     שתרגיש את הרצף בונה עוד לפני החגיגה הבאה. */
+  const streakPill = el('div', 'streak-pill');
+  streakPill.hidden = true;
+  counts.append(cGood, cBad, cLeft, streakPill);
   bar.append(counts);
 
   const progress = el('div', 'bar');
@@ -1254,7 +1443,38 @@ function playQuestions(cfg) {
 
   const resetBtn = el('button', 'btn ghost', 'איפוס');
   bar.append(resetBtn);
+  bar.append(rewardToggles());
   view.append(bar);
+
+  /* --- מצב הרצף (בזיכרון, פר-סבב) --- */
+  let streak = 0;
+  let celebratedResult = false;
+  /* השיא כפי שהיה *בתחילת* הסבב. "שיא אישי" נחגג רק כשעוברים אותו — כלומר
+     שוברים שיא מסבב קודם, לא סתם מתקדמים בתוך הסבב הנוכחי. */
+  const bestAtStart = bestStreak();
+  function paintStreak() {
+    if (streak >= 2) {
+      streakPill.hidden = false;
+      streakPill.innerHTML = '';
+      streakPill.append(el('span', 'flame', '🔥'), el('span', 'sn', String(streak)));
+      streakPill.classList.remove('bump'); void streakPill.offsetWidth; streakPill.classList.add('bump');
+    } else {
+      streakPill.hidden = true;
+    }
+  }
+  /* נקרא מ-choose על תשובה נכונה. off-syllabus לא נספר (כמו בציון). */
+  function bumpStreak(isRight, item) {
+    if (item.offSyllabus) return;
+    if (!isRight) { streak = 0; paintStreak(); return; }
+    streak++;
+    paintStreak();
+    if (streak > bestStreak()) setBestStreak(streak);        // שומרים את השיא לכל החיים
+    if (isStreakMilestone(streak)) {
+      if (streak > bestAtStart && bestAtStart >= 3) celebrateBest(streak);   // שברת שיא מסבב קודם
+      else celebrateStreak(streak);
+    }
+    if (cfg.milestone) checkCourseMilestone(cfg.milestone);
+  }
 
   const qWrap = el('div');
   const resultBox = el('div');
@@ -1290,6 +1510,9 @@ function playQuestions(cfg) {
     if (answered !== scoredCount) return;
 
     const pct = Math.round((good / scoredCount) * 100);
+    /* חגיגת סיום — פעם אחת לסבב, על ציון גבוה. הדגל מגן מפני ירי כפול
+       אם refresh ייקרא שוב אחרי שכבר סיימת. */
+    if (!celebratedResult) { celebratedResult = true; celebrateResult(pct, scoredCount, firstName()); }
     const box = el('div', 'result');
     box.append(el('div', 'grade ' + (pct >= 80 ? 'good' : pct >= 60 ? 'mid' : 'bad'), pct + '%'));
     /* פנייה אישית כשהצליח: "כל הכבוד, ___!" — רק כשיש שם וציון טוב. */
@@ -1374,6 +1597,7 @@ function playQuestions(cfg) {
   function doReset() {
     for (const k of Object.keys(answers)) delete answers[k];
     if (persist) store.reset(key);
+    streak = 0; celebratedResult = false; paintStreak();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1505,8 +1729,12 @@ function playQuestions(cfg) {
   function choose(qi, oi, card, opts, fb, item) {
     if (answers[qi] != null) return;
     answers[qi] = oi;
-    if (!item.offSyllabus) seen.mark(item, oi === item.a);   // מחוץ לחומר לא נכנס ל"טעויות שלי"
+    const isRight = oi === item.a;
+    if (!item.offSyllabus) seen.mark(item, isRight);   // מחוץ לחומר לא נכנס ל"טעויות שלי"
     paint(qi, oi, card, opts, fb, item);
+    /* החגיגה חיה כאן ולא ב-paint, כי paint רץ מחדש בכל רינדור של שאלה שכבר
+       נענתה — והיה יורה טוסט/קונפטי שוב על שאלה ישנה. choose רץ פעם אחת. */
+    bumpStreak(isRight, item);
     refresh();
 
     /* אין גלילה אוטומטית. הרגע שאחרי המענה הוא הרגע שבו לומדים —
@@ -2047,6 +2275,9 @@ async function renderPractice(courseId, seedTopic = null) {
       questions: picked,
       persist: false,
       back: { text: 'תרגול חדש', href: '#/practice/' + courseId },
+      /* אבן דרך "כיסית את כל המקצוע" — נמדדת מול כל בריכת השאלות, לא רק
+         תת-הקבוצה שנבחרה לסבב הזה. */
+      milestone: { courseId, courseName: c.name, total: pool.length, qids: pool.map(qKey) },
     });
   };
 

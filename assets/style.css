@@ -563,6 +563,73 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   max-width:70ch;
 }
 
+/* ═══════════════ שכבת התגמול — חגיגות, רצפים ════════════════
+   משוב דופמינרגי על הצלחה. משתמש בטוקנים הקיימים (--good/--accent) ובאידיום
+   ההילה 0 0 0 3px של האתר. כל אנימציה מקבלת גארד prefers-reduced-motion:
+   קונפטי ותנועה מושתקים לגמרי, אבל הטקסט/האימוג׳י עדיין מופיעים. */
+
+/* --- מיקרו-פופ על משוב נכון --- */
+.fb.ok{ animation:fb-pop .32s cubic-bezier(.4,0,.2,1); }
+@keyframes fb-pop{ from{ transform:scale(.97); } 60%{ transform:scale(1.012); } to{ transform:scale(1); } }
+
+/* --- פיל הרצף בסרגל --- */
+.streak-pill{
+  display:inline-flex; align-items:center; gap:5px; margin-inline-start:4px;
+  padding:2px 10px; border-radius:99px;
+  background:var(--warn-bg); border:1px solid var(--warn-ln); color:var(--warn);
+  font-size:12.5px; font-weight:800; white-space:nowrap;
+}
+.streak-pill[hidden]{ display:none; }   /* המחלקה גוברת על [hidden] של הדפדפן — צריך במפורש */
+.streak-pill .sn{ font-variant-numeric:tabular-nums; }
+.streak-pill.bump{ animation:pill-bump .34s cubic-bezier(.34,1.56,.64,1); }
+@keyframes pill-bump{ 0%{ transform:scale(1); } 40%{ transform:scale(1.18); } 100%{ transform:scale(1); } }
+
+/* --- מתגי צליל/חגיגות --- */
+.reward-toggles{ display:inline-flex; gap:4px; margin-inline-start:auto; }
+.bar-toggle{
+  width:34px; height:34px; padding:0; border-radius:9px; cursor:pointer;
+  display:grid; place-items:center; font-size:16px; line-height:1;
+  background:var(--surface); border:1px solid var(--line); transition:.13s;
+}
+.bar-toggle:hover{ border-color:var(--accent); background:var(--surface-2); }
+.bar-toggle[aria-pressed="false"]{ opacity:.55; }
+
+/* --- הטוסט החוגג --- */
+.cheer{
+  position:fixed; z-index:1300; inset-inline:0; top:76px; margin-inline:auto;
+  width:max-content; max-width:calc(100vw - 32px);
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:14px 26px; border-radius:16px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--good-ln);
+  box-shadow:var(--shadow-lg), 0 0 0 3px color-mix(in srgb, var(--good-ln) 30%, transparent);
+  opacity:0; transform:translateY(-14px) scale(.92); pointer-events:none;
+  transition:opacity .3s, transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.cheer.in{ opacity:1; transform:translateY(0) scale(1); }
+.cheer.t-high{ border-color:var(--accent); box-shadow:var(--shadow-lg), 0 0 0 3px color-mix(in srgb, var(--accent) 32%, transparent); }
+.cheer-line{ font-size:19px; font-weight:800; letter-spacing:-.01em; }
+.cheer-sub{ font-size:13px; font-weight:700; color:var(--muted); }
+
+/* --- קונפטי --- */
+.confetti{ position:fixed; inset:0; z-index:1290; pointer-events:none; overflow:hidden; }
+.confetti i{
+  position:absolute; top:-14px; width:9px; height:9px; border-radius:2px;
+  animation:confetti-fall var(--d,1.2s) linear var(--delay,0s) forwards;
+}
+@keyframes confetti-fall{
+  from{ transform:translate(0,0) rotate(0); opacity:1; }
+  to{ transform:translate(calc(var(--x,0) * 46vw), 104vh) rotate(var(--r,360deg)); opacity:.9; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fb.ok{ animation:none; }
+  .streak-pill.bump{ animation:none; }
+  .confetti{ display:none; }
+  .cheer{ transition:opacity .2s; transform:none; }
+  .cheer.in{ transform:none; }
+}
+
 /* ===== כפתור העתקה ל-NotebookLM ===== */
 .nb-btn{
   display:inline-flex; align-items:center; gap:7px; margin-top:14px;
