@@ -30,7 +30,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="assets/style.css?v=40acd6b0">
+<link rel="stylesheet" href="assets/style.css?v=bfc5cf70">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🧬</text></svg>">
 </head>
 <body>
@@ -76,7 +76,17 @@
 <!-- הענן: הספרייה מוקמת מקומית (בלי CDN בזמן ריצה) ונעוצה בגרסה — לכן פין קבוע.
      cloud.js נחתם ע"י sync.js כמו app.js. אם אחד מהם נכשל, app.js ממשיך מקומית. -->
 <script src="assets/vendor/supabase.js?v=2.110.8"></script>
-<script src="assets/cloud.js?v=13780465"></script>
-<script src="assets/app.js?v=2ec81345"></script>
+<script src="assets/cloud.js?v=e6c519f7"></script>
+<script src="assets/app.js?v=06554a9d"></script>
+
+<!-- ═══ Cloudflare Web Analytics — תעבורה כוללת, גם מי שלא התחבר ═══
+     קוקילס, ידידותי לפרטיות, חינם. נצפה בלוח של Cloudflare (לא בתוך האתר).
+     להפעלה (פעם אחת): dash.cloudflare.com → Web Analytics → Add a site →
+     shichzurim → העתק את ה-token, הדבק במקום CF_TOKEN למטה, והסר את סימני ההערה.
+     זה הרכיב היחיד של צד שלישי (מלבד Google Fonts) — ניתן להשאיר מושבת. -->
+<!--
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token": "CF_TOKEN"}'></script>
+-->
 </body>
 </html>

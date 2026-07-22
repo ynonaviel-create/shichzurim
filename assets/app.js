@@ -426,6 +426,12 @@ function router() {
      האתר לפני שמתחברים. כשהענן כבוי (קונפיג ריק / file://) אין את מי לשאול
      מי מחובר, אז השער לא נאכף — האתר לא ננעל בטעות על עצמו. */
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
+  /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
+     סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
+  if (['course','exam','sim','drill','practice','review','guide'].includes(route)) {
+    window.Cloud?.track('view', param ? `${route}:${param}` : route);
+  }
+  if (route === 'admin') return renderAdmin();
   if (route === 'account') return renderAccount();
   if (route === 'course' && param) return renderCourse(param);
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
@@ -2137,7 +2143,8 @@ function renderAbout() {
     { icon: '🔑', title: 'חשבון אחד, התקדמות בכל מכשיר',
       body: 'נכנסים עם חשבון Google (הכפתור למעלה). מאותו רגע כל תשובה שאתה עונה נשמרת בחשבון ' +
             'וממשיכה מכל מכשיר — פתחת בטלפון בדרך לאוניברסיטה, וזה מחכה לך במחשב בבית. ' +
-            'רק אתה רואה את ההתקדמות שלך: היא מוגנת מאחורי חשבון הגוגל שלך, ואף אחד אחר — כולל מי שהעלה את האתר — לא ניגש אליה.' },
+            'רק אתה רואה את ההתקדמות שלך: היא מוגנת מאחורי חשבון הגוגל שלך, ואף אחד אחר — כולל מי שהעלה את האתר — לא ניגש אליה. ' +
+            '(נאספות סטטיסטיקות שימוש אנונימיות ומצטברות בלבד — כמה אנשים, אילו נושאים נפתחים — כדי לשפר את האתר. לא מי עשה מה.)' },
     { icon: '✍️', title: 'עונים, ומקבלים תשובה מיד',
       body: 'לוחצים על מסיח. הנכון נצבע ירוק, השגוי אדום — מיד. איפה שיש הסבר, הוא מופיע גם. ' +
             'אפשר גם פשוט להקיש 1, 2, 3 על המקלדת.' },
@@ -2312,8 +2319,151 @@ function renderAccount() {
     'ההתחברות הבאה תאחה בין המכשיר לחשבון.'));
 
   view.append(card);
+
+  /* כניסה ללוח הבקרה — מוצג רק למנהל, ולא בתפריט הציבורי. */
+  if (C.isAdmin) {
+    const a = el('a', 'btn ghost admin-link', '📊 לוח הבקרה');
+    a.href = '#/admin';
+    a.style.marginTop = '14px';
+    view.append(a);
+  }
+
   toTop();
   updateFooter();
+}
+
+/* ================= לוח בקרה — סטטיסטיקות (מנהל בלבד) =================
+   כל הנתונים אגרגטיביים ומגיעים מפונקציות admin_* בשרת, שנעולות מאחורי
+   is_admin(). אין כאן שום מידע על סטודנט בודד — רק מספרים ומגמות. */
+
+/* עמודות פשוטות בשימוש חוזר בדפוס הפסים של האתר — בלי ספריית גרפים. */
+function barChart(rows, labelOf, valueOf, opts) {
+  const max = Math.max(1, ...rows.map(valueOf));
+  const box = el('div', 'adm-chart');
+  if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים.')); return box; }
+  rows.forEach((r) => {
+    const row = el('div', 'bd-row');
+    row.append(el('span', 'bd-name', labelOf(r)));
+    const track = el('div', 'bar');
+    const f = el('i');
+    f.style.width = Math.round((valueOf(r) / max) * 100) + '%';
+    f.classList.add('good');
+    track.append(f);
+    row.append(track);
+    row.append(el('span', 'bd-score ok', String(valueOf(r))));
+    box.append(row);
+  });
+  return box;
+}
+
+async function renderAdmin() {
+  setNav(null);
+  view.innerHTML = '';
+  const C = window.Cloud;
+
+  if (!C || !C.enabled || !C.isAdmin) {
+    view.append(emptyState('🔒', 'אין גישה', 'לוח הבקרה פתוח למנהל בלבד.'));
+    toTop();
+    return;
+  }
+
+  view.append(crumb('לארכיון', '#/'));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '📊 לוח הבקרה'));
+  head.append(el('p', null, 'סטטיסטיקות שימוש אגרגטיביות — מספרים ומגמות בלבד, בלי מידע על משתמש בודד.'));
+  view.append(head);
+
+  const loading = el('div', 'empty');
+  loading.innerHTML = '<span class="ico">⏳</span><b>טוען נתונים…</b>';
+  view.append(loading);
+
+  try {
+    const [ov, signups, active, hourly, targets] = await Promise.all([
+      C.admin.overview(),
+      C.admin.signupsDaily(30),
+      C.admin.activeDaily(30),
+      C.admin.activeHourly(30),
+      C.admin.topTargets(30, 25),
+    ]);
+    loading.remove();
+
+    /* שגיאת הרשאה (משתמש רגיל שהגיע לכאן איכשהו) — עוצרים בכבוד. */
+    if (ov.error) {
+      view.append(emptyState('🔒', 'אין גישה', 'השרת דחה את הבקשה — לוח הבקרה למנהל בלבד.'));
+      return;
+    }
+    const o = ov.data || {};
+
+    // ── סיכום מהיר ──
+    const dash = el('div', 'dash');
+    dash.append(stat(o.total_users ?? '—', 'משתמשים רשומים', 'accent'));
+    dash.append(stat(o.active_today ?? '—', 'פעילים היום', 'good'));
+    dash.append(stat(o.active_7d ?? '—', 'פעילים השבוע'));
+    dash.append(stat(o.new_7d ?? '—', 'נרשמו השבוע'));
+    view.append(dash);
+
+    const sub = el('p', 'adm-note');
+    sub.textContent = `סה״כ ${o.events_total ?? 0} אירועים · ${o.active_30d ?? 0} פעילים ב-30 יום · ${o.new_30d ?? 0} הרשמות ב-30 יום.`;
+    view.append(sub);
+
+    // ── מה הכי בשימוש ──
+    const secT = el('section', 'adm-sec');
+    secT.append(el('h3', 'adm-h', '🔥 מה הכי בשימוש (30 יום)'));
+    const tRows = (targets.data || []).map((r) => ({
+      label: prettyTarget(r.target, r.type),
+      n: r.n,
+    }));
+    secT.append(barChart(tRows, (r) => r.label, (r) => r.n));
+    view.append(secT);
+
+    // ── שעות שיא ──
+    const secH = el('section', 'adm-sec');
+    secH.append(el('h3', 'adm-h', '🕐 שעות שיא (שעון ישראל, 30 יום)'));
+    const byHour = {};
+    (hourly.data || []).forEach((r) => { byHour[r.hour] = r.n; });
+    const hRows = Array.from({ length: 24 }, (_, h) => ({ h, n: byHour[h] || 0 }));
+    secH.append(barChart(hRows, (r) => String(r.h).padStart(2, '0') + ':00', (r) => r.n));
+    view.append(secH);
+
+    // ── פעילים ליום ──
+    const secA = el('section', 'adm-sec');
+    secA.append(el('h3', 'adm-h', '📈 פעילים ליום (30 יום)'));
+    secA.append(barChart(active.data || [], (r) => fmtDay(r.day), (r) => r.n));
+    view.append(secA);
+
+    // ── הרשמות ליום ──
+    const secS = el('section', 'adm-sec');
+    secS.append(el('h3', 'adm-h', '🆕 הרשמות ליום (30 יום)'));
+    secS.append(barChart(signups.data || [], (r) => fmtDay(r.day), (r) => r.n));
+    view.append(secS);
+  } catch (err) {
+    loading.remove();
+    view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err && err.message || err)));
+  }
+
+  toTop();
+  updateFooter();
+}
+
+/* מזהה target → שם קריא. 'course:electro' → 'אלקטרו', 'exam:<id>' → כותרת המבחן. */
+function prettyTarget(target, type) {
+  if (!target) return type;
+  const [kind, id] = String(target).split(':');
+  if (kind === 'course') { const c = courseOf(id); return '📚 ' + (c ? c.name : id); }
+  if (kind === 'exam') { const e = EXAMS.find((x) => x.id === id); return '📄 ' + (e ? e.title : id); }
+  if (kind === 'sim') return '🎛️ סימולציה: ' + id;
+  if (kind === 'drill') return '🧮 תרגיל: ' + id;
+  if (kind === 'practice') { const c = courseOf(id); return '🎲 תרגול: ' + (c ? c.name : id); }
+  if (kind === 'review') { const c = courseOf(id); return '🎯 טעויות: ' + (c ? c.name : id); }
+  if (kind === 'guide') { const c = courseOf(id); return '🗺️ מפה: ' + (c ? c.name : id); }
+  return target;
+}
+
+/* תאריך קצר לגרפים: '15/07'. מקבל 'YYYY-MM-DD' מ-Postgres. */
+function fmtDay(d) {
+  const s = String(d);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}` : s;
 }
 
 /* הצעת התחברות בדף הבית — רק למי שעוד לא התחבר, פעם אחת. */

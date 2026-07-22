@@ -1561,3 +1561,17 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .account-sync{font-size:14px; font-weight:700; color:var(--muted);}
 .account-note{font-size:13px; color:var(--dim); line-height:1.7;}
 .btn.logout:hover{border-color:var(--bad); color:var(--bad); background:var(--bad-bg);}
+
+/* ===== לוח הבקרה (מנהל) ===== */
+.admin-link{display:inline-flex;}
+.adm-note{font-size:13.5px; color:var(--muted); margin:-14px 0 26px;}
+.adm-sec{margin-bottom:30px;}
+.adm-h{font-size:16px; font-weight:800; margin-bottom:14px; letter-spacing:-.2px;}
+.adm-chart{
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+  display:flex; flex-direction:column; gap:9px;
+}
+.adm-chart .bd-row{padding:2px 0;}
+.adm-chart .bd-name{min-width:88px; max-width:220px;}
+.adm-empty{color:var(--dim); font-size:14px; text-align:center; padding:8px;}

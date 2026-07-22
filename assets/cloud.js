@@ -20,6 +20,10 @@
     anonKey: 'sb_publishable_LXyYIHmPautTU8qKvH5EUA_qVz4nSaK',   // מפתח ציבורי (publishable) — מיועד לדפדפן; ההגנה היא ה-RLS
   };
 
+  /* מי רואה את לוח הבקרה. רק רמז ללקוח (להצגת הקישור); האכיפה האמיתית היא
+     is_admin() בשרת — משתמש רגיל שיקרא ל-RPC פשוט יקבל שגיאה. */
+  const ADMIN_EMAILS = ['avielyin@post.bgu.ac.il', 'ynonaviel@gmail.com'];
+
   /* מיפוי המרחבים בענן אל מפתחות ה-localStorage שבאתר — אותם מפתחות שהעטיפות
      ב-app.js קוראות. המיזוג כותב ישירות למפתחות האלה, והאתר קורא אותם כרגיל. */
   const KEYMAP = {
@@ -38,9 +42,10 @@
   /* ממשק ריק כשהענן כבוי — כל הקריאות מ-app.js הופכות ללא-כלום. */
   if (disabled) {
     window.Cloud = {
-      enabled: false, user: null,
+      enabled: false, user: null, isAdmin: false,
       init: async () => {}, login: () => {}, logout: async () => {},
       queue: () => {}, queueDelete: () => {}, queueClear: () => {}, queueClearPrefix: () => {},
+      track: () => {}, admin: {},
       status: () => ({ pending: 0, lastSync: 0, syncing: false }),
     };
     return;
@@ -212,6 +217,23 @@
     }
   }
 
+  /* ---------- מעקב (אגרגטיבי) ----------
+     אירוע קליל על פעולה משמעותית. fire-and-forget: לא מחכים, לא זורקים.
+     דה-דופ קצר: אותו (type,target) לא נרשם פעמיים באותה חצי-שעה בטאב הזה,
+     כדי שרענון או חזרה-קדימה לא ינפחו את הספירה. הקריאה שקטה כשמנותקים. */
+  const trackSeen = new Map();
+  function track(type, target) {
+    if (!state.session) return;
+    const key = type + '|' + (target || '');
+    const now = Date.now();
+    if (now - (trackSeen.get(key) || 0) < 30 * 60 * 1000) return;
+    trackSeen.set(key, now);
+    try {
+      sb.from('events').insert({ user_id: state.session.user.id, type, target: target || null })
+        .then(() => {}, () => {});   // בולעים שגיאות — מעקב לעולם לא שובר את האתר
+    } catch { /* ignore */ }
+  }
+
   /* ---------- session ---------- */
   function setSession(session) {
     state.session = session || null;
@@ -222,11 +244,13 @@
           name: (session.user.user_metadata && session.user.user_metadata.full_name) || session.user.email || '',
         }
       : null;
+    Cloud.isAdmin = !!(Cloud.user && ADMIN_EMAILS.includes(Cloud.user.email));
   }
 
   const Cloud = {
     enabled: true,
     user: null,
+    isAdmin: false,
 
     /* נקרא פעם אחת מ-init של app.js, לפני הרינדור הראשון. חסום בזמן קצוב:
        Supabase איטי לא יעכב את הציור — ההתחברות תושלם ברקע ותשודר כאירוע. */
@@ -270,6 +294,18 @@
     queueClear: (ns) => push({ op: 'clearns', ns }),
     queueClearPrefix: (ns, prefix) => push({ op: 'clearpre', ns, k: prefix }),
 
+    /* מעקב אגרגטיבי — app.js קורא Cloud.track('view', courseId) וכו׳. */
+    track,
+
+    /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת). */
+    admin: {
+      overview:     ()   => sb.rpc('admin_overview'),
+      signupsDaily: (d)  => sb.rpc('admin_signups_daily', { days: d ?? 30 }),
+      activeDaily:  (d)  => sb.rpc('admin_active_daily',  { days: d ?? 30 }),
+      activeHourly: (d)  => sb.rpc('admin_active_hourly', { days: d ?? 30 }),
+      topTargets:   (d, l) => sb.rpc('admin_top_targets', { days: d ?? 30, lim: l ?? 20 }),
+    },
+
     status: () => ({ pending: outbox.length, lastSync: state.lastSync, syncing: state.syncing }),
   };
   window.Cloud = Cloud;
@@ -278,6 +314,6 @@
     const had = !!state.session;
     setSession(session);
     emit('cloud:user');
-    if (session && !had) syncNow();   // התחברות טרייה (גם השלמת PKCE אחרי redirect)
+    if (session && !had) { syncNow(); track('login'); }   // התחברות טרייה (גם השלמת PKCE אחרי redirect)
   });
 })();
