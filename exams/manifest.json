@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-23",
-  "version": "f6669d57",
+  "version": "50d14baf",
   "assets": {
     "css": "f13a05df",
     "js": "9e179751",
@@ -901,6 +901,23 @@
       "count": 40
     },
     {
+      "id": "physics-electricity",
+      "file": "physics-electricity.json",
+      "course": "physics",
+      "part": "חשמל",
+      "title": "תרגול חשמל — תיאוריה",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 66
+    },
+    {
       "id": "physics-experiments",
       "file": "physics-experiments.json",
       "course": "physics",
@@ -918,6 +935,57 @@
       "count": 10
     },
     {
+      "id": "physics-fluids",
+      "file": "physics-fluids.json",
+      "course": "physics",
+      "part": "הידרוסטטיקה והידרודינמיקה",
+      "title": "תרגול הידרו — תיאוריה",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 26
+    },
+    {
+      "id": "physics-imaging",
+      "file": "physics-imaging.json",
+      "course": "physics",
+      "part": "דימות רפואי",
+      "title": "תרגול דימות רפואי — תיאוריה",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 27
+    },
+    {
+      "id": "physics-magnetism",
+      "file": "physics-magnetism.json",
+      "course": "physics",
+      "part": "מגנטיות",
+      "title": "תרגול מגנטיות — תיאוריה",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 19
+    },
+    {
       "id": "physics-submitted",
       "file": "physics-submitted.json",
       "course": "physics",
@@ -933,6 +1001,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 7
+    },
+    {
+      "id": "physics-waves",
+      "file": "physics-waves.json",
+      "course": "physics",
+      "part": "תנודות וגלים",
+      "title": "תרגול גלים — תיאוריה",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 22
     }
   ]
 }
