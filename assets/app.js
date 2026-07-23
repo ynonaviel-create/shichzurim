@@ -5063,7 +5063,7 @@ function pointsPanel(courseId, u, idx, summaryMode) {
   const nQ = new Set(u.points.flatMap((p) => p.qids || [])).size;
   /* בקורס בלי שחזורים אין "מה נשאל" — הנקודות הן תמצית לחזרה מהירה. */
   det.append(el('summary', null, summaryMode
-    ? `🎯 בשורה אחת — תמצית לחזרה מהירה`
+    ? `🎯 תמצית לחזרה מהירה`
     : `📌 מה באמת נשאל — ${ranked.length} נקודות, מתוך ${nQ} שאלות שנשאלו בפועל`));
 
   /* המסגור הזה הוא של ינון, אחרי שקרא את הפיילוט: **זו החזרה השנייה, לא
@@ -5073,10 +5073,26 @@ function pointsPanel(courseId, u, idx, summaryMode) {
      שחזרה אמורה לעשות. לומר את זה במפורש עדיף על שהלומד יגלה לבד. */
   const lead = el('p', 'g-points-lead');
   lead.textContent = summaryMode
-    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על זה מהר לפני המבחן: השורה התחתונה של הנושא, והמלכודת שנופלים בה.'
+    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על התמצית מהר לפני המבחן, ומוודאים שלא נופלים במלכודות.'
     : 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
       'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
   det.append(lead);
+
+  /* במצב תמצית: פסקת/שתי-פסקאות סיכום מרוכז לנושא (u.summary), ואז המלכודות
+     שנאספו מהנקודות. זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
+  if (summaryMode && u.summary) {
+    const sum = el('div', 'g-summary');
+    u.summary.split('\n\n').forEach((para) => { const pp = el('p'); pp.innerHTML = para; sum.append(pp); });
+    det.append(sum);
+    const traps = [...new Set(u.points.map((p) => p.trap).filter(Boolean))];
+    if (traps.length) {
+      const tb = el('div', 'g-traps');
+      tb.append(el('div', 'g-traps-lbl', '⚠️ מלכודות נפוצות'));
+      traps.forEach((t) => { const d = el('div', 'g-point-trap'); d.innerHTML = '• ' + t; tb.append(d); });
+      det.append(tb);
+    }
+    return det;
+  }
 
   ranked.forEach(({ p, hits, wrong, allShaky }) => {
     const row = el('div', 'g-point');
@@ -5119,9 +5135,9 @@ function pointsPanel(courseId, u, idx, summaryMode) {
   return det;
 }
 
-function unitCard(courseId, g, r, focus) {
+function unitCard(courseId, g, r, focus, collapsible) {
   const u = r.u;
-  const sec = el('section', 'g-unit' + (focus ? ' q-flash' : ''));
+  const sec = el('section', 'g-unit' + (focus ? ' q-flash' : '') + (collapsible ? ' g-unit-collapsible' : '') + (collapsible && focus ? ' is-open' : ''));
   sec.id = 'g-' + encodeURIComponent(u.topic);
 
   const head = el('div', 'g-unit-head');
@@ -5138,6 +5154,18 @@ function unitCard(courseId, g, r, focus) {
   freq.append(el('div', 'g-freq-n', u.freq + '%'));
   freq.append(el('div', 'g-freq-l', 'מהשאלות'));
   head.append(freq);
+  /* במצב מקובץ (בלוקים) הכרטיס מתקפל: הכותרת היא כפתור שפותח/סוגר את הגוף,
+     כדי שהמפה תהיה רשימת כותרות קומפקטית ולא גלילה אחת אינסופית. */
+  if (collapsible) {
+    head.append(el('span', 'g-unit-chev', '⌄'));
+    head.setAttribute('role', 'button');
+    head.setAttribute('tabindex', '0');
+    const toggle = () => sec.classList.toggle('is-open');
+    head.addEventListener('click', toggle);
+    head.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  }
   sec.append(head);
 
   sec.append(el('p', 'g-what', u.what));
@@ -5327,8 +5355,54 @@ async function renderGuide(courseId, focusTopic = null) {
   const unitsSec = el('section', 'g-units');
   /* בקורס בלי שחזורים אין "משקל במבחן" — פשוט רשימת הנושאים. */
   unitsSec.append(el('h2', 'g-h2', g.noDayPlan ? '📖 כל הנושאים' : '📖 הנושאים — לפי המשקל שלהם במבחן'));
-  ranked.slice().sort((a, b) => b.u.freq - a.u.freq)
-    .forEach((r) => unitsSec.append(unitCard(courseId, g, r, focusTopic === r.u.topic)));
+
+  if (g.blocks && g.blocks.length) {
+    /* מפה מקובצת: לשוניות לבלוקים (מציג בלוק אחד בכל פעם) + כרטיסים מתקפלים,
+       כדי שהמפה תהיה נוחה לניווט ולא גלילה אחת ארוכה. גזור על g.blocks —
+       מקצועות בלי בלוקים ממשיכים ברשימה השטוחה הרגילה. */
+    const byTopic = {};
+    ranked.forEach((r) => { byTopic[r.u.topic] = r; });
+    let activeKey = g.blocks[0].key;
+    if (focusTopic) {
+      const fb = g.blocks.find((bl) => (bl.topics || []).includes(focusTopic));
+      if (fb) activeKey = fb.key;
+    }
+    const tabs = el('div', 'g-blocktabs');
+    const wrap = el('div', 'g-blocks');
+    const covered = new Set();
+    g.blocks.forEach((bl) => {
+      const units = (bl.topics || []).map((t) => byTopic[t]).filter(Boolean);
+      units.forEach((r) => covered.add(r.u.topic));
+      const on = bl.key === activeKey;
+      const tab = el('button', 'g-blocktab' + (on ? ' is-active' : ''));
+      tab.type = 'button';
+      tab.dataset.block = bl.key;
+      tab.innerHTML = `<span class="g-blocktab-ic">${bl.icon || ''}</span><span>${bl.title}</span><span class="g-blocktab-n">${units.length}</span>`;
+      tabs.append(tab);
+      const blk = el('div', 'g-block' + (on ? ' is-active' : ''));
+      blk.dataset.block = bl.key;
+      units.forEach((r) => blk.append(unitCard(courseId, g, r, focusTopic === r.u.topic, true)));
+      wrap.append(blk);
+    });
+    /* רשת ביטחון: נושא שאינו בשום בלוק לא ייעלם — נוסיף אותו לבלוק הפעיל. */
+    const orphans = ranked.filter((r) => !covered.has(r.u.topic));
+    if (orphans.length) {
+      const firstBlk = wrap.querySelector('.g-block');
+      orphans.forEach((r) => firstBlk && firstBlk.append(unitCard(courseId, g, r, focusTopic === r.u.topic, true)));
+    }
+    tabs.addEventListener('click', (e) => {
+      const t = e.target.closest('.g-blocktab');
+      if (!t) return;
+      const k = t.dataset.block;
+      tabs.querySelectorAll('.g-blocktab').forEach((x) => x.classList.toggle('is-active', x.dataset.block === k));
+      wrap.querySelectorAll('.g-block').forEach((x) => x.classList.toggle('is-active', x.dataset.block === k));
+    });
+    unitsSec.append(tabs);
+    unitsSec.append(wrap);
+  } else {
+    ranked.slice().sort((a, b) => b.u.freq - a.u.freq)
+      .forEach((r) => unitsSec.append(unitCard(courseId, g, r, focusTopic === r.u.topic)));
+  }
   view.append(unitsSec);
 
   if ((g.skipList || []).length) view.append(skipPanel(g));

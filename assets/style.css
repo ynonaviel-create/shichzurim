@@ -1172,6 +1172,40 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .g-what{margin:12px 0 14px; font-size:14px; line-height:1.6; color:var(--muted);}
 .g-body{display:flex; flex-direction:column; gap:8px;}
 
+/* ═══ מפה מקובצת: לשוניות בלוקים + כרטיסים מתקפלים ═══ */
+.g-blocktabs{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 20px;}
+.g-blocktab{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:9px 15px; border:1px solid var(--line); border-radius:999px;
+  background:var(--surface); color:var(--muted); cursor:pointer;
+  font-family:inherit; font-size:14px; font-weight:700; line-height:1;
+  transition:border-color .15s, color .15s, background .15s;
+}
+.g-blocktab:hover{border-color:var(--accent); color:var(--text);}
+.g-blocktab.is-active{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:var(--shadow);}
+.g-blocktab-ic{font-size:16px;}
+.g-blocktab-n{
+  font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px;
+  background:color-mix(in srgb, var(--text) 12%, transparent);
+}
+.g-blocktab.is-active .g-blocktab-n{background:rgba(255,255,255,.28);}
+.g-blocks{min-height:60px;}
+.g-block{display:none; flex-direction:column; gap:14px;}
+.g-block.is-active{display:flex; animation:g-fade .22s ease;}
+@keyframes g-fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+.g-unit-collapsible{transition:border-color .15s, box-shadow .15s;}
+.g-unit-collapsible .g-unit-head{cursor:pointer; align-items:center;}
+.g-unit-collapsible:hover{border-color:var(--accent);}
+.g-unit-collapsible .g-unit-chev{
+  align-self:center; flex-shrink:0; margin-inline-start:4px;
+  font-size:22px; line-height:1; color:var(--dim); transition:transform .2s;
+}
+.g-unit-collapsible.is-open{border-color:var(--accent-dk);}
+.g-unit-collapsible.is-open .g-unit-chev{transform:rotate(180deg);}
+.g-unit-collapsible:not(.is-open) .g-body{display:none;}
+.g-unit-collapsible:not(.is-open) .g-what{margin-bottom:2px;}
+
 .g-src{background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm); padding:10px 13px;}
 .g-src.g-main{background:var(--good-bg); border-color:var(--good-ln);}
 .g-src-head{display:flex; gap:9px; align-items:baseline; flex-wrap:wrap;}
@@ -1290,6 +1324,9 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 @media (max-width:620px){
   .g-unit-head{flex-direction:column; gap:8px;}
   .g-freq{text-align:start;}
+  /* כרטיס מתקפל: שומרים שורה אחת גם במובייל כדי שהצ׳ברון יישאר בקצה */
+  .g-unit-collapsible .g-unit-head{flex-direction:row; align-items:center; flex-wrap:wrap;}
+  .g-unit-collapsible .g-freq{text-align:center;}
   .g-headline h2{font-size:17px;}
   .g-now h2{font-size:20px;}
 }
@@ -1422,6 +1459,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   margin:0 0 12px; font-size:12.5px; line-height:1.65; color:var(--muted);
   padding-bottom:10px; border-bottom:1px solid var(--line-soft);
 }
+
+/* תמצית מרוכזת (קורס בלי שחזורים) — פסקאות קריאה, לא רשימת נקודות. */
+.g-summary p{margin:0 0 11px; font-size:14px; line-height:1.85; color:var(--text);}
+.g-summary p:last-child{margin-bottom:0;}
+.g-summary b{color:var(--accent-dp, var(--accent)); font-weight:800;}
+.g-traps{margin-top:15px; padding-top:13px; border-top:1px solid var(--line-soft);}
+.g-traps-lbl{font-size:12px; font-weight:800; color:var(--warn); margin-bottom:8px;}
 
 .g-point{padding:12px 0; border-bottom:1px solid var(--line-soft);}
 .g-point:last-child{border-bottom:none;}
