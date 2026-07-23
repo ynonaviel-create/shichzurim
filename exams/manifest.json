@@ -1,6 +1,6 @@
 {
-  "updated": "2026-07-22",
-  "version": "89e5fc5f",
+  "updated": "2026-07-23",
+  "version": "f6669d57",
   "assets": {
     "css": "f13a05df",
     "js": "9e179751",
@@ -67,8 +67,9 @@
       "name": "פיסיקה לרפואנים ב׳",
       "code": "0-471-8-1021",
       "icon": "🔬",
-      "blurb": "חשמל, גלים ואופטיקה",
+      "blurb": "חשמל, מגנטיות ודימות רפואי",
       "order": 4,
+      "about": "פיזיקה לרפואנים ב׳ (פרופ׳ נצח פרביאש) מכסה לפי הסילבוס הרשמי: הידרוסטטיקה והידרודינמיקה, תנודות (תנועה הרמונית), חשמל, מגנטיות, גלים אלקטרומגנטיים ומכשירי דימות רפואיים (רנטגן, CT, PET, MRI). המבחן אמריקאי — כ-25 שאלות רב-ברירה, כולן חובה.\n\nלקורס הזה אין שחזורים: הוא חדש-יחסית והמבחן לא שוחזר מעולם. לכן כל מה שכאן הוא תרגול — לא העתק של מבחן.\n\nכרגע יש שני סטים: (1) השאלות שהכיתה כתבה והגישה לפרופ׳ פרביאש — הוא אמר שייקח מהן חלק למבחן, אז שווה להכיר אותן; (2) שאלות על הניסויים המצולמים של הכיתה. בנק שאלות תיאורטי על החומר, מבוסס על הקלטות ההרצאות, בהכנה.",
       "dates": [
         {
           "moed": "א",
@@ -671,7 +672,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-22",
+      "added": "2026-07-23",
       "official": null,
       "trust": null,
       "heroSub": null,
@@ -722,7 +723,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-22",
+      "added": "2026-07-23",
       "official": null,
       "trust": null,
       "heroSub": null,
@@ -881,6 +882,57 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
+    },
+    {
+      "id": "physics-class",
+      "file": "physics-class.json",
+      "course": "physics",
+      "part": "שאלות הכיתה",
+      "title": "שאלות הכיתה — הבנק המלא",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-23",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 40
+    },
+    {
+      "id": "physics-experiments",
+      "file": "physics-experiments.json",
+      "course": "physics",
+      "part": "ניסויים",
+      "title": "שאלות מהניסויים (הסרטונים)",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-23",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 10
+    },
+    {
+      "id": "physics-submitted",
+      "file": "physics-submitted.json",
+      "course": "physics",
+      "part": "שאלות הכיתה",
+      "title": "שאלות הכיתה — עם איורים",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-23",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 7
     }
   ]
 }
