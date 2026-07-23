@@ -5273,7 +5273,9 @@ async function renderGuide(courseId, focusTopic = null) {
     view.append(now);
   }
 
-  const plan = dayPlan(courseId, ranked);
+  /* חלוקה לימים היא "תוכנית לימוד" — קורס יכול לבטל אותה עם noDayPlan
+     ולהישאר עם מפה בלבד (פיזיקה: המרצה/הסטודנטים רצו מפה, לא לוח ימים). */
+  const plan = g.noDayPlan ? null : dayPlan(courseId, ranked);
   if (plan) {
     const sec = el('section', 'g-plan');
     sec.append(el('div', 'g-lbl', `🗓️ ${plan.days} ימים למבחן — הצעה לחלוקה`));
