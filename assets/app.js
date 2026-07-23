@@ -4857,24 +4857,6 @@ function priorityList(courseId, g) {
     .sort((a, b) => b.score - a.score);
 }
 
-/* לוח הימים נגזר מהספירה לאחור ולא נכתב ביד — אחרת הוא נכון ליום אחד.
-   היום האחרון שמור תמיד ל-High Yield ולטעויות; את השאר ממלאים לפי עדיפות
-   בשיבוץ חמדני לדלי הכי ריק, כדי שהעומס יתחלק ולא ייפול הכל על יום אחד. */
-function dayPlan(courseId, ranked) {
-  const c = courseOf(courseId);
-  const next = nextDate(c);            // {moed, at, ts} — לא חותמת זמן
-  if (!next || !next.ts) return null;
-  const days = Math.max(1, Math.ceil((next.ts - Date.now()) / MS.day));
-  const studyDays = Math.max(1, Math.min(days - 1, 7));
-  const bins = Array.from({ length: studyDays }, () => ({ items: [], load: 0 }));
-  ranked.forEach((r) => {
-    const b = bins.reduce((min, x) => (x.load < min.load ? x : min), bins[0]);
-    b.items.push(r);
-    b.load += r.score;
-  });
-  return { days, bins };
-}
-
 /* ---------- הדיסקליימר ----------
    שלושה מקומות, אף אחד מהם לא חוסם: שורה מתקפלת במפה (המסך היחיד שאומר
    "אל תלמדו את זה"), סעיף פרוס בדף ההסבר, ושורה בפוטר של כל עמוד.
@@ -5321,35 +5303,6 @@ async function renderGuide(courseId, focusTopic = null) {
       now.append(gp);
     }
     view.append(now);
-  }
-
-  /* חלוקה לימים היא "תוכנית לימוד" — קורס יכול לבטל אותה עם noDayPlan
-     ולהישאר עם מפה בלבד (פיזיקה: המרצה/הסטודנטים רצו מפה, לא לוח ימים). */
-  const plan = g.noDayPlan ? null : dayPlan(courseId, ranked);
-  if (plan) {
-    const sec = el('section', 'g-plan');
-    sec.append(el('div', 'g-lbl', `🗓️ ${plan.days} ימים למבחן — הצעה לחלוקה`));
-    const grid = el('div', 'g-plan-grid');
-    plan.bins.forEach((b, i) => {
-      const d = el('div', 'g-day');
-      d.append(el('div', 'g-day-n', 'יום ' + (i + 1)));
-      b.items.forEach((r) => {
-        const a = el('a', 'g-day-t');
-        a.href = '#/guide/' + courseId + '/' + encodeURIComponent(r.u.topic);
-        a.textContent = r.u.topic;
-        d.append(a);
-      });
-      grid.append(d);
-    });
-    const last = el('div', 'g-day g-day-last');
-    last.append(el('div', 'g-day-n', 'היום האחרון'));
-    const hy = EXAMS.find((e) => e.course === courseId && e.kind === 'highyield');
-    if (hy) { const a = el('a', 'g-day-t'); a.href = '#/exam/' + hy.id; a.textContent = '🎯 High Yield'; last.append(a); }
-    const rv = el('a', 'g-day-t'); rv.href = '#/review/' + courseId; rv.textContent = '❌ הטעויות שלי';
-    last.append(rv);
-    grid.append(last);
-    sec.append(grid);
-    view.append(sec);
   }
 
   const unitsSec = el('section', 'g-units');

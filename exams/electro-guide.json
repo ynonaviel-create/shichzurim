@@ -40,6 +40,12 @@
     "patch": "<b>טל שטרית עמ׳ 147–149</b> — בדיוק לנושא היחיד שאמיר לא מכסה: שיטות מחקר (אופטוגנטיקה, pHluorin, GCaMP). זה המקור היחיד בארכיון כולו לנושא הזה.",
     "warn": "<b>מזור מצהיר על עצמו</b> שהוא „נכתב במלחמת חרבות ברזל ולכן אינו כולל את כל החומר הנלמד” — בעמוד הראשון שלו. הוא השלמה, לא בסיס."
   },
+  "blocks": [
+    {"key":"foundations","title":"יסודות הנוירון","icon":"🧠","topics":["מבנה ותפקוד הנוירון","מנגנוני טרנספורט","תנועת חלקיקים ודיפוזיה"]},
+    {"key":"excitability","title":"אקסיטביליות — הבלוק החשמלי","icon":"⚡","topics":["פוטנציאל מנוחה","תכונות פאסיביות של הממברנה","פוטנציאל הפעולה"]},
+    {"key":"synaptic","title":"הבלוק הסינפטי","icon":"🔗","topics":["הסינפסה: המודל החשמלי","התאוריה הקוונטאלית","סידן, אקסוציטוזה ומחזור הווזיקולה","רצפטורים ותגובה פוסט-סינפטית","פלסטיות סינפטית"]},
+    {"key":"methods","title":"שיטות מחקר","icon":"🔬","topics":["שיטות מחקר"]}
+  ],
   "units": [
     {
       "topic": "סידן, אקסוציטוזה ומחזור הווזיקולה",
@@ -166,7 +172,40 @@
         { "quote": "בעקבות מוטציה בגן של syntaxin 1, נוצר דומיין ה-SNARE complex אך לא דומיין Habc — איזה מבין הבאים מתאר את ההשפעה?", "src": "שיעור חזרה למבחן — ד״ר גיטלר · שקף 18" },
         { "quote": "בנוירון במנוחה, איזה מן הבאים הוא השכיח ביותר בכלל הטרמינאל הפרסינפטי? (Cis-SNARE חופשי מ-NSF / קשור ל-NSF / Trans-SNARE / V-SNARE חופשי)", "src": "שיעור חזרה למבחן — ד״ר גיטלר · שקף 19" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "NKnxfBCSxa0",
+          "title": "SNARE Complex & Vesicle Fusion — Animated Biology",
+          "verified": true,
+          "covers": [
+            "מנגנון SNARE (synaptobrevin/syntaxin/SNAP-25)",
+            "synaptotagmin כחיישן הסידן",
+            "docking ו-fusion",
+            "פירוק הקומפלקס ע\"י NSF/SNAP"
+          ]
+        },
+        {
+          "id": "FIIK2Gp5WzU",
+          "title": "2-Minute Neuroscience: Neurotransmitter Release — Neuroscientifically Challenged",
+          "verified": true,
+          "covers": [
+            "כניסת Ca2+ דרך תעלות תלויות-מתח",
+            "איחוי הווזיקולה ושחרור",
+            "סקירה תמציתית של SNARE"
+          ]
+        },
+        {
+          "id": "WhowH0kb7n0",
+          "title": "2-Minute Neuroscience: Synaptic Transmission — Neuroscientifically Challenged",
+          "verified": "partial",
+          "covers": [
+            "מבט-על על הסינפסה",
+            "המרווח הסינפטי",
+            "שחרור וקשירה לרצפטור"
+          ],
+          "missing": "כמעט לא נוגע ב-endocytosis (clathrin/dynamin) ובמחזור הווזיקולה"
+        }
+      ]
     },
     {
       "topic": "פוטנציאל הפעולה",
@@ -262,7 +301,29 @@
         { "quote": "בזמן שיא פוטנציאל הפעולה בנוירון, איזה מבין הזרמים הבאים מתאפס? (זרם הנתרן / האשלגן / הקיבולי / אף אחד)", "src": "שיעור חזרה למבחן — ד״ר גיטלר · שקף 21" },
         { "quote": "לפניך ציור סכמטי של פוטנציאל פעולה — באיזה שלב המוליכות של תעלות נתרן תלויות מתח הינה הנמוכה ביותר?", "src": "שיעור חזרה למבחן — ד״ר גיטלר · שקף 22" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "TUOSCEVt6HI",
+          "title": "10-Minute Neuroscience: Action Potentials — Neuroscientifically Challenged",
+          "verified": true,
+          "covers": [
+            "תעלות Na/K מווסתות-מתח",
+            "דה/רה/היפר-פולריזציה",
+            "רפרקטורי מוחלט ויחסי",
+            "הולכה לאורך האקסון ומיאלין"
+          ]
+        },
+        {
+          "id": "MZz4OUOyFvg",
+          "title": "Neuron Action Potential Mechanism — Khan Academy",
+          "verified": true,
+          "covers": [
+            "מנגנון פוטנציאל הפעולה",
+            "סף ו-all-or-none",
+            "זרמי Na ו-K"
+          ]
+        }
+      ]
     },
     {
       "topic": "תכונות פאסיביות של הממברנה",
@@ -375,7 +436,30 @@
         }
       ],
       "intel": [],
-      "videos": []
+      "videos": [
+        {
+          "id": "2VzAY8pEbEE",
+          "title": "Cable Theory & the Space Constant λ — Science With Tal",
+          "verified": "partial",
+          "covers": [
+            "תורת הכבל של הנוירון",
+            "קבוע האורך λ",
+            "התנגדות ממברנה מול ציטופלזמה"
+          ],
+          "missing": "מתמטי, מכסה λ ולא τ — לצפות יחד עם סרטון ה-RC/τ"
+        },
+        {
+          "id": "Sfs-1NDBK0g",
+          "title": "Neuron as an RC Circuit & the Time Constant τ — Science With Tal",
+          "verified": "partial",
+          "covers": [
+            "הממברנה כמעגל RC",
+            "קיבול הממברנה Cm",
+            "קבוע הזמן τ=RmCm וטעינה ל-63%"
+          ],
+          "missing": "ממוקד ב-τ — משלים את סרטון ה-λ"
+        }
+      ]
     },
     {
       "topic": "מבנה ותפקוד הנוירון",
@@ -458,7 +542,38 @@
         }
       ],
       "intel": [],
-      "videos": []
+      "videos": [
+        {
+          "id": "qOmmqu6_g3s",
+          "title": "Neuron Anatomy & Function — Ninja Nerd",
+          "verified": true,
+          "covers": [
+            "מבנה הנוירון: סומה, דנדריטים, אקסון, מסופים",
+            "סינתזת חלבונים בגוף התא",
+            "סיווג פונקציונלי של נוירונים"
+          ]
+        },
+        {
+          "id": "1h4kW8RX-6k",
+          "title": "Overview of Neuron Structure — Khan Academy",
+          "verified": true,
+          "covers": [
+            "דנדריטים, אקסון, סומה וגבעת האקסון",
+            "מיאלין ומסופי אקסון",
+            "טיפוסים: unipolar / bipolar / multipolar"
+          ]
+        },
+        {
+          "id": "BY8DJeX_tGc",
+          "title": "Overview of Neuron Function — Khan Academy",
+          "verified": "partial",
+          "covers": [
+            "תפקוד הנוירון וזרימת האות",
+            "סיווג: sensory / motor / interneuron"
+          ],
+          "missing": "לא נכנס למבנה תת-תאי או לגליה — לצפייה יחד עם סרטון המבנה"
+        }
+      ]
     },
     {
       "topic": "מנגנוני טרנספורט",
@@ -536,7 +651,41 @@
         }
       ],
       "intel": [],
-      "videos": []
+      "videos": [
+        {
+          "id": "xHIzfkbj82U",
+          "title": "Passive & Active Transport — Ninja Nerd",
+          "verified": true,
+          "covers": [
+            "דיפוזיה פשוטה מול מסייעת (channels מול carriers)",
+            "טרנספורט אקטיבי ראשוני (Na/K ATPase) מול משני",
+            "קו-טרנספורט: סימפורט/אנטיפורט",
+            "אנדו/אקסוציטוזה"
+          ]
+        },
+        {
+          "id": "vh166DKxYiM",
+          "title": "Sodium–Potassium Pump — Khan Academy",
+          "verified": "partial",
+          "covers": [
+            "משאבת Na/K כטרנספורט אקטיבי ראשוני",
+            "מחזור: 3 Na החוצה, 2 K פנימה",
+            "הקשר לפוטנציאל מנוחה"
+          ],
+          "missing": "ממוקד רק במשאבה — בלי דיפוזיה מסייעת או טרנספורט משני"
+        },
+        {
+          "id": "q3DTczompSM",
+          "title": "Secondary Active Transport — Animated Biology",
+          "verified": "partial",
+          "covers": [
+            "ראשוני מול משני",
+            "ניצול הגרדיאנט האלקטרוכימי",
+            "סימפורט מול אנטיפורט"
+          ],
+          "missing": "פחות מלוטש — להעמקה נקודתית בטרנספורט המשני"
+        }
+      ]
     },
     {
       "topic": "שיטות מחקר",
@@ -629,7 +778,40 @@
         }
       ],
       "intel": [],
-      "videos": []
+      "videos": [
+        {
+          "id": "MUGky_QaaV0",
+          "title": "Karl Deisseroth: The Development of Optogenetics — iBiology",
+          "verified": true,
+          "covers": [
+            "channelrhodopsin ואופסינים מיקרוביאליים",
+            "המרת פוטון לזרם יוני",
+            "ביטוי גנטי סלקטיבי בנוירונים",
+            "יישומים התנהגותיים"
+          ]
+        },
+        {
+          "id": "Nb07TLkJ3Ww",
+          "title": "Explained: Optogenetics — MIT",
+          "verified": true,
+          "covers": [
+            "הדלקה/כיבוי נוירונים באור",
+            "חלבונים רגישי-אור",
+            "שליטה ברזולוציית מילישניות"
+          ]
+        },
+        {
+          "id": "mVbkSD5FHOw",
+          "title": "The Patch Clamp Method — DR MEDIC",
+          "verified": "partial",
+          "covers": [
+            "עקרון ה-patch clamp",
+            "voltage clamp מול current clamp",
+            "קונפיגורציות (whole-cell, cell-attached ועוד)"
+          ],
+          "missing": "התוכן לא אומת לעומק מול תמלול — לצפות ולאמת לפני הסתמכות"
+        }
+      ]
     },
     {
       "topic": "הסינפסה: המודל החשמלי",
@@ -711,7 +893,39 @@
         { "quote": "כאשר שתי סינפסות, אקסיטטורית ואינהיביטורית מסוג GABAA, פועלות באותו הזמן על אותו תא — מה כיוון זרימת היונים?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 16 — ✅ מופיעה במועד ב׳ 2023" },
         { "quote": "איזה מבין הגורמים לא יגרמו לשינוי משמעותי של גודל התגובה הפוסטסינפטית בתגובה לגירוי בודד?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 11 — ✅ מופיעה במועד ב׳ 2023" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "JnM1FCSAvF8",
+          "title": "Synaptic Transmission: EPSPs, IPSPs, Receptors — Medicine & Meaning",
+          "verified": true,
+          "covers": [
+            "העברה סינפטית ושחרור נוירוטרנסמיטר",
+            "EPSP מול IPSP",
+            "רצפטורים פוסט-סינפטיים"
+          ]
+        },
+        {
+          "id": "U74vnv1TraA",
+          "title": "EPSP, IPSP & Summation — A&P Made Easy",
+          "verified": true,
+          "covers": [
+            "EPSP ו-IPSP",
+            "סיכום זמני (temporal)",
+            "סיכום מרחבי (spatial) והגעה לסף"
+          ]
+        },
+        {
+          "id": "Tbq-KZaXiL4",
+          "title": "Chemical Synapses — Khan Academy",
+          "verified": "partial",
+          "covers": [
+            "מסוף פרה-סינפטי ושחרור",
+            "המרווח הסינפטי",
+            "סינפסה כימית מול חשמלית"
+          ],
+          "missing": "בלי EPSP/IPSP וסיכום — אלה בסרטונים שמעליו"
+        }
+      ]
     },
     {
       "topic": "רצפטורים ותגובה פוסט-סינפטית",
@@ -787,7 +1001,38 @@
         { "quote": "איזה מבין הבאים אינו אגוניסט של רצפטורי גלוטמט? (AMPA / NMDA / APV / גלוטמט)", "src": "שיעור חזרה — ד״ר גיטלר · שקף 1" },
         { "quote": "להלן גרף I/V של זרמי NMDA מחיה צעירה ובוגרת — איזה מהמשפטים אפשרי (אך לא בהכרח נכון)?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 17" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "ajO36AKxyaE",
+          "title": "Glutamate Receptors: Ionotropic & Metabotropic — Alila Medical Media",
+          "verified": true,
+          "covers": [
+            "ionotropic מול metabotropic",
+            "AMPA / NMDA / kainate",
+            "רצפטור מטבוטרופי (GPCR)"
+          ]
+        },
+        {
+          "id": "NXOXZ-kaSVI",
+          "title": "2-Minute Neuroscience: Receptors & Ligands — Neuroscientifically Challenged",
+          "verified": true,
+          "covers": [
+            "ionotropic מול metabotropic",
+            "רצפטור מצומד חלבון-G",
+            "קשירת ליגנד ופתיחת תעלה"
+          ]
+        },
+        {
+          "id": "Ac-Npt3vgCE",
+          "title": "Neurotransmitter Release & Postsynaptic Response — Khan Academy",
+          "verified": "partial",
+          "covers": [
+            "קשירת נוירוטרנסמיטר לרצפטור",
+            "תגובה עירורית/מעכבת בסיסית"
+          ],
+          "missing": "בלי AMPA/NMDA/GABA-A ברזולוציה ובלי reversal potential"
+        }
+      ]
     },
     {
       "topic": "פלסטיות סינפטית",
@@ -867,7 +1112,38 @@
       "intel": [
         { "quote": "במוטנט מסויים, בזמן השריית LTP, סינפסות שלא היו פעילות גם מתחזקות — כלומר הספציפיות של ה-LTP לא נשמרת. איזה שינוי עשוי לאפשר זאת?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 12" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "4Hm08ksPtMo",
+          "title": "Long-Term Potentiation & Memory (Animation) — Alila Medical Media",
+          "verified": true,
+          "covers": [
+            "תפקיד ההיפוקמפוס בזיכרון",
+            "שני שלבי LTP (early/late)",
+            "NMDA כחיישן צירוף וכניסת סידן"
+          ]
+        },
+        {
+          "id": "-mHgPfXHzJE",
+          "title": "2-Minute Neuroscience: Long-Term Potentiation (LTP) — Neuroscientifically Challenged",
+          "verified": true,
+          "covers": [
+            "LTP תלוי-NMDA",
+            "חסם המגנזיום ושחרורו בדפולריזציה",
+            "הכנסת קולטני AMPA"
+          ]
+        },
+        {
+          "id": "B7ig6sIwIC8",
+          "title": "2-Minute Neuroscience: Long-Term Depression (LTD) — Neuroscientifically Challenged",
+          "verified": true,
+          "covers": [
+            "LTD כצד השני של הפלסטיות",
+            "כניסת Ca נמוכה/ממושכת → פוספטזות",
+            "הוצאת קולטני AMPA"
+          ]
+        }
+      ]
     },
     {
       "topic": "פוטנציאל מנוחה",
@@ -947,7 +1223,39 @@
       "intel": [
         { "quote": "בטבלה ריכוזי מומסים… הממברנה חדירה רק ליוני נתרן, לאוראה ולמים. מה יהיה פוטנציאל הממברנה בשיווי משקל?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 7" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "Jk_9IhHVOTk",
+          "title": "Resting Membrane, Graded & Action Potentials — Ninja Nerd",
+          "verified": true,
+          "covers": [
+            "פוטנציאל מנוחה ~-70mV ודומיננטיות K+",
+            "משאבת Na/K",
+            "מדוע Vm קרוב ל-E_K"
+          ]
+        },
+        {
+          "id": "5Ixp_0r5YWk",
+          "title": "Nernst Equation — Khan Academy",
+          "verified": true,
+          "covers": [
+            "משוואת נרנסט ופוטנציאל שיווי-משקל ליון",
+            "קשר מפל ריכוזים↔מתח חשמלי",
+            "המפל האלקטרוכימי"
+          ]
+        },
+        {
+          "id": "x7DyzG6geX8",
+          "title": "Goldman–Hodgkin–Katz (GHK) Equation — Science Simplified",
+          "verified": "partial",
+          "covers": [
+            "משוואת גולדמן (GHK)",
+            "שקלול חדירויות של כמה יונים",
+            "מדוע Vm בין E_K ל-E_Na"
+          ],
+          "missing": "ערוץ פחות מוכר — למי שרוצה כיסוי מפורש של גולדמן"
+        }
+      ]
     },
     {
       "topic": "התאוריה הקוונטאלית",
@@ -1013,7 +1321,31 @@
         { "quote": "מוטציה בחלבון Neurexin גורמת לכך שרוחב ה-synaptic cleft גדול מהרגיל. על איזה פרמטר סינפטי תשפיע? (n / p / q / אף אחד)", "src": "שיעור חזרה — ד״ר גיטלר · שקף 15 — ✅ <b>זהה ב-100%</b> לשאלה במועד ב׳ 2021" },
         { "quote": "איזה מן הבאים לא יכול להשפיע על התכולה הקוונטית (m) בסינפסה גבארגית?", "src": "שיעור חזרה — ד״ר גיטלר · שקף 13 — ✅ מופיעה במועד ב׳ 2021" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "nHLTI_39Yjg",
+          "title": "Endplate Potentials & Quantal Release (Katz) — Science With Tal",
+          "verified": "partial",
+          "covers": [
+            "ניסויי Katz",
+            "שחרור קוונטאלי",
+            "MEPP כקוונטום בודד",
+            "EPP ככפולות של MEPP"
+          ],
+          "missing": "קליפ קצר — בלי הסטטיסטיקה (Poisson) ו-m=n·p ברמה כמותית"
+        },
+        {
+          "id": "egTrbuVrOxs",
+          "title": "EPSP and mEPSP — Animated Biology",
+          "verified": "partial",
+          "covers": [
+            "פוטנציאלים זעירים (miniature)",
+            "הגודל הקוונטלי q",
+            "שחרור וזיקולה בודדת"
+          ],
+          "missing": "בלי תוכן קוונטאלי כמותי (m=n·p) והתפלגות"
+        }
+      ]
     },
     {
       "topic": "תנועת חלקיקים ודיפוזיה",
@@ -1088,7 +1420,39 @@
       "intel": [
         { "quote": "איזה מבין הגורמים הבאים לא משפיע על מקדם הדיפוזיה של חומר? (הטמפרטורה / ריכוז החומר / תכונות הממס / המשקל הסגולי)", "src": "שיעור חזרה — ד״ר גיטלר · שקף 4" }
       ],
-      "videos": []
+      "videos": [
+        {
+          "id": "a_Y9wBQ610o",
+          "title": "Diffusion — Khan Academy",
+          "verified": true,
+          "covers": [
+            "דיפוזיה כתנועה אקראית",
+            "מפל ריכוזים ותנועה במורדו",
+            "שיווי משקל דינמי"
+          ]
+        },
+        {
+          "id": "rCNlG_j_gSM",
+          "title": "Osmosis — Khan Academy",
+          "verified": true,
+          "covers": [
+            "אוסמוזה וממברנה חדירה-למחצה",
+            "תנועת מים לפי ריכוז מומס",
+            "לחץ אוסמוטי"
+          ]
+        },
+        {
+          "id": "03yoPfRORGY",
+          "title": "Osmolarity & Osmotic Equilibrium — Byte Size Med",
+          "verified": "partial",
+          "covers": [
+            "אוסמולריות",
+            "שיווי משקל אוסמוטי",
+            "אוסמוזה ברמת הממברנה"
+          ],
+          "missing": "לא מפתח את חוק פיק ואת המפל האלקטרוכימי; טוניות נדרשת השלמה"
+        }
+      ]
     }
   ],
   "skipList": [
