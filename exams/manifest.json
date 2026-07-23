@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-23",
-  "version": "50d14baf",
+  "version": "1161ba72",
   "assets": {
     "css": "f13a05df",
     "js": "9e179751",
@@ -950,6 +950,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 26
+    },
+    {
+      "id": "physics-guide",
+      "file": "physics-guide.json",
+      "course": "physics",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": "מפה איפה ללמוד כל נושא בפיזיקה ב׳ — סיכום, תרגול, סרטונים, ושאלות תרגול מקושרות. בנוי ללמידת ספרינט.",
+      "heroEyebrow": null,
+      "count": 21
     },
     {
       "id": "physics-imaging",
