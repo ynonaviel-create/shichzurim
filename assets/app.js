@@ -842,6 +842,11 @@ function renderCourse(courseId) {
   /* מקרים מתגלגלים — הפורמט של המבחן עצמו. גם הם לא מבחן ברשימה אלא באנר. */
   list.filter((e) => e.kind === 'case').forEach((deck) => view.append(casesHero(deck)));
 
+  /* הסיכום המלא — הקריאה הראשונה. באנר לפני מפת החומרים: קודם קוראים לעומק,
+     אז ניגשים למפה ("מאיפה") ולתרגול. מונע-דאטה דרך course.studyDoc. */
+  const sth = studyHero(courseId);
+  if (sth) view.append(sth);
+
   /* מפת החומרים — גם היא לא מבחן: באנר בראש, ולא שורה ברשימה. */
   const gh = guideHero(courseId);
   if (gh) view.append(gh);
@@ -4921,6 +4926,29 @@ function guideHero(courseId) {
   return a;
 }
 
+/* עמוד "הסיכום המלא" — מסמך לימוד סטטי חיצוני (guides/…html), מונע-דאטה
+   דרך course.studyDoc. הוא הקריאה הראשונה שמפת החומרים מפנה אליה: משלים,
+   לא כפול. באנר בסגנון מפת החומרים אבל בטורקיז (קריאה) במקום זהב (מפה). */
+function studyHero(courseId) {
+  const c = courseOf(courseId);
+  const s = c && c.studyDoc;
+  if (!s) return null;
+  const a = el('a', 'lhero study-hero');
+  a.href = s.href;
+  const left = el('div', 'lhero-main');
+  left.append(el('div', 'lhero-eyebrow', s.eyebrow || '📖 הסיכום המלא'));
+  left.append(el('h2', null, s.title || 'הסיכום המלא'));
+  if (s.sub) left.append(el('p', 'lhero-sub', s.sub));
+  a.append(left);
+  if (s.meta) {
+    const right = el('div', 'lhero-side');
+    right.append(el('div', 'lhero-n', '📖'));
+    right.append(el('div', 'lhero-n-lbl', s.meta));
+    a.append(right);
+  }
+  return a;
+}
+
 function srcLine(s, cls) {
   const d = el('div', 'g-src ' + (cls || ''));
   const head = el('div', 'g-src-head');
@@ -5204,6 +5232,15 @@ function unitCard(courseId, g, r, focus, collapsible) {
     sa.textContent = `${sim.icon} ${sim.title}`;
     sa.title = sim.blurb;
     acts.append(sa);
+  }
+  /* קישור לפרק הנכון בסיכום המלא — אותו עוגן נושא קנוני (top-<topic>),
+     בדיוק כמו שהמסמך עצמו מחזיר קישור "במפה". חינם, מונע-דאטה. */
+  const sd = courseOf(courseId) && courseOf(courseId).studyDoc;
+  if (sd) {
+    const da = el('a', 'btn btn-sm g-study');
+    da.href = sd.href + '#top-' + encodeURIComponent(u.topic);
+    da.textContent = '📖 קרא בסיכום המלא';
+    acts.append(da);
   }
   const prog = el('span', 'g-prog');
   prog.textContent = r.m.total ? `${r.m.correct}/${r.m.total} נכונות בארכיון` : 'טרם תרגלת';
