@@ -5241,8 +5241,10 @@ async function renderGuide(courseId, focusTopic = null) {
 
   /* "מה עכשיו" — הנושא עם הפער הגדול ביותר בין המשקל שלו במבחן למה שאתה
      כבר יודע. מוצג עם החישוב גלוי, כי הנחיה בלי נימוק היא עוד מקור ללחץ. */
+  /* גם סקשן "מה עכשיו" (תיעדוף + נימוק הדלפה/גבולות גזרה) הוא שכבת תכנון,
+     ולכן noDayPlan מבטל גם אותו — פיזיקה מציגה מפה נטו בלבד. */
   const top = ranked[0];
-  if (top) {
+  if (top && !g.noDayPlan) {
     const now = el('section', 'g-now');
     now.append(el('div', 'g-now-eyebrow', '⚡ מה עכשיו'));
     now.append(el('h2', null, top.u.topic));
