@@ -856,25 +856,40 @@ function renderCourse(courseId) {
   const dh = drillsHero(courseId);
   if (dh) view.append(dh);
 
-  /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו.
-     מבחנים בלי חלק נופלים לקבוצה אחת. */
-  const byPart = {};
-  list2.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
-
-  Object.keys(byPart).sort().forEach((part) => {
+  /* flatExams: כשכל "חלק" הוא בעצם בלוק בודד (פיזיקה — חשמל, מגנטיות…),
+     חלוקה לסקשן נפרד לכל אחד יוצרת רשימה ארוכה של כרטיסים בודדים. במצב הזה
+     מציגים גריד אחד קומפקטי של כל המבחנים (הכותרת של כל כרטיס כבר אומרת את
+     הבלוק). שאר הקורסים ממשיכים עם הקיבוץ לפי חלק כרגיל. */
+  if (c.flatExams) {
     const sec = el('section', 'part');
     const ph = el('div', 'part-head');
-    // שם המקצוע כבר בכותרת העמוד — בסקשן מספיק שם החלק עצמו.
-    ph.append(el('h2', null, part || c.name));
-    const n = byPart[part].reduce((a, e) => a + e.count, 0);
-    ph.append(el('span', 'pill', `${plural(byPart[part].length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
+    ph.append(el('h2', null, 'מבחני תרגול'));
+    const n = list2.reduce((a, e) => a + e.count, 0);
+    ph.append(el('span', 'pill', `${plural(list2.length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
     sec.append(ph);
-
     const cards = el('div', 'cards');
-    byPart[part].forEach((e) => cards.append(examCard(e)));
+    list2.forEach((e) => cards.append(examCard(e)));
     sec.append(cards);
     view.append(sec);
-  });
+  } else {
+    /* קיבוץ לפי חלק — "א׳/ב׳" בביוכימיה, "בחני אמצע/מבחני גמר" באלקטרו. */
+    const byPart = {};
+    list2.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
+
+    Object.keys(byPart).sort().forEach((part) => {
+      const sec = el('section', 'part');
+      const ph = el('div', 'part-head');
+      ph.append(el('h2', null, part || c.name));
+      const n = byPart[part].reduce((a, e) => a + e.count, 0);
+      ph.append(el('span', 'pill', `${plural(byPart[part].length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
+      sec.append(ph);
+
+      const cards = el('div', 'cards');
+      byPart[part].forEach((e) => cards.append(examCard(e)));
+      sec.append(cards);
+      view.append(sec);
+    });
+  }
 
   toTop();
   updateFooter();
@@ -5023,7 +5038,7 @@ function qIndex(courseId) {
 
    הנקודות ממוינות לפי מספר השאלות שבדקו אותן: מה שנשאל שש פעמים עולה למעלה.
    זה מה שסיכום לא יכול לעשות — הוא לא יודע מה נשאל. */
-function pointsPanel(courseId, u, idx) {
+function pointsPanel(courseId, u, idx, summaryMode) {
   if (!(u.points || []).length) return null;
 
   const seenMap = seen.read();
@@ -5044,10 +5059,12 @@ function pointsPanel(courseId, u, idx) {
     })
     .sort((a, b) => b.hits.length - a.hits.length);
 
-  const det = el('details', 'g-points');
+  const det = el('details', 'g-points' + (summaryMode ? ' g-points-sum' : ''));
   const nQ = new Set(u.points.flatMap((p) => p.qids || [])).size;
-  det.append(el('summary', null,
-    `📌 מה באמת נשאל — ${ranked.length} נקודות, מתוך ${nQ} שאלות שנשאלו בפועל`));
+  /* בקורס בלי שחזורים אין "מה נשאל" — הנקודות הן תמצית לחזרה מהירה. */
+  det.append(el('summary', null, summaryMode
+    ? `🎯 בשורה אחת — תמצית לחזרה מהירה`
+    : `📌 מה באמת נשאל — ${ranked.length} נקודות, מתוך ${nQ} שאלות שנשאלו בפועל`));
 
   /* המסגור הזה הוא של ינון, אחרי שקרא את הפיילוט: **זו החזרה השנייה, לא
      הראשונה.** זה גם מיישב את החשש המתודולוגי — הנקודות נדחסו מהשאלות שבארכיון,
@@ -5055,21 +5072,24 @@ function pointsPanel(courseId, u, idx) {
      אבל אחרי שקראת את הסיכום והבנת, "מה מתוך זה באמת נבחן" הוא בדיוק מה
      שחזרה אמורה לעשות. לומר את זה במפורש עדיף על שהלומד יגלה לבד. */
   const lead = el('p', 'g-points-lead');
-  lead.textContent = 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
-    'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
+  lead.textContent = summaryMode
+    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על זה מהר לפני המבחן: השורה התחתונה של הנושא, והמלכודת שנופלים בה.'
+    : 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
+      'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
   det.append(lead);
 
   ranked.forEach(({ p, hits, wrong, allShaky }) => {
     const row = el('div', 'g-point');
     row.append(el('div', 'g-point-txt', p.point));
 
+    /* במצב תמצית אין "נשאל X פעמים" (אין מבחן) — רק אם נפלת בתרגול. */
     const meta = el('div', 'g-point-meta');
-    meta.append(el('span', 'g-point-n', hits.length === 1 ? 'נשאל פעם אחת' : `נשאל ${hits.length} פעמים`));
-    if (allShaky) meta.append(el('span', 'g-point-shaky', '⚠️ אף מפתח כאן לא אומת'));
-    /* צביעה אישית: מגיעה בחינם מהמפתח היציב. "נפלת כאן" הוא בדיוק מה
-       שמבדיל בין רשימת עובדות לבין משהו שמדבר אליך. */
+    if (!summaryMode) {
+      meta.append(el('span', 'g-point-n', hits.length === 1 ? 'נשאל פעם אחת' : `נשאל ${hits.length} פעמים`));
+      if (allShaky) meta.append(el('span', 'g-point-shaky', '⚠️ אף מפתח כאן לא אומת'));
+    }
     if (wrong) meta.append(el('span', 'g-point-bad', `✗ נפלת ב-${wrong}`));
-    row.append(meta);
+    if (meta.children.length) row.append(meta);
 
     if (p.trap) {
       const t = el('div', 'g-point-trap');
@@ -5081,7 +5101,7 @@ function pointsPanel(courseId, u, idx) {
        כל קישור נושא את שם המועד שלו, ולכן הוא **גם** הקבלה: אין צורך בשורת
        "נשאל במ״ח · מ״ז · נ׳" נפרדת מעליהם. שורה כזאת הייתה חוזרת על אותו
        מידע בלי להיות לחיצה. */
-    if (hits.length) {
+    if (hits.length && !summaryMode) {
       const links = el('div', 'g-point-qs');
       hits.forEach((h) => {
         const shaky = h.trust === 'unverified' || h.trust === 'partial';
@@ -5138,7 +5158,7 @@ function unitCard(courseId, g, r, focus) {
      פתוחות היו הופכות אותו לגלילה אינסופית — כלומר לסיכום המשעמם, שוב.
      יחידה בלי points פשוט לא מציגה כלום — אין fallback לרשימת הסברים, כי
      רשימה כזאת היא הכישלון עצמו ולא גרסת ביניים. */
-  const pts = pointsPanel(courseId, u, qIndex(courseId));
+  const pts = pointsPanel(courseId, u, qIndex(courseId), g.noDayPlan);
   if (pts) body.append(pts);
 
   if ((u.videos || []).length) {
@@ -5305,7 +5325,8 @@ async function renderGuide(courseId, focusTopic = null) {
   }
 
   const unitsSec = el('section', 'g-units');
-  unitsSec.append(el('h2', 'g-h2', '📖 הנושאים — לפי המשקל שלהם במבחן'));
+  /* בקורס בלי שחזורים אין "משקל במבחן" — פשוט רשימת הנושאים. */
+  unitsSec.append(el('h2', 'g-h2', g.noDayPlan ? '📖 כל הנושאים' : '📖 הנושאים — לפי המשקל שלהם במבחן'));
   ranked.slice().sort((a, b) => b.u.freq - a.u.freq)
     .forEach((r) => unitsSec.append(unitCard(courseId, g, r, focusTopic === r.u.topic)));
   view.append(unitsSec);
