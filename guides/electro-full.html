@@ -16,27 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/tokens.css">
 <style>
-:root{
-  --bg:#f6f8fa; --surface:#ffffff; --surface-2:#f2f5f7;
-  --line:#dfe5ea; --line-soft:#eaeff3;
-  --text:#16222e; --muted:#5a6b7b; --dim:#8395a4;
-  --accent:#0d8b84; --accent-dk:#0a6f6a; --accent-sl:#e2f2f1;
-  --good:#12885d; --good-bg:#e4f5ec; --good-ln:#9bd8bb;
-  --bad:#cf3a44; --bad-bg:#fdeaec; --bad-ln:#f2b3b8;
-  --warn:#a86a06; --warn-bg:#fdf3e2; --warn-ln:#e8c67e;
-  --topic-bg:#eceaf9; --topic-ln:#c3bcea; --topic-tx:#56499c;
-}
-:root[data-theme="dark"]{
-  --bg:#0e1620; --surface:#16222e; --surface-2:#1d2c3a;
-  --line:#2b3d4d; --line-soft:#223140;
-  --text:#e7eef4; --muted:#9db0c0; --dim:#708496;
-  --accent:#2bb3aa; --accent-dk:#178f88; --accent-sl:#14312f;
-  --good:#34c184; --good-bg:#123528; --good-ln:#1f6b4c;
-  --bad:#f2646e; --bad-bg:#3a1a1e; --bad-ln:#7d3037;
-  --warn:#e0a83c; --warn-bg:#33280f; --warn-ln:#7a5f22;
-  --topic-bg:#262453; --topic-ln:#474394; --topic-tx:#b7b0f0;
-}
 html{font-size:20px}
 @media print{html{font-size:11.4pt}}
 
@@ -345,14 +326,88 @@ html[data-theme="dark"]{color:var(--text)}
 [data-theme="dark"] .cd-b,[data-theme="dark"] .kk{color:#4b5563}
 [data-theme="dark"] .fig-key{border-top-color:#e9edf1}
 [data-theme="dark"] .fq-bar{background:#eef2f5}
-</style></head><body><div class="site-bar">
+
+/* ═════════ שדרוג: ניווט, אינטראקטיביות, קישוריות ═════════ */
+/* פס התקדמות קריאה */
+#ed-prog{position:fixed;top:0;right:0;height:3px;width:0;z-index:200;
+  background:linear-gradient(90deg,var(--accent),var(--accent-dk));transition:width .1s linear}
+
+/* תפריט הפרקים */
+.ed-navwrap{position:relative}
+#ed-nav{max-height:min(70vh,560px);overflow-y:auto;position:absolute;top:calc(100% + .5rem);inset-inline-start:0;
+  min-width:min(92vw,26rem);background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 12px 40px rgba(10,25,40,.28);padding:.5rem;z-index:210;display:none}
+#ed-nav.open{display:block}
+.ed-navsec{font-family:'Heebo',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.08em;
+  color:var(--dim);padding:.5rem .6rem .25rem}
+#ed-nav a{display:flex;align-items:center;gap:.5rem;padding:.42rem .6rem;border-radius:9px;
+  text-decoration:none;color:var(--text);font-size:.78rem;line-height:1.35}
+#ed-nav a:hover{background:var(--surface-2)}
+#ed-nav a.cur{background:var(--accent-sl);color:var(--accent-dk);font-weight:700}
+.ed-pct{font-family:'Heebo',sans-serif;font-weight:800;font-size:.7rem;color:var(--dim);
+  min-width:2.9rem;text-align:left;flex-shrink:0}
+#ed-nav a.cur .ed-pct{color:var(--accent-dk)}
+.ed-tick{flex-shrink:0;width:1rem;text-align:center;color:var(--good);font-size:.8rem;opacity:0}
+#ed-nav a.done .ed-tick{opacity:1}
+.ed-count{font-family:'Heebo',sans-serif;font-size:.66rem;color:var(--dim);padding:.15rem .6rem .5rem}
+
+/* סימון "קראתי" + חזרה למעלה */
+.ed-read{cursor:pointer;background:transparent}
+.ed-read.on{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+#ed-top{position:fixed;bottom:1.1rem;inset-inline-end:1.1rem;z-index:150;width:2.6rem;height:2.6rem;
+  border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);
+  cursor:pointer;font-size:1rem;display:none;box-shadow:0 4px 16px rgba(10,25,40,.18)}
+#ed-top.show{display:block}
+#ed-top:hover{color:var(--accent);border-color:var(--accent)}
+
+/* קישור פנימי לנושא אחר */
+a.ed-xref{color:inherit;text-decoration:underline;text-decoration-style:dotted;
+  text-underline-offset:.22em;text-decoration-color:var(--accent)}
+a.ed-xref:hover{color:var(--accent)}
+/* קישור בטבלאות הנספחים */
+a.ed-tl{color:var(--accent);text-decoration:none;font-weight:600}
+a.ed-tl:hover{text-decoration:underline}
+
+/* שאלה פתורה — מסיחים לחיצים */
+.wk-gated ol.wk-o li{cursor:pointer;border-radius:7px;padding-block:.15rem;transition:background .12s}
+.wk-gated ol.wk-o li:hover{background:var(--accent-sl)}
+ol.wk-o li.picked-bad{color:var(--bad);font-weight:700}
+ol.wk-o li.picked-bad::before{background:var(--bad);color:#fff}
+ol.wk-o li.reveal-ok{color:var(--good);font-weight:700}
+ol.wk-o li.reveal-ok::before{background:var(--good);color:#fff}
+.wk-verdict{font-family:'Heebo',sans-serif;font-weight:800;font-size:.78rem;margin:.5rem 0 0}
+.wk-verdict.good{color:var(--good)} .wk-verdict.bad{color:var(--bad)}
+
+/* בלוקים חדשים: פתולוגיות / השיעור האחרון */
+.pblk{margin:4mm 0 2mm}
+.pcard{border:1px solid var(--line);border-right:3px solid var(--accent);border-radius:0 10px 10px 0;
+  padding:3.4mm 4mm;margin-bottom:2.6mm;background:var(--surface);page-break-inside:avoid}
+.pcard.m{border-right-color:var(--topic-tx)}
+.pc-q{font-family:'Heebo',sans-serif;font-weight:800;font-size:.92rem;color:var(--accent-dk);
+  margin-bottom:1.6mm;line-height:1.5}
+.pcard.m .pc-q{color:var(--topic-tx)}
+.pc-s{font-size:.88rem;line-height:1.75}
+.pc-d p{font-size:.86rem;line-height:1.75;margin-bottom:1.8mm;color:var(--muted)}
+.pc-rel{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:2mm;align-items:center}
+.pc-rel b{font-family:'Heebo',sans-serif;font-size:.66rem;font-weight:800;color:var(--dim);letter-spacing:.05em}
+.pc-rel a{font-family:'Heebo',sans-serif;font-size:.66rem;font-weight:700;text-decoration:none;
+  border:1px solid var(--line);border-radius:2rem;padding:.16rem .5rem;color:var(--muted)}
+.pc-rel a:hover{border-color:var(--accent);color:var(--accent)}
+[data-theme="dark"] .pcard{background:var(--surface-2)}
+
+@media print{#ed-prog,#ed-nav,#ed-top,.ed-navwrap,.ed-read,.wk-verdict{display:none!important}
+  .pcard{border:1px solid #ccc;border-right:3px solid #0f4c5c}}
+</style></head><body><div id="ed-prog"></div>
+<div class="site-bar">
 <a class="site-brand" href="../index.html#/course/electro">🧬 <b>ארכיון השחזורים</b> <span>· אלקטרו</span></a>
 <div class="site-bar-r">
+<span class="ed-navwrap"><button id="ed-navbtn" type="button" class="site-btn">📑 פרקים</button><div id="ed-nav"></div></span>
 <button id="revealAll" type="button" class="site-btn">👁️ גלה הכל</button>
 <button id="themeToggle" type="button" class="site-btn" aria-label="ערכת נושא">🌓 <span class="wide-only">ערכה</span></button>
 <a class="site-btn" href="../index.html#/course/electro">→ חזרה לאלקטרו</a>
 </div>
-</div><svg width="0" height="0" style="position:absolute"><defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs></svg><div class="sizer" role="group" aria-label="גודל טקסט">
+</div>
+<button id="ed-top" type="button" aria-label="חזרה למעלה">↑</button><svg width="0" height="0" style="position:absolute"><defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs></svg><div class="sizer" role="group" aria-label="גודל טקסט">
 <button type="button" data-s="-1" aria-label="הקטן טקסט">A&#8722;</button>
 <span id="szv">100%</span>
 <button type="button" data-s="1" aria-label="הגדל טקסט">A+</button></div>
@@ -466,7 +521,7 @@ apply();})();</script><section class="cover">
       <h2>שיטות מחקר</h2>
       <div class="ch-m"><span class="tag t-warn">פער בסיכומים</span><span>פרופ׳ גיטלר</span>
       <span class="dot">·</span><span>פזור לאורך הקורס</span></div>
-    </header><div class="why"><b>למה זה כאן</b><p><b>הנושא שהסיכומים הכי פחות מכסים כבלוק אחד</b> — הוא פזור בין הפרקים. הפער כאן הוא בחומר עצמו, לא רק בתרגול. שווה לבנות לו דף נפרד.</p></div><h3>המודל</h3><p class="lead">שלוש שיטות, וכל אחת עונה על שאלה אחרת. <b>קיבוע מתח (voltage clamp)</b> — מקבעים V ומודדים I; מכיוון ש-V קבוע, הזרם פרופורציוני ישירות למוליכות, וזו כל הנקודה. <b>קיבוע זרם (current clamp)</b> — מזריקים I קבוע ומודדים V; ככה מודדים תכונות פאסיביות. <b>Patch clamp</b> — פיפטה של 1–5 מיקרומטר על פיסת ממברנה זעירה, ורואים תעלות בודדות. הכלל שמסביר כמעט כל שאלה בנושא: <b>בקיבוע מתח אין פוטנציאל פעולה</b> — מנטרלים את המשוב החיובי בכוונה.</p><div class="fbox"><b>הנוסחאות שצריך להחזיק</b><ul><li><code>g_i = I_i / (V_m − E_i)</code><span>מדוע קיבוע מתח: המכנה ידוע וקבוע, ולכן I מודד ישירות את g</span></li><li><code>ΔI_s = 0  ⟺  V_H = E_syn</code><span>ניסוי פוטנציאל ההיפוך: המתח שבו הזרם הסינפטי מתאפס הוא פוטנציאל ההיפוך</span></li><li><code>R_in = ΔV_(t→∞) / I_inj</code><span>מהמתח המקסימלי בקיבוע זרם</span></li><li><code>γ = i / (V_m − E_rev)</code><span>מוליכות יחידה — משיפוע ה-I/V של תעלה בודדת ב-patch</span></li></ul></div><figure class="fg wide"><div class="fig-h">שתי שיטות הקיבוע — ומה כל אחת עונה עליו</div><table class="minit"><thead><tr><th></th><th>Voltage clamp</th><th>Current clamp</th></tr></thead><tbody><tr><td>מה קובעים</td><td>את המתח</td><td>את הזרם</td></tr><tr><td>מה מודדים</td><td>זרם</td><td>מתח</td></tr><tr><td>מה מקבלים</td><td>מוליכות, ישירות — כי הכא״מ ידוע וקבוע</td><td>τ, λ, R_in — התכונות הפאסיביות</td></tr><tr><td>פוטנציאל פעולה</td><td><b>לא נוצר</b> — מנטרלים את המשוב בכוונה</td><td>נוצר כרגיל</td></tr></tbody></table><div class="fig-note">כשרואים בשאלה גרף של זרם מול זמן במדרגות מתח — זה קיבוע מתח, ואין שם פוטנציאל פעולה. זו הנחת היסוד שרוב המסיחים בנושא מפרים.</div></figure><h3>המנגנון, שלב אחר שלב</h3><ol class="mech"><li><b>איך מפרידים זרמים</b> — פרמקולוגיה. TTX חוסם תעלות נתרן תלויות מתח; TEA חוסם תעלות אשלגן. הודג׳קין והאקסלי הפרידו כך את זרם הנתרן מזרם האשלגן באקסון הענק של דג הדיו.</li><li><b>זרם קיבולי במדרגת מתח</b> — חד ועצום, ולכן בגרפים הוא לרוב נמחק ידנית. אם רואים גרף עם קטעים חסרים בתחילת המדרגה — זו הסיבה.</li><li><b>קביעת פוטנציאל היפוך</b> — מקבעים סדרת מתחים, מפעילים סינפסה בכל אחד, ומחפשים את המתח שבו הזרם הסינפטי מתאפס.</li><li><b>Patch clamp על תעלה בודדת</b> — משרעת הזרם משקפת את המוליכות; <b>משך הפתיחה</b> משקף את הקינטיקה. המשרעת קבועה, המשך משתנה בין אירועים.</li><li><b>Nitrophen (caged calcium)</b> — בופר סידן שנשבר באור UV. מאפשר להעלות סידן תוך-תאי בלי לגעת במתח כלל — כך הופרד תפקיד הסידן מתפקיד הדפולריזציה.</li><li><b>BAPTA מול EGTA</b> — אותו Kd, קינטיקה שונה בסדרי גודל. ההשוואה ביניהם מודדת את המרחק בין תעלת הסידן לגלאי.</li><li><b>FRAP</b> — מלבינים אזור פלואורסצנטי באור חזק ומודדים את קצב חזרת הפלואורסצנציה; מכאן מקדם הדיפוזיה.</li><li><b>מיקרוסקופיה</b> — אלקטרונים חודר (מתכות כבדות, רואים ממברנות וריכוזי חלבון) · אלקטרונים סורק עם freeze-fracture (השבירה מתרחשת בדיוק בממברנה, ורואים את שטח הפנים) · טומוגרפיה (סיבוב הדגימה → שחזור תלת-ממדי, כך מופו תעלות הסידן מול הווזיקולות).</li></ol><figure class="fg wide"><div class="fig-h">Patch clamp — רישום תעלות בודדות</div><div class="fig-canvas"><svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><line x1="55" y1="30" x2="89" y2="30" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="30" x2="89" y2="16" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="16" x2="575" y2="16" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="50" x2="575" y2="50" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,66.00 L 89.00,50.00 L 108.40,50.00 L 108.40,66.00 L 138.66,66.00 L 138.66,50.00 L 159.34,50.00 L 159.34,66.00 L 172.59,66.00 L 172.59,66.00 L 196.08,66.00 L 196.08,50.00 L 207.24,50.00 L 207.24,50.00 L 218.33,50.00 L 218.33,66.00 L 243.28,66.00 L 243.28,66.00 L 274.87,66.00 L 274.87,50.00 L 298.91,50.00 L 298.91,66.00 L 311.53,66.00 L 311.53,50.00 L 332.68,50.00 L 332.68,66.00 L 346.06,66.00 L 346.06,50.00 L 355.75,50.00 L 355.75,50.00 L 374.88,50.00 L 374.88,66.00 L 395.82,66.00 L 395.82,50.00 L 416.32,50.00 L 416.32,66.00 L 435.83,66.00 L 435.83,66.00 L 467.78,66.00 L 467.78,50.00 L 496.10,50.00 L 496.10,66.00 L 512.36,66.00 L 512.36,50.00 L 528.00,50.00 L 528.00,66.00 L 554.63,66.00 L 554.63,50.00 L 575.00,50.00 L 575.00,66.00" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="84" x2="575" y2="84" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,100.00 L 89.00,100.00 L 120.03,100.00 L 120.03,84.00 L 129.05,84.00 L 129.05,100.00 L 158.98,100.00 L 158.98,84.00 L 190.53,84.00 L 190.53,100.00 L 201.21,100.00 L 201.21,84.00 L 228.12,84.00 L 228.12,100.00 L 239.12,100.00 L 239.12,100.00 L 270.30,100.00 L 270.30,84.00 L 282.01,84.00 L 282.01,100.00 L 293.33,100.00 L 293.33,84.00 L 320.67,84.00 L 320.67,100.00 L 342.53,100.00 L 342.53,84.00 L 355.91,84.00 L 355.91,100.00 L 367.93,100.00 L 367.93,84.00 L 379.61,84.00 L 379.61,100.00 L 393.50,100.00 L 393.50,100.00 L 424.83,100.00 L 424.83,100.00 L 440.83,100.00 L 440.83,84.00 L 454.68,84.00 L 454.68,100.00 L 483.33,100.00 L 483.33,100.00 L 494.63,100.00 L 494.63,84.00 L 508.54,84.00 L 508.54,100.00 L 535.31,100.00 L 535.31,84.00 L 551.13,84.00 L 551.13,100.00 L 562.20,100.00 L 562.20,84.00 L 575.00,84.00 L 575.00,100.00" fill="none" stroke="#0f4c5c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="118" x2="575" y2="118" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,134.00 L 89.00,118.00 L 106.55,118.00 L 106.55,134.00 L 137.61,134.00 L 137.61,134.00 L 159.82,134.00 L 159.82,118.00 L 173.03,118.00 L 173.03,118.00 L 202.92,118.00 L 202.92,134.00 L 217.66,134.00 L 217.66,134.00 L 243.67,134.00 L 243.67,134.00 L 257.19,134.00 L 257.19,118.00 L 286.48,118.00 L 286.48,134.00 L 305.17,134.00 L 305.17,134.00 L 315.06,134.00 L 315.06,118.00 L 329.55,118.00 L 329.55,118.00 L 344.46,118.00 L 344.46,134.00 L 367.18,134.00 L 367.18,118.00 L 380.21,118.00 L 380.21,134.00 L 390.79,134.00 L 390.79,134.00 L 412.66,134.00 L 412.66,118.00 L 435.79,118.00 L 435.79,134.00 L 465.89,134.00 L 465.89,118.00 L 475.27,118.00 L 475.27,134.00 L 494.52,134.00 L 494.52,118.00 L 507.57,118.00 L 507.57,134.00 L 529.73,134.00 L 529.73,134.00 L 547.06,134.00 L 547.06,118.00 L 575.00,118.00 L 575.00,134.00" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="152" x2="575" y2="152" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,168.00 L 89.00,152.00 L 113.90,152.00 L 113.90,168.00 L 126.13,168.00 L 126.13,168.00 L 135.54,168.00 L 135.54,168.00 L 160.66,168.00 L 160.66,152.00 L 170.15,152.00 L 170.15,168.00 L 190.24,168.00 L 190.24,168.00 L 206.58,168.00 L 206.58,152.00 L 217.31,152.00 L 217.31,152.00 L 243.26,152.00 L 243.26,168.00 L 269.21,168.00 L 269.21,168.00 L 296.46,168.00 L 296.46,152.00 L 313.55,152.00 L 313.55,152.00 L 343.27,152.00 L 343.27,152.00 L 361.86,152.00 L 361.86,168.00 L 390.72,168.00 L 390.72,152.00 L 414.10,152.00 L 414.10,168.00 L 436.50,168.00 L 436.50,152.00 L 447.34,152.00 L 447.34,152.00 L 479.19,152.00 L 479.19,168.00 L 504.94,168.00 L 504.94,152.00 L 530.84,152.00 L 530.84,152.00 L 549.97,152.00 L 549.97,152.00 L 560.90,152.00 L 560.90,168.00 L 570.59,168.00 L 570.59,152.00 L 575.00,152.00 L 575.00,168.00" fill="none" stroke="#0f4c5c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="fig-key"><span class="kk"><i style="background:#12181f"></i>מדרגת המתח</span><span class="kk"><i style="background:#0e7490"></i>רישומי זרם עוקבים</span><span class="kk"><i style="background:#b45309"></i>משרעת תעלה אחת</span></div><div class="fig-note">המשרעת קבועה ומשקפת מוליכות; המשך משתנה ומשקף קינטיקה. רמת זרם כפולה = שתי תעלות פתוחות יחד.</div></figure><h3>איזו שיטה עונה על איזו שאלה</h3><div class="tw"><table><thead><tr><th>השיטה</th><th>מה קובעים</th><th>מה מודדים</th><th>למה דווקא היא</th></tr></thead><tbody><tr><td>Voltage clamp</td><td>מתח</td><td>זרם</td><td>הכא״מ ידוע וקבוע → הזרם מודד מוליכות ישירות</td></tr><tr><td>Current clamp</td><td>זרם</td><td>מתח</td><td>מדידת τ, λ, R_in — התכונות הפאסיביות</td></tr><tr><td>Patch clamp</td><td>מתח, על פיסה זעירה</td><td>זרם של תעלה בודדת</td><td>מוליכות יחידה, קינטיקה, הסתברותיות</td></tr><tr><td>Caged calcium (UV)</td><td>סידן, בלי לגעת במתח</td><td>תגובה פוסט-סינפטית</td><td>מפריד סידן מדפולריזציה</td></tr><tr><td>BAPTA/EGTA</td><td>קינטיקת בופר</td><td>השחרור</td><td>מודד מרחק תעלה–גלאי</td></tr><tr><td>FRAP</td><td>הלבנת אזור</td><td>קצב התאוששות</td><td>מקדם דיפוזיה</td></tr></tbody></table></div><h3>המלכודות החוזרות</h3><div class="trap"><span class="tn">1</span><div class="tb"><p>בקיבוע מתח לא נוצר פוטנציאל פעולה — האלקטרודה מזריקה כל הזמן זרם הפוך לזה שהתא מייצר.</p><p class="tt"><b>איך זה מגיע במבחן</b>מסיחים שמתארים ׳הפוטנציאל שנמדד׳ בניסוי קיבוע מתח.</p></div></div><div class="trap"><span class="tn">2</span><div class="tb"><p>בגרף I/V של תעלה, נקודת החיתוך עם ציר ה-X היא פוטנציאל ההיפוך (הכא״מ מתאפס), והשיפוע הוא המוליכות.</p><p class="tt"><b>איך זה מגיע במבחן</b>לבלבל בין ׳אין זרם׳ (הכא״מ אפס) לבין ׳התעלה סגורה׳ (המוליכות אפס). אלה שני מצבים שונים לגמרי, ושניהם נותנים I=0.</p></div></div><div class="trap"><span class="tn">3</span><div class="tb"><p>משרעת הזרם ב-patch משקפת מוליכות; משך הפתיחה משקף קינטיקה. הזרם המאקרוסקופי הוא הסכום ההסתברותי של אירועים בודדים.</p><p class="tt"><b>איך זה מגיע במבחן</b>׳לתעלות אלו אינאקטיבציה מהירה מאוד׳ בשאלה שבה רואים תעלות שנפתחות ונסגרות אקראית — צריך לזהות מה בגרף מעיד על אינאקטיבציה ומה סתם על סגירה.</p></div></div><div class="trap"><span class="tn">4</span><div class="tb"><p>מספר תעלות בפיסה מזוהה מכך שנצפות רמות זרם שהן כפולות שלמות של המשרעת היחידנית.</p><p class="tt"><b>איך זה מגיע במבחן</b>הקו המקווקו בגרף מסמן את משרעת התעלה הבודדת — כל רמה מעליו היא שתי תעלות במקביל.</p></div></div><div class="trap"><span class="tn">5</span><div class="tb"><p>בסיכומים ובמבחנים מסתמכים על שני פרפרטים קלאסיים: האקסון והסינפסה הענקיים של דג הדיו (מאפשרים שתי אלקטרודות בצד הפרה-סינפטי), וסינפסת עצב-שריר של צפרדע (p גבוה, n עצום).</p><p class="tt"><b>איך זה מגיע במבחן</b>לא לייבא מסקנות מעצב-שריר לסינפסה מרכזית — ההסתברויות והמאגרים שונים בסדרי גודל.</p></div></div><div class="wk"><b class="wk-h">שאלה פתורה · בוחן 1, 2023</b>
+    </header><div class="why"><b>למה זה כאן</b><p><b>הנושא שהסיכומים הכי פחות מכסים כבלוק אחד</b> — הוא פזור בין הפרקים. <b>הפער הזה נסגר מאז:</b> השיעור האחרון (2.7) הוקדש לשיטות מחקר ולסינפסין, והחומר ממנו מופיע כאן למטה בבלוק „מהשיעור האחרון”.</p></div><h3>המודל</h3><p class="lead">שלוש שיטות, וכל אחת עונה על שאלה אחרת. <b>קיבוע מתח (voltage clamp)</b> — מקבעים V ומודדים I; מכיוון ש-V קבוע, הזרם פרופורציוני ישירות למוליכות, וזו כל הנקודה. <b>קיבוע זרם (current clamp)</b> — מזריקים I קבוע ומודדים V; ככה מודדים תכונות פאסיביות. <b>Patch clamp</b> — פיפטה של 1–5 מיקרומטר על פיסת ממברנה זעירה, ורואים תעלות בודדות. הכלל שמסביר כמעט כל שאלה בנושא: <b>בקיבוע מתח אין פוטנציאל פעולה</b> — מנטרלים את המשוב החיובי בכוונה.</p><div class="fbox"><b>הנוסחאות שצריך להחזיק</b><ul><li><code>g_i = I_i / (V_m − E_i)</code><span>מדוע קיבוע מתח: המכנה ידוע וקבוע, ולכן I מודד ישירות את g</span></li><li><code>ΔI_s = 0  ⟺  V_H = E_syn</code><span>ניסוי פוטנציאל ההיפוך: המתח שבו הזרם הסינפטי מתאפס הוא פוטנציאל ההיפוך</span></li><li><code>R_in = ΔV_(t→∞) / I_inj</code><span>מהמתח המקסימלי בקיבוע זרם</span></li><li><code>γ = i / (V_m − E_rev)</code><span>מוליכות יחידה — משיפוע ה-I/V של תעלה בודדת ב-patch</span></li></ul></div><figure class="fg wide"><div class="fig-h">שתי שיטות הקיבוע — ומה כל אחת עונה עליו</div><table class="minit"><thead><tr><th></th><th>Voltage clamp</th><th>Current clamp</th></tr></thead><tbody><tr><td>מה קובעים</td><td>את המתח</td><td>את הזרם</td></tr><tr><td>מה מודדים</td><td>זרם</td><td>מתח</td></tr><tr><td>מה מקבלים</td><td>מוליכות, ישירות — כי הכא״מ ידוע וקבוע</td><td>τ, λ, R_in — התכונות הפאסיביות</td></tr><tr><td>פוטנציאל פעולה</td><td><b>לא נוצר</b> — מנטרלים את המשוב בכוונה</td><td>נוצר כרגיל</td></tr></tbody></table><div class="fig-note">כשרואים בשאלה גרף של זרם מול זמן במדרגות מתח — זה קיבוע מתח, ואין שם פוטנציאל פעולה. זו הנחת היסוד שרוב המסיחים בנושא מפרים.</div></figure><h3>המנגנון, שלב אחר שלב</h3><ol class="mech"><li><b>איך מפרידים זרמים</b> — פרמקולוגיה. TTX חוסם תעלות נתרן תלויות מתח; TEA חוסם תעלות אשלגן. הודג׳קין והאקסלי הפרידו כך את זרם הנתרן מזרם האשלגן באקסון הענק של דג הדיו.</li><li><b>זרם קיבולי במדרגת מתח</b> — חד ועצום, ולכן בגרפים הוא לרוב נמחק ידנית. אם רואים גרף עם קטעים חסרים בתחילת המדרגה — זו הסיבה.</li><li><b>קביעת פוטנציאל היפוך</b> — מקבעים סדרת מתחים, מפעילים סינפסה בכל אחד, ומחפשים את המתח שבו הזרם הסינפטי מתאפס.</li><li><b>Patch clamp על תעלה בודדת</b> — משרעת הזרם משקפת את המוליכות; <b>משך הפתיחה</b> משקף את הקינטיקה. המשרעת קבועה, המשך משתנה בין אירועים.</li><li><b>Nitrophen (caged calcium)</b> — בופר סידן שנשבר באור UV. מאפשר להעלות סידן תוך-תאי בלי לגעת במתח כלל — כך הופרד תפקיד הסידן מתפקיד הדפולריזציה.</li><li><b>BAPTA מול EGTA</b> — אותו Kd, קינטיקה שונה בסדרי גודל. ההשוואה ביניהם מודדת את המרחק בין תעלת הסידן לגלאי.</li><li><b>FRAP</b> — מלבינים אזור פלואורסצנטי באור חזק ומודדים את קצב חזרת הפלואורסצנציה; מכאן מקדם הדיפוזיה.</li><li><b>מיקרוסקופיה</b> — אלקטרונים חודר (מתכות כבדות, רואים ממברנות וריכוזי חלבון) · אלקטרונים סורק עם freeze-fracture (השבירה מתרחשת בדיוק בממברנה, ורואים את שטח הפנים) · טומוגרפיה (סיבוב הדגימה → שחזור תלת-ממדי, כך מופו תעלות הסידן מול הווזיקולות).</li></ol><figure class="fg wide"><div class="fig-h">Patch clamp — רישום תעלות בודדות</div><div class="fig-canvas"><svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><line x1="55" y1="30" x2="89" y2="30" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="30" x2="89" y2="16" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="16" x2="575" y2="16" stroke="#1f2937" stroke-width="1.6"/><line x1="89" y1="50" x2="575" y2="50" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,66.00 L 89.00,50.00 L 108.40,50.00 L 108.40,66.00 L 138.66,66.00 L 138.66,50.00 L 159.34,50.00 L 159.34,66.00 L 172.59,66.00 L 172.59,66.00 L 196.08,66.00 L 196.08,50.00 L 207.24,50.00 L 207.24,50.00 L 218.33,50.00 L 218.33,66.00 L 243.28,66.00 L 243.28,66.00 L 274.87,66.00 L 274.87,50.00 L 298.91,50.00 L 298.91,66.00 L 311.53,66.00 L 311.53,50.00 L 332.68,50.00 L 332.68,66.00 L 346.06,66.00 L 346.06,50.00 L 355.75,50.00 L 355.75,50.00 L 374.88,50.00 L 374.88,66.00 L 395.82,66.00 L 395.82,50.00 L 416.32,50.00 L 416.32,66.00 L 435.83,66.00 L 435.83,66.00 L 467.78,66.00 L 467.78,50.00 L 496.10,50.00 L 496.10,66.00 L 512.36,66.00 L 512.36,50.00 L 528.00,50.00 L 528.00,66.00 L 554.63,66.00 L 554.63,50.00 L 575.00,50.00 L 575.00,66.00" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="84" x2="575" y2="84" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,100.00 L 89.00,100.00 L 120.03,100.00 L 120.03,84.00 L 129.05,84.00 L 129.05,100.00 L 158.98,100.00 L 158.98,84.00 L 190.53,84.00 L 190.53,100.00 L 201.21,100.00 L 201.21,84.00 L 228.12,84.00 L 228.12,100.00 L 239.12,100.00 L 239.12,100.00 L 270.30,100.00 L 270.30,84.00 L 282.01,84.00 L 282.01,100.00 L 293.33,100.00 L 293.33,84.00 L 320.67,84.00 L 320.67,100.00 L 342.53,100.00 L 342.53,84.00 L 355.91,84.00 L 355.91,100.00 L 367.93,100.00 L 367.93,84.00 L 379.61,84.00 L 379.61,100.00 L 393.50,100.00 L 393.50,100.00 L 424.83,100.00 L 424.83,100.00 L 440.83,100.00 L 440.83,84.00 L 454.68,84.00 L 454.68,100.00 L 483.33,100.00 L 483.33,100.00 L 494.63,100.00 L 494.63,84.00 L 508.54,84.00 L 508.54,100.00 L 535.31,100.00 L 535.31,84.00 L 551.13,84.00 L 551.13,100.00 L 562.20,100.00 L 562.20,84.00 L 575.00,84.00 L 575.00,100.00" fill="none" stroke="#0f4c5c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="118" x2="575" y2="118" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,134.00 L 89.00,118.00 L 106.55,118.00 L 106.55,134.00 L 137.61,134.00 L 137.61,134.00 L 159.82,134.00 L 159.82,118.00 L 173.03,118.00 L 173.03,118.00 L 202.92,118.00 L 202.92,134.00 L 217.66,134.00 L 217.66,134.00 L 243.67,134.00 L 243.67,134.00 L 257.19,134.00 L 257.19,118.00 L 286.48,118.00 L 286.48,134.00 L 305.17,134.00 L 305.17,134.00 L 315.06,134.00 L 315.06,118.00 L 329.55,118.00 L 329.55,118.00 L 344.46,118.00 L 344.46,134.00 L 367.18,134.00 L 367.18,118.00 L 380.21,118.00 L 380.21,134.00 L 390.79,134.00 L 390.79,134.00 L 412.66,134.00 L 412.66,118.00 L 435.79,118.00 L 435.79,134.00 L 465.89,134.00 L 465.89,118.00 L 475.27,118.00 L 475.27,134.00 L 494.52,134.00 L 494.52,118.00 L 507.57,118.00 L 507.57,134.00 L 529.73,134.00 L 529.73,134.00 L 547.06,134.00 L 547.06,118.00 L 575.00,118.00 L 575.00,134.00" fill="none" stroke="#0e7490" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="89" y1="152" x2="575" y2="152" stroke="#b45309" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.75"/><path d="M 55.00,168.00 L 89.00,152.00 L 113.90,152.00 L 113.90,168.00 L 126.13,168.00 L 126.13,168.00 L 135.54,168.00 L 135.54,168.00 L 160.66,168.00 L 160.66,152.00 L 170.15,152.00 L 170.15,168.00 L 190.24,168.00 L 190.24,168.00 L 206.58,168.00 L 206.58,152.00 L 217.31,152.00 L 217.31,152.00 L 243.26,152.00 L 243.26,168.00 L 269.21,168.00 L 269.21,168.00 L 296.46,168.00 L 296.46,152.00 L 313.55,152.00 L 313.55,152.00 L 343.27,152.00 L 343.27,152.00 L 361.86,152.00 L 361.86,168.00 L 390.72,168.00 L 390.72,152.00 L 414.10,152.00 L 414.10,168.00 L 436.50,168.00 L 436.50,152.00 L 447.34,152.00 L 447.34,152.00 L 479.19,152.00 L 479.19,168.00 L 504.94,168.00 L 504.94,152.00 L 530.84,152.00 L 530.84,152.00 L 549.97,152.00 L 549.97,152.00 L 560.90,152.00 L 560.90,168.00 L 570.59,168.00 L 570.59,152.00 L 575.00,152.00 L 575.00,168.00" fill="none" stroke="#0f4c5c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="fig-key"><span class="kk"><i style="background:#12181f"></i>מדרגת המתח</span><span class="kk"><i style="background:#0e7490"></i>רישומי זרם עוקבים</span><span class="kk"><i style="background:#b45309"></i>משרעת תעלה אחת</span></div><div class="fig-note">המשרעת קבועה ומשקפת מוליכות; המשך משתנה ומשקף קינטיקה. רמת זרם כפולה = שתי תעלות פתוחות יחד.</div></figure><h3>איזו שיטה עונה על איזו שאלה</h3><div class="tw"><table><thead><tr><th>השיטה</th><th>מה קובעים</th><th>מה מודדים</th><th>למה דווקא היא</th></tr></thead><tbody><tr><td>Voltage clamp</td><td>מתח</td><td>זרם</td><td>הכא״מ ידוע וקבוע → הזרם מודד מוליכות ישירות</td></tr><tr><td>Current clamp</td><td>זרם</td><td>מתח</td><td>מדידת τ, λ, R_in — התכונות הפאסיביות</td></tr><tr><td>Patch clamp</td><td>מתח, על פיסה זעירה</td><td>זרם של תעלה בודדת</td><td>מוליכות יחידה, קינטיקה, הסתברותיות</td></tr><tr><td>Caged calcium (UV)</td><td>סידן, בלי לגעת במתח</td><td>תגובה פוסט-סינפטית</td><td>מפריד סידן מדפולריזציה</td></tr><tr><td>BAPTA/EGTA</td><td>קינטיקת בופר</td><td>השחרור</td><td>מודד מרחק תעלה–גלאי</td></tr><tr><td>FRAP</td><td>הלבנת אזור</td><td>קצב התאוששות</td><td>מקדם דיפוזיה</td></tr></tbody></table></div><h3>המלכודות החוזרות</h3><div class="trap"><span class="tn">1</span><div class="tb"><p>בקיבוע מתח לא נוצר פוטנציאל פעולה — האלקטרודה מזריקה כל הזמן זרם הפוך לזה שהתא מייצר.</p><p class="tt"><b>איך זה מגיע במבחן</b>מסיחים שמתארים ׳הפוטנציאל שנמדד׳ בניסוי קיבוע מתח.</p></div></div><div class="trap"><span class="tn">2</span><div class="tb"><p>בגרף I/V של תעלה, נקודת החיתוך עם ציר ה-X היא פוטנציאל ההיפוך (הכא״מ מתאפס), והשיפוע הוא המוליכות.</p><p class="tt"><b>איך זה מגיע במבחן</b>לבלבל בין ׳אין זרם׳ (הכא״מ אפס) לבין ׳התעלה סגורה׳ (המוליכות אפס). אלה שני מצבים שונים לגמרי, ושניהם נותנים I=0.</p></div></div><div class="trap"><span class="tn">3</span><div class="tb"><p>משרעת הזרם ב-patch משקפת מוליכות; משך הפתיחה משקף קינטיקה. הזרם המאקרוסקופי הוא הסכום ההסתברותי של אירועים בודדים.</p><p class="tt"><b>איך זה מגיע במבחן</b>׳לתעלות אלו אינאקטיבציה מהירה מאוד׳ בשאלה שבה רואים תעלות שנפתחות ונסגרות אקראית — צריך לזהות מה בגרף מעיד על אינאקטיבציה ומה סתם על סגירה.</p></div></div><div class="trap"><span class="tn">4</span><div class="tb"><p>מספר תעלות בפיסה מזוהה מכך שנצפות רמות זרם שהן כפולות שלמות של המשרעת היחידנית.</p><p class="tt"><b>איך זה מגיע במבחן</b>הקו המקווקו בגרף מסמן את משרעת התעלה הבודדת — כל רמה מעליו היא שתי תעלות במקביל.</p></div></div><div class="trap"><span class="tn">5</span><div class="tb"><p>בסיכומים ובמבחנים מסתמכים על שני פרפרטים קלאסיים: האקסון והסינפסה הענקיים של דג הדיו (מאפשרים שתי אלקטרודות בצד הפרה-סינפטי), וסינפסת עצב-שריר של צפרדע (p גבוה, n עצום).</p><p class="tt"><b>איך זה מגיע במבחן</b>לא לייבא מסקנות מעצב-שריר לסינפסה מרכזית — ההסתברויות והמאגרים שונים בסדרי גודל.</p></div></div><div class="wk"><b class="wk-h">שאלה פתורה · בוחן 1, 2023</b>
       <p class="wk-q">בניסוי קיבוע מתח בפיסת ממברנה קטנה נמדדה סדרת רישומי זרם; בכל רישום מתח ההחזקה שונה מ־70mV- ל־30mV-. הקו המקווקו מראה את משרעת הזרם דרך תעלה אחת. איזה מן המשפטים אינו סביר?</p><ol class="wk-o"><li class="">הפיסה נלקחה מתא שמבטא תעלות תלויות מתח.</li><li class="">יש יותר מתעלה אחת בפיסת הממברנה.</li><li class="">התעלות מוליכות יון שפוטנציאל נרנסט שלו חיובי.</li><li class="ok">לתעלות מסוג זה יש אינאקטיבציה מהירה מאוד.</li><li class="">מוליכות התעלות כ-25pS.</li></ol>
       <div class="wk-a"><b>גישת הפתרון</b><p>פרק כל טענה לשאלה ׳מה בגרף היה צריך להראות את זה׳. תעלות תלויות מתח — הפתיחה מתרחשת בעקבות המדרגה, אז כן. יותר מתעלה אחת — אם יש רמות זרם שהן כפולות של הקו המקווקו, כן. נרנסט חיובי — אם הזרם נכנס (שלילי) במתח 30mV-, אז E_rev חיובי יותר, כן. מוליכות 25pS — חישוב ישיר מהמשרעת חלקי הכא״מ. נשארת האינאקטיבציה: <b>אינאקטיבציה מהירה הייתה מתבטאת בכך שאחרי פתיחה קצרה התעלות מפסיקות לחלוטין עד סוף המדרגה.</b> אם רואים תעלות שממשיכות להיפתח ולהיסגר לאורך כל המדרגה — אין אינאקטיבציה מהירה. זו הטענה הלא-סבירה.</p></div></div><div class="bn">
       <div><span class="bl y">נשאל</span><p>ההבדל בין קיבוע מתח לקיבוע זרם · patch clamp ומה נמדד בו · קריאת גרפי I/V · פוטנציאל היפוך ניסויי · חסמים פרמקולוגיים · caged calcium · BAPTA/EGTA</p></div>
@@ -617,4 +672,227 @@ apply();})();</script><section class="cover">
     try{localStorage.setItem('shichzurim.theme',mode);}catch(e){}
     tb.firstChild.textContent=(mode==='auto'?'🌓':mode==='dark'?'🌙':'☀️')+' ';
   });
+})();</script><script>(function(){
+  var COURSE='electro', LS={read:'electro-doc.read', ans:'electro-doc.answers'};
+  function load(k){try{return JSON.parse(localStorage.getItem(k))||{}}catch(e){return {}}}
+  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function esc(t){var d=document.createElement('div');d.textContent=t==null?'':t;return d.innerHTML}
+  function slug(t){return 'sec-'+encodeURIComponent(t.trim().slice(0,40))}
+
+  /* ---- מפת פרקים ונספחים ---- */
+  var chaps=[].slice.call(document.querySelectorAll('section.chap')).map(function(sec){
+    var h=sec.querySelector('header.ch h2'), f=sec.querySelector('.ch-f');
+    return {sec:sec, topic:h?h.textContent.trim():'', id:sec.id, pct:f?f.textContent.trim():''};
+  }).filter(function(c){return c.topic});
+  var byTopic={}; chaps.forEach(function(c){byTopic[c.topic]=c;});
+
+  var pages=[].slice.call(document.querySelectorAll('section.page')).map(function(sec){
+    var h=sec.querySelector('h2.ph'); if(!h) return null;
+    if(!sec.id) sec.id=slug(h.textContent);
+    return {sec:sec, title:h.textContent.trim(), id:sec.id};
+  }).filter(Boolean);
+
+  /* ---- תוכן העניינים: הפיכת שורות לקישורים ---- */
+  document.querySelectorAll('ol.toc li').forEach(function(li){
+    var t=li.querySelector('.t'); if(!t) return;
+    var c=byTopic[t.textContent.trim()]; if(!c) return;
+    var a=document.createElement('a');
+    a.href='#'+c.id; a.style.cssText='display:flex;align-items:baseline;gap:3.4mm;flex:1;text-decoration:none;color:inherit';
+    while(li.firstChild) a.appendChild(li.firstChild);
+    li.appendChild(a);
+    a.addEventListener('mouseenter',function(){t.style.color='var(--accent)';});
+    a.addEventListener('mouseleave',function(){t.style.color='';});
+  });
+
+  /* ---- תפריט הפרקים + scroll-spy ---- */
+  var read=load(LS.read), nav=document.getElementById('ed-nav');
+  function buildNav(){
+    var h='<div class="ed-navsec">הפרקים</div>';
+    chaps.forEach(function(c){
+      h+='<a href="#'+c.id+'" data-id="'+c.id+'"'+(read[c.topic]?' class="done"':'')+'>'+
+         '<span class="ed-tick">✓</span><span style="flex:1">'+esc(c.topic)+'</span>'+
+         '<span class="ed-pct">'+esc(c.pct)+'</span></a>';
+    });
+    h+='<div class="ed-count" id="ed-count"></div><div class="ed-navsec">נספחים ופתיחה</div>';
+    pages.forEach(function(p){
+      h+='<a href="#'+p.id+'" data-id="'+p.id+'"><span class="ed-tick"></span><span style="flex:1">'+esc(p.title)+'</span></a>';
+    });
+    nav.innerHTML=h; updateCount();
+  }
+  function updateCount(){
+    var n=chaps.filter(function(c){return read[c.topic]}).length;
+    var el=document.getElementById('ed-count');
+    if(el) el.textContent='נקראו '+n+' מתוך '+chaps.length+' פרקים';
+  }
+  buildNav();
+  var navbtn=document.getElementById('ed-navbtn');
+  navbtn.addEventListener('click',function(e){e.stopPropagation();nav.classList.toggle('open');});
+  document.addEventListener('click',function(e){if(!nav.contains(e.target))nav.classList.remove('open');});
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))nav.classList.remove('open');});
+
+  /* ---- סימון "קראתי" בכל פרק ---- */
+  chaps.forEach(function(c){
+    var x=c.sec.querySelector('.x-links'); if(!x) return;
+    var b=document.createElement('button');
+    b.type='button'; b.className='site-btn ed-read'+(read[c.topic]?' on':'');
+    b.textContent=read[c.topic]?'✓ נקרא':'סמן כנקרא';
+    b.addEventListener('click',function(){
+      if(read[c.topic]) delete read[c.topic]; else read[c.topic]=1;
+      save(LS.read,read);
+      b.classList.toggle('on',!!read[c.topic]);
+      b.textContent=read[c.topic]?'✓ נקרא':'סמן כנקרא';
+      var a=nav.querySelector('a[data-id="'+c.id+'"]'); if(a)a.classList.toggle('done',!!read[c.topic]);
+      updateCount();
+    });
+    x.appendChild(b);
+    /* קישור לחפיסות הכרטיסיות */
+    var cd=document.createElement('a'); cd.href='../index.html#/cards'; cd.textContent='🃏 כרטיסיות';
+    x.appendChild(cd);
+  });
+
+  /* ---- scroll-spy + פס התקדמות + חזרה למעלה ---- */
+  var prog=document.getElementById('ed-prog'), top=document.getElementById('ed-top');
+  var marks=chaps.concat(pages);
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    prog.style.width=(h>0?Math.min(100,window.scrollY/h*100):0)+'%';
+    top.classList.toggle('show',window.scrollY>600);
+    var cur=null;
+    marks.forEach(function(m){ if(m.sec.getBoundingClientRect().top<=140) cur=m; });
+    nav.querySelectorAll('a').forEach(function(a){a.classList.remove('cur');});
+    if(cur){var a=nav.querySelector('a[data-id="'+cur.id+'"]'); if(a)a.classList.add('cur');}
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  top.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+  /* ---- שאלה פתורה: מסיחים לחיצים ---- */
+  var answers=load(LS.ans);
+  document.querySelectorAll('.wk').forEach(function(wk,wi){
+    var opts=[].slice.call(wk.querySelectorAll('ol.wk-o li')); if(!opts.length) return;
+    var det=wk.querySelector('details.reveal');
+    function verdict(ok){
+      var v=wk.querySelector('.wk-verdict');
+      if(!v){v=document.createElement('p');v.className='wk-verdict';wk.querySelector('ol.wk-o').after(v);}
+      v.className='wk-verdict '+(ok?'good':'bad');
+      v.textContent=ok?'✓ נכון':'✗ לא נכון — התשובה הנכונה מסומנת';
+    }
+    function apply(i){
+      opts.forEach(function(o){o.classList.remove('picked-bad','reveal-ok');});
+      var ok=opts[i].classList.contains('ok');
+      if(!ok) opts[i].classList.add('picked-bad');
+      opts.forEach(function(o){if(o.classList.contains('ok'))o.classList.add('reveal-ok');});
+      wk.classList.remove('wk-gated');
+      verdict(ok);
+      if(det&&!det.open){det.open=true;det.dispatchEvent(new Event('toggle'));}
+    }
+    opts.forEach(function(o,i){
+      o.addEventListener('click',function(){
+        if(!wk.classList.contains('wk-gated')) return;   /* כבר נענתה */
+        answers[wi]=i; save(LS.ans,answers); apply(i);
+      });
+    });
+    if(answers[wi]!=null) apply(answers[wi]);
+  });
+
+  /* ---- קישור טבלאות הנספחים לפרקים ---- */
+  function linkTopicCell(td){
+    var c=byTopic[td.textContent.trim()]; if(!c) return;
+    td.innerHTML='<a class="ed-tl" href="#'+c.id+'">'+esc(c.topic)+'</a>';
+  }
+  document.querySelectorAll('.ftab td.tp, .hytab td.ht').forEach(linkTopicCell);
+  /* מילון: id לכל מונח */
+  document.querySelectorAll('.glos .gi > b').forEach(function(b){
+    b.id='gl-'+encodeURIComponent(b.textContent.trim());
+  });
+
+  /* ---- קישור אזכורי נושאים בגוף הטקסט (מופע ראשון בכל פרק) ---- */
+  /* כינויים: שם הנושא הקנוני כמעט לא מופיע מילולית בפרוזה, ולכן לכל פרק
+     יש גם צורות מקוצרות שבהן הטקסט באמת משתמש. הארוך קודם — כדי שהתאמה
+     ספציפית תנצח לפני התאמה גנרית. */
+  var ALIAS={
+    'סידן, אקסוציטוזה ומחזור הווזיקולה':['מחזור הווזיקולה','אקסוציטוזה'],
+    'פוטנציאל הפעולה':['פוטנציאל הפעולה'],
+    'תכונות פאסיביות של הממברנה':['תכונות פאסיביות','קבוע המרחק','קבוע הזמן'],
+    'מבנה ותפקוד הנוירון':['מבנה ותפקוד הנוירון'],
+    'מנגנוני טרנספורט':['מנגנוני טרנספורט'],
+    'שיטות מחקר':['שיטות מחקר'],
+    'הסינפסה: המודל החשמלי':['המודל החשמלי'],
+    'רצפטורים ותגובה פוסט-סינפטית':['רצפטורים ותגובה פוסט-סינפטית','תגובה פוסט-סינפטית'],
+    'פלסטיות סינפטית':['פלסטיות סינפטית'],
+    'פוטנציאל מנוחה':['פוטנציאל מנוחה','מתח המנוחה'],
+    'התאוריה הקוונטאלית':['התאוריה הקוונטאלית','התאוריה הקוונטלית'],
+    'תנועת חלקיקים ודיפוזיה':['תנועת חלקיקים','דיפוזיה']
+  };
+  var names=[];
+  chaps.forEach(function(c){
+    (ALIAS[c.topic]||[c.topic]).forEach(function(t){ names.push({t:t,topic:c.topic}); });
+  });
+  names.sort(function(a,b){return b.t.length-a.t.length;});
+  chaps.forEach(function(c){
+    var used={};
+    var walker=document.createTreeWalker(c.sec,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+      if(!n.nodeValue||n.nodeValue.length<10) return NodeFilter.FILTER_REJECT;
+      if(n.parentElement.closest('a,code,h2,h3,summary,svg,.x-links,.pcard,.toc'))
+        return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    var todo=[],n;
+    while((n=walker.nextNode())) todo.push(n);
+    todo.forEach(function(node){
+      for(var i=0;i<names.length;i++){
+        var t=names[i].t, tp=names[i].topic;
+        if(tp===c.topic||used[tp]) continue;      /* מופע אחד לכל נושא-יעד בפרק */
+        var idx=node.nodeValue.indexOf(t);
+        if(idx<0) continue;
+        used[tp]=1;
+        var after=node.splitText(idx); after.splitText(t.length);
+        var a=document.createElement('a');
+        a.className='ed-xref'; a.href='#'+byTopic[tp].id; a.title='לפרק: '+tp;
+        a.textContent=t; after.replaceWith(a);
+        break;
+      }
+    });
+  });
+
+  /* ---- שכבת פתולוגיות + השיעור האחרון (נמשכת בזמן ריצה) ---- */
+  function cardHtml(c,cls){
+    var deep=(c.deep||'').split('\n\n').map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+    var rel='';
+    if(c.related&&c.related.length){
+      rel='<div class="pc-rel"><b>נשאל ב־</b>'+c.related.map(function(r){
+        return '<a href="../index.html#/exam/'+encodeURIComponent(r.exam)+'/'+r.idx+'" title="'+esc(r.q||'')+'">'+
+               esc(r.examTitle||r.exam)+' ↗</a>';
+      }).join('')+'</div>';
+    }
+    return '<div class="pcard'+(cls?' '+cls:'')+'">'+
+      '<div class="pc-q">'+esc(c.q)+'</div>'+
+      '<div class="pc-s">'+esc(c.short||'')+'</div>'+
+      (deep?'<details class="reveal"><summary>לעומק — נסה קודם להסביר לעצמך</summary><div class="pc-d">'+deep+'</div></details>':'')+
+      rel+'</div>';
+  }
+  function inject(cards,title,cls){
+    var by={};
+    cards.forEach(function(c){ (by[c.topic]=by[c.topic]||[]).push(c); });
+    Object.keys(by).forEach(function(topic){
+      var c=byTopic[topic]; if(!c) return;
+      var traps=c.sec.querySelectorAll('.trap');
+      var anchor=traps.length?traps[traps.length-1]:c.sec.querySelector('.wk');
+      if(!anchor) return;
+      var h=document.createElement('h3'); h.textContent=title;
+      var box=document.createElement('div'); box.className='pblk';
+      box.innerHTML=by[topic].map(function(x){return cardHtml(x,cls);}).join('');
+      anchor.after(box); box.before(h);
+    });
+  }
+  function grab(file){
+    return fetch('../exams/'+file).then(function(r){return r.ok?r.json():null;})
+      .then(function(d){return d?(d.questions||d.cards||[]):[];}).catch(function(){return [];});
+  }
+  Promise.all([grab('electro-patho-cards.json'),grab('electro-methods-cards.json')])
+    .then(function(res){
+      if(res[0].length) inject(res[0],'🩺 פתולוגיות ותרופות','');
+      if(res[1].length) inject(res[1],'🆕 מהשיעור האחרון','m');
+      /* הבלוקים החדשים מצטרפים לאחזור-האקטיבי ול"גלה הכל" אוטומטית (details.reveal) */
+      onScroll();
+    });
 })();</script></body></html>

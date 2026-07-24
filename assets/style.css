@@ -689,14 +689,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .lhero-n-lbl{font-size:12px; color:var(--muted); margin-top:2px;}
 .lhero-done{margin-top:8px; font-size:11px; font-weight:800; color:var(--good);}
 
-/* באנר הסיכום המלא — טורקיז (קריאה), להבחין ממפת החומרים הזהובה */
-.study-hero{background:linear-gradient(135deg, var(--accent-sl), var(--surface) 78%); border-color:var(--accent);}
-.study-hero .lhero-eyebrow,
-.study-hero .lhero-n{color:var(--accent);}
-.study-hero h2{color:var(--accent-dk);}
-.study-hero .lhero-side{border-inline-start-color:var(--accent);}
-.study-hero .lhero-n{font-size:26px;}
-
 /* --- דף הכרטיסיות --- */
 .cards-note{
   background:var(--gold-bg); border:1px solid var(--gold-ln); color:var(--gold-dp);

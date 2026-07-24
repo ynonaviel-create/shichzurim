@@ -5276,29 +5276,6 @@ function guideHero(courseId) {
   return a;
 }
 
-/* עמוד "הסיכום המלא" — מסמך לימוד סטטי חיצוני (guides/…html), מונע-דאטה
-   דרך course.studyDoc. הוא הקריאה הראשונה שמפת החומרים מפנה אליה: משלים,
-   לא כפול. באנר בסגנון מפת החומרים אבל בטורקיז (קריאה) במקום זהב (מפה). */
-function studyHero(courseId) {
-  const c = courseOf(courseId);
-  const s = c && c.studyDoc;
-  if (!s) return null;
-  const a = el('a', 'lhero study-hero');
-  a.href = s.href;
-  const left = el('div', 'lhero-main');
-  left.append(el('div', 'lhero-eyebrow', s.eyebrow || '📖 הסיכום המלא'));
-  left.append(el('h2', null, s.title || 'הסיכום המלא'));
-  if (s.sub) left.append(el('p', 'lhero-sub', s.sub));
-  a.append(left);
-  if (s.meta) {
-    const right = el('div', 'lhero-side');
-    right.append(el('div', 'lhero-n', '📖'));
-    right.append(el('div', 'lhero-n-lbl', s.meta));
-    a.append(right);
-  }
-  return a;
-}
-
 function srcLine(s, cls) {
   const d = el('div', 'g-src ' + (cls || ''));
   const head = el('div', 'g-src-head');
