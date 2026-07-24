@@ -1,0 +1,211 @@
+/* ===== ארכיון השחזורים — פרימיטיבים =====
+   אבני-הבניין שכל רכיב מרכיב מהן. נטען אחרי style.css. הכלל: תוכן/עמוד חדש
+   מורכב מכאן, לא ממציא chrome משלו. כל צבע דרך טוקן; המבטא הוא --course-accent. */
+
+/* R6 — בתוך הקשר מקצוע (data-course), המבטא הגלובלי הופך לצבע המקצוע. שורה אחת
+   שצובעת כל רכיב קיים (כפתורים, תגיות, באנרים, אפשרויות בנגן) בלי עריכה פרטנית.
+   הטופ-בר מחוץ ל-view ולכן נשאר טורקיז-מותג. חשוב: data-course חייב להיות תמיד
+   מזהה תקין או נעדר — ערך לא-מוכר יוצר מחזור עם ברירת המחדל בטוקנים. */
+[data-course]{
+  --accent:    var(--course-accent);
+  --accent-dk: var(--course-accent-dk);
+  --accent-sl: var(--course-accent-sl);
+  /* גם פלטת הסימולציות — כאן (על אותו אלמנט כמו --course-accent) כדי שה-var
+     ייפתר לצבע המקצוע ולא לגלובלי (custom-property מחושב על אלמנט ההצהרה). */
+  --sim:    var(--course-accent);
+  --sim-dp: var(--course-accent-dk);
+  --sim-bg: var(--course-accent-sl);
+  --sim-ln: var(--course-accent);
+}
+
+/* ---------- Pill — תווית אחת, variants סמנטיים ---------- */
+.pill{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:700; line-height:1;
+  padding:4px 10px; border-radius:20px; white-space:nowrap;
+  border:1px solid transparent;
+}
+.pill-accent{ background:var(--course-accent-sl); color:var(--course-accent-dk); }
+.pill-topic { background:var(--topic-bg); color:var(--topic-tx); border-color:var(--topic-ln); }
+.pill-good  { background:var(--good-bg); color:var(--good); border-color:var(--good-ln); }
+.pill-bad   { background:var(--bad-bg);  color:var(--bad);  border-color:var(--bad-ln); }
+.pill-warn  { background:var(--warn-bg); color:var(--warn); border-color:var(--warn-ln); }
+.pill-muted { background:var(--surface-2); color:var(--muted); border-color:var(--line); }
+
+/* ---------- Ring — טבעת מוכנוּת ---------- */
+.ring{ display:inline-grid; place-items:center; position:relative; }
+.ring svg{ display:block; transform:rotate(-90deg); }
+.ring-track{ stroke:var(--line); }
+.ring-fill { stroke:var(--course-accent); stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
+.ring-val{ position:absolute; font-size:13px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; }
+
+/* ================= המדף — עמוד הבית ================= */
+.shelf-group{ margin:0 0 26px; }
+.shelf-head{
+  display:flex; align-items:center; gap:12px; margin:0 0 14px;
+}
+.shelf-head-t{ font-size:13px; font-weight:800; letter-spacing:.03em; color:var(--muted); white-space:nowrap; }
+.shelf-head-line{ flex:1; height:1px; background:var(--line); }
+.shelf-head-n{ font-size:12px; color:var(--dim); white-space:nowrap; }
+
+.shelf-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px;
+}
+
+/* כרטיס-מקצוע — Card עם שדרת-צבע (--course-accent) + טבעת מוכנוּת */
+.ccard{
+  position:relative; display:block; overflow:hidden;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 18px 16px 20px; text-decoration:none; color:inherit;
+  box-shadow:var(--shadow); transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.ccard::before{
+  content:""; position:absolute; inset-inline-start:0; top:0; bottom:0; width:5px;
+  background:var(--course-accent);
+}
+.ccard:hover{ transform:translateY(-2px); border-color:var(--course-accent); box-shadow:var(--shadow-lg); }
+.ccard-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.ccard-id{ display:flex; align-items:flex-start; gap:10px; min-width:0; }
+.ccard-ico{ font-size:24px; line-height:1.1; flex-shrink:0; }
+.ccard-name{ font-size:16.5px; font-weight:800; line-height:1.3; margin:0; }
+.ccard-blurb{ font-size:12.5px; color:var(--muted); margin:2px 0 0; line-height:1.45; }
+.ccard-ring{ flex-shrink:0; text-align:center; }
+.ccard-ring-l{ font-size:10px; color:var(--dim); margin-top:2px; }
+.ccard-acts{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.ccard-cd{ margin-top:11px; font-size:12.5px; display:flex; align-items:center; gap:6px; }
+.ccard-cd.u-hot{ color:var(--bad); font-weight:700; }
+.ccard-cd.u-soon{ color:var(--warn); font-weight:700; }
+.ccard-cd.u-far{ color:var(--muted); }
+.ccard-cd.u-past{ color:var(--dim); }
+
+/* ארכיון סמסטרים קודמים — accordion אחד, מקופל כברירת-מחדל */
+.shelf-arch{ margin-top:8px; border-top:1px dashed var(--line); padding-top:18px; }
+.shelf-arch > summary{
+  cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px;
+  font-size:13px; font-weight:800; color:var(--muted);
+}
+.shelf-arch > summary::-webkit-details-marker{ display:none; }
+.shelf-arch > summary .chev{ transition:transform .18s ease; }
+.shelf-arch[open] > summary .chev{ transform:rotate(180deg); }
+.shelf-arch-line{ flex:1; height:1px; background:var(--line); }
+.shelf-arch .shelf-grid{ margin-top:16px; }
+
+@media (max-width:640px){
+  .shelf-grid{ grid-template-columns:1fr; }
+}
+
+/* ================= עמוד מקצוע — ניווט היברידי ================= */
+/* צ'יפי ארבע-הפעולות: עוגן+מסנן. לחיצה מסננת לזונה אחת; לחיצה חוזרת מחזירה הכל. */
+.verbnav{ display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 26px; }
+.verb-chip{
+  cursor:pointer; font:800 15.5px/1 var(--font); color:var(--muted);
+  background:var(--surface); border:1.5px solid var(--line); border-radius:24px;
+  padding:12px 22px; transition:background .14s ease, color .14s ease, border-color .14s ease;
+}
+.verb-chip:hover{ border-color:var(--course-accent); color:var(--text); }
+.verb-chip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+
+.verb-zone{ margin:0 0 30px; }
+.verb-zone[hidden]{ display:none; }
+.zone-head{ display:flex; align-items:center; gap:12px; margin:0 0 14px; }
+.zone-head-t{ font-size:13px; font-weight:800; letter-spacing:.02em; color:var(--muted); white-space:nowrap; }
+.zone-head-line{ flex:1; height:1px; background:var(--line); }
+
+/* באנר-גיבור התרגול — בראש העמוד, מעל השחזורים. באנר יחיד ואלגנטי:
+   התרגול הוא הדבר הראשון שרואים, והשחזורים (רשימה ארוכה) זורמים מתחתיו. */
+.practice-hero{
+  border:1.5px solid var(--course-accent); border-radius:var(--radius);
+  background:var(--course-accent-sl); padding:20px 22px; margin:0 0 24px;
+  scroll-margin-top:90px;
+}
+.practice-hero h2{ font-size:22px; margin:0 0 5px; }
+.practice-hero p{ font-size:14px; color:var(--muted); margin:0 0 16px; max-width:60ch; line-height:1.5; }
+.practice-hero-extra{
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  margin-top:15px; padding-top:14px; border-top:1px solid var(--line);
+}
+.practice-hero-extra .lbl{ font-size:12px; color:var(--muted); font-weight:700; }
+.practice-hero-extra a{
+  font-size:12.5px; font-weight:700; color:var(--course-accent-dk);
+  background:var(--surface); border:1px solid var(--course-accent); border-radius:20px;
+  padding:6px 13px; text-decoration:none; transition:transform .12s ease;
+}
+.practice-hero-extra a:hover{ transform:translateY(-1px); }
+
+/* עוגן-גלילה לסקשנים (כדי שהסרגל הדביק לא יכסה את הכותרת) */
+.verb-zone{ scroll-margin-top:90px; }
+
+/* עמוד תרגול — סינון מתקדם מתקפל (גילוי-הדרגתי: פשוט קודם, עומק בלחיצה) */
+.adv-filters{ border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); margin:2px 0 6px; }
+.adv-filters > summary{
+  cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px;
+  padding:13px 16px; font-weight:800; font-size:14px; color:var(--text);
+}
+.adv-filters > summary::-webkit-details-marker{ display:none; }
+.adv-filters > summary::after{ content:'⌄'; margin-inline-start:auto; color:var(--muted); transition:transform .18s ease; }
+.adv-filters[open] > summary::after{ transform:rotate(180deg); }
+.adv-filters .adv-hint{ font-size:12px; font-weight:600; color:var(--muted); }
+.adv-body{ padding:2px 16px 14px; }
+.adv-body .field:last-child{ margin-bottom:0; }
+
+/* מפה — מתג סידור: לפי סדר הלימוד (בלוקים) או לפי נפח במבחן (תדירות) */
+.g-sortnav{ display:flex; gap:8px; flex-wrap:wrap; margin:0 0 16px; }
+.g-sortchip{
+  cursor:pointer; font:800 13px/1 var(--font); color:var(--muted);
+  background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:9px 15px;
+  transition:background .14s ease, color .14s ease, border-color .14s ease;
+}
+.g-sortchip:hover{ border-color:var(--course-accent); color:var(--text); }
+.g-sortchip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+
+/* מצב מבחן — toggle בסרגל הנגן. מבחן = משוב רק בסוף; לימוד = משוב מיידי. */
+.exam-toggle{
+  font:800 12.5px/1 var(--font); padding:8px 13px; border-radius:20px;
+  border:1.5px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer;
+  white-space:nowrap; transition:background .14s ease, color .14s ease, border-color .14s ease;
+}
+.exam-toggle[aria-pressed="true"]{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+.reveal-btn{ font-size:13px; }
+/* משוב "נענתה" במצב מבחן (לפני חשיפה) — ניטרלי, בלי נכון/שגוי */
+.fb.show.exam-pending{ background:var(--surface-2); border:1px solid var(--line); color:var(--muted); }
+
+/* ללמוד — כרטיסים ברורים ובעלי נוכחות (לא באנרים ענקיים, אבל גם לא זעירים) */
+.learn-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+.learn-card{
+  display:flex; align-items:flex-start; gap:13px; padding:16px 18px;
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--surface);
+  text-decoration:none; color:inherit; transition:border-color .14s ease, transform .14s ease;
+}
+.learn-card:hover{ border-color:var(--course-accent); transform:translateY(-2px); }
+.learn-card-ico{ font-size:27px; flex-shrink:0; line-height:1; }
+.learn-card-ttl{ font-size:15.5px; font-weight:800; line-height:1.3; }
+.learn-card-sub{ font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
+
+/* שחזורים — כרטיס צפוף (בלי התגיות החוזרות), כדי שהרשימה לא תשתלט על העמוד */
+.exam-cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }
+.exam-c{
+  display:block; padding:11px 13px; border:1px solid var(--line); border-radius:var(--radius-sm);
+  background:var(--surface); text-decoration:none; color:inherit;
+  transition:border-color .14s ease, transform .14s ease;
+}
+.exam-c:hover{ border-color:var(--course-accent); transform:translateY(-1px); }
+.exam-c-ttl{ font-size:14px; font-weight:700; line-height:1.3; margin-bottom:6px; }
+.exam-c-meta{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
+.exam-c-yr{ font-weight:800; color:var(--text); }
+.exam-c-off{ color:var(--good); font-weight:700; }
+.exam-c-bar{ height:3px; background:var(--line); border-radius:20px; margin-top:8px; overflow:hidden; }
+.exam-c-bar > i{ display:block; height:100%; background:var(--course-accent); }
+.exam-c-bar > i.good{ background:var(--good); }
+.exam-c-bar > i.bad{ background:var(--bad); }
+.exam-c-score{ font-size:11px; margin-top:4px; }
+
+/* מעבדות — accordion מקופל בתחתית (הכי פחות בשימוש) */
+.labs-acc{ margin-top:4px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+.labs-acc > summary{
+  cursor:pointer; list-style:none; padding:13px 16px; font-size:13.5px; font-weight:700;
+  color:var(--muted); display:flex; align-items:center; gap:10px;
+}
+.labs-acc > summary::-webkit-details-marker{ display:none; }
+.labs-acc > summary .chev{ margin-inline-start:auto; transition:transform .18s ease; }
+.labs-acc[open] > summary .chev{ transform:rotate(180deg); }
+.labs-acc-body{ padding:2px 16px 16px; display:flex; flex-direction:column; gap:12px; }

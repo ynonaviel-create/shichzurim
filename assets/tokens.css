@@ -1,0 +1,106 @@
+/* ===== ארכיון השחזורים — טוקנים =====
+   מקור-האמת היחיד לצבע, טיפוגרפיה, מרווח, רדיוס וצל. נטען לפני style.css,
+   ולפני הציור הראשון, כדי שערכת הנושא (שנקבעת ב-index.html) תתפוס מיד.
+   כלל: אין צבע קשיח בגוף ה-CSS — הכל עובר דרך המשתנים כאן.
+
+   בהיר כברירת מחדל, כהה דרך [data-theme="dark"] על <html>. */
+
+:root{
+  --bg:        #f6f8fa;
+  --bg-tint:   #eef3f4;
+  --surface:   #ffffff;
+  --surface-2: #f2f5f7;
+  --line:      #dfe5ea;
+  --line-soft: #eaeff3;
+
+  --text:      #16222e;
+  --muted:     #5a6b7b;
+  --dim:       #8395a4;
+
+  --accent:    #0d8b84;   /* טורקיז קליני — מותג-העל של האתר */
+  --accent-dk: #0a6f6a;
+  --accent-sl: #e2f2f1;   /* רקע מבטא עדין */
+
+  /* צבע-זהות המקצוע. ברירת המחדל = המבטא הגלובלי, כך שדף בלי מקצוע
+     נראה בדיוק כמו קודם. renderCourse/renderHome דורסים אותו לפי courses.json. */
+  --course-accent:    var(--accent);
+  --course-accent-dk: var(--accent-dk);
+  --course-accent-sl: var(--accent-sl);
+
+  /* פלטת הסימולציות המקבילה (--sim*) בוטלה — ממופה לצבע-המקצוע, כך שכל
+     המעבדות עקביות עם שאר העמוד. מוגדר פעם אחת: --course-accent כבר מתחלף
+     בין בהיר/כהה, אז אין צורך בהגדרה נפרדת ל-dark. */
+  --sim:    var(--course-accent);
+  --sim-dp: var(--course-accent-dk);
+  --sim-bg: var(--course-accent-sl);
+  --sim-ln: var(--course-accent);
+
+  --good:      #12885d;
+  --good-bg:   #e4f5ec;
+  --good-ln:   #9bd8bb;
+  --bad:       #cf3a44;
+  --bad-bg:    #fdeaec;
+  --bad-ln:    #f2b3b8;
+  --warn:      #a86a06;
+  --warn-bg:   #fdf3e2;
+  --warn-ln:   #e8c67e;
+
+  --topic-bg:  #eceaf9;
+  --topic-ln:  #c3bcea;
+  --topic-tx:  #56499c;
+
+  --radius:    14px;
+  --radius-sm: 10px;
+  --shadow:    0 1px 2px rgba(20,35,50,.05), 0 8px 24px rgba(20,35,50,.06);
+  --shadow-lg: 0 2px 4px rgba(20,35,50,.06), 0 16px 40px rgba(20,35,50,.10);
+
+  --font: "Assistant", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* סקאלת טיפוגרפיה — קנה-מידה אחד לכל האתר (במקום גדלים אד-הוק).
+     רכיבים חדשים צריכים לצרוך מכאן. */
+  --fs-xs:   12px;
+  --fs-sm:   13.5px;
+  --fs-base: 16px;
+  --fs-md:   17.5px;
+  --fs-lg:   21px;
+  --fs-xl:   28px;
+  --fs-2xl:  40px;
+}
+
+:root[data-theme="dark"]{
+  --bg:        #0e1620;
+  --bg-tint:   #101c27;
+  --surface:   #16222e;
+  --surface-2: #1d2c3a;
+  --line:      #2b3d4d;
+  --line-soft: #223140;
+
+  --text:      #e7eef4;
+  --muted:     #9db0c0;
+  --dim:       #708496;
+
+  --accent:    #2bb3aa;
+  --accent-dk: #178f88;
+  --accent-sl: #14312f;
+
+  --course-accent:    var(--accent);
+  --course-accent-dk: var(--accent-dk);
+  --course-accent-sl: var(--accent-sl);
+
+  --good:      #34c184;
+  --good-bg:   #123528;
+  --good-ln:   #1f6b4c;
+  --bad:       #f2646e;
+  --bad-bg:    #3a1a1e;
+  --bad-ln:    #7d3037;
+  --warn:      #e0a83c;
+  --warn-bg:   #33280f;
+  --warn-ln:   #7a5f22;
+
+  --topic-bg:  #262453;
+  --topic-ln:  #474394;
+  --topic-tx:  #b7b0f0;
+
+  --shadow:    0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  --shadow-lg: 0 2px 4px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.4);
+}

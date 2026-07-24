@@ -321,6 +321,8 @@ const stamp = (file) =>
    המניפסט נטען תמיד עם no-cache ולכן הוא תמיד עדכני — האתר משווה אליו את
    הגרסה של עצמו, ואם ה-index.html שהוגש לו מהמטמון ישן, הוא מרענן את עצמו.
    בלי זה כל דחיפה משאירה חלון של 10 דקות שבו משתמשים רואים גרסה ישנה. */
+const tokensV = stamp('assets/tokens.css');
+const compV = stamp('assets/components.css');
 const cssV = stamp('assets/style.css');
 const jsV = stamp('assets/app.js');
 const cloudV = stamp('assets/cloud.js');   // גשר הענן — נחתם כמו app.js; הספרייה שב-vendor נעוצה בפין ידני
@@ -331,7 +333,7 @@ fs.writeFileSync(
     {
       updated: new Date().toISOString().slice(0, 10),
       version: contentHash,
-      assets: { css: cssV, js: jsV, cloud: cloudV },
+      assets: { tokens: tokensV, components: compV, css: cssV, js: jsV, cloud: cloudV },
       courses,
       exams,
     },
@@ -346,6 +348,8 @@ fs.writeFileSync(
 const indexPath = path.join(__dirname, 'index.html');
 let html = fs.readFileSync(indexPath, 'utf8');
 html = html
+  .replace(/assets\/tokens\.css(\?v=[a-f0-9]+)?/g, `assets/tokens.css?v=${tokensV}`)
+  .replace(/assets\/components\.css(\?v=[a-f0-9]+)?/g, `assets/components.css?v=${compV}`)
   .replace(/assets\/style\.css(\?v=[a-f0-9]+)?/g, `assets/style.css?v=${cssV}`)
   .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`)
   .replace(/assets\/cloud\.js(\?v=[a-f0-9]+)?/g, `assets/cloud.js?v=${cloudV}`);
