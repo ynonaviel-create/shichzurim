@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-24",
-  "version": "68c28b81",
+  "version": "65690a84",
   "assets": {
     "tokens": "3e9add29",
     "components": "481de6a8",
@@ -746,6 +746,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 9
+    },
+    {
+      "id": "electro-2026-boch2",
+      "file": "electro-2026-boch2.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 2 — סינפסות",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": true,
+      "trust": "verified",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 10
     },
     {
       "id": "electro-guide",
