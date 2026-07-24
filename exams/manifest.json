@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-24",
-  "version": "48b36423",
+  "version": "68c28b81",
   "assets": {
     "tokens": "3e9add29",
     "components": "481de6a8",
@@ -729,6 +729,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 33
+    },
+    {
+      "id": "electro-2026-boch1",
+      "file": "electro-2026-boch1.json",
+      "course": "electro",
+      "part": "בחני אמצע",
+      "title": "בוחן 1 — אקסיטביליות",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": true,
+      "trust": "verified",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 9
     },
     {
       "id": "electro-guide",
