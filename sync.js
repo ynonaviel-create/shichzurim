@@ -187,8 +187,11 @@ for (const file of files) {
 
     /* qid → הנושא שלו. זה מה שמאפשר לאמת ש-points מצביעות על שאלות אמיתיות,
        ולספור כמה מהשאלות בנושא כבר ממופות. ה-High Yield מוחרג: הוא עותק של
-       שאלות שכבר נספרו, והוא היה מנפח את המכנה. */
-    if (data.kind !== 'highyield') {
+       שאלות שכבר נספרו, והוא היה מנפח את המכנה.
+       `guideEvidence: false` מחריג קובץ שהשאלות בו נכתבו כאן ולא נשאלו במבחן:
+       הן שאלות תרגול לגיטימיות, אבל הן אינן ראיה ל"מה באמת נשאל", ולכן אסור
+       להן להיכנס למכנה של הכיסוי — אחרת המד ידווח על פער שאינו קיים. */
+    if (data.kind !== 'highyield' && data.guideEvidence !== false) {
       const map = (qidTopic[data.course] ??= new Map());
       items.forEach((q) => q.qid && map.set(q.qid, q.topic || null));
     }
