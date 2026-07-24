@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-24",
-  "version": "22639b7d",
+  "version": "6335859d",
   "assets": {
     "tokens": "3e9add29",
     "components": "481de6a8",
@@ -763,6 +763,40 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 26
+    },
+    {
+      "id": "electro-methods-cards",
+      "file": "electro-methods-cards.json",
+      "course": "electro",
+      "part": null,
+      "title": "השיעור האחרון — שיטות מחקר וסינפסין",
+      "kind": "cards",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": "חמש שיטות מחקר, וסיפור אחד שמחבר ביניהן: איך סינפסין מארגן את הווזיקולות כטיפת נוזל, ולמה בלעדיו אלפא-סינוקלאין מפסיק להיות רעיל.",
+      "heroEyebrow": "🔬 השיעור האחרון",
+      "count": 10
+    },
+    {
+      "id": "electro-methods-practice",
+      "file": "electro-methods-practice.json",
+      "course": "electro",
+      "part": null,
+      "title": "תרגול — השיעור האחרון (שיטות מחקר וסינפסין)",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-24",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 20
     },
     {
       "id": "electro-patho-cards",
