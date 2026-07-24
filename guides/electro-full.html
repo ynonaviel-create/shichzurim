@@ -354,7 +354,9 @@ html[data-theme="dark"]{color:var(--text)}
 /* סימון "קראתי" + חזרה למעלה */
 .ed-read{cursor:pointer;background:transparent}
 .ed-read.on{background:var(--good-bg);border-color:var(--good);color:var(--good)}
-#ed-top{position:fixed;bottom:1.1rem;inset-inline-end:1.1rem;z-index:150;width:2.6rem;height:2.6rem;
+/* צד ימין פיזי — .sizer יושב על left:1.1rem, ו-inset-inline-end ב-RTL נופל
+   גם הוא לשמאל, כלומר בדיוק עליו. physical right מונע את ההתנגשות. */
+#ed-top{position:fixed;bottom:1.1rem;right:1.1rem;z-index:150;width:2.6rem;height:2.6rem;
   border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);
   cursor:pointer;font-size:1rem;display:none;box-shadow:0 4px 16px rgba(10,25,40,.18)}
 #ed-top.show{display:block}
