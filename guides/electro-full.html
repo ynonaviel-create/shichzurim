@@ -397,7 +397,27 @@ ol.wk-o li.reveal-ok::before{background:var(--good);color:#fff}
 .pc-rel a:hover{border-color:var(--accent);color:var(--accent)}
 [data-theme="dark"] .pcard{background:var(--surface-2)}
 
-@media print{#ed-prog,#ed-nav,#ed-top,.ed-navwrap,.ed-read,.wk-verdict{display:none!important}
+/* סרגל הנושאים בצד — התמצאות בזמן קריאה. גובה כל מקטע פרופורציוני
+   לאורך הפרק, כך שרואים גם "איפה אני" וגם "כמה נשאר". */
+#ed-rail{position:fixed;right:15px;top:50%;transform:translateY(-50%);z-index:140;
+  display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.ed-seg{position:relative;display:flex;align-items:center;justify-content:flex-end;
+  cursor:pointer;border:0;background:transparent;padding:0;font:inherit}
+.ed-seg i{display:block;width:4px;border-radius:2px;background:var(--dim);opacity:.38;transition:all .18s}
+.ed-seg.done i{background:var(--good);opacity:.6}
+.ed-seg:hover i{background:var(--accent);opacity:1}
+.ed-seg.cur i{background:var(--accent);opacity:1;width:7px}
+.ed-seg span{position:absolute;right:14px;white-space:nowrap;opacity:0;transform:translateX(6px);
+  transition:.16s;pointer-events:none;background:var(--surface);color:var(--text);
+  border:1px solid var(--line);border-radius:8px;padding:.22rem .6rem;
+  font-family:'Heebo',sans-serif;font-size:.7rem;font-weight:700;
+  box-shadow:0 4px 14px rgba(10,25,40,.16)}
+.ed-seg:hover span,.ed-seg.cur span{opacity:1;transform:none}
+.ed-seg.cur span{color:var(--accent-dk)}
+/* מתחת לרוחב הזה אין שוליים פנויים לתוויות — הסרגל מפנה את הדרך */
+@media (max-width:1080px){#ed-rail{display:none}}
+
+@media print{#ed-prog,#ed-nav,#ed-top,#ed-rail,.ed-navwrap,.ed-read,.wk-verdict{display:none!important}
   .pcard{border:1px solid #ccc;border-right:3px solid #0f4c5c}}
 </style></head><body><div id="ed-prog"></div>
 <div class="site-bar">
@@ -744,17 +764,52 @@ apply();})();</script><section class="cover">
       b.classList.toggle('on',!!read[c.topic]);
       b.textContent=read[c.topic]?'✓ נקרא':'סמן כנקרא';
       var a=nav.querySelector('a[data-id="'+c.id+'"]'); if(a)a.classList.toggle('done',!!read[c.topic]);
+      /* חיפוש עצל: הסרגל נבנה בהמשך הסקריפט */
+      var rs=document.querySelector('#ed-rail .ed-seg[data-id="'+c.id+'"]');
+      if(rs)rs.classList.toggle('done',!!read[c.topic]);
       updateCount();
     });
     x.appendChild(b);
-    /* קישור לחפיסות הכרטיסיות */
-    var cd=document.createElement('a'); cd.href='../index.html#/cards'; cd.textContent='🃏 כרטיסיות';
-    x.appendChild(cd);
   });
+
+  /* ---- סרגל הנושאים בצד ---- */
+  var rail=document.createElement('div'); rail.id='ed-rail';
+  chaps.forEach(function(c){
+    var b=document.createElement('button');
+    b.type='button';
+    b.className='ed-seg'+(read[c.topic]?' done':'');
+    b.dataset.id=c.id;
+    b.setAttribute('aria-label',c.topic);
+    b.innerHTML='<span>'+esc(c.topic)+(c.pct?' · '+esc(c.pct):'')+'</span><i></i>';
+    b.addEventListener('click',function(){
+      var t=document.getElementById(c.id);
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    rail.appendChild(b);
+  });
+  document.body.appendChild(rail);
+  /* גובה פרופורציוני לאורך הפרק — נמדד מחדש אחרי טעינת פונטים ואחרי
+     הזרקת הכרטיסיות, כי שניהם משנים את גובה הפרקים. */
+  function sizeRail(){
+    var tot=chaps.reduce(function(a,c){return a+c.sec.offsetHeight;},0)||1;
+    chaps.forEach(function(c,i){
+      var seg=rail.children[i]; if(!seg) return;
+      seg.querySelector('i').style.height=
+        Math.max(14,Math.min(44,Math.round(c.sec.offsetHeight/tot*260)))+'px';
+    });
+  }
+  sizeRail();
+  window.addEventListener('resize',sizeRail);
+  window.addEventListener('load',sizeRail);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(sizeRail);
 
   /* ---- scroll-spy + פס התקדמות + חזרה למעלה ---- */
   var prog=document.getElementById('ed-prog'), top=document.getElementById('ed-top');
-  var marks=chaps.concat(pages);
+  /* חייב להיות בסדר המסמך ולא בסדר המערך: עמודי הפתיחה מופיעים לפני הפרקים
+     במסמך אך אחרונים ב-concat, ולכן הם היו "מנצחים" בכל גלילה והסימון נתקע עליהם. */
+  var marks=chaps.concat(pages).sort(function(a,b){
+    return (a.sec.compareDocumentPosition(b.sec) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+  });
   function onScroll(){
     var h=document.documentElement.scrollHeight-window.innerHeight;
     prog.style.width=(h>0?Math.min(100,window.scrollY/h*100):0)+'%';
@@ -762,7 +817,11 @@ apply();})();</script><section class="cover">
     var cur=null;
     marks.forEach(function(m){ if(m.sec.getBoundingClientRect().top<=140) cur=m; });
     nav.querySelectorAll('a').forEach(function(a){a.classList.remove('cur');});
-    if(cur){var a=nav.querySelector('a[data-id="'+cur.id+'"]'); if(a)a.classList.add('cur');}
+    rail.querySelectorAll('.ed-seg').forEach(function(b){b.classList.remove('cur');});
+    if(cur){
+      var a=nav.querySelector('a[data-id="'+cur.id+'"]'); if(a)a.classList.add('cur');
+      var rb=rail.querySelector('.ed-seg[data-id="'+cur.id+'"]'); if(rb)rb.classList.add('cur');
+    }
   }
   window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
   top.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
@@ -895,6 +954,6 @@ apply();})();</script><section class="cover">
       if(res[0].length) inject(res[0],'🩺 פתולוגיות ותרופות','');
       if(res[1].length) inject(res[1],'🆕 מהשיעור האחרון','m');
       /* הבלוקים החדשים מצטרפים לאחזור-האקטיבי ול"גלה הכל" אוטומטית (details.reveal) */
-      onScroll();
+      sizeRail(); onScroll();
     });
 })();</script></body></html>
