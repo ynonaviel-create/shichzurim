@@ -46,7 +46,10 @@ const el = (tag, cls, txt) => {
   if (txt != null) n.textContent = txt;
   return n;
 };
-const plural = (n, one, many) => (n === 1 ? `${one} אחד` : `${n} ${many}`);
+/* fem=true לשמות עצם נקביים. בלי זה יצא "שאלה אחד" — וזה כבר קרה בכרטיסיות
+   ("לתרגול — שאלה אחד מהארכיון"). ברירת המחדל נשארת זכר, כך שכל קריאה קיימת
+   מתנהגת בדיוק כמו קודם. */
+const plural = (n, one, many, fem) => (n === 1 ? `${one} ${fem ? 'אחת' : 'אחד'}` : `${n} ${many}`);
 
 /* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
    בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
@@ -784,7 +787,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   if (route === 'admin') return renderAdmin();
@@ -806,6 +809,7 @@ function router() {
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param);
+  if (route === 'traps' && param) return renderTraps(param);
   if (route === 'about') return renderAbout();
   return renderHome();
 }
@@ -1521,7 +1525,7 @@ async function renderCards(id) {
 
     if (card.related && card.related.length) {
       const rel = el('div', 'lcard-rel');
-      rel.append(el('span', 'lcard-rel-lbl', `לתרגול — ${plural(card.related.length, 'שאלה', 'שאלות')} מהארכיון על הנושא`));
+      rel.append(el('span', 'lcard-rel-lbl', `לתרגול — ${plural(card.related.length, 'שאלה', 'שאלות', true)} מהארכיון על הנושא`));
       const list = el('div', 'lcard-rel-list');
       card.related.forEach((r) => {
         const a = el('a', 'rel-chip');
@@ -2601,6 +2605,9 @@ function playQuestions(cfg) {
     fb.innerHTML = '';
     fb.append(el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`));
     if (item.explain) fb.append(el('div', 'explain', item.explain));
+    /* המלכודת — רק כשטועים, ורק אם באמת יש כזו לשאלה הזאת. "הנה התשובה
+       הנכונה" מתקן; "זו המלכודת שנפלת בה, והיא תופסת גם כאן וכאן" מלמד. */
+    if (!isRight) { const tb = trapBox(item); if (tb) fb.append(tb); }
     const sim = SIM_BY_TOPIC[item.topic];
     if (sim) fb.append(simButton(sim));
     /* טעית בשאלת שעתוק? הרגע הזה הוא בדיוק הרגע לדעת מאיזה עמוד ללמוד אותו. */
@@ -3247,6 +3254,99 @@ async function renderReview(courseId) {
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
   });
+}
+
+/* ================= המלכודות שלי =================
+
+   הצד השני של "הטעויות שלי". שם רואים *אילו שאלות* טעית; כאן רואים **למה** —
+   מקובץ לפי התפיסה השגויה עצמה, כי חמש טעויות שנובעות מאותו בלבול אינן חמש
+   בעיות אלא אחת. כל התוכן כאן כבר קיים בשדה `trap` שבמפת החומרים; הדף הזה
+   רק מצליב אותו עם מה שבאמת נפלת בו. */
+async function renderTraps(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  if (!c) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  view.dataset.course = courseId;
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>מחפש את המלכודות…</b></div>';
+
+  const g = await loadGuide(courseId).catch(() => null);
+  const metas = quizzesOf(courseId);
+  await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
+  const hmap = seenH.read();
+
+  view.innerHTML = '';
+  view.append(crumb(c.name, '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `המלכודות שלי — ${c.name}`));
+  /* בלי הדגשות בכוכביות: המנוע מכניס טקסט דרך textContent ולא מרנדר Markdown,
+     אז ‎**‎ היה מוצג כתווים. */
+  head.append(el('p', null,
+    'לא "אילו שאלות טעית" אלא למה. חמש טעויות שנובעות מאותו בלבול הן בעיה אחת, ' +
+    'וכאן הן מקובצות יחד.'));
+  view.append(head);
+
+  if (!g) {
+    view.append(emptyState('🗺️', 'אין עדיין מפת חומרים למקצוע הזה',
+      'המלכודות נשענות על "מה באמת נשאל" שבמפה. במקצועות שיש בהם מפה — אלקטרו, ביומול ופיזיקה — הדף הזה מלא.'));
+    toTop(); updateFooter();
+    return;
+  }
+
+  /* אוספים כל נקודה שיש לה trap, וסופרים בכמה מה-qids שלה יש טעות פתוחה. */
+  const rows = [];
+  (g.units || []).forEach((u) => {
+    (u.points || []).forEach((p) => {
+      if (!p.trap) return;
+      const qids = p.qids || [];
+      const fell = qids.filter((q) => seenH.isOpenMistake(seenH.rec(q, hmap)));
+      const seenCnt = qids.filter((q) => seenH.has(q, hmap)).length;
+      if (!fell.length) return;
+      rows.push({ u, p, qids, fell, seenCnt });
+    });
+  });
+  rows.sort((a, b) => b.fell.length - a.fell.length || b.u.freq - a.u.freq);
+
+  if (!rows.length) {
+    view.append(emptyState('🎯', 'אין מלכודות פתוחות',
+      'או שעוד לא ענית מספיק במקצוע הזה, או שלא נפלת באף מלכודת שמופתה. ' +
+      'כל טעות בשאלה שממופה לנקודה תופיע כאן.'));
+    toTop(); updateFooter();
+    return;
+  }
+
+  const sum = el('p', 'traps-sum');
+  sum.textContent = `${plural(rows.length, 'מלכודת פתוחה', 'מלכודות פתוחות', true)} · ` +
+    `${rows.reduce((n, r) => n + r.fell.length, 0)} שאלות. מדורג לפי כמה נפלת, ואז לפי משקל הנושא במבחן.`;
+  view.append(sum);
+
+  rows.forEach((r) => {
+    const card = el('div', 'trapcard');
+    const top = el('div', 'trapcard-top');
+    top.append(el('span', 'trapcard-topic', r.u.topic));
+    top.append(el('span', 'trapcard-n', `✗ ${r.fell.length} מתוך ${r.qids.length}`));
+    card.append(top);
+    card.append(el('div', 'trap-text', r.p.trap));
+    /* הנקודה עצמה — מה שנכון — מתחת למלכודת ולא מעליה, כדי שהקריאה תהיה
+       "זו הטעות" ואז "וזה הנכון", ולא להפך. */
+    card.append(el('div', 'trapcard-point', r.p.point));
+    const acts = el('div', 'trapcard-acts');
+    const gA = el('a', 'btn ghost', '📚 איפה ללמוד');
+    gA.href = `#/guide/${courseId}/${encodeURIComponent(r.u.topic)}`;
+    acts.append(gA);
+    const pA = el('a', 'btn ghost', '🏋️ תרגל את הנושא');
+    pA.href = `#/practice/${courseId}/${encodeURIComponent(r.u.topic)}`;
+    acts.append(pA);
+    card.append(acts);
+    view.append(card);
+  });
+
+  toTop();
+  updateFooter();
 }
 
 /* ================= דף הסבר ================= */
@@ -5771,8 +5871,34 @@ async function loadGuide(courseId) {
     guideCache[courseId] = res.ok ? await res.json() : null;
   } catch { guideCache[courseId] = null; }
   const g = guideCache[courseId];
-  if (g) g.units.forEach((u) => (GUIDE_BY_TOPIC[u.topic] = { unit: u, course: courseId }));
+  if (g) {
+    g.units.forEach((u) => (GUIDE_BY_TOPIC[u.topic] = { unit: u, course: courseId }));
+    indexTraps(courseId, g);
+  }
   return g;
+}
+
+/* ---------- אינדקס המלכודות ----------
+
+   שלוש מפות החומרים מחזיקות 341 נקודות, **ולכל אחת מהן יש `trap`** — תיאור
+   כתוב של התפיסה השגויה, עם ה-qids של השאלות שנופלים בה. sync.js מאמת שכל
+   qid קיים ושייך לאותו נושא, ולכן אי אפשר להמציא מלכודת.
+
+   זה הנכס היקר ביותר בארכיון, והוא מוצג היום רק בתוך כרטיס מתקפל בעמוד המפה
+   — כלומר אחרי שסיימת, אם בכלל נכנסת. ההיפוך כאן הופך אותו לזמין ברגע היחיד
+   שבו הוא באמת שווה משהו: הרגע שבו נפלת. */
+const TRAP_BY_QID = {};
+function indexTraps(courseId, g) {
+  (g.units || []).forEach((u) => {
+    (u.points || []).forEach((p) => {
+      if (!p.trap) return;
+      (p.qids || []).forEach((qid) => {
+        /* qid לא יכול להשתייך לשתי נקודות — sync.js נכשל על זה במפורש
+           ("אותה שאלה משמשת ראיה לשתי נקודות"). לכן ההשמה בטוחה. */
+        TRAP_BY_QID[qid] = { trap: p.trap, point: p.point, qids: p.qids, topic: u.topic, course: courseId };
+      });
+    });
+  });
 }
 
 /* נושא → יחידה. מתמלא ב-loadGuide, ולכן כל מסך שמציג שאלות טוען את המפה
@@ -6442,6 +6568,28 @@ function sourcesPanel(g) {
   });
   sec.append(grid);
   return sec;
+}
+
+/* קופסת המלכודת בפאנל המשוב. מוצגת רק אחרי טעות, ורק לשאלה שמופיעה כראיה
+   לנקודה שיש לה trap. הספירה "תופסת גם ב-N" נגזרת בזמן ריצה מה-qids — אם
+   שאלה תימחק מהארכיון, המספר יקטן מעצמו במקום להישאר שקר. */
+function trapBox(item) {
+  const t = item.qid && TRAP_BY_QID[item.qid];
+  if (!t) return null;
+  const box = el('div', 'trapbox');
+  box.append(el('b', null, '🪤 המלכודת שנפלת בה'));
+  box.append(el('div', 'trap-text', t.trap));
+  const others = (t.qids || []).length - 1;
+  if (others > 0) {
+    const foot = el('div', 'trap-foot');
+    foot.append(el('span', null,
+      `אותה מלכודת נבדקת בעוד ${plural(others, 'שאלה', 'שאלות', true)} בארכיון.`));
+    const a = el('a', 'trap-link', 'כל המלכודות שלי ←');
+    a.href = '#/traps/' + t.course;
+    foot.append(a);
+    box.append(foot);
+  }
+  return box;
 }
 
 /* מהשאלה למפה. נבחר אוטומטית לפי topic — ראו GUIDE_BY_TOPIC. */
