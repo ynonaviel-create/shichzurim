@@ -701,6 +701,9 @@ function renderHome() {
   const nextup = nextExamBanner();
   if (nextup) view.append(nextup);
 
+  const push = shinunHomePush();
+  if (push) view.append(push);
+
   /* המדף: הסמסטר הפעיל למעלה, ושנים/סמסטרים קודמים מקופלים בארכיון.
      כך האתר "גדל בחן" — ריבוי שנים לא נערם מול העיניים. */
   const active = COURSES.filter((c) => c.status !== 'archived');
@@ -1494,6 +1497,12 @@ async function renderShinun(courseId, topicFilter) {
     const bar = el('div', 'shn-scorebar');
     body.append(bar);
     const card = el('div', 'shn-flip'); body.append(card);
+    /* כפתורי ההערכה יושבים *מתחת* לקלף ולא בתוכו — אחרת הקליק עליהם היה
+       גם הופך את הקלף. הקלף עצמו מתהפך לשני הכיוונים בכל קליק. */
+    const judge = el('div', 'shn-judge');
+    const no = el('button', 'btn shn-no', '✗ עוד לא'); no.type = 'button';
+    const yes = el('button', 'btn shn-yes', '✓ ידעתי'); yes.type = 'button';
+    judge.append(no, yes); body.append(judge);
     const acts = el('div', 'btn-row');
     const resetB = el('button', 'btn ghost', '↻ אפס התקדמות בקבוצה'); resetB.type = 'button';
     resetB.addEventListener('click', () => {
@@ -1501,42 +1510,47 @@ async function renderShinun(courseId, topicFilter) {
     });
     acts.append(resetB); body.append(acts);
 
+    let flipped = false;
     function counts() {
       const known = pool.filter((it) => shinunProg.box(it.key) >= 3).length;
       bar.innerHTML = `נשלטו <b>${known}</b> מתוך <b>${pool.length}</b> · בתור: ${queue.length}`;
     }
+    function renderFace() {
+      const it = queue[0];
+      card.innerHTML = '';
+      card.className = 'shn-flip' + (flipped ? ' is-open' : '');
+      card.append(el('div', 'shn-flip-grp', it.group + (it.topic ? ' · ' + it.topic : '')));
+      card.append(el('div', 'shn-flip-front', it.front));
+      if (flipped) {
+        card.append(el('div', 'shn-flip-back', it.back));
+        if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
+      } else {
+        card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · קליק שוב מחזיר'));
+      }
+    }
     function draw() {
       counts();
       if (!queue.length) {
-        card.innerHTML = '';
+        card.innerHTML = ''; card.className = 'shn-flip';
         card.append(el('div', 'shn-done', '🎉 סיימת את הסבב! כל הכבוד.'));
+        judge.style.display = 'none';
         return;
       }
-      const it = queue[0];
-      card.innerHTML = '';
-      card.className = 'shn-flip';
-      const grp = el('div', 'shn-flip-grp', it.group + (it.topic ? ' · ' + it.topic : ''));
-      const front = el('div', 'shn-flip-front', it.front);
-      const hint = el('div', 'shn-flip-hint', 'קליק כדי לחשוף');
-      card.append(grp, front, hint);
-      card.onclick = () => reveal(it);
+      judge.style.display = '';
+      flipped = false;
+      renderFace();
     }
-    function reveal(it) {
-      card.onclick = null;
-      card.classList.add('is-open');
-      const back = el('div', 'shn-flip-back', it.back);
-      card.append(back);
-      if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
-      const judge = el('div', 'shn-judge');
-      const no = el('button', 'btn shn-no', '✗ עוד לא'); no.type = 'button';
-      const yes = el('button', 'btn shn-yes', '✓ ידעתי'); yes.type = 'button';
-      no.addEventListener('click', () => { shinunProg.set(it.key, 0); queue.push(it); queue.shift(); draw(); });
-      yes.addEventListener('click', () => { shinunProg.set(it.key, Math.min(3, shinunProg.box(it.key) + 1)); queue.shift(); draw(); });
-      judge.append(no, yes); card.append(judge);
-    }
+    card.onclick = () => { if (!queue.length) return; flipped = !flipped; renderFace(); };
+    no.addEventListener('click', () => {
+      const it = queue[0]; if (!it) return;
+      shinunProg.set(it.key, 0); queue.push(it); queue.shift(); draw();
+    });
+    yes.addEventListener('click', () => {
+      const it = queue[0]; if (!it) return;
+      shinunProg.set(it.key, Math.min(3, shinunProg.box(it.key) + 1)); queue.shift(); draw();
+    });
     function flipMode2() { body.innerHTML = ''; flipMode(); }
     draw();
-    /* מקלדת: רווח=חשוף, →=ידעתי, ←=לא */
   }
 
   /* ═════ מצב כסה־וגלה ═════ */
@@ -3036,6 +3050,27 @@ function renderAbout() {
 
   toTop();
   updateFooter();
+}
+
+/* פוש במסך הבית ל-i❤️Shinun — באנר חד-פעמי (עד סגירה) שמפנה למקצוע שיש בו
+   שננת. מוצג רק אם קיימת חפיסת שינון כלשהי, ורק למי שעדיין לא ראה/סגר. */
+function shinunHomePush() {
+  try { if (localStorage.getItem('shichzurim.shinunHomePush')) return null; } catch { return null; }
+  const deck = EXAMS.find((e) => e.kind === 'shinun');
+  if (!deck) return null;
+  const b = el('a', 'intro shinun-push');
+  b.href = '#/shinun/' + deck.course;
+  const txt = el('div');
+  txt.append(el('b', null, '🧠 חדש: i❤️Shinun — שינון בעל־פה'));
+  txt.append(el('span', null, 'המקום לעובדות שאי אפשר להסיק, רק לזכור — חלבונים, רעלנים, בופרים. ' +
+    'כרטיסי היפוך, כסה־וגלה, ומבחן קצר. נסה עכשיו ←'));
+  b.append(txt);
+  const x = el('button', 'intro-x', '✕');
+  x.type = 'button';
+  x.setAttribute('aria-label', 'סגירה');
+  x.onclick = (e) => { e.preventDefault(); e.stopPropagation(); try { localStorage.setItem('shichzurim.shinunHomePush', '1'); } catch {} b.remove(); };
+  b.append(x);
+  return b;
 }
 
 function introBanner() {

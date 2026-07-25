@@ -1710,3 +1710,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 @media print{.shn-tabs,.shn-filters,.shn-listbar,.shn-scorebar,.shn-judge{display:none!important;}
   .shn-row-b::before{display:none!important;} .shn-row-btext,.shn-row-mnem{opacity:1!important;}
   .shn-row{break-inside:avoid;}}
+
+/* פוש i❤️Shinun במסך הבית — באנר לחיץ עם צבע-מבטא ו-✕ לסגירה */
+.shinun-push{ text-decoration:none; color:inherit; position:relative;
+  background:linear-gradient(135deg, var(--course-accent-sl, var(--accent-sl)), var(--surface) 82%);
+  border-color:var(--course-accent, var(--accent)); transition:transform .12s, box-shadow .12s; }
+.shinun-push:hover{ transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+.shinun-push b{ color:var(--course-accent-dk, var(--accent-dk)); }
+.intro-x{ position:absolute; top:8px; inset-inline-start:12px; background:transparent; border:0;
+  color:var(--dim); font-size:15px; cursor:pointer; line-height:1; padding:4px; border-radius:6px; }
+.intro-x:hover{ color:var(--text); background:var(--surface-2); }
