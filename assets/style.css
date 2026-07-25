@@ -1846,3 +1846,26 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .shn-audio-front{ font-size:19px; font-weight:800; line-height:1.5; }
 .shn-audio-back{ font-size:15.5px; font-weight:500; color:var(--muted); line-height:1.8; }
+
+/* ═══════════════ הלילה לפני המבחן ═══════════════ */
+.tonight-ctl{ margin-bottom:12px; }
+.tonight-info{ color:var(--dim); font-size:13.5px; margin:0 0 16px; }
+.tonight-plan{ margin-bottom:20px; }
+.tonight-row{
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.tonight-n{
+  flex:0 0 34px; text-align:center; font-size:15px; font-weight:800;
+  color:var(--accent-dk); font-variant-numeric:tabular-nums;
+}
+[data-theme="dark"] .tonight-n{ color:var(--accent); }
+.tonight-txt{ flex:1 1 auto; min-width:0; }
+.tonight-txt b{ display:block; font-size:14.5px; font-weight:700; }
+.tonight-txt span{ display:block; font-size:12.5px; color:var(--dim); margin-top:2px; }
+.tonight-bar{
+  flex:0 0 84px; height:7px; border-radius:99px;
+  background:var(--surface-2); overflow:hidden;
+}
+.tonight-bar i{ display:block; height:100%; background:var(--accent); border-radius:99px; }
+@media (max-width:560px){ .tonight-bar{ flex-basis:52px; } }

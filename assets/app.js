@@ -877,6 +877,7 @@ function router() {
   if (route === 'review' && param) return renderReview(param);
   if (route === 'traps' && param) return renderTraps(param);
   if (route === 'q' && param) return renderOneQuestion(param);
+  if (route === 'tonight' && param) return renderTonight(param);
   if (route === 'flagged' && param) return renderFlagged(param);
   if (route === 'about') return renderAbout();
   return renderHome();
@@ -1212,6 +1213,14 @@ function renderCourse(courseId) {
     const tr = el('a', 'btn', '🪤 המלכודות שלי');
     tr.href = '#/traps/' + courseId;
     lRow.append(tr);
+  }
+  /* "הלילה לפני" — רק כשהמבחן באמת קרוב. באמצע הסמסטר זה רעש; שלושה ימים
+     לפני זה הדבר היחיד שרוצים ללחוץ עליו. */
+  const nd = nextDate(c);
+  if (nd && nd.ts - Date.now() < 8 * MS.day) {
+    const tn = el('a', 'btn', '🌙 הלילה לפני');
+    tn.href = '#/tonight/' + courseId;
+    lRow.append(tn);
   }
   /* המסומנות — רק אם יש מה להראות. */
   if (Object.keys(flags.read()).length) {
@@ -3648,6 +3657,191 @@ async function renderOneQuestion(qid) {
     persist: false,
     back: { text: found.course.name, href: '#/course/' + found.course.id },
   });
+}
+
+/* ================= הלילה לפני המבחן =================
+
+   מסלול דחוס שנבנה משלושה דברים שכבר קיימים באתר, ושאף אחד מהם לא ניחוש:
+   `freq` — כמה הנושא באמת שווה במבחן, נספר מהשחזורים עצמם;
+   `strength` — כמה אתה יודע אותו *עכשיו*, כולל דעיכה עם הזמן;
+   והמלכודות שנפלת בהן.
+
+   זה לא "תרגול אקראי עם טיימר". זו הקצאת זמן: אם נשארו לך שעה וחצי, השאלה
+   היחידה היא במה לגעת — וזו בדיוק השאלה שאי אפשר לענות עליה בלי שלושת
+   הנתונים האלה יחד. */
+async function renderTonight(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  if (!c) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop(); return;
+  }
+  view.dataset.course = courseId;
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>בונה לך מסלול…</b></div>';
+
+  const g = await loadGuide(courseId).catch(() => null);
+  const metas = quizzesOf(courseId);
+  const loaded = await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
+
+  /* בריכה אחת, בלי High Yield — הוא עותק והיה מכפיל שאלות במסלול. */
+  const pool = [];
+  const seenQ = new Set();
+  metas.forEach((m, mi) => {
+    if (!loaded[mi] || m.kind === 'highyield') return;
+    (loaded[mi].questions || []).forEach((q, i) => {
+      const item = { ...q, origin: loaded[mi].title, examId: m.id, idx: i };
+      const k = qKey(item);
+      if (seenQ.has(k)) return;
+      seenQ.add(k);
+      pool.push(item);
+    });
+  });
+
+  view.innerHTML = '';
+  view.append(crumb(c.name, '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `🌙 הלילה לפני — ${c.name}`));
+  head.append(el('p', null,
+    'כמה זמן נשאר לך? האתר יבנה מסלול לפי מה שבאמת כבד במבחן, מה שאתה חלש בו, ומה שנפלת בו.'));
+  view.append(head);
+
+  if (!pool.length) {
+    view.append(emptyState('📭', 'אין שאלות במקצוע הזה', 'המסלול נבנה מבריכת השאלות.'));
+    toTop(); updateFooter(); return;
+  }
+
+  const hmap = seenH.read();
+  const now = Date.now();
+
+  /* משקל לכל נושא. עם מפה — freq אמיתי שנספר מהשחזורים. בלי מפה (קליני,
+     ביוכימיה) נופלים לחלק היחסי של הנושא בבריכה, שזה הקירוב הכן ביותר
+     שאפשר: כמה מהשאלות בארכיון עוסקות בו. */
+  const topicW = {};
+  if (g) {
+    priorityList(courseId, g).forEach(({ u, m }) => {
+      topicW[u.topic] = { w: Math.max(0.01, u.freq * (1 - m.strength)), strength: m.strength, freq: u.freq };
+    });
+  } else {
+    const cnt = {};
+    pool.forEach((q) => { if (q.topic) cnt[q.topic] = (cnt[q.topic] || 0) + 1; });
+    const tot = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
+    Object.entries(cnt).forEach(([t, n]) => {
+      const m = masteryOf(courseId, t, hmap, now);
+      topicW[t] = { w: Math.max(0.01, (100 * n / tot) * (1 - m.strength)), strength: m.strength, freq: 100 * n / tot };
+    });
+  }
+
+  /* בתוך נושא: קודם מה שנפלת בו ועוד לא נגמלת, אז מה שבשל לרענון, אז מה
+     שלא ראית, ורק בסוף מה שאתה כבר יודע. */
+  const rank = (q) => {
+    const r = seenH.rec(qKey(q), hmap);
+    if (seenH.isOpenMistake(r)) return 0;
+    if (r && r.b > 0 && seenH.due(qKey(q), now, hmap)) return 1;
+    if (!r) return 2;
+    return 3;
+  };
+
+  const controls = el('div', 'tonight-ctl');
+  const info = el('p', 'tonight-info');
+  let minutes = 60;
+  const chips = el('div', 'chips');
+  [[30, '30 דקות'], [60, 'שעה'], [90, 'שעה וחצי'], [150, 'שעתיים וחצי']].forEach(([mn, lbl]) => {
+    const ch = chipEl('chip' + (mn === minutes ? ' on' : ''), lbl);
+    ch.onclick = () => {
+      minutes = mn;
+      chips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
+      ch.classList.add('on');
+      draw();
+    };
+    chips.append(ch);
+  });
+  controls.append(chips);
+  view.append(controls, info);
+
+  const plan = el('div', 'tonight-plan');
+  view.append(plan);
+
+  const row = el('div', 'btn-row');
+  const go = el('button', 'btn primary', '🌙 התחל את המסלול');
+  row.append(go);
+  view.append(row);
+
+  let picked = [];
+
+  function build() {
+    /* ~50 שניות לשאלה: קריאה, מענה, וקריאת ההסבר. לא מדעי — אבל הרבה יותר
+       כן מ"שאלה בדקה", שמניח שלא קוראים את ההסבר, וזה בדיוק מה שלא רוצים
+       בלילה לפני. */
+    const budget = Math.max(8, Math.round(minutes * 60 / 50));
+    const topics = Object.entries(topicW).sort((a, b) => b[1].w - a[1].w);
+    const totW = topics.reduce((a, [, v]) => a + v.w, 0) || 1;
+
+    const byTopic = {};
+    pool.forEach((q) => { (byTopic[q.topic || '—'] ??= []).push(q); });
+    Object.values(byTopic).forEach((arr) => arr.sort((a, b) => rank(a) - rank(b)));
+
+    const out = [];
+    const used = {};
+    topics.forEach(([t, v]) => {
+      const want = Math.round(budget * (v.w / totW));
+      const arr = byTopic[t] || [];
+      const take = arr.slice(0, Math.min(want, arr.length));
+      used[t] = take.length;
+      out.push(...take);
+    });
+    /* עיגול כלפי מטה משאיר מקום — ממלאים בנושאים הכבדים לפי אותו סדר. */
+    if (out.length < budget) {
+      for (const [t] of topics) {
+        const arr = byTopic[t] || [];
+        while (out.length < budget && used[t] < arr.length) out.push(arr[used[t]++]);
+        if (out.length >= budget) break;
+      }
+    }
+    return { list: out.slice(0, budget), used, topics };
+  }
+
+  function draw() {
+    const { list, used, topics } = build();
+    picked = list;
+    info.textContent =
+      `${plural(list.length, 'שאלה', 'שאלות', true)} · ` +
+      `${plural(topics.filter(([t]) => used[t]).length, 'נושא', 'נושאים')} · ` +
+      'מסודר מהכבד לקל.';
+    plan.innerHTML = '';
+    topics.filter(([t]) => used[t]).slice(0, 10).forEach(([t, v]) => {
+      const r = el('div', 'tonight-row');
+      r.append(el('span', 'tonight-n', String(used[t])));
+      const d = el('div', 'tonight-txt');
+      d.append(el('b', null, t));
+      d.append(el('span', null,
+        `${v.freq.toFixed(1)}% מהמבחן · אתה ב-${Math.round(v.strength * 100)}%`));
+      r.append(d);
+      const bar = el('div', 'tonight-bar');
+      const fill = el('i');
+      fill.style.width = Math.round(v.strength * 100) + '%';
+      bar.append(fill);
+      r.append(bar);
+      plan.append(r);
+    });
+  }
+  draw();
+
+  go.onclick = () => {
+    if (!picked.length) return;
+    playQuestions({
+      key: 'tonight',
+      title: `🌙 הלילה לפני — ${c.name}`,
+      subtitle: `${picked.length} שאלות · ${minutes} דקות`,
+      note: 'המסלול מסודר מהנושא הכבד ביותר שאתה הכי חלש בו, ובתוכו — קודם מה שנפלת בו.',
+      questions: picked,
+      persist: false,
+      back: { text: 'בניית מסלול', href: '#/tonight/' + courseId },
+    });
+  };
+
+  toTop();
+  updateFooter();
 }
 
 /* ================= מה שסימנתי ================= */
