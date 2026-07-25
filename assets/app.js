@@ -208,8 +208,8 @@ function checkCourseMilestone(m) {
   if (!m || !m.total) return;
   const id = `${m.courseId}:cov100`;
   if (milestoneHit(id)) return;
-  const map = seen.read();
-  const done = m.qids.filter((k) => map[k] !== undefined).length;
+  const map = seenH.read();
+  const done = m.qids.filter((k) => seenH.has(k, map)).length;
   if (done < m.total) return;
   markMilestone(id);
   const name = firstName();
@@ -347,15 +347,127 @@ const seen = {
     catch { return {}; }
   },
   write(d) { try { localStorage.setItem(SEEN_Q_KEY, JSON.stringify(d)); } catch {} },
-  mark(item, correct) {
+  /* כותב לשתי המפות. הכפילות מכוונת ולזמן קצוב: כל עוד היא כאן, החזרה
+     לגרסה קודמת של app.js לא מאבדת את העובדה שענית — הקוד הישן ימשיך לקרוא
+     את המפה הישנה וימצא אותה מלאה. להסיר בשחרור שאחרי, לא לפני. */
+  mark(item, correct, chosen) {
     if (item.examId == null || item.idx == null) return;
     const d = this.read();
     d[qKey(item)] = correct ? 1 : 0;
     this.write(d);
     window.Cloud?.queue('seen', qKey(item), correct ? 1 : 0);
+    seenH.mark(item, correct, chosen);
   },
   status(item) { return this.read()[qKey(item)]; },  // undefined | 0 | 1
-  clear() { localStorage.removeItem(SEEN_Q_KEY); window.Cloud?.queueClear('seen'); },
+  clear() {
+    localStorage.removeItem(SEEN_Q_KEY); window.Cloud?.queueClear('seen');
+    seenH.clear();
+  },
+};
+
+/* ---------- היסטוריית מענה לכל שאלה ----------
+
+   המפה שלמעלה יודעת דבר אחד: "בפעם האחרונה צדקת או טעית". זה מספיק כדי לצבוע
+   שאלה, ולא מספיק לשום דבר אחר — היא לא יודעת מתי זה היה, כמה פעמים ניסית,
+   ואיזו תשובה שגויה בחרת. משלוש החוסרים האלה נובעים שני עיוותים אמיתיים:
+   "הטעויות שלי" מתרוקן אחרי נכונה אחת (גם אם מלפני שלושה שבועות), ומד השליטה
+   מטפס ל-100% למי שגמר סבב, גם אם שכח הכול.
+
+   ⚠️ מפתח חדש, ולא שדרוג של הישן — וזו ההחלטה הכי חשובה כאן.
+   שתי הצורות היו נפגשות בענן: משתמש עם app.js מהמטמון מעלה `1` לשורה שכבר
+   מכילה אובייקט, `winner('seen')` מחזיר `1`, ו-writeLS דורס את ההיסטוריה
+   במספר. אובדן שקט, דווקא במכשיר שכבר עבר מיגרציה. עם מפתח נפרד אין חלון
+   צורות מעורבות בכלל, הקוד הישן ממשיך לקרוא מפה שלא נגענו בה, ו-rollback של
+   app.js חוזר לעבוד מלא. המחיר — שתי מפות במקביל — נסבל (~35KB). */
+const SEENH_KEY = 'shichzurim.seenH';
+/* מתי שווה לחזור, לפי התיבה. קצר בכוונה, מאותה סיבה שמרווחי השינון קצרים:
+   המבחן בעוד ימים, לא חודשים. */
+const SEENH_IVL  = [0, 6 * 3600e3, 24 * 3600e3, 3 * 24 * 3600e3];
+/* כמה מהר הידיעה דועכת, לפי התיבה. תיבה גבוהה = זיכרון עמיד יותר. */
+const SEENH_HALF = [6 * 3600e3, 24 * 3600e3, 3 * 24 * 3600e3, 7 * 24 * 3600e3];
+
+/* מטמון קריאה. בלעדיו masteryOf עושה JSON.parse בתוך עצמו, priorityList קורא
+   לו לכל יחידה (~30 פרסורים בכל רינדור של המפה), ו-filtered() פרסר בכל הקלדה
+   בשדה החיפוש. הרשומה החדשה גדולה יותר מהישנה, אז זה עובר מ"בזבוז" ל"מורגש". */
+let seenHCache = null;
+
+const seenH = {
+  read() {
+    if (seenHCache) return seenHCache;
+    try { seenHCache = JSON.parse(localStorage.getItem(SEENH_KEY)) || {}; }
+    catch { seenHCache = {}; }
+    return seenHCache;
+  },
+  write(d) {
+    seenHCache = d;
+    try { localStorage.setItem(SEENH_KEY, JSON.stringify(d)); } catch {}
+  },
+  drop() { seenHCache = null; },     // אחרי מיזוג ענן או כתיבה מטאב אחר
+
+  /* ערך שאינו אובייקט — מגיבוי שהודבק, או משורת ענן שנכתבה בגרסה אחרת —
+     נקרא כניסיון בודד. הכשל היחיד שהצורה הזאת יכולה לייצר הוא רשומה דלה,
+     לא זבל. */
+  rec(k, d) {
+    const v = (d || this.read())[k];
+    if (v == null) return null;
+    if (typeof v === 'number') return { b: v ? 1 : 0, n: 1, w: v ? 0 : 1, f: v ? 1 : 0 };
+    return v;
+  },
+  has(k, d) { return this.rec(k, d) != null; },
+
+  /* b = תיבת לייטנר 0–3. שדה אחד בשני תפקידים: גם לוח הזמנים של החזרה, וגם
+     "כמה נכונות ברצף מאז הכשל האחרון" — כי נכון מעלה ב-1 וטעות מאפסת. לכן
+     b>=2 הוא בדיוק "שתי נכונות ברצף", שזה כלל הגמילה מרשימת הטעויות.
+     f נרשם רק בניסיון הראשון ולא זז אחר כך — הוא הרכיב היחיד שהופך את מד
+     השליטה לכן, כי מי שצדק רק בסבב השני לא באמת ידע.
+     c = המסיח האחרון שנבחר בטעות. זה מה שמאפשר "אתה מחליף בין X ל-Y" במקום
+     "טעית". נשמר רק כשטועים — בתשובה נכונה אין מה ללמוד ממנה. */
+  mark(item, correct, chosen) {
+    const k = qKey(item);
+    const d = this.read();
+    const p = this.rec(k, d);
+    const rec = {
+      b: correct ? Math.min(3, (p ? p.b : 0) + 1) : 0,
+      t: Date.now(),
+      n: (p ? p.n : 0) + 1,
+      w: (p ? p.w : 0) + (correct ? 0 : 1),
+      f: p ? p.f : (correct ? 1 : 0),
+    };
+    if (!correct && typeof chosen === 'number') rec.c = chosen;
+    else if (p && p.c != null) rec.c = p.c;
+    d[k] = rec;
+    this.write(d);
+    window.Cloud?.queue('seenH', k, rec);
+  },
+
+  /* פריט שלא נראה מעולם נחשב בשל — "לא יודעים" זו סיבה לחזור, לא להימנע.
+     חסר t (רשומה מהמיגרציה) — גם כן בשל, מאותה סיבה בדיוק. */
+  due(k, now, d) {
+    const r = this.rec(k, d);
+    if (!r) return true;
+    if (!r.t) return true;
+    return (now - r.t) >= SEENH_IVL[Math.min(3, r.b)];
+  },
+
+  /* כמה אתה יודע את זה *עכשיו*, בין 0 ל-1. הזיכרון דועך, ולכן גם המדד.
+     רשומה בלי t מקבלת מקדם ניטרלי 0.75 ולא 0: אין לנו נתון על מתי היא נענתה,
+     ולהעניש על חוסר ידיעה שלנו זה להציג לכל המשתמשים קריסה מדומה בבוקר
+     שאחרי המיגרציה. */
+  strength(r, now) {
+    if (!r || !r.n) return 0;
+    const fresh = r.t ? Math.pow(0.5, (now - r.t) / SEENH_HALF[Math.min(3, r.b)]) : 0.75;
+    return (r.b / 3) * fresh;
+  },
+
+  /* טעות פתוחה = טעית בה, ועוד לא נגמלת. הגמילה דורשת שתי נכונות ברצף ולא
+     אחת — נכונה אחת אחרי טעות היא לא ראיה לידיעה, וזה בדיוק ה-leech שברח. */
+  isOpenMistake(r) { return !!(r && r.w > 0 && r.b < 2); },
+
+  clear() {
+    seenHCache = null;
+    localStorage.removeItem(SEENH_KEY);
+    window.Cloud?.queueClear('seenH');
+  },
 };
 
 /* ---------- נתונים ---------- */
@@ -446,6 +558,7 @@ async function loadExam(id) {
   if (!res.ok) throw new Error('exam ' + res.status);
   const data = await res.json();
   migrateSeen(data);
+  migrateSeenH(data);   // אחרי הראשונה — היא צריכה מפה שכבר עברה נרמול idx→qid
   /* qIndex נגזר מ-cache, אז מבחן חדש מייתר אותו. renderGuide טוען את הכול לפני
      שהוא מרנדר ולכן זה לא אמור לקרות — אבל מטמון שנבנה על דאטה חלקי ונתקע
      הוא בדיוק סוג הבאג שנראה כמו "לפעמים חסרות שאלות בקבלה". */
@@ -482,6 +595,36 @@ function migrateSeen(exam) {
       window.Cloud?.queue('seen', m.qid, m.val);
       window.Cloud?.queueDelete('seen', m.old);
     });
+  }
+}
+
+/* מ"מה ראית" ל"מה קרה". יושבת כאן ולא באתחול, מאותה סיבה בדיוק שקודמתה
+   יושבת כאן: רק בטעינת מבחן יש ביד את השאלות עצמן.
+
+   שלושה הבדלים מ-migrateSeen, וכולם מכוונים:
+   1. היא **לא מוחקת** מהמפה הישנה. הישנה נשארת כתיבה חוקית של כל טאב שעוד רץ
+      על קוד מהמטמון, וגם תיבת דואר נכנס: תשובה שנרשמה שם אחרי המיגרציה
+      תיקלט בטעינה הבאה.
+   2. אין דגל גרסה — האידמפוטנטיות היא מזה שהיא כותבת רק לתא ריק.
+   3. **בלי t.** אין שום נתון על מתי השאלה נענתה. t=עכשיו הוא שקר שמנפח את
+      מד השליטה, ו-t=0 הוא שקר שמרסק אותו — וכל המשתמשים היו רואים בבוקר
+      שההתקדמות שלהם "נעלמה". חסר t מטופל במפורש ב-due ו-strength. */
+function migrateSeenH(exam) {
+  if (!Array.isArray(exam.questions)) return;
+  const old = seen.read();
+  const d = seenH.read();
+  const moved = [];
+  exam.questions.forEach((q, i) => {
+    const k = q.qid || `${exam.id}#${i}`;
+    if (d[k] !== undefined) return;              // כבר הוגר — לא נוגעים
+    const v = old[k];
+    if (v === undefined) return;
+    d[k] = v ? { b: 1, n: 1, w: 0, f: 1 } : { b: 0, n: 1, w: 1, f: 0 };
+    moved.push(k);
+  });
+  if (moved.length) {
+    seenH.write(d);
+    moved.forEach((k) => window.Cloud?.queue('seenH', k, d[k]));
   }
 }
 
@@ -2410,7 +2553,9 @@ function playQuestions(cfg) {
     if (answers[qi] != null) return;
     answers[qi] = oi;
     const isRight = oi === item.a;
-    if (!item.offSyllabus) seen.mark(item, isRight);   // מחוץ לחומר לא נכנס ל"טעויות שלי"
+    /* oi נוסע פנימה כדי שהמסיח שנבחר יישמר. עד היום הוא נזרק, ולכן "טעית"
+       ו"אתה מחליף בין X ל-Y" נראו לאתר אותו דבר. */
+    if (!item.offSyllabus) seen.mark(item, isRight, oi);   // מחוץ לחומר לא נכנס ל"טעויות שלי"
     paint(qi, oi, card, opts, fb, item);
     /* החגיגה חיה כאן ולא ב-paint, כי paint רץ מחדש בכל רינדור של שאלה שכבר
        נענתה — והיה יורה טוסט/קונפטי שוב על שאלה ישנה. choose רץ פעם אחת.
@@ -2701,16 +2846,24 @@ async function renderPractice(courseId, seedTopic = null) {
   view.append(progress);
 
   function drawProgress() {
-    const map = seen.read();
+    const map = seenH.read();
+    const nowTs = Date.now();
     const total = pool.length;
-    const done = pool.filter((q) => map[qKey(q)] !== undefined).length;
-    const wrong = pool.filter((q) => map[qKey(q)] === 0).length;
+    const done = pool.filter((q) => seenH.has(qKey(q), map)).length;
+    /* "טעויות פתוחות" ולא "הטעות האחרונה": שאלה שטעית בה וענית נכון פעם אחת
+       עדיין פתוחה, כי נכונה אחת אינה ראיה לידיעה. */
+    const wrong = pool.filter((q) => seenH.isOpenMistake(seenH.rec(qKey(q), map))).length;
+    const due = pool.filter((q) => {
+      const r = seenH.rec(qKey(q), map);
+      return r && r.b > 0 && seenH.due(qKey(q), nowTs, map);
+    }).length;
     const fresh = total - done;
 
     progress.innerHTML = '';
     progress.append(stat(fresh, 'שאלות שלא ראית', fresh ? 'accent' : ''));
     progress.append(stat(done, 'שאלות שראית'));
     progress.append(stat(wrong, 'טעויות פתוחות', wrong ? 'bad' : ''));
+    progress.append(stat(due, 'בשל לחזרה', due ? 'accent' : ''));
     progress.append(stat(Math.round((done / total) * 100) + '%', 'מהמקצוע'));
   }
 
@@ -2723,7 +2876,10 @@ async function renderPractice(courseId, seedTopic = null) {
   const MODES = [
     { id: 'new',   label: '✨ שאלות חדשות' },
     { id: 'wrong', label: '🎯 רק מה שטעיתי' },
-    { id: 'all',   label: '🔁 הכול, כולל מה שראיתי' },
+    /* התשלום של כל מנגנון ההיסטוריה: שאלות שידעת, ושהגיע הזמן לוודא שאתה
+       עדיין יודע. כמצב נוסף ולא כברירת מחדל — מי שלא נוגע בו לא מרגיש שינוי. */
+    { id: 'due',   label: '🔁 בשל לחזרה' },
+    { id: 'all',   label: '📚 הכול, כולל מה שראיתי' },
   ];
   MODES.forEach((m) => {
     const ch = chipEl('chip' + (m.id === mode ? ' on' : ''), m.label);
@@ -2917,13 +3073,17 @@ async function renderPractice(courseId, seedTopic = null) {
     /* המחיקה חייבת לנסוע גם לענן. בלעדיה האיפוס ביטל את עצמו: המפתח נמחק
        מקומית בלבד, ובמיזוג הבא `l === undefined` והשורה שנשארה בענן חוזרת
        ומנצחת. מבחוץ זה נראה כמו "לחצתי איפוס והכול חזר". */
+    /* משתי המפות. אם רק הישנה נמחקת, migrateSeenH לא רואה הבדל (היא כותבת
+       רק לתא ריק) והחדשה נשארת מלאה; ואם רק החדשה — המיגרציה מייבאת אותה
+       בחזרה מהישנה בטעינת המבחן הבאה. בשני המקרים האיפוס מבטל את עצמו. */
+    const h = seenH.read();
     pool.forEach((q) => {
       const k = qKey(q);
-      if (map[k] === undefined) return;
-      delete map[k];
-      window.Cloud?.queueDelete('seen', k);
+      if (map[k] !== undefined) { delete map[k]; window.Cloud?.queueDelete('seen', k); }
+      if (h[k] !== undefined) { delete h[k]; window.Cloud?.queueDelete('seenH', k); }
     });
     seen.write(map);
+    seenH.write(h);
     drawProgress();
     update();
   };
@@ -2931,16 +3091,19 @@ async function renderPractice(courseId, seedTopic = null) {
   view.append(resetRow);
 
   function filtered() {
-    const map = seen.read();
+    const map = seenH.read();
+    const nowTs = Date.now();
     return pool.filter((q) => {
       if (!inParts(q)) return false;
       if (!matchesQuery(q)) return false;
       if (imagesOnly && !q.image) return false;
       if (selTopics.size && !selTopics.has(q.topic)) return false;
       if ((q.repeat?.n || 1) < minRepeat) return false;
-      const s = map[qKey(q)];
+      const r = seenH.rec(qKey(q), map);
+      if (mode === 'due') return r && r.b > 0 && seenH.due(qKey(q), nowTs, map);
+      const s = r == null ? undefined : (r.b >= 1 ? 1 : 0);
+      if (mode === 'wrong') return seenH.isOpenMistake(r);
       if (mode === 'new') return s === undefined;
-      if (mode === 'wrong') return s === 0;
       return true;
     });
   }
@@ -2950,7 +3113,10 @@ async function renderPractice(courseId, seedTopic = null) {
     const take = count === 0 ? f.length : Math.min(count, f.length);
 
     if (f.length) {
-      const label = mode === 'new' ? 'שאלות שלא ראית' : mode === 'wrong' ? 'שאלות שטעית בהן' : 'שאלות';
+      const label = mode === 'new' ? 'שאלות שלא ראית'
+        : mode === 'wrong' ? 'שאלות שטעית בהן ועוד לא נגמלת מהן'
+        : mode === 'due' ? 'שאלות שהגיע הזמן לרענן'
+        : 'שאלות';
       info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
       go.disabled = false;
       go.textContent = `התחל תרגול · ${take} שאלות`;
@@ -3027,11 +3193,12 @@ async function renderReview(courseId) {
 
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>אוסף את הטעויות…</b></div>';
 
-  // נשען על מפת ה"נראו" — לכן טעות שנעשתה בתרגול חופשי מגיעה לכאן גם היא,
-  // ותשובה נכונה כאן מורידה את השאלה מהרשימה.
-  const map = seen.read();
+  // נשען על מפת ההיסטוריה — לכן טעות שנעשתה בתרגול חופשי מגיעה לכאן גם היא.
   const metas = quizzesOf(courseId);
   const loaded = await Promise.all(metas.map((m) => loadExam(m.id)));   // במקביל, לא בטור
+  /* אחרי הטעינה ולא לפניה: loadExam הוא מה שמריץ את migrateSeenH, ומפה
+     שנקראה קודם לא הייתה מכילה את השאלות שזה עתה הוגרו. */
+  const hmap = seenH.read();
   const wrong = [];
   /* שאלה חוזרת קיימת גם בשחזור וגם במבחן ה-High Yield שנבנה ממנו. מאז
      שהשניים חולקים qid הן גם חולקות מפתח התקדמות — ולכן *שתיהן* עוברות את
@@ -3046,7 +3213,10 @@ async function renderReview(courseId) {
     loaded[mi].questions.forEach((q, i) => {
       const item = { ...q, origin: loaded[mi].title, examId: m.id, idx: i };
       const k = qKey(item);
-      if (map[k] !== 0 || shown.has(k)) return;
+      /* עד היום: `map[k] !== 0` — כלומר נכונה אחת הורידה שאלה מהרשימה לנצח,
+         גם אם היא הייתה לפני שלושה שבועות. זה ה-leech שבורח. עכשיו הגמילה
+         דורשת שתי נכונות ברצף (b>=2), ורשומה שאין בה טעות כלל לא נכנסת. */
+      if (!seenH.isOpenMistake(seenH.rec(k, hmap)) || shown.has(k)) return;
       shown.add(k);
       wrong.push(item);
     });
@@ -3071,7 +3241,8 @@ async function renderReview(courseId) {
     key: 'review',
     title: `הטעויות שלי — ${c.name}`,
     subtitle: `${wrong.length} שאלות שטעית בהן`,
-    note: 'תענה נכון — והשאלה תרד מרשימת הטעויות. תטעה שוב — היא תישאר.',
+    note: 'תענה נכון פעמיים ברצף — והשאלה תרד מהרשימה. תטעה — היא מתאפסת. ' +
+          'פעם אחת לא מספיקה: זה בדיוק מה שגרם לשאלות לברוח מהרשימה בלי שידעת אותן.',
     questions: wrong,
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
@@ -3331,7 +3502,7 @@ function renderAccount() {
     const dump = {};
     /* כל מפתח שנושא התקדמות אמיתית. השינון נשכח כאן כשהוא נוסף, והגיבוי
        הבטיח יותר ממה שנתן — מי ששחזר ממנו קיבל חזרה מבחנים בלי הקופסאות. */
-    [KEY, SEEN_Q_KEY, CARDS_READ_KEY, CASE_KEY, SHINUN_KEY, SHINUN_CELEB_KEY]
+    [KEY, SEEN_Q_KEY, SEENH_KEY, CARDS_READ_KEY, CASE_KEY, SHINUN_KEY, SHINUN_CELEB_KEY]
       .forEach((k) => { dump[k] = localStorage.getItem(k); });
     try {
       await navigator.clipboard.writeText(JSON.stringify(dump));
@@ -5611,9 +5782,12 @@ const guideOf = (courseId) => EXAMS.find((e) => e.course === courseId && e.kind 
 
 /* כמה מהנושא אתה כבר יודע. שאלה שלא נענתה נספרת כלא-נשלטת — זו לא החמרה,
    זה בדיוק המצב: לא ידוע אם אתה יודע אותה. */
-function masteryOf(courseId, topic) {
-  const d = seen.read();
-  let total = 0, correct = 0;
+/* d ו-now מגיעים מבחוץ כדי ש-priorityList יפרסר פעם אחת ולא לכל יחידה בנפרד
+   (~30 קריאות בכל רינדור של המפה). ברירת מחדל נשמרה כדי לא לשבור קורא בודד. */
+function masteryOf(courseId, topic, d, now) {
+  d = d || seenH.read();
+  now = now || Date.now();
+  let total = 0, correct = 0, strength = 0, tried = 0, firstOk = 0;
   /* לפי מפתח ייחודי ולא לפי מופע. שאלה חוזרת קיימת גם בשחזור וגם במבחן ה-
      High Yield שנבנה ממנו, ולכן נספרה כאן פעמיים — המכנה של שעתוק היה 79
      במקום 67, ו"כמה אתה יודע" יצא נמוך מהאמת. הדירוג במפה נגזר מזה ישירות
@@ -5635,10 +5809,24 @@ function masteryOf(courseId, topic) {
       if (counted.has(k)) return;
       counted.add(k);
       total++;
-      if (d[k] === 1) correct++;
+      const r = seenH.rec(k, d);
+      /* correct נשאר "ענית נכון בפעם האחרונה" — זהה בדיוק לחישוב הישן
+         (b>=1 ⟺ התשובה האחרונה נכונה), כדי שכל תצוגת "X מתוך Y" בעמוד המפה
+         לא תזוז. החידוש יושב לצידו ולא במקומו. */
+      if (r && r.b >= 1) correct++;
+      if (r && r.n) { tried++; if (r.f) firstOk++; }
+      strength += seenH.strength(r, now);
     });
   });
-  return { total, correct, ratio: total ? correct / total : 0 };
+  return {
+    total, correct,
+    ratio: total ? correct / total : 0,
+    /* כמה אתה יודע *עכשיו* — דועך עם הזמן. זה מה שמזין את דירוג העדיפויות,
+       במקום ratio שמתקרב ל-100% למי שגמר סבב אחד ולא אומר עליו דבר. */
+    strength: total ? strength / total : 0,
+    /* דיוק בניסיון הראשון. הכי קרוב שיש למה שיקרה במבחן, שבו אין ניסיון שני. */
+    firstTry: tried ? firstOk / tried : 0,
+  };
 }
 
 /* משקל הוודאות: מרצה שמסר גבולות גזרה (קוקס) שווה פחות זמן לנקודה — לא כי
@@ -5659,10 +5847,14 @@ const certaintyTag = (g, c) =>
   (g.certaintyTags && g.certaintyTags[c]) || CERTAINTY_TAG[c] || CERTAINTY_TAG.unknown;
 
 function priorityList(courseId, g) {
+  /* פרסור אחד לכל הרשימה במקום אחד לכל יחידה. */
+  const d = seenH.read(), now = Date.now();
   return g.units
     .map((u) => {
-      const m = masteryOf(courseId, u.topic);
-      return { u, m, score: u.freq * (1 - m.ratio) * (CERTAINTY_W[u.certainty] ?? 1) };
+      const m = masteryOf(courseId, u.topic, d, now);
+      /* strength ולא ratio: נושא שנשלט לפני שבוע חוזר לראש הרשימה, וזה
+         הנכון — הדירוג אמור לענות "במה כדאי לגעת עכשיו", לא "במה נגעת פעם". */
+      return { u, m, score: u.freq * (1 - m.strength) * (CERTAINTY_W[u.certainty] ?? 1) };
     })
     .sort((a, b) => b.score - a.score);
 }
@@ -5833,7 +6025,7 @@ function qIndex(courseId) {
 function pointsPanel(courseId, u, idx, summaryMode) {
   if (!(u.points || []).length) return null;
 
-  const seenMap = seen.read();
+  const seenMap = seenH.read();
   const ranked = u.points
     .map((p) => {
       const hits = (p.qids || []).filter((q) => idx[q]).map((q) => ({ qid: q, ...idx[q] }));
@@ -5841,7 +6033,7 @@ function pointsPanel(courseId, u, idx, summaryMode) {
       return {
         p, hits,
         moadim: [...new Set(hits.map((h) => h.title))],
-        wrong: hits.filter((h) => seenMap[h.qid] === 0).length,
+        wrong: hits.filter((h) => seenH.isOpenMistake(seenH.rec(h.qid, seenMap))).length,
         /* כל הראיות מגיעות משחזורים שלא אומתו — כלומר הטענה עצמה נשענת על
            מפתחות שאיש לא בדק. תגית על קישור בודד לא מספיקה כאן: ההבדל בין
            "אחת מארבע ראיות רעועה" ל"כל הראיות רעועות" הוא ההבדל בין הערה
@@ -6328,7 +6520,16 @@ document.addEventListener('cloud:user', () => {
 /* המיזוג הביא שינויים ממכשיר אחר — המסך צריך להראות אותם. changed=false
    (המצב המקומי כבר עדכני) לא מרנדר, כדי לא להזיז למשתמש את העמוד סתם. */
 document.addEventListener('cloud:merged', (e) => {
+  /* המיזוג כותב ישירות ל-localStorage (writeLS ב-cloud.js) ולא דרך seenH.write,
+     ולכן המטמון בזיכרון לא יודע שהוא התיישן. בלי השורה הזאת מכשיר שסונכרן
+     ממשיך להציג את המצב שלפני המיזוג עד רענון. */
+  seenH.drop();
   if (appReady && e.detail && e.detail.changed) router();
+});
+
+/* טאב אחר של אותו אתר כתב — המטמון שלנו התיישן. */
+window.addEventListener('storage', (e) => {
+  if (e.key === SEENH_KEY) seenH.drop();
 });
 
 (async function init() {

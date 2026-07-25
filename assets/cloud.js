@@ -32,6 +32,7 @@
     cardsRead:  'shichzurim.cardsRead',
     caseProg:   'shichzurim.caseProg',
     shinunProg: 'shichzurim.shinunProg',
+    seenH:      'shichzurim.seenH',
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 
@@ -211,6 +212,18 @@
     if (ns === 'shinunProg') {
       const t = (x) => (x && typeof x === 'object' ? x.t || 0 : 0);
       return t(l) >= t(r) ? l : r;
+    }
+    /* היסטוריה נצברת: מי שספר יותר ניסיונות ראה יותר, ולכן max(n) הוא בורר
+       דטרמיניסטי שלא מאבד התקדמות. במפורש **לא** חיבור — הערך הממוזג נכתב
+       בחזרה לענן, ובסנכרון הבא הוא היה ממוזג עם עצמו ומכפיל את הספירה.
+       המחיר: שני מכשירים שענו במקביל על אותה שאלה — אחד הניסיונות נבלע.
+       זה מאבד רזולוציה, לא התקדמות. */
+    if (ns === 'seenH') {
+      const N = (x) => (x && typeof x === 'object' ? x
+        : { b: x ? 1 : 0, t: 0, n: x == null ? 0 : 1, w: x ? 0 : 1, f: x ? 1 : 0 });
+      const L = N(l), R = N(r);
+      if ((L.n || 0) !== (R.n || 0)) return (L.n || 0) > (R.n || 0) ? L : R;
+      return ((L.t || 0) >= (R.t || 0)) ? L : R;
     }
     if (ns === 'cardsRead') return 1;                           // הערכים תמיד 1; איחוד
     if (ns === 'caseProg') {                                    // מי שהתקדם יותר במקרה מנצח
