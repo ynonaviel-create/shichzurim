@@ -306,7 +306,11 @@ const store = {
     try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
     catch { return {}; }
   },
-  write(d) { localStorage.setItem(KEY, JSON.stringify(d)); },
+  /* עטוף, כמו shinunCeleb. הכתיבה הזאת יושבת על הנתיב החם של המענה, ודפדפן
+     שקרוב למכסת האחסון (או גלישה פרטית) זורק QuotaExceededError — שהיה
+     מתפוצץ בתוך choose() ושובר את הלחיצה עצמה. עדיף לאבד שמירה מלאבד מענה;
+     הענן ממילא מקבל את אותו ערך בנפרד. */
+  write(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} },
   exam(id) { return this.read()[id] || { answers: {} }; },
   save(id, rec) { const d = this.read(); d[id] = rec; this.write(d); window.Cloud?.queue('progress', id, rec); },
   reset(id) { const d = this.read(); delete d[id]; this.write(d); window.Cloud?.queueDelete('progress', id); },
@@ -342,7 +346,7 @@ const seen = {
     try { return JSON.parse(localStorage.getItem(SEEN_Q_KEY)) || {}; }
     catch { return {}; }
   },
-  write(d) { localStorage.setItem(SEEN_Q_KEY, JSON.stringify(d)); },
+  write(d) { try { localStorage.setItem(SEEN_Q_KEY, JSON.stringify(d)); } catch {} },
   mark(item, correct) {
     if (item.examId == null || item.idx == null) return;
     const d = this.read();
@@ -2910,7 +2914,15 @@ async function renderPractice(courseId, seedTopic = null) {
   resetLink.onclick = () => {
     if (!confirm(`לאפס את הסימון של כל השאלות שראית ב${c.name}?\nהציונים במבחנים עצמם יישארו.`)) return;
     const map = seen.read();
-    pool.forEach((q) => delete map[qKey(q)]);
+    /* המחיקה חייבת לנסוע גם לענן. בלעדיה האיפוס ביטל את עצמו: המפתח נמחק
+       מקומית בלבד, ובמיזוג הבא `l === undefined` והשורה שנשארה בענן חוזרת
+       ומנצחת. מבחוץ זה נראה כמו "לחצתי איפוס והכול חזר". */
+    pool.forEach((q) => {
+      const k = qKey(q);
+      if (map[k] === undefined) return;
+      delete map[k];
+      window.Cloud?.queueDelete('seen', k);
+    });
     seen.write(map);
     drawProgress();
     update();
@@ -3165,8 +3177,19 @@ function renderAbout() {
    שננת. מוצג רק אם קיימת חפיסת שינון כלשהי, ורק למי שעדיין לא ראה/סגר. */
 function shinunHomePush() {
   try { if (localStorage.getItem('shichzurim.shinunHomePush')) return null; } catch { return null; }
-  const deck = EXAMS.find((e) => e.kind === 'shinun');
-  if (!deck) return null;
+  /* החפיסה של המקצוע שהמבחן שלו הכי קרוב, ולא "הראשונה שנמצאה". הבחירה
+     הגלובלית עבדה רק כל עוד יש חפיסה אחת בארכיון, ו-i❤️Shinun הוא סטנדרט
+     לכל מקצוע (PROMPT.md) — כלומר היא הייתה נשברת בשקט עם החפיסה השנייה,
+     ומפנה את כולם למקצוע שרירותי. */
+  const decks = EXAMS.filter((e) => e.kind === 'shinun');
+  if (!decks.length) return null;
+  const deck = decks
+    .map((d) => {
+      const c = courseOf(d.course);
+      const nd = c && nextDate(c);
+      return { d, ts: nd ? nd.ts : Infinity };
+    })
+    .sort((a, b) => a.ts - b.ts)[0].d;
   const b = el('a', 'intro shinun-push');
   b.href = '#/shinun/' + deck.course;
   const txt = el('div');
@@ -3306,7 +3329,10 @@ function renderAccount() {
   const exp = el('button', 'btn ghost', 'העתקת גיבוי התקדמות');
   exp.onclick = async () => {
     const dump = {};
-    [KEY, SEEN_Q_KEY, CARDS_READ_KEY, CASE_KEY].forEach((k) => { dump[k] = localStorage.getItem(k); });
+    /* כל מפתח שנושא התקדמות אמיתית. השינון נשכח כאן כשהוא נוסף, והגיבוי
+       הבטיח יותר ממה שנתן — מי ששחזר ממנו קיבל חזרה מבחנים בלי הקופסאות. */
+    [KEY, SEEN_Q_KEY, CARDS_READ_KEY, CASE_KEY, SHINUN_KEY, SHINUN_CELEB_KEY]
+      .forEach((k) => { dump[k] = localStorage.getItem(k); });
     try {
       await navigator.clipboard.writeText(JSON.stringify(dump));
       exp.textContent = '✓ הועתק ללוח';
@@ -6240,8 +6266,14 @@ function guideButton(topic) {
 function updateFooter() {
   const n = EXAMS.reduce((a, e) => a + e.count, 0);
   const f = document.getElementById('footerStats');
+  /* שריד מלפני הענן: השורה הזאת אמרה "נשמר בדפדפן הזה בלבד" בכל עמוד, בזמן
+     ש-#/account אמר את ההפך. משתמש מחובר שקרא את שניהם לא ידע במי להאמין —
+     וזה בדיוק המקום שבו אמון בגיבוי נשבר. */
+  const where = window.Cloud?.user
+    ? 'ההתקדמות מסונכרנת לחשבון שלך'
+    : 'ההתקדמות נשמרת בדפדפן הזה בלבד';
   f.textContent =
-    `${plural(COURSES.length, 'מקצוע', 'מקצועות')} · ${plural(EXAMS.length, 'מבחן', 'מבחנים')} · ${n} שאלות · ההתקדמות נשמרת בדפדפן הזה בלבד`;
+    `${plural(COURSES.length, 'מקצוע', 'מקצועות')} · ${plural(EXAMS.length, 'מבחן', 'מבחנים')} · ${n} שאלות · ${where}`;
   /* מופיע בכל עמוד: הארכיון כולו הוא שחזורי סטודנטים, לא חומר רשמי. */
   let d = document.getElementById('footerDisc');
   if (!d) {

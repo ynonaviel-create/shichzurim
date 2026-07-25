@@ -27,10 +27,11 @@
   /* מיפוי המרחבים בענן אל מפתחות ה-localStorage שבאתר — אותם מפתחות שהעטיפות
      ב-app.js קוראות. המיזוג כותב ישירות למפתחות האלה, והאתר קורא אותם כרגיל. */
   const KEYMAP = {
-    progress:  'shichzurim.v1',
-    seen:      'shichzurim.seen',
-    cardsRead: 'shichzurim.cardsRead',
-    caseProg:  'shichzurim.caseProg',
+    progress:   'shichzurim.v1',
+    seen:       'shichzurim.seen',
+    cardsRead:  'shichzurim.cardsRead',
+    caseProg:   'shichzurim.caseProg',
+    shinunProg: 'shichzurim.shinunProg',
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 
@@ -93,6 +94,21 @@
     flushTimer = setTimeout(flush, 1500);
   }
 
+  /* כמה פעמים ברציפות נכשלה האצווה שבראש התור. אפס בכל הצלחה. */
+  let headFails = 0;
+  const MAX_HEAD_FAILS = 5;
+
+  /* האם השרת דחה את הבקשה לגופה (ולכן ניסיון חוזר לעולם לא יצליח), או שזו
+     תקלה חולפת. שגיאת Postgres מגיעה עם code בן חמישה תווים (23514 = הפרת
+     check), ושגיאת HTTP עם status בטווח 4xx. נפילת רשת זורקת TypeError בלי
+     אף אחד מהם — ואותה דווקא *כן* שווה לנסות שוב, כמה שצריך. */
+  const isPermanent = (e) => {
+    if (!e) return false;
+    const s = Number(e.status);
+    if (s >= 400 && s < 500 && s !== 408 && s !== 429) return true;
+    return typeof e.code === 'string' && /^[0-9A-Z]{5}$/.test(e.code);
+  };
+
   let flushing = false;
   async function flush() {
     if (flushing || !state.session || !outbox.length) return;
@@ -107,11 +123,33 @@
         await apply(batch);
         outbox.splice(0, n);
         saveOutbox();
+        headFails = 0;
       }
       state.lastSync = Date.now();
       emit('cloud:sync');
-    } catch {
-      /* רשת/שרת נפלו — התור נשאר שמור, ננסה שוב עוד עשר שניות. */
+    } catch (e) {
+      /* ── למה יש כאן מונה ולא רק ניסיון חוזר ──
+         היה כאן ניסיון חוזר בלבד, וזה עלה ביוקר: פעולה שהשרת דוחה *תמיד*
+         (מרחב שם שה-check לא הכיר) נשארה בראש תור ה-FIFO, נכשלה כל עשר
+         שניות לנצח, וחסמה מאחוריה את כל ההתקדמות והטעויות של המשתמש —
+         בלי שום סימן. גרוע מזה: אצווה אחת מכילה כמה מרחבים, אז שורה אחת
+         מורעלת הפילה גם שורות תקינות לגמרי.
+
+         עכשיו: כישלון רשת חולף מקבל את אותם ניסיונות חוזרים כמו קודם, אבל
+         פעולה שנכשלת שוב ושוב נזרקת — עדיף לאבד כתיבה בודדת מלהשתיק את
+         הסנכרון כולו. הכתיבה שאבדה תשוחזר ממילא במיזוג הבא, כי localStorage
+         הוא מקור האמת ו-syncNow מעלה כל מה שקיים רק מקומית. */
+      headFails++;
+      if (outbox.length && (isPermanent(e) || headFails >= MAX_HEAD_FAILS)) {
+        const bad = outbox[0];
+        let n = 1;
+        if (bad.op === 'set') { while (n < outbox.length && outbox[n].op === 'set') n++; }
+        outbox.splice(0, n);
+        saveOutbox();
+        headFails = 0;
+        console.warn('[cloud] פעולה נזרקה מהתור:', bad.ns, bad.op, e && (e.code || e.status || e.message));
+      }
+      /* התור נשאר שמור — ננסה שוב עוד עשר שניות. */
       clearTimeout(flushTimer);
       flushTimer = setTimeout(flush, 10000);
     } finally {
@@ -166,6 +204,14 @@
   function winner(ns, l, r) {
     if (ns === 'progress') return ((l && l.at) || 0) >= ((r && r.at) || 0) ? l : r;
     if (ns === 'seen') return l === 1 || r === 1 ? 1 : 0;      // "ידעתי" מנצח — נצבר, לא נמחק
+    /* שינון: הדירוג האחרון הוא האמת, כמו progress לפי at. לא "הקופסה הגבוהה
+       מנצחת" — מי שטעה במכשיר אחד באמת שכח, וקופסה 3 ישנה ממכשיר אחר לא
+       מבטלת את זה. הצורה הישנה (מספר חשוף) נקראת כקופסה בזמן 0, בדיוק כמו
+       ב-shinunProg.rec שב-app.js, כדי שרשומה עתיקה תפסיד לרשומה עם חותמת. */
+    if (ns === 'shinunProg') {
+      const t = (x) => (x && typeof x === 'object' ? x.t || 0 : 0);
+      return t(l) >= t(r) ? l : r;
+    }
     if (ns === 'cardsRead') return 1;                           // הערכים תמיד 1; איחוד
     if (ns === 'caseProg') {                                    // מי שהתקדם יותר במקרה מנצח
       const cnt = (a) => (Array.isArray(a) ? a.filter((x) => x != null).length : 0);
@@ -182,7 +228,11 @@
       const { data, error } = await sb.from('user_kv').select('ns,k,v');
       if (error) throw error;
 
-      const remote = { progress: {}, seen: {}, cardsRead: {}, caseProg: {} };
+      /* נגזר מ-KEYMAP ולא נכתב ביד. כשהרשימה הייתה כפולה, הוספת מרחב חדש
+         (shinunProg) עדכנה מקום אחד ולא את השני — והשורות הגיעו מהשרת
+         ונזרקו בשקט. מרחב חדש נכנס עכשיו בשורה אחת, ב-KEYMAP בלבד. */
+      const remote = {};
+      Object.keys(KEYMAP).forEach((ns) => { remote[ns] = {}; });
       (data || []).forEach((r) => { if (remote[r.ns]) remote[r.ns][r.k] = r.v; });
 
       const ups = [];
