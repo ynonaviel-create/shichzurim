@@ -57,6 +57,43 @@ const plural = (n, one, many, fem) => (n === 1 ? `${one} ${fem ? 'אחת' : 'א�
    ⚠️ זה **לא** ה-norm שמייצר qid — אותו אסור לגעת, הוא מגבב את הארכיון. */
 const searchNorm = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
 
+/* ---------- הקראה ----------
+   speechSynthesis הוא חלק מהדפדפן: בלי שרת, בלי מפתח, ועובד אופליין. הקול
+   העברי במק/אייפון הוא "כרמית" (יש גם גרסה משופרת), ושניהם מקומיים.
+
+   ⚠️ אם אין קול עברי מותקן, הדפדפן ייפול לקול ברירת המחדל ויקרא עברית
+   באנגלית — צליל ג׳יבריש. לכן בודקים שיש he לפני שמציעים את המצב בכלל. */
+const speechOK = () => typeof window.speechSynthesis !== 'undefined';
+let heVoice = null;
+function pickHeVoice() {
+  if (!speechOK()) return null;
+  if (heVoice) return heVoice;
+  const v = speechSynthesis.getVoices().filter((x) => /^he/i.test(x.lang));
+  /* "משופר"/Enhanced קודם — אותו מנוע, איכות גבוהה יותר. */
+  heVoice = v.find((x) => /משופר|enhanced|premium/i.test(x.name)) || v[0] || null;
+  return heVoice;
+}
+if (speechOK()) speechSynthesis.onvoiceschanged = () => { heVoice = null; pickHeVoice(); };
+
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function speak(text) {
+  return new Promise((resolve) => {
+    if (!speechOK() || !text) return resolve();
+    const u = new SpeechSynthesisUtterance(String(text));
+    const v = pickHeVoice();
+    if (v) u.voice = v;
+    u.lang = 'he-IL';
+    u.rate = 0.95;
+    /* גם onend וגם onerror פותרים: אחרת הקראה שנקטעה (ניווט, נעילת מסך)
+       הייתה תוקעת את הלולאה לנצח. */
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    try { speechSynthesis.speak(u); } catch { resolve(); }
+  });
+}
+function stopSpeech() { try { if (speechOK()) speechSynthesis.cancel(); } catch {} }
+
 /* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
    בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
    מחלקה כן נוצרת כ-button (ראו s.toggles) — הפער הזה הוא הסיבה שזה נשמט.
@@ -807,6 +844,7 @@ function crumb(text, href) {
 
 function router() {
   killSim();   // עמוד סימולציה משאיר אחריו ResizeObserver חי. router לא מפרק, אז מפרקים כאן.
+  stopSpeech();   // הקראה ששרדה ניווט הייתה ממשיכה לדבר על עמוד אחר
   delete view.dataset.course;  // איפוס scope-הצבע; כל רנדרר ממוקד-מקצוע קובע אותו מחדש
   const [route, param, sub] = location.hash.replace(/^#\/?/, '').split('/');
   /* שער הכניסה של האתר הסגור. "מה זה?" נשאר פתוח — שאפשר יהיה להבין מה
@@ -1663,7 +1701,11 @@ async function renderShinun(courseId, topicFilter) {
 
   /* ---- סרגל מצבים ---- */
   const tabs = el('div', 'shn-tabs');
+  /* מצב השמע מוצג רק אם לדפדפן יש בכלל מנוע הקראה. את *קיום הקול העברי*
+     אי אפשר לבדוק כאן — רשימת הקולות נטענת אסינכרונית ולעיתים ריקה ברינדור
+     הראשון — ולכן זה נבדק בתוך המצב עצמו. */
   const MODES = [['flip', '🎴 היפוך'], ['list', '📋 כסה־וגלה'], ['quiz', '📝 מבחן']];
+  if (speechOK()) MODES.push(['audio', '🎧 שמע']);
   const tabBtns = {};
   MODES.forEach(([m, label]) => {
     const b = el('button', 'shn-tab', label); b.type = 'button';
@@ -1718,10 +1760,101 @@ async function renderShinun(courseId, topicFilter) {
     MODES.forEach(([m]) => tabBtns[m].classList.toggle('on', state.mode === m));
     buildFilters();
     body.innerHTML = '';
+    stopSpeech();                    // החלפת מצב/מסנן עוצרת הקראה שרצה
     if (state.mode === 'flip') flipMode();
     else if (state.mode === 'list') listMode();
+    else if (state.mode === 'audio') audioMode();
     else quizMode();
     toTop();
+  }
+
+  /* ═════ מצב שמע — לימוד בהליכה ═════
+     עד היום שום דבר בארכיון לא היה שמיש בלי עיניים, וסטודנטים נוסעים והולכים
+     המון. speechSynthesis הוא חלק מהדפדפן: בלי שרת, בלי מפתח, ועובד אופליין.
+
+     ⚠️ מגבלה אמיתית שלא מסתירים מהמשתמש: הקול העברי (כרמית) קורא מונחים
+     לטיניים כמו SNARE ו-NADP באיות עברי משובש. לכן הכיתוב אומר את זה מראש,
+     והטקסט המוקרא מוצג על המסך במקביל — מי שהמונח יצא לו מוזר יכול לקרוא. */
+  function audioMode() {
+    const items = filtered();
+    if (!items.length) {
+      body.append(emptyState('🎧', 'אין פריטים', 'בחר קבוצה או נושא אחר.'));
+      return;
+    }
+    /* בלי קול עברי הדפדפן יקרא עברית במנוע אנגלי, וזה ג׳יבריש גמור. עדיף
+       לומר את זה מאשר לתת למישהו ללחוץ ולשמוע רעש. */
+    if (!pickHeVoice()) {
+      body.append(emptyState('🔇', 'אין קול עברי במכשיר הזה',
+        'ההקראה דורשת קול עברי מותקן (במק ובאייפון זו „כרמית”, והיא מגיעה מובנית). ' +
+        'בווינדוס/אנדרואיד לפעמים צריך להוסיף אותו בהגדרות השפה.'));
+      return;
+    }
+
+    const wrap = el('div', 'shn-audio');
+    wrap.append(el('p', 'shn-audio-note',
+      'הקראה רצופה: רמז, שקט קצר, ואז העובדה. אפשר לנעול מסך ולהמשיך ללכת. ' +
+      'מונחים באנגלית עלולים להישמע משובש — הם מוצגים גם על המסך.'));
+
+    const now = el('div', 'shn-audio-now');
+    const front = el('div', 'shn-audio-front');
+    const back = el('div', 'shn-audio-back');
+    now.append(front, back);
+    const pos = el('div', 'shn-audio-pos');
+
+    const row = el('div', 'btn-row');
+    const playBtn = el('button', 'btn primary', '▶ הפעל');
+    playBtn.type = 'button';
+    const stopBtn = el('button', 'btn ghost', '⏹ עצור');
+    stopBtn.type = 'button';
+    stopBtn.disabled = true;
+    row.append(playBtn, stopBtn);
+
+    wrap.append(row, pos, now);
+    body.append(wrap);
+
+    let i = 0, playing = false;
+
+    const paint = () => {
+      const it = items[i];
+      pos.textContent = `${i + 1} מתוך ${items.length}`;
+      front.textContent = it ? it.front : '';
+      back.textContent = '';
+    };
+    paint();
+
+    async function loop() {
+      while (playing && i < items.length) {
+        const it = items[i];
+        front.textContent = it.front;
+        back.textContent = '';
+        await speak(it.front);
+        if (!playing) break;
+        await pause(900);                 // השהייה לשליפה — זה כל העניין
+        if (!playing) break;
+        back.textContent = it.back;
+        await speak(it.back);
+        if (!playing) break;
+        await pause(500);
+        i++;
+        pos.textContent = `${Math.min(i + 1, items.length)} מתוך ${items.length}`;
+      }
+      if (i >= items.length) { i = 0; paint(); }
+      playing = false;
+      playBtn.textContent = '▶ הפעל';
+      stopBtn.disabled = true;
+    }
+
+    playBtn.onclick = () => {
+      if (playing) { playing = false; stopSpeech(); playBtn.textContent = '▶ הפעל'; stopBtn.disabled = true; return; }
+      playing = true;
+      playBtn.textContent = '⏸ השהה';
+      stopBtn.disabled = false;
+      loop();
+    };
+    stopBtn.onclick = () => {
+      playing = false; stopSpeech(); i = 0; paint();
+      playBtn.textContent = '▶ הפעל'; stopBtn.disabled = true;
+    };
   }
 
   /* ═════ מצב היפוך (לייטנר + SRS) ═════ */

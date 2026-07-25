@@ -1832,3 +1832,17 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .srch-txt{ min-width:0; }
 .srch-txt b{ display:block; font-size:14px; font-weight:700; line-height:1.5; }
 .srch-txt span{ display:block; font-size:12.5px; color:var(--dim); margin-top:2px; }
+
+/* ═══════════════ מצב שמע ═══════════════ */
+.shn-audio{ max-width:620px; margin:0 auto; text-align:center; }
+.shn-audio-note{ color:var(--dim); font-size:13.5px; line-height:1.7; margin-bottom:16px; }
+.shn-audio .btn-row{ justify-content:center; }
+.shn-audio-pos{ margin-top:14px; font-size:12.5px; font-weight:700; color:var(--dim); }
+.shn-audio-now{
+  margin-top:12px; padding:22px 20px; min-height:118px;
+  background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+  display:flex; flex-direction:column; justify-content:center; gap:12px;
+}
+.shn-audio-front{ font-size:19px; font-weight:800; line-height:1.5; }
+.shn-audio-back{ font-size:15.5px; font-weight:500; color:var(--muted); line-height:1.8; }
