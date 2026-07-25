@@ -1259,24 +1259,43 @@ const cardsRead = {
   },
 };
 
-/* התקדמות השננת — לייטנר פשוט. הערך הוא box (0=חדש/נכשל … 3=נשלט), ממופתח
-   לפי מפתח יציב `${deckId}#${מפתח-הפריט}` ולא לפי מיקום, כדי ששינוי סדר או
-   הוספת פריט לא יזיזו התקדמות קיימת. נשמר בענן כמו cardsRead. */
+/* התקדמות השננת — לייטנר עם ריווח (SRS). לכל פריט רשומה {b,t}: b=תיבה
+   (0=חדש/נכשל … 3=נשלט), t=זמן הנראות האחרונה (ms). ממופתח לפי מפתח יציב
+   `${deckId}#${מפתח-הפריט}`. תאימות לאחור: ערך מספרי ישן נקרא כ-{b:n,t:0}.
+   ה"בשלוּת" לחזרה נגזרת מ-t + מרווח לפי התיבה: ככל שנשלט יותר, חוזר בהמשך. */
 const SHINUN_KEY = 'shichzurim.shinunProg';
+/* מרווחים קצרים בכוונה — המבחן בעוד ימים, לא חודשים. */
+const SHINUN_IVL = [0, 10 * 60e3, 24 * 3600e3, 3 * 24 * 3600e3];
 const shinunProg = {
   read() { try { return JSON.parse(localStorage.getItem(SHINUN_KEY)) || {}; } catch { return {}; } },
   write(d) { localStorage.setItem(SHINUN_KEY, JSON.stringify(d)); },
-  box(key) { return this.read()[key] || 0; },
-  set(key, box) {
+  rec(key, d) { const v = (d || this.read())[key]; if (v == null) return null; return typeof v === 'number' ? { b: v, t: 0 } : v; },
+  box(key, d) { const r = this.rec(key, d); return r ? r.b : 0; },
+  seen(key, d) { return this.rec(key, d) != null; },
+  /* בשל לחזרה: פריט חדש תמיד, אחרת אם עבר מספיק זמן מאז שנראה. */
+  due(key, now, d) { const r = this.rec(key, d); if (!r) return true; return (now - (r.t || 0)) >= SHINUN_IVL[Math.min(3, r.b)]; },
+  mark(key, box, now) {
     const d = this.read();
-    if (box > 0) d[key] = box; else delete d[key];
+    d[key] = { b: box, t: now };
     this.write(d);
-    if (box > 0) window.Cloud?.queue('shinunProg', key, box); else window.Cloud?.queueDelete('shinunProg', key);
+    window.Cloud?.queue('shinunProg', key, d[key]);
+  },
+  reset(key) {
+    const d = this.read(); delete d[key]; this.write(d);
+    window.Cloud?.queueDelete('shinunProg', key);
   },
   clear(id) {
     const d = this.read(); Object.keys(d).forEach((k) => k.startsWith(id + '#') && delete d[k]); this.write(d);
     window.Cloud?.queueClearPrefix('shinunProg', id + '#');
   },
+};
+/* חגיגת שליטה בקבוצה — נשמר כדי לחגוג פעם אחת בלבד לכל קבוצה. */
+const SHINUN_CELEB_KEY = 'shichzurim.shinunCeleb';
+const shinunCeleb = {
+  read() { try { return JSON.parse(localStorage.getItem(SHINUN_CELEB_KEY)) || {}; } catch { return {}; } },
+  has(k) { return !!this.read()[k]; },
+  add(k) { const d = this.read(); d[k] = 1; try { localStorage.setItem(SHINUN_CELEB_KEY, JSON.stringify(d)); } catch {} },
+  del(k) { const d = this.read(); delete d[k]; try { localStorage.setItem(SHINUN_CELEB_KEY, JSON.stringify(d)); } catch {} },
 };
 
 async function renderCards(id) {
@@ -1460,10 +1479,28 @@ async function renderShinun(courseId, topicFilter) {
     const b = el('button', 'shn-chip' + (active ? ' on' : ''), label); b.type = 'button';
     b.addEventListener('click', on); return b;
   };
+  /* מד שליטה: כמה מכל קבוצה כבר נשלטו (box≥3). מוצג על הצ׳יפ, ו-✓ כשהכול נשלט. */
+  const groupStats = () => {
+    const d = shinunProg.read();
+    const st = {};
+    all.forEach((it) => {
+      const s = (st[it.group] ||= { done: 0, total: 0 });
+      s.total++; if (shinunProg.box(it.key, d) >= 3) s.done++;
+    });
+    return st;
+  };
   const buildFilters = () => {
     filters.innerHTML = '';
-    filters.append(mkChip('הכל', state.group === 'all', () => { state.group = 'all'; sync(); }));
-    groupLabels.forEach((g) => filters.append(mkChip(g, state.group === g, () => { state.group = g; sync(); })));
+    const st = groupStats();
+    const allDone = all.filter((it) => shinunProg.box(it.key) >= 3).length;
+    filters.append(mkChip(`הכל · ${allDone}/${all.length}`, state.group === 'all', () => { state.group = 'all'; sync(); }));
+    groupLabels.forEach((g) => {
+      const s = st[g] || { done: 0, total: 0 };
+      const full = s.total && s.done === s.total;
+      const chip = mkChip(`${full ? '✓ ' : ''}${g} · ${s.done}/${s.total}`, state.group === g, () => { state.group = g; sync(); });
+      if (full) chip.classList.add('done');
+      filters.append(chip);
+    });
     if (state.topic) {
       const t = el('span', 'shn-topic', '🎯 ' + state.topic + ' ✕');
       t.addEventListener('click', () => { state.topic = null; sync(); });
@@ -1475,7 +1512,10 @@ async function renderShinun(courseId, topicFilter) {
   const body = el('div', 'shn-body');
   view.append(body);
 
+  /* מאזין המקלדת של מצב ההיפוך — מוסר בכל החלפת מצב/מסנן כדי לא לדלוף. */
+  let keyHandler = null;
   function sync() {
+    if (keyHandler) { document.removeEventListener('keydown', keyHandler); keyHandler = null; }
     MODES.forEach(([m]) => tabBtns[m].classList.toggle('on', state.mode === m));
     buildFilters();
     body.innerHTML = '';
@@ -1485,35 +1525,62 @@ async function renderShinun(courseId, topicFilter) {
     toTop();
   }
 
-  /* ═════ מצב היפוך (לייטנר) ═════ */
+  /* ═════ מצב היפוך (לייטנר + SRS) ═════ */
   function flipMode() {
-    let pool = filtered();
-    if (!pool.length) { body.append(emptyState('🤷', 'אין פריטים', 'נסה מסנן אחר.')); return; }
-    /* משוקלל לכיוון תיבות נמוכות: כל פריט חוזר (4 − box) פעמים בבריכה. */
-    const weighted = [];
-    pool.forEach((it) => { const w = 4 - shinunProg.box(it.key); for (let k = 0; k < w; k++) weighted.push(it); });
-    let queue = shuffle(weighted.slice());
+    const all0 = filtered();
+    if (!all0.length) { body.append(emptyState('🤷', 'אין פריטים', 'נסה מסנן אחר.')); return; }
 
-    const bar = el('div', 'shn-scorebar');
-    body.append(bar);
+    let reviewAll = false, flipped = false, queue = [];
+    let sess = { right: 0, wrong: 0, wrongItems: [] };
+
+    const bar = el('div', 'shn-scorebar'); body.append(bar);
+    const celebBox = el('div', 'shn-celeb'); body.append(celebBox);
     const card = el('div', 'shn-flip'); body.append(card);
-    /* כפתורי ההערכה יושבים *מתחת* לקלף ולא בתוכו — אחרת הקליק עליהם היה
-       גם הופך את הקלף. הקלף עצמו מתהפך לשני הכיוונים בכל קליק. */
+    /* כפתורי ההערכה מתחת לקלף — קליק עליהם מקדם, קליק על הקלף מהפך. */
     const judge = el('div', 'shn-judge');
     const no = el('button', 'btn shn-no', '✗ עוד לא'); no.type = 'button';
     const yes = el('button', 'btn shn-yes', '✓ ידעתי'); yes.type = 'button';
     judge.append(no, yes); body.append(judge);
-    const acts = el('div', 'btn-row');
-    const resetB = el('button', 'btn ghost', '↻ אפס התקדמות בקבוצה'); resetB.type = 'button';
-    resetB.addEventListener('click', () => {
-      pool.forEach((it) => shinunProg.set(it.key, 0)); flipMode2();
-    });
-    acts.append(resetB); body.append(acts);
+    const acts = el('div', 'btn-row'); body.append(acts);
+    const resetB = el('button', 'btn ghost', '↻ אפס התקדמות'); resetB.type = 'button';
 
-    let flipped = false;
+    /* התור: פריטים חדשים או ש„הגיע זמנם” לחזרה (SRS). מה שנשלט ולא בשל — מחוץ
+       לסבב, אלא אם ביקשת „חזרה על הכל”. סדר: חדשים קודם, ואז תיבה נמוכה קודם. */
+    function buildQueue() {
+      const now = Date.now(), d = shinunProg.read();
+      let items = all0.filter((it) => reviewAll || !shinunProg.seen(it.key, d) || shinunProg.due(it.key, now, d));
+      items = shuffle(items.slice());
+      items.sort((a, b) => {
+        const na = shinunProg.seen(a.key, d) ? 1 : 0, nb = shinunProg.seen(b.key, d) ? 1 : 0;
+        if (na !== nb) return na - nb;
+        return shinunProg.box(a.key, d) - shinunProg.box(b.key, d);
+      });
+      return items;
+    }
     function counts() {
-      const known = pool.filter((it) => shinunProg.box(it.key) >= 3).length;
-      bar.innerHTML = `נשלטו <b>${known}</b> מתוך <b>${pool.length}</b> · בתור: ${queue.length}`;
+      const d = shinunProg.read();
+      let nw = 0, learning = 0, known = 0;
+      all0.forEach((it) => {
+        const seen = shinunProg.seen(it.key, d), b = shinunProg.box(it.key, d);
+        if (!seen) nw++; else if (b >= 3) known++; else learning++;
+      });
+      bar.innerHTML = `חדשים <b>${nw}</b> · בלמידה <b>${learning}</b> · נשלטו <b>${known}</b> · בתור: ${queue.length}`;
+    }
+    /* חגיגה חד-פעמית כשקבוצה שלמה נשלטה — זה ה„השלמתי נושא”. */
+    function checkCeleb(it) {
+      const d = shinunProg.read();
+      const gitems = all.filter((x) => x.group === it.group);
+      const full = gitems.every((x) => shinunProg.box(x.key, d) >= 3);
+      const ck = deck.id + '#' + it.group;
+      if (full && !shinunCeleb.has(ck)) {
+        shinunCeleb.add(ck);
+        celebBox.innerHTML = '';
+        celebBox.append(el('div', 'shn-celeb-in', `🎉 שלטת בכל „${it.group}”! כל הכבוד.`));
+        try { blip('big'); } catch { /* אין סאונד — לא נורא */ }
+        setTimeout(() => { if (celebBox.firstChild) celebBox.innerHTML = ''; }, 4500);
+      } else if (!full) {
+        shinunCeleb.del(ck);   // ירד מתחת למלא (איפוס) — לאפשר חגיגה חוזרת בעתיד
+      }
     }
     function renderFace() {
       const it = queue[0];
@@ -1525,32 +1592,74 @@ async function renderShinun(courseId, topicFilter) {
         card.append(el('div', 'shn-flip-back', it.back));
         if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
       } else {
-        card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · קליק שוב מחזיר'));
+        card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · רווח / →ידעתי / ←עוד לא'));
       }
     }
-    function draw() {
-      counts();
-      if (!queue.length) {
-        card.innerHTML = ''; card.className = 'shn-flip';
-        card.append(el('div', 'shn-done', '🎉 סיימת את הסבב! כל הכבוד.'));
-        judge.style.display = 'none';
-        return;
+    function summary() {
+      judge.style.display = 'none';
+      card.innerHTML = ''; card.className = 'shn-flip is-summary';
+      const total = sess.right + sess.wrong, pct = total ? Math.round(sess.right / total * 100) : 0;
+      const box = el('div', 'shn-summary');
+      box.append(el('div', 'shn-done', total ? '🎉 סבב הושלם!' : '✓ הכול נשלט כרגע'));
+      box.append(el('div', 'shn-summary-line', total
+        ? `נשלטו ${sess.right} · לחזרה ${sess.wrong} · ${pct}% הצלחה`
+        : 'אין פריטים שממתינים לחזרה עכשיו. חזור מאוחר יותר, או „חזרה על הכל”.'));
+      card.append(box);
+      acts.innerHTML = '';
+      if (sess.wrongItems.length) {
+        const again = el('button', 'btn primary', '↻ עוד סבב על החלשים'); again.type = 'button';
+        again.onclick = () => {
+          const weak = sess.wrongItems.slice();
+          sess = { right: 0, wrong: 0, wrongItems: [] };
+          queue = shuffle(weak); acts.innerHTML = ''; acts.append(resetB);
+          judge.style.display = ''; flipped = false; renderFace(); counts();
+        };
+        acts.append(again);
       }
-      judge.style.display = '';
-      flipped = false;
-      renderFace();
+      const allBtn = el('button', 'btn', '🔁 חזרה על הכל'); allBtn.type = 'button';
+      allBtn.onclick = () => { reviewAll = true; sess = { right: 0, wrong: 0, wrongItems: [] }; restart(); };
+      acts.append(allBtn, resetB);
     }
-    card.onclick = () => { if (!queue.length) return; flipped = !flipped; renderFace(); };
-    no.addEventListener('click', () => {
+    function next() {
+      queue.shift();
+      if (!queue.length) { counts(); summary(); return; }
+      flipped = false; renderFace(); counts();
+    }
+    function rate(known) {
       const it = queue[0]; if (!it) return;
-      shinunProg.set(it.key, 0); queue.push(it); queue.shift(); draw();
+      const b = shinunProg.box(it.key);
+      if (known) { shinunProg.mark(it.key, Math.min(3, b + 1), Date.now()); sess.right++; }
+      else { shinunProg.mark(it.key, 0, Date.now()); sess.wrong++; sess.wrongItems.push(it); }
+      checkCeleb(it);
+      buildFilters();   // רענון מדי השליטה בצ׳יפים
+      next();
+    }
+    function restart() {
+      acts.innerHTML = ''; acts.append(resetB);
+      judge.style.display = ''; celebBox.innerHTML = '';
+      queue = buildQueue(); flipped = false; counts();
+      if (!queue.length) summary(); else renderFace();
+    }
+
+    card.onclick = () => { if (queue.length) { flipped = !flipped; renderFace(); } };
+    no.addEventListener('click', () => rate(false));
+    yes.addEventListener('click', () => rate(true));
+    resetB.addEventListener('click', () => {
+      all0.forEach((it) => shinunProg.reset(it.key));
+      reviewAll = false; sess = { right: 0, wrong: 0, wrongItems: [] };
+      buildFilters(); restart();
     });
-    yes.addEventListener('click', () => {
-      const it = queue[0]; if (!it) return;
-      shinunProg.set(it.key, Math.min(3, shinunProg.box(it.key) + 1)); queue.shift(); draw();
-    });
-    function flipMode2() { body.innerHTML = ''; flipMode(); }
-    draw();
+
+    keyHandler = (e) => {
+      if (!document.body.contains(card)) { document.removeEventListener('keydown', keyHandler); return; }
+      if (!queue.length || e.metaKey || e.ctrlKey) return;
+      if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); flipped = !flipped; renderFace(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); rate(true); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); rate(false); }
+    };
+    document.addEventListener('keydown', keyHandler);
+
+    restart();
   }
 
   /* ═════ מצב כסה־וגלה ═════ */

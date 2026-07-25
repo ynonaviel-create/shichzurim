@@ -1720,3 +1720,14 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .intro-x{ position:absolute; top:8px; inset-inline-start:12px; background:transparent; border:0;
   color:var(--dim); font-size:15px; cursor:pointer; line-height:1; padding:4px; border-radius:6px; }
 .intro-x:hover{ color:var(--text); background:var(--surface-2); }
+
+/* i❤️Shinun — שדרוגי חוכמה */
+.shn-chip.done{ background:var(--good-bg); border-color:var(--good); color:var(--good); }
+.shn-celeb{ min-height:0; }
+.shn-celeb-in{ background:var(--good-bg); border:1px solid var(--good); color:var(--good);
+  border-radius:12px; padding:11px 16px; margin-bottom:12px; font-weight:800; font-size:15px;
+  text-align:center; animation:shnpop .3s ease; }
+@keyframes shnpop{ from{ transform:scale(.96); opacity:0; } to{ transform:scale(1); opacity:1; } }
+.shn-flip.is-summary{ cursor:default; }
+.shn-summary{ text-align:center; }
+.shn-summary-line{ font-size:15px; color:var(--muted); margin-top:10px; line-height:1.6; }
