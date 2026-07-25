@@ -852,6 +852,11 @@ function renderHome() {
   const nextup = nextExamBanner();
   if (nextup) view.append(nextup);
 
+  /* מה חדש — מעל הפוש של השינון, כי הוא מכסה גם אותו (תיקון הסנכרון).
+     מתחת לספירה לאחור: המבחן הקרוב גובר על כל הודעה. */
+  const wn = whatsNewBanner();
+  if (wn) view.append(wn);
+
   const push = shinunHomePush();
   if (push) view.append(push);
 
@@ -3473,6 +3478,61 @@ function shinunHomePush() {
   x.setAttribute('aria-label', 'סגירה');
   x.onclick = (e) => { e.preventDefault(); e.stopPropagation(); try { localStorage.setItem('shichzurim.shinunHomePush', '1'); } catch {} b.remove(); };
   b.append(x);
+  return b;
+}
+
+/* ================= הכרזת החידושים =================
+
+   באנר חד-פעמי במסך הבית שמסביר מה חדש. אותה תבנית כמו shinunHomePush:
+   נסגר לתמיד בלחיצה, ולא חוזר.
+
+   ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
+   כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
+   לשמוע על פיצ׳ר ב׳. */
+const ANNOUNCE_V5_KEY = 'shichzurim.announce.v5';
+function whatsNewBanner() {
+  try { if (localStorage.getItem(ANNOUNCE_V5_KEY)) return null; } catch { return null; }
+
+  const b = el('div', 'intro whatsnew');
+  const txt = el('div');
+  txt.append(el('b', null, '✨ מה חדש באתר'));
+
+  const list = el('ul', 'whatsnew-list');
+  [
+    ['🪤', 'המלכודות',
+     'טעית? האתר מראה לך עכשיו את המלכודת שנפלת בה — התפיסה השגויה עצמה, לא רק התשובה הנכונה. ' +
+     'יש 341 מלכודות כאלה בארכיון, ולכל מקצוע יש דף „המלכודות שלי” שמקבץ אותן לפי הסיבה.'],
+    ['🔁', 'חזרה מרווחת',
+     'האתר זוכר מתי ענית ולא רק אם צדקת, ומחזיר לך שאלה כשהגיע הזמן לרענן אותה. ' +
+     'יש מצב תרגול חדש — „בשל לחזרה”.'],
+    ['🎯', '„הטעויות שלי” נהיה הוגן',
+     'עד היום תשובה נכונה אחת הורידה שאלה מהרשימה לתמיד. עכשיו צריך שתיים ברצף — ' +
+     'כי פעם אחת זה יכול להיות ניחוש, וזה בדיוק מה שגרם לשאלות לברוח בלי שידעת אותן.'],
+    /* בלי „ל-i❤️Shinun”: תחילית עברית שדבוקה לטקסט לטיני עוברת סידור דו-כיווני
+       ויוצאת הפוכה על המסך („Shinun-ל❤️i”). מנסחים סביב זה. */
+    ['☁️', 'תיקון סנכרון',
+     'היה באג שהשתיק את שמירת ההתקדמות בענן למי שנכנס למסך השינון. תוקן — ההתקדמות שלכם ' +
+     'שוב עוברת בין מכשירים. שווה להיכנס מהנייד ולוודא שהכול שם.'],
+  ].forEach(([ico, title, body]) => {
+    const li = el('li');
+    li.append(el('span', 'whatsnew-ico', ico));
+    const d = el('div');
+    d.append(el('b', null, title));
+    d.append(el('span', null, body));
+    li.append(d);
+    list.append(li);
+  });
+  txt.append(list);
+  b.append(txt);
+
+  const acts = el('div', 'btn-row');
+  const ok = el('button', 'btn primary', 'הבנתי, תודה 👍');
+  ok.onclick = () => {
+    try { localStorage.setItem(ANNOUNCE_V5_KEY, '1'); } catch {}
+    b.remove();
+  };
+  acts.append(ok);
+  b.append(acts);
   return b;
 }
 

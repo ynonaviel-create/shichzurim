@@ -1772,3 +1772,14 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   font-size:14px; line-height:1.8; color:var(--muted); max-width:70ch;
 }
 .trapcard-acts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
+
+/* ═══════════════ באנר "מה חדש" ═══════════════
+   יורש מ-.intro, אבל עם רשימה במקום שורה אחת: גל חידושים שלם לא נכנס
+   למשפט, ולהצטמצם למשפט אחד היה אומר שרוב מה שנבנה לא ייוודע. */
+.whatsnew{ align-items:flex-start; }
+.whatsnew > div:first-child{ flex:1 1 320px; }
+.whatsnew-list{ list-style:none; margin:12px 0 0; padding:0; display:grid; gap:13px; }
+.whatsnew-list li{ display:flex; gap:11px; align-items:flex-start; }
+.whatsnew-ico{ font-size:17px; line-height:1.5; flex:0 0 auto; }
+.whatsnew-list b{ font-size:14.5px; margin-bottom:2px; }
+.whatsnew-list span{ display:block; max-width:66ch; }
