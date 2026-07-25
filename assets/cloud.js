@@ -33,6 +33,9 @@
     caseProg:   'shichzurim.caseProg',
     shinunProg: 'shichzurim.shinunProg',
     seenH:      'shichzurim.seenH',
+    /* מרחב חדש. עד שמיגרציה 0004 תרוץ ה-check ידחה אותו — וזה בטוח: flush
+       מזהה דחייה קבועה וזורק את הפעולה במקום לחסום את התור (ראו 0003). */
+    flag:       'shichzurim.flag',
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 

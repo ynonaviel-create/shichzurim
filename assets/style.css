@@ -1783,3 +1783,52 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .whatsnew-ico{ font-size:17px; line-height:1.5; flex:0 0 auto; }
 .whatsnew-list b{ font-size:14.5px; margin-bottom:2px; }
 .whatsnew-list span{ display:block; max-width:66ch; }
+
+/* ═══════════════ כלי השאלה — סימון וקישור ═══════════════
+   פינה שקטה בראש כל שאלה. לא כפתורים בולטים: הם עוזרים למי שמחפש אותם
+   ולא אמורים להתחרות בשאלה עצמה. */
+.q-tools{ display:flex; gap:4px; margin-inline-start:auto; }
+.q-tool{
+  background:none; border:1px solid transparent; border-radius:8px;
+  font-size:15px; line-height:1; cursor:pointer; padding:5px 7px;
+  opacity:.45; transition:opacity .15s, background .15s, border-color .15s;
+}
+.q-tool:hover, .q-tool:focus-visible{ opacity:1; background:var(--surface-2); border-color:var(--line-soft); }
+.q-tool.on{ opacity:1; }
+
+/* ═══════════════ חיפוש גלובלי ═══════════════ */
+.srch-btn{
+  width:38px; height:38px; border-radius:11px; margin-inline-start:6px;
+  display:grid; place-items:center; cursor:pointer; padding:0;
+  background:transparent; border:1px solid var(--line);
+  color:var(--muted); line-height:0; transition:.16s;
+}
+.srch-btn:hover{ border-color:var(--accent); color:var(--accent); background:var(--accent-sl); }
+
+.srch{
+  position:fixed; inset:0; z-index:120;
+  background:color-mix(in srgb, #000 55%, transparent);
+  display:flex; justify-content:center; align-items:flex-start;
+  padding:10vh 16px 16px; overscroll-behavior:contain;
+}
+.srch-box{
+  width:min(680px, 100%); max-height:78vh; display:flex; flex-direction:column;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); box-shadow:0 24px 60px rgba(0,0,0,.35); overflow:hidden;
+}
+.srch-inp{
+  width:100%; padding:16px 20px; border:0; border-bottom:1px solid var(--line-soft);
+  background:transparent; color:var(--text); font:inherit; font-size:16px; font-weight:600;
+}
+.srch-inp:focus{ outline:none; }
+.srch-res{ overflow-y:auto; }
+.srch-hint{ padding:18px 20px; color:var(--dim); font-size:13.5px; }
+.srch-row{
+  display:flex; gap:11px; align-items:flex-start; padding:11px 20px;
+  text-decoration:none; color:inherit; border-bottom:1px solid var(--line-soft);
+}
+.srch-row:hover{ background:var(--surface-2); }
+.srch-ico{ font-size:15px; flex:0 0 auto; line-height:1.5; }
+.srch-txt{ min-width:0; }
+.srch-txt b{ display:block; font-size:14px; font-weight:700; line-height:1.5; }
+.srch-txt span{ display:block; font-size:12.5px; color:var(--dim); margin-top:2px; }

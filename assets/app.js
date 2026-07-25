@@ -51,6 +51,12 @@ const el = (tag, cls, txt) => {
    מתנהגת בדיוק כמו קודם. */
 const plural = (n, one, many, fem) => (n === 1 ? `${one} ${fem ? 'אחת' : 'אחד'}` : `${n} ${many}`);
 
+/* נרמול לחיפוש: מסיר ניקוד וגרשיים, כי אף אחד לא מקליד אותם. היה מקומי
+   לבורר התרגול; הועלה לכאן כדי שהחיפוש הגלובלי לא יהיה עותק חמישי של
+   נרמול עברית בקובץ (כבר יש norm ב-repeats.js, shinunNorm, ואחד ב-rulingA).
+   ⚠️ זה **לא** ה-norm שמייצר qid — אותו אסור לגעת, הוא מגבב את הארכיון. */
+const searchNorm = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
+
 /* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
    בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
    מחלקה כן נוצרת כ-button (ראו s.toggles) — הפער הזה הוא הסיבה שזה נשמט.
@@ -473,6 +479,28 @@ const seenH = {
   },
 };
 
+/* ---------- "לחזור לזה" ----------
+   סימון אישי לשאלה. מפה נפרדת ולא שדה בתוך seenH, ובכוונה: כלל המיזוג של
+   seenH הוא max(n) — מי שענה יותר מנצח — וסימון שנעשה במכשיר שלא ענה היה
+   נבלע. מרחב משלו מקבל כלל משלו: הפעולה האחרונה קובעת, כך שגם ביטול סימון
+   מתפשט (ולא רק סימון, כמו במפת ה"נראו").
+
+   ⚠️ מרחב flag ייכנס למסד רק כשמיגרציה 0004 תרוץ. עד אז Postgres דוחה,
+   וההקשחה של flush זורקת את הפעולה — הסימון נשאר מקומי ושום סנכרון אחר
+   לא נפגע. */
+const FLAG_KEY = 'shichzurim.flag';
+const flags = {
+  read() { try { return JSON.parse(localStorage.getItem(FLAG_KEY)) || {}; } catch { return {}; } },
+  write(d) { try { localStorage.setItem(FLAG_KEY, JSON.stringify(d)); } catch {} },
+  has(k) { return !!this.read()[k]; },
+  toggle(k) {
+    const d = this.read();
+    if (d[k]) { delete d[k]; this.write(d); window.Cloud?.queueDelete('flag', k); return false; }
+    d[k] = 1; this.write(d); window.Cloud?.queue('flag', k, 1);
+    return true;
+  },
+};
+
 /* ---------- נתונים ---------- */
 let COURSES = [];
 let EXAMS = [];
@@ -810,6 +838,8 @@ function router() {
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'traps' && param) return renderTraps(param);
+  if (route === 'q' && param) return renderOneQuestion(param);
+  if (route === 'flagged' && param) return renderFlagged(param);
   if (route === 'about') return renderAbout();
   return renderHome();
 }
@@ -1138,6 +1168,19 @@ function renderCourse(courseId) {
   rv.dataset.tour = 'review';
   rv.href = '#/review/' + courseId;
   lRow.append(rv);
+  /* המלכודות — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. בקליני ובביוכימיה
+     הדף היה מציג מצב ריק, וכפתור שמוביל לכלום גרוע מכפתור שאינו. */
+  if (guideOf(courseId)) {
+    const tr = el('a', 'btn', '🪤 המלכודות שלי');
+    tr.href = '#/traps/' + courseId;
+    lRow.append(tr);
+  }
+  /* המסומנות — רק אם יש מה להראות. */
+  if (Object.keys(flags.read()).length) {
+    const fg = el('a', 'btn', '🔖 מה שסימנתי');
+    fg.href = '#/flagged/' + courseId;
+    lRow.append(fg);
+  }
   hero.append(lRow);
   /* בנקי-תרגול ומקרים — כקישורים קומפקטיים בתוך הבאנר, לא כבלוקים נפרדים. */
   if (practiceExams.length || caseDecks.length) {
@@ -2452,6 +2495,40 @@ function playQuestions(cfg) {
     const top = el('div', 'q-top');
     top.append(el('span', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
 
+    /* "לחזור לזה" + קישור לשאלה בודדת. שניהם היו חסרים לגמרי: לא הייתה שום
+       דרך לסמן שאלה, ולא הייתה דרך לשתף אחת — רק מבחן שלם. האתר מתפשט
+       בקישורי וואטסאפ, אז "תראה את השאלה הזאת" הוא בדיוק מה שאנשים רוצים. */
+    if (item.qid) {
+      const tools = el('div', 'q-tools');
+
+      const fl = el('button', 'q-tool' + (flags.has(item.qid) ? ' on' : ''));
+      fl.type = 'button';
+      const paintFlag = () => {
+        const on = flags.has(item.qid);
+        fl.textContent = on ? '🔖' : '🏷️';
+        fl.classList.toggle('on', on);
+        fl.title = on ? 'מסומנת — לחץ להסרה' : 'לסמן: לחזור לזה';
+        fl.setAttribute('aria-label', fl.title);
+      };
+      paintFlag();
+      fl.onclick = () => { flags.toggle(item.qid); paintFlag(); };
+      tools.append(fl);
+
+      const lk = el('button', 'q-tool');
+      lk.type = 'button';
+      lk.textContent = '🔗';
+      lk.title = 'העתקת קישור לשאלה הזאת';
+      lk.setAttribute('aria-label', lk.title);
+      lk.onclick = async () => {
+        const url = location.origin + location.pathname + '#/q/' + item.qid;
+        try { await navigator.clipboard.writeText(url); lk.textContent = '✓'; }
+        catch { lk.textContent = '✗'; }
+        setTimeout(() => { lk.textContent = '🔗'; }, 1400);
+      };
+      tools.append(lk);
+      top.append(tools);
+    }
+
     const tags = el('div', 'q-tags');
 
     if (item.offSyllabus) tags.append(el('span', 'off-tag', '✦ מחוץ לחומר · לא נספר בציון'));
@@ -2848,7 +2925,7 @@ async function renderPractice(courseId, seedTopic = null) {
      כדי ש"טלומראז"/"הטלומראז" ו-"MDM2"/"mdm2" ייתפסו. מחפשים מחרוזת-משנה
      על גוף השאלה + המסיחים + הנושא + ההסבר, כי המונח עשוי להופיע רק שם.
      שדה החיפוש (_hay) מחושב פעם אחת לכל שאלה ונשמר. */
-  const normQ = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
+  const normQ = searchNorm;   // מועלה למודול כדי שהחיפוש הגלובלי ישתמש באותו נרמול
   const hay = (q) => (q._hay ??= normQ([q.q, ...(q.opts || []), q.topic, q.explain].filter(Boolean).join(' ')));
   const queryTerms = () => normQ(query).split(/\s+/).filter(Boolean);
   const matchesQuery = (q) => { const t = queryTerms(); return !t.length || t.every((w) => hay(q).includes(w)); };
@@ -3256,6 +3333,235 @@ async function renderReview(courseId) {
     note: 'תענה נכון פעמיים ברצף — והשאלה תרד מהרשימה. תטעה — היא מתאפסת. ' +
           'פעם אחת לא מספיקה: זה בדיוק מה שגרם לשאלות לברוח מהרשימה בלי שידעת אותן.',
     questions: wrong,
+    persist: false,
+    back: { text: c.name, href: '#/course/' + courseId },
+  });
+}
+
+/* ================= חיפוש גלובלי =================
+
+   עד היום היה חיפוש רק בתוך בריכת התרגול של מקצוע אחד — כלומר כדי למצוא
+   משהו היית צריך כבר לדעת באיזה מקצוע הוא. כאן מחפשים בכל הארכיון בבת אחת:
+   שאלות, נקודות מהמפה, כרטיסיות ופריטי שינון.
+
+   נבנה על דרישה (בפתיחה הראשונה) ולא באתחול: זה 1.6MB של JSON, ואין סיבה
+   לשלם עליו במכשיר של מי שלא יחפש. */
+let searchIdx = null;
+let searchBuilding = null;
+
+async function buildSearchIndex() {
+  if (searchIdx) return searchIdx;
+  if (searchBuilding) return searchBuilding;
+  searchBuilding = (async () => {
+    const rows = [];
+    for (const c of COURSES) {
+      const metas = EXAMS.filter((e) => e.course === c.id);
+      const loaded = await Promise.all(metas.map((m) =>
+        (m.kind === 'guide' ? loadGuide(c.id) : loadExam(m.id)).catch(() => null)));
+      metas.forEach((m, mi) => {
+        const d = loaded[mi];
+        if (!d) return;
+        if (m.kind === 'guide') {
+          (d.units || []).forEach((u) => {
+            (u.points || []).forEach((p) => rows.push({
+              kind: 'point', course: c, icon: '🎯',
+              title: u.topic, body: p.point,
+              href: `#/guide/${c.id}/${encodeURIComponent(u.topic)}`,
+              hay: searchNorm([u.topic, p.point, p.trap].filter(Boolean).join(' ')),
+            }));
+          });
+          return;
+        }
+        if (m.kind === 'cards') {
+          (d.cards || []).forEach((cd) => rows.push({
+            kind: 'card', course: c, icon: '📇',
+            title: cd.q, body: cd.short,
+            href: '#/cards/' + m.id,
+            hay: searchNorm([cd.q, cd.short, cd.deep, cd.topic].filter(Boolean).join(' ')),
+          }));
+          return;
+        }
+        if (m.kind === 'shinun') {
+          (d.groups || []).forEach((gr) => (gr.items || []).forEach((it) => rows.push({
+            kind: 'shinun', course: c, icon: '🧠',
+            title: it.front, body: it.back,
+            href: '#/shinun/' + c.id,
+            hay: searchNorm([it.front, it.back, it.topic].filter(Boolean).join(' ')),
+          })));
+          return;
+        }
+        if (m.kind === 'case') return;
+        /* שאלות. ה-HY מוחרג — הוא עותק, והיה מכפיל כל תוצאה. */
+        if (m.kind === 'highyield') return;
+        (d.questions || []).forEach((q, i) => rows.push({
+          kind: 'q', course: c, icon: '❓',
+          title: q.q, body: q.topic || d.title,
+          href: q.qid ? '#/q/' + q.qid : `#/exam/${m.id}/${i}`,
+          hay: searchNorm([q.q, ...(q.opts || []), q.topic, q.explain].filter(Boolean).join(' ')),
+        }));
+      });
+    }
+    searchIdx = rows;
+    searchBuilding = null;
+    return rows;
+  })();
+  return searchBuilding;
+}
+
+let searchOpen = false;
+function openSearch() {
+  if (searchOpen) return;
+  searchOpen = true;
+
+  const ov = el('div', 'srch');
+  const box = el('div', 'srch-box');
+  const inp = el('input', 'srch-inp');
+  inp.type = 'search';
+  inp.placeholder = 'חיפוש בכל הארכיון — שאלה, מושג, נושא…';
+  inp.setAttribute('aria-label', 'חיפוש בכל הארכיון');
+  box.append(inp);
+  const res = el('div', 'srch-res');
+  box.append(res);
+  ov.append(box);
+  document.body.append(ov);
+  inp.focus();
+
+  res.append(el('div', 'srch-hint', 'טוען את הארכיון…'));
+  let ready = false;
+  buildSearchIndex().then(() => { ready = true; run(); });
+
+  function run() {
+    const terms = searchNorm(inp.value).split(/\s+/).filter(Boolean);
+    res.innerHTML = '';
+    if (!ready) { res.append(el('div', 'srch-hint', 'טוען את הארכיון…')); return; }
+    if (!terms.length) {
+      res.append(el('div', 'srch-hint',
+        `${searchIdx.length} פריטים בארכיון — שאלות, נקודות מהמפה, כרטיסיות ושינון. הקלד כדי לחפש.`));
+      return;
+    }
+    const hits = searchIdx.filter((r) => terms.every((t) => r.hay.includes(t))).slice(0, 40);
+    if (!hits.length) { res.append(el('div', 'srch-hint', 'לא נמצא כלום.')); return; }
+    hits.forEach((r) => {
+      const a = el('a', 'srch-row');
+      a.href = r.href;
+      a.onclick = close;
+      a.append(el('span', 'srch-ico', r.icon));
+      const d = el('div', 'srch-txt');
+      d.append(el('b', null, String(r.title).slice(0, 110)));
+      d.append(el('span', null, `${r.course.icon || ''} ${r.course.name}${r.body ? ' · ' + String(r.body).slice(0, 80) : ''}`));
+      a.append(d);
+      res.append(a);
+    });
+    if (searchIdx.filter((r) => terms.every((t) => r.hay.includes(t))).length > 40) {
+      res.append(el('div', 'srch-hint', 'מוצגות 40 התוצאות הראשונות — צמצם את החיפוש.'));
+    }
+  }
+
+  let t = null;
+  inp.oninput = () => { clearTimeout(t); t = setTimeout(run, 120); };
+  ov.onclick = (e) => { if (e.target === ov) close(); };
+  function onKey(e) { if (e.key === 'Escape') close(); }
+  document.addEventListener('keydown', onKey);
+
+  function close() {
+    searchOpen = false;
+    document.removeEventListener('keydown', onKey);
+    ov.remove();
+  }
+}
+
+/* ================= שאלה בודדת =================
+   #/q/<qid> — הקישור שאפשר לשלוח בוואטסאפ. הארכיון מתפשט ככה ממילא, ועד
+   היום אפשר היה לקשר רק למבחן שלם ("תפתח את מועד א׳ ותגלול לשאלה 24").
+
+   סורק את כל הקורסים עד שנמצא ה-qid, כי הקישור לא נושא מקצוע — ומי ששולח
+   אותו לא אמור לדעת מה זה. הסריקה זולה: המניפסט כבר בזיכרון, והמבחנים
+   נטענים במקביל ובמטמון. */
+async function renderOneQuestion(qid) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>מחפש את השאלה…</b></div>';
+
+  let found = null;
+  for (const c of COURSES) {
+    const metas = quizzesOf(c.id);
+    const loaded = await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
+    metas.forEach((m, mi) => {
+      if (found || !loaded[mi]) return;
+      const i = (loaded[mi].questions || []).findIndex((q) => q.qid === qid);
+      if (i < 0) return;
+      found = { course: c, meta: m, exam: loaded[mi], idx: i };
+    });
+    if (found) break;
+  }
+
+  if (!found) {
+    view.innerHTML = '';
+    view.append(emptyState('🔍', 'לא מצאתי את השאלה',
+      'ייתכן שהיא הוסרה מהארכיון מאז ששותף הקישור, או שהקישור לא שלם.'));
+    toTop(); updateFooter();
+    return;
+  }
+
+  view.dataset.course = found.course.id;
+  await loadGuide(found.course.id).catch(() => null);   // בשביל המלכודת וכפתור "איפה ללמוד"
+  const q = found.exam.questions[found.idx];
+
+  playQuestions({
+    key: 'one',
+    title: 'שאלה מהארכיון',
+    subtitle: `${found.course.name} · ${found.exam.title} · שאלה ${found.idx + 1}`,
+    note: 'שאלה בודדת ששותפה בקישור. התשובה נספרת בהתקדמות שלך כרגיל.',
+    questions: [{ ...q, origin: found.exam.title, examId: found.meta.id, idx: found.idx }],
+    persist: false,
+    back: { text: found.course.name, href: '#/course/' + found.course.id },
+  });
+}
+
+/* ================= מה שסימנתי ================= */
+async function renderFlagged(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  if (!c) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop(); return;
+  }
+  view.dataset.course = courseId;
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>אוסף את המסומנות…</b></div>';
+  await loadGuide(courseId).catch(() => null);
+
+  const metas = quizzesOf(courseId);
+  const loaded = await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
+  const f = flags.read();
+  const picked = [];
+  const shown = new Set();
+  metas.forEach((m, mi) => {
+    if (!loaded[mi]) return;
+    (loaded[mi].questions || []).forEach((q, i) => {
+      if (!q.qid || !f[q.qid] || shown.has(q.qid)) return;
+      shown.add(q.qid);
+      picked.push({ ...q, origin: loaded[mi].title, examId: m.id, idx: i });
+    });
+  });
+
+  view.innerHTML = '';
+  if (!picked.length) {
+    view.append(crumb(c.name, '#/course/' + courseId));
+    const head = el('div', 'page-head');
+    head.append(el('h1', null, `מה שסימנתי — ${c.name}`));
+    view.append(head);
+    view.append(emptyState('🏷️', 'עוד לא סימנת שאלות',
+      'בכל שאלה יש כפתור 🏷️ בפינה. סימון שם אותה כאן, כדי שתוכל לחזור אליה בלי לחפש.'));
+    toTop(); updateFooter();
+    return;
+  }
+
+  playQuestions({
+    key: 'flagged',
+    title: `מה שסימנתי — ${c.name}`,
+    subtitle: `${plural(picked.length, 'שאלה מסומנת', 'שאלות מסומנות', true)}`,
+    note: 'להסרת סימון — לחץ על 🔖 בפינת השאלה.',
+    questions: picked,
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
   });
@@ -6685,6 +6991,13 @@ function updateFooter() {
 }
 
 /* ---------- מקשי קיצור: 1-9 ---------- */
+/* חיפוש: "/" כמו בגיטהאב, ו-⌘K/Ctrl+K כמו בכל מקום אחר. */
+document.addEventListener('keydown', (e) => {
+  const typing = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); return; }
+  if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey) { e.preventDefault(); openSearch(); }
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return;
   const n = parseInt(e.key, 10);
@@ -6696,6 +7009,8 @@ document.addEventListener('keydown', (e) => {
   });
   target?.querySelectorAll('.opt')[n - 1]?.click();
 });
+
+document.getElementById('searchBtn')?.addEventListener('click', openSearch);
 
 /* ---------- הפעלה ---------- */
 window.addEventListener('hashchange', router);
