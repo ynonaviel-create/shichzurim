@@ -1007,12 +1007,14 @@ function renderCourse(courseId) {
   }
 
   /* 3) ללמוד — מפה + סיכום + כרטיסים, כקלפים ברורים (לא באנרים ענקיים). */
-  const learnCard = (ico, ttl, sub, href) => {
+  const learnCard = (ico, ttl, sub, href, badge) => {
     const a = el('a', 'learn-card');
     a.href = href;
     a.append(el('span', 'learn-card-ico', ico));
     const t = el('div');
-    t.append(el('div', 'learn-card-ttl', ttl));
+    const ttlRow = el('div', 'learn-card-ttl', ttl);
+    if (badge) ttlRow.append(el('span', 'learn-card-badge', badge));
+    t.append(ttlRow);
     if (sub) t.append(el('div', 'learn-card-sub', sub));
     a.append(t);
     return a;
@@ -1025,7 +1027,7 @@ function renderCourse(courseId) {
     lg.append(gcard);
   }
   cardDecks.forEach((d) => lg.append(learnCard('🎓', d.title, plural(d.count, 'כרטיסייה', 'כרטיסיות'), '#/cards/' + d.id)));
-  if (shinunDeck) lg.append(learnCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה`, '#/shinun/' + courseId));
+  if (shinunDeck) lg.append(learnCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה`, '#/shinun/' + courseId, '✨ חדש'));
   if (lg.children.length) {
     addChip('sec-learn', '📖 ללמוד');
     const sec = el('section', 'verb-zone');
@@ -1415,6 +1417,21 @@ async function renderShinun(courseId, topicFilter) {
     const d = el('div', 'cards-note');
     d.innerHTML = '📝 <b>טיוטה</b> — התוכן נשאב מהמילון, הנוסחאות והכרטיסיות; טרם עבר ליטוש והעשרה.';
     view.append(d);
+  }
+
+  /* פוש חד-פעמי למי שנכנס לאופציה החדשה — מסביר את שלושת המצבים, ואז נעלם. */
+  const INTRO_KEY = 'shichzurim.shinunIntro';
+  if (!localStorage.getItem(INTRO_KEY)) {
+    const intro = el('div', 'intro shn-intro');
+    const txt = el('div');
+    txt.append(el('b', null, '🧠 חדש: i❤️Shinun — לדעת בעל־פה'));
+    txt.append(el('span', null, 'כאן משננים את העובדות היבשות שאי אפשר להסיק — חלבונים, רעלנים, בופרים. ' +
+      'שלושה מצבים: 🎴 היפוך (ידעתי/לא), 📋 כסה־וגלה לחזרה מהירה, ו-📝 מבחן קצר.'));
+    intro.append(txt);
+    const close = el('button', 'btn ghost', 'הבנתי, בואו נתחיל');
+    close.onclick = () => { localStorage.setItem(INTRO_KEY, '1'); intro.remove(); };
+    const acts = el('div', 'btn-row'); acts.append(close); intro.append(acts);
+    view.append(intro);
   }
 
   /* מצב פעיל + מסנן קבוצה. topicFilter (מקישור מהסיכום) מצמצם התחלתית. */
@@ -2933,7 +2950,7 @@ function renderAbout() {
   localStorage.setItem(SEEN_KEY, '1');
 
   const head = el('div', 'page-head');
-  head.append(el('h1', null, 'מה זה המקום הזה?'));
+  head.append(el('h1', null, 'איך זה עובד'));
   head.append(el('p', null, 'דקה של קריאה, ואז אתה יודע להשתמש בכל מה שיש כאן.'));
   view.append(head);
 
@@ -2978,6 +2995,11 @@ function renderAbout() {
       body: 'לכל מקצוע יש מפת חומרים וסיכומים. במפה אפשר לסדר את הנושאים בשתי דרכים: לפי סדר הלימוד ' +
             '(כמו שלימדו, החומר בנוי אחד על השני) או לפי נפח במבחן (הכי נשאל קודם). כל נושא מקשר ישר ' +
             'לתרגול עליו.' },
+    { icon: '🧠', title: 'i❤️Shinun — לדעת בעל־פה',
+      body: 'המקום לשנן את העובדות היבשות שאי אפשר להסיק, רק לזכור: שמות חלבונים ותפקידם, תרופות ומנגנון, ' +
+            'זוגות בופרים, יחסים וקיצורים. מרוכז — לא הכול, רק ה"פשוט והדחוס". שלושה מצבים: 🎴 כרטיס־היפוך ' +
+            '(רואים רמז, מנחשים, מגלים, ומסמנים ידעתי/לא — מה שלא ידעת חוזר), 📋 רשימת כסה־וגלה לחזרה מהירה ' +
+            'ולהדפסה, ו-📝 מבחן קצר שהמסיחים בו תמיד מאותה משפחה (כמו AMPA מול NMDA) כדי שיהיה אתגר אמיתי.' },
     { icon: '📊', title: 'פילוח לפי נושא',
       body: 'בסוף מבחן שהשאלות בו מתויגות, מופיעה טבלה שממיינת את הנושאים מהחלש לחזק. ' +
             'במקום "קיבלת 62%", אתה רואה בדיוק במה לפתוח כשאתה חוזר.' },
@@ -3068,7 +3090,7 @@ function renderLogin() {
     'שלך נשמרת בחשבון וממשיכה מכל מכשיר: טלפון, מחשב, ספרייה.'));
   wrap.append(googleLoginBtn('התחברות עם Google'));
 
-  const about = el('a', 'login-about', 'מה זה האתר הזה? →');
+  const about = el('a', 'login-about', 'איך זה עובד? →');
   about.href = '#/about';
   wrap.append(about);
 
@@ -3626,7 +3648,7 @@ function tourSteps() {
       body: 'הכפתור מחליף ערכת נושא. ללילה לפני מבחן — כהה, שהמסך לא יסנוור.' },
     { route: '#/', center: true,
       title: '✅ זהו, אתה מוכן!',
-      body: 'רוצה לראות את הסיור שוב? הוא תמיד מחכה בעמוד "מה זה?". בהצלחה במבחנים! 🚀' },
+      body: 'רוצה לראות את הסיור שוב? הוא תמיד מחכה בעמוד "איך זה עובד". בהצלחה במבחנים! 🚀' },
   );
 
   return steps;
