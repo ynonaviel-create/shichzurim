@@ -1639,3 +1639,74 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .name-prompt .btn-row{ align-items:center; }
 .account-name{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:2px; }
 .account-name label{ font-size:13.5px; font-weight:700; color:var(--muted); }
+
+/* ═══════════ i❤️Shinun — מסך שינון בעל־פה ═══════════ */
+.shn-tabs{display:flex; gap:8px; margin:8px 0 16px; flex-wrap:wrap;}
+.shn-tab{padding:9px 18px; border-radius:99px; border:1px solid var(--line); background:var(--surface);
+  color:var(--muted); font-weight:800; font-size:14.5px; cursor:pointer; transition:.15s;}
+.shn-tab:hover{color:var(--text); border-color:var(--accent);}
+.shn-tab.on{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
+.shn-filters{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px; align-items:center;}
+.shn-chip{padding:5px 13px; border-radius:99px; border:1px solid var(--line); background:transparent;
+  color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer;}
+.shn-chip:hover{border-color:var(--accent); color:var(--accent);}
+.shn-chip.on{background:var(--accent-sl); border-color:var(--accent); color:var(--accent-dk);}
+.shn-topic{font-size:12.5px; font-weight:800; color:var(--accent-dk); background:var(--accent-sl);
+  border:1px solid var(--accent); border-radius:99px; padding:5px 13px; cursor:pointer;}
+
+.shn-scorebar,.shn-listbar{font-size:14px; color:var(--muted); margin-bottom:12px;}
+.shn-scorebar b{color:var(--accent-dk); font-weight:900;}
+.shn-listbar{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+
+/* ── היפוך ── */
+.shn-flip{border:1.5px solid var(--line); border-radius:var(--radius); background:var(--surface);
+  box-shadow:var(--shadow); padding:30px 26px; min-height:200px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; cursor:pointer; transition:.15s;}
+.shn-flip:hover:not(.is-open){border-color:var(--accent);}
+.shn-flip.is-open{cursor:default; align-items:stretch;}
+.shn-flip-grp{font-size:12px; font-weight:800; letter-spacing:.03em; color:var(--dim); margin-bottom:14px; text-align:center;}
+.shn-flip-front{font-size:26px; font-weight:800; color:var(--text); line-height:1.35;}
+.shn-flip-hint{font-size:12.5px; color:var(--dim); margin-top:16px;}
+.shn-flip-back{font-size:19px; line-height:1.6; color:var(--accent-dk); font-weight:700;
+  border-top:1px solid var(--line); margin-top:18px; padding-top:18px; text-align:center;}
+.shn-mnem{font-size:14px; color:var(--warn); background:var(--warn-bg); border:1px solid var(--warn-ln);
+  border-radius:10px; padding:8px 12px; margin-top:14px; line-height:1.5; text-align:center;}
+.shn-judge{display:flex; gap:12px; margin-top:22px;}
+.shn-judge .btn{flex:1; justify-content:center; font-size:15px; font-weight:800;}
+.shn-yes{background:var(--good-bg)!important; border-color:var(--good)!important; color:var(--good)!important;}
+.shn-no{background:var(--bad-bg)!important; border-color:var(--bad)!important; color:var(--bad)!important;}
+.shn-done{font-size:20px; font-weight:800; color:var(--good); text-align:center;}
+
+/* ── כסה־וגלה ── */
+.shn-grp-h{font-size:15px; color:var(--accent-dk); margin:20px 0 8px; padding-bottom:5px;
+  border-bottom:1.5px solid var(--line);}
+.shn-row{display:flex; gap:14px; align-items:flex-start; padding:11px 14px; border:1px solid var(--line-soft);
+  border-radius:10px; margin-bottom:7px; cursor:pointer; background:var(--surface); transition:.12s;}
+.shn-row:hover{border-color:var(--accent);}
+.shn-row-f{flex:0 0 42%; font-weight:800; color:var(--text); font-size:15px; line-height:1.5;}
+.shn-row-b{flex:1; position:relative; min-height:1.4em;}
+.shn-row-b::before{content:"לחץ לחשיפה"; position:absolute; inset:0; display:flex; align-items:center;
+  font-size:12.5px; color:var(--dim); background:var(--surface-2); border-radius:6px; padding:0 10px;
+  transition:opacity .12s;}
+.shn-row.open .shn-row-b::before{opacity:0; pointer-events:none;}
+.shn-row-btext{font-size:14.5px; line-height:1.6; color:var(--muted); opacity:0; transition:opacity .12s;}
+.shn-row.open .shn-row-btext{opacity:1;}
+.shn-row-mnem{opacity:0; transition:opacity .12s; color:var(--warn); font-size:13px;}
+.shn-row.open .shn-row-mnem{opacity:1;}
+@media (max-width:560px){.shn-row-f{flex-basis:100%;} .shn-row{flex-direction:column; gap:6px;}}
+
+/* ── מבחן ── */
+.shn-quiz{border:1.5px solid var(--line); border-radius:var(--radius); background:var(--surface);
+  box-shadow:var(--shadow); padding:24px 22px;}
+.shn-q{font-size:22px; font-weight:800; color:var(--text); line-height:1.4; margin:6px 0 20px;}
+.shn-opts{display:flex; flex-direction:column; gap:10px;}
+.shn-opt{text-align:start; padding:13px 16px; border:1.5px solid var(--line); border-radius:11px;
+  background:var(--surface); color:var(--text); font-size:15.5px; font-weight:600; cursor:pointer; transition:.12s;}
+.shn-opt:hover:not(.locked){border-color:var(--accent); background:var(--accent-sl);}
+.shn-opt.locked{cursor:default;}
+.shn-opt.right{border-color:var(--good); background:var(--good-bg); color:var(--good); font-weight:800;}
+.shn-opt.wrong{border-color:var(--bad); background:var(--bad-bg); color:var(--bad); font-weight:800;}
+
+@media print{.shn-tabs,.shn-filters,.shn-listbar,.shn-scorebar,.shn-judge{display:none!important;}
+  .shn-row-b::before{display:none!important;} .shn-row-btext,.shn-row-mnem{opacity:1!important;}
+  .shn-row{break-inside:avoid;}}

@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-24",
-  "version": "65690a84",
+  "updated": "2026-07-25",
+  "version": "e49d9c02",
   "assets": {
     "tokens": "3e9add29",
     "components": "481de6a8",
-    "css": "3e4d1be3",
-    "js": "45129eb4",
+    "css": "f34d4a64",
+    "js": "d7eea4e8",
     "cloud": "187f8372"
   },
   "courses": [
@@ -791,7 +791,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-24",
+      "added": "2026-07-25",
       "official": null,
       "trust": null,
       "heroSub": null,
@@ -867,6 +867,23 @@
       "count": 51
     },
     {
+      "id": "electro-shinun",
+      "file": "electro-shinun.json",
+      "course": "electro",
+      "part": null,
+      "title": "i❤️Shinun — מה שצריך בעל־פה",
+      "kind": "shinun",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-25",
+      "official": null,
+      "trust": null,
+      "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, תרופות, בופרים, יחסים ונוסחאות. מרוכז — לחזרה אחרונה ולבדיקה עצמית.",
+      "heroEyebrow": null,
+      "count": 96
+    },
+    {
       "id": "molecular-cox-cards",
       "file": "molecular-cox-cards.json",
       "course": "molecular",
@@ -910,7 +927,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-24",
+      "added": "2026-07-25",
       "official": null,
       "trust": null,
       "heroSub": null,

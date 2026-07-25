@@ -19,7 +19,7 @@ const THEME_KEY = 'shichzurim.theme';
    שהסנכרון הוכח יציב על משתמשים אמיתיים הופכים את זה ל-true. קומיט של שורה
    אחת, בבוקר שקט, לא בערב מבחן. כיבוי חזרה = אותה שורה. */
 const REQUIRE_LOGIN = true;
-const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים', case: 'מקרה מתגלגל' };
+const KIND_LABEL = { shichzur: 'שחזור', practice: 'תרגול', highyield: 'High Yield', cards: 'מהמרצה', guide: 'מפת חומרים', case: 'מקרה מתגלגל', shinun: 'שננת' };
 /* סטטוס אבחנה בלוח המבדלת של מקרה מתגלגל. הסדר כאן הוא סדר ההצגה. */
 const DDX_UI = {
   open:      { icon: '⬜', label: 'פתוח' },
@@ -494,7 +494,7 @@ const examsOf = (courseId) =>
   );
 /* רק מה שבאמת מבחן. כרטיסיות קריאה ומפת החומרים אין להן opts/a — הן לא נספרות
    בציון ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
-const NOT_QUIZ = new Set(['cards', 'guide', 'case']);
+const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
 const quizzesOf = (courseId) => examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind));
 
 /* ---------- ספירה לאחור למבחנים ---------- */
@@ -646,6 +646,8 @@ function router() {
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'cards' && param) return renderCards(param);
+  // #/shinun/<course>?topic=<נושא> — מסך השינון, אופציונלית מסונן לנושא
+  if (route === 'shinun' && param) return renderShinun(param, sub ? decodeURIComponent(sub) : null);
   // #/case/<id>/<caseId> — קופץ ישר למקרה מסוים בתוך הדק
   if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
@@ -773,7 +775,7 @@ function courseVerbs(c) {
   const out = [];
   if (has('shichzur')) out.push('שחזורים');
   if (has('practice') || has('highyield') || has('case') || simsOf(c.id).length) out.push('תרגול');
-  if (has('guide') || has('cards') || c.studyDoc) out.push('ללמוד');
+  if (has('guide') || has('cards') || has('shinun') || c.studyDoc) out.push('ללמוד');
   return out;
 }
 
@@ -948,6 +950,7 @@ function renderCourse(courseId) {
   const testExams = list.filter((e) => e.kind === 'shichzur');
   const caseDecks = list.filter((e) => e.kind === 'case');
   const cardDecks = list.filter((e) => e.kind === 'cards');
+  const shinunDeck = list.find((e) => e.kind === 'shinun');
   const hasGuide = list.some((e) => e.kind === 'guide');
 
   /* צ'יפי הניווט — גלילה חלקה לסקשן (עוגן, לא מסנן). */
@@ -1022,6 +1025,7 @@ function renderCourse(courseId) {
     lg.append(gcard);
   }
   cardDecks.forEach((d) => lg.append(learnCard('🎓', d.title, plural(d.count, 'כרטיסייה', 'כרטיסיות'), '#/cards/' + d.id)));
+  if (shinunDeck) lg.append(learnCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה`, '#/shinun/' + courseId));
   if (lg.children.length) {
     addChip('sec-learn', '📖 ללמוד');
     const sec = el('section', 'verb-zone');
@@ -1250,6 +1254,26 @@ const cardsRead = {
   },
 };
 
+/* התקדמות השננת — לייטנר פשוט. הערך הוא box (0=חדש/נכשל … 3=נשלט), ממופתח
+   לפי מפתח יציב `${deckId}#${מפתח-הפריט}` ולא לפי מיקום, כדי ששינוי סדר או
+   הוספת פריט לא יזיזו התקדמות קיימת. נשמר בענן כמו cardsRead. */
+const SHINUN_KEY = 'shichzurim.shinunProg';
+const shinunProg = {
+  read() { try { return JSON.parse(localStorage.getItem(SHINUN_KEY)) || {}; } catch { return {}; } },
+  write(d) { localStorage.setItem(SHINUN_KEY, JSON.stringify(d)); },
+  box(key) { return this.read()[key] || 0; },
+  set(key, box) {
+    const d = this.read();
+    if (box > 0) d[key] = box; else delete d[key];
+    this.write(d);
+    if (box > 0) window.Cloud?.queue('shinunProg', key, box); else window.Cloud?.queueDelete('shinunProg', key);
+  },
+  clear(id) {
+    const d = this.read(); Object.keys(d).forEach((k) => k.startsWith(id + '#') && delete d[k]); this.write(d);
+    window.Cloud?.queueClearPrefix('shinunProg', id + '#');
+  },
+};
+
 async function renderCards(id) {
   setNav('home');
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
@@ -1343,6 +1367,245 @@ async function renderCards(id) {
 
   paint();
   toTop();
+  updateFooter();
+}
+
+/* ================= שננת — שינון בעל־פה =================
+   מסך אחד, שלושה מצבים: 🎴 היפוך (לייטנר) · 📋 כסה־וגלה · 📝 מבחן.
+   התוכן מונע־דאטה (kind:'shinun', groups[].items[]). המסיחים במצב המבחן
+   נשלפים רק מאותה `family` — תשובות בנות־בלבול — ופריט בלי משפחה מספקת
+   פשוט לא נכלל במבחן, כדי לא לזייף אתגר. */
+const shinunNorm = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`\s]/g, '').toLowerCase();
+
+async function renderShinun(courseId, topicFilter) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+  /* הראוט הוא #/shinun/<course> — מאתרים את חפיסת השננת של הקורס (אחת לקורס). */
+  const meta = EXAMS.find((e) => e.course === courseId && e.kind === 'shinun');
+  if (!meta) { view.innerHTML = ''; view.append(emptyState('🤷', 'אין שננת למקצוע הזה', 'עדיין לא נבנתה.')); return; }
+  const id = meta.id;
+  let deck;
+  try { deck = await loadExam(id); }
+  catch (err) { view.innerHTML = ''; view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err.message))); return; }
+
+  const c = courseOf(deck.course);
+  if (deck.course) view.dataset.course = deck.course;
+
+  /* השטחה: כל פריט נושא את הקבוצה שלו ומפתח יציב לפי front. */
+  const all = [];
+  (deck.groups || []).forEach((g) => (g.items || []).forEach((it) => {
+    if (!it.front || !it.back) return;
+    all.push({ ...it, group: g.label, key: id + '#' + shinunNorm(it.front) });
+  }));
+  const groupLabels = [...new Set(all.map((it) => it.group))];
+  const topics = [...new Set(all.map((it) => it.topic).filter(Boolean))];
+
+  /* משפחות למסיחים. פריט "כשיר למבחן" = יש לו family עם לפחות 2 חברים
+     (כדי שיהיה לפחות מסיח אחד); עדיף 4. */
+  const fam = {};
+  all.forEach((it) => { if (it.family) (fam[it.family] ||= []).push(it); });
+
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '🧠 ' + (deck.title || 'i❤️Shinun')));
+  if (deck.heroSub) head.append(el('p', null, deck.heroSub));
+  view.append(head);
+  if (deck.draft) {
+    const d = el('div', 'cards-note');
+    d.innerHTML = '📝 <b>טיוטה</b> — התוכן נשאב מהמילון, הנוסחאות והכרטיסיות; טרם עבר ליטוש והעשרה.';
+    view.append(d);
+  }
+
+  /* מצב פעיל + מסנן קבוצה. topicFilter (מקישור מהסיכום) מצמצם התחלתית. */
+  const state = { mode: 'flip', group: 'all', topic: topicFilter || null };
+  const filtered = () => all.filter((it) =>
+    (state.group === 'all' || it.group === state.group) &&
+    (!state.topic || it.topic === state.topic));
+
+  /* ---- סרגל מצבים ---- */
+  const tabs = el('div', 'shn-tabs');
+  const MODES = [['flip', '🎴 היפוך'], ['list', '📋 כסה־וגלה'], ['quiz', '📝 מבחן']];
+  const tabBtns = {};
+  MODES.forEach(([m, label]) => {
+    const b = el('button', 'shn-tab', label); b.type = 'button';
+    b.addEventListener('click', () => { state.mode = m; sync(); });
+    tabBtns[m] = b; tabs.append(b);
+  });
+  view.append(tabs);
+
+  /* ---- מסנני קבוצה + נושא ---- */
+  const filters = el('div', 'shn-filters');
+  const mkChip = (label, active, on) => {
+    const b = el('button', 'shn-chip' + (active ? ' on' : ''), label); b.type = 'button';
+    b.addEventListener('click', on); return b;
+  };
+  const buildFilters = () => {
+    filters.innerHTML = '';
+    filters.append(mkChip('הכל', state.group === 'all', () => { state.group = 'all'; sync(); }));
+    groupLabels.forEach((g) => filters.append(mkChip(g, state.group === g, () => { state.group = g; sync(); })));
+    if (state.topic) {
+      const t = el('span', 'shn-topic', '🎯 ' + state.topic + ' ✕');
+      t.addEventListener('click', () => { state.topic = null; sync(); });
+      filters.append(t);
+    }
+  };
+  view.append(filters);
+
+  const body = el('div', 'shn-body');
+  view.append(body);
+
+  function sync() {
+    MODES.forEach(([m]) => tabBtns[m].classList.toggle('on', state.mode === m));
+    buildFilters();
+    body.innerHTML = '';
+    if (state.mode === 'flip') flipMode();
+    else if (state.mode === 'list') listMode();
+    else quizMode();
+    toTop();
+  }
+
+  /* ═════ מצב היפוך (לייטנר) ═════ */
+  function flipMode() {
+    let pool = filtered();
+    if (!pool.length) { body.append(emptyState('🤷', 'אין פריטים', 'נסה מסנן אחר.')); return; }
+    /* משוקלל לכיוון תיבות נמוכות: כל פריט חוזר (4 − box) פעמים בבריכה. */
+    const weighted = [];
+    pool.forEach((it) => { const w = 4 - shinunProg.box(it.key); for (let k = 0; k < w; k++) weighted.push(it); });
+    let queue = shuffle(weighted.slice());
+
+    const bar = el('div', 'shn-scorebar');
+    body.append(bar);
+    const card = el('div', 'shn-flip'); body.append(card);
+    const acts = el('div', 'btn-row');
+    const resetB = el('button', 'btn ghost', '↻ אפס התקדמות בקבוצה'); resetB.type = 'button';
+    resetB.addEventListener('click', () => {
+      pool.forEach((it) => shinunProg.set(it.key, 0)); flipMode2();
+    });
+    acts.append(resetB); body.append(acts);
+
+    function counts() {
+      const known = pool.filter((it) => shinunProg.box(it.key) >= 3).length;
+      bar.innerHTML = `נשלטו <b>${known}</b> מתוך <b>${pool.length}</b> · בתור: ${queue.length}`;
+    }
+    function draw() {
+      counts();
+      if (!queue.length) {
+        card.innerHTML = '';
+        card.append(el('div', 'shn-done', '🎉 סיימת את הסבב! כל הכבוד.'));
+        return;
+      }
+      const it = queue[0];
+      card.innerHTML = '';
+      card.className = 'shn-flip';
+      const grp = el('div', 'shn-flip-grp', it.group + (it.topic ? ' · ' + it.topic : ''));
+      const front = el('div', 'shn-flip-front', it.front);
+      const hint = el('div', 'shn-flip-hint', 'קליק כדי לחשוף');
+      card.append(grp, front, hint);
+      card.onclick = () => reveal(it);
+    }
+    function reveal(it) {
+      card.onclick = null;
+      card.classList.add('is-open');
+      const back = el('div', 'shn-flip-back', it.back);
+      card.append(back);
+      if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
+      const judge = el('div', 'shn-judge');
+      const no = el('button', 'btn shn-no', '✗ עוד לא'); no.type = 'button';
+      const yes = el('button', 'btn shn-yes', '✓ ידעתי'); yes.type = 'button';
+      no.addEventListener('click', () => { shinunProg.set(it.key, 0); queue.push(it); queue.shift(); draw(); });
+      yes.addEventListener('click', () => { shinunProg.set(it.key, Math.min(3, shinunProg.box(it.key) + 1)); queue.shift(); draw(); });
+      judge.append(no, yes); card.append(judge);
+    }
+    function flipMode2() { body.innerHTML = ''; flipMode(); }
+    draw();
+    /* מקלדת: רווח=חשוף, →=ידעתי, ←=לא */
+  }
+
+  /* ═════ מצב כסה־וגלה ═════ */
+  function listMode() {
+    const pool = filtered();
+    if (!pool.length) { body.append(emptyState('🤷', 'אין פריטים', 'נסה מסנן אחר.')); return; }
+    const bar = el('div', 'shn-listbar');
+    const revealAll = el('button', 'btn btn-sm', '👁️ גלה הכל'); revealAll.type = 'button';
+    let open = false;
+    revealAll.addEventListener('click', () => {
+      open = !open;
+      body.querySelectorAll('.shn-row').forEach((r) => r.classList.toggle('open', open));
+      revealAll.textContent = open ? '🙈 הסתר הכל' : '👁️ גלה הכל';
+    });
+    bar.append(el('span', null, `${pool.length} פריטים`), revealAll);
+    body.append(bar);
+
+    const byGroup = {};
+    pool.forEach((it) => (byGroup[it.group] ||= []).push(it));
+    Object.keys(byGroup).forEach((g) => {
+      body.append(el('h3', 'shn-grp-h', g));
+      byGroup[g].forEach((it) => {
+        const row = el('div', 'shn-row');
+        row.append(el('div', 'shn-row-f', it.front));
+        const b = el('div', 'shn-row-b');
+        b.append(el('span', 'shn-row-btext', it.back));
+        if (it.mnem) { const m = el('span', 'shn-row-mnem'); m.innerHTML = ' · 💡 ' + it.mnem; b.append(m); }
+        row.append(b);
+        row.addEventListener('click', () => row.classList.toggle('open'));
+        body.append(row);
+      });
+    });
+  }
+
+  /* ═════ מצב מבחן (MCQ, מסיחים מאותה משפחה) ═════ */
+  function quizMode() {
+    const pool = filtered().filter((it) => it.family && fam[it.family].length >= 2);
+    if (!pool.length) {
+      body.append(emptyState('🚫', 'אין פריטים כשירים למבחן כאן',
+        'מבחן דורש פריטים עם „משפחה” של תשובות בנות־בלבול. נסה קבוצה אחרת, או השתמש בהיפוך.'));
+      return;
+    }
+    let queue = shuffle(pool.slice());
+    const tally = { ok: 0, total: 0 };
+    const bar = el('div', 'shn-scorebar'); body.append(bar);
+    const qbox = el('div', 'shn-quiz'); body.append(qbox);
+    const acts = el('div', 'btn-row');
+    const next = el('button', 'btn primary', 'הבא ⟵'); next.type = 'button';
+    acts.append(next); body.append(acts);
+    next.addEventListener('click', draw);
+
+    function draw() {
+      if (!queue.length) queue = shuffle(pool.slice());
+      const it = queue.shift();
+      const distract = shuffle(fam[it.family].filter((o) => o.key !== it.key && o.back !== it.back))
+        .slice(0, 3).map((o) => o.back);
+      const opts = shuffle([it.back, ...distract]);
+      bar.innerHTML = tally.total ? `ציון: <b>${tally.ok}/${tally.total}</b>` : 'בחר את התשובה הנכונה';
+      qbox.innerHTML = '';
+      qbox.append(el('div', 'shn-flip-grp', it.family));
+      qbox.append(el('div', 'shn-q', it.front));
+      const list = el('div', 'shn-opts');
+      let done = false;
+      opts.forEach((o) => {
+        const b = el('button', 'shn-opt', o); b.type = 'button';
+        b.addEventListener('click', () => {
+          if (done) return; done = true;
+          tally.total++;
+          const correct = o === it.back;
+          if (correct) tally.ok++;
+          list.querySelectorAll('.shn-opt').forEach((x) => {
+            x.classList.add('locked');
+            if (x.textContent === it.back) x.classList.add('right');
+          });
+          if (!correct) b.classList.add('wrong');
+          if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; qbox.append(m); }
+          bar.innerHTML = `ציון: <b>${tally.ok}/${tally.total}</b>`;
+        });
+        list.append(b);
+      });
+      qbox.append(list);
+    }
+    draw();
+  }
+
+  sync();
   updateFooter();
 }
 

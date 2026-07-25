@@ -17,7 +17,7 @@ const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards / uni
 /* case = מקרה מתגלגל (לא מבחן): cases[] במקום questions[]. כל מקרה נפרש בשלבים
    (אנמנזה → בדיקה → בירור → אבחנה → טיפול), וכל שלב מעדכן לוח אבחנה מבדלת חי.
    זה הפורמט של המבחן עצמו בעימות קליני — שאלה בודדת לא מתרגלת רצף. */
-const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide', 'case'];
+const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide', 'case', 'shinun'];
 const DDX_STATUS = ['open', 'likely', 'unlikely', 'ruled_out', 'confirmed'];
 /* עד כמה ידוע מה המרצה שואל: known = הדליף/מסר גבולות גזרה (קוקס), unknown = לא ידוע,
    mixed = חלק מהנושא ידוע, new = נושא שעבר למרצה השנה ואין עליו היסטוריה.
@@ -25,7 +25,7 @@ const DDX_STATUS = ['open', 'likely', 'unlikely', 'ruled_out', 'confirmed'];
 const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
 /* מה שאינו מבחן — כרטיסיות, מפת חומרים ומקרים. הפריטים שלהם אינם שאלות, ולכן
    הם לא נספרים בסיכומי ה"שאלות" (כמו NOT_QUIZ ב-app.js). */
-const NOT_QUIZ = new Set(['cards', 'guide', 'case']);
+const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
 const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e) => a + e.count, 0);
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
@@ -85,10 +85,13 @@ for (const file of files) {
   const isCards = data.kind === 'cards';
   const isGuide = data.kind === 'guide';
   const isCase = data.kind === 'case';
-  const items = isCards ? data.cards : isGuide ? data.units : isCase ? data.cases : data.questions;
+  const isShinun = data.kind === 'shinun';
+  /* שננת: הפריטים מקובצים ל-groups[].items — משטחים לרשימה אחת לספירה ולוולידציה. */
+  const items = isCards ? data.cards : isGuide ? data.units : isCase ? data.cases
+    : isShinun ? (data.groups || []).flatMap((g) => g.items || []) : data.questions;
   if (!Array.isArray(items) || !items.length) {
     problems.push(
-      `${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : isCase ? 'אין מקרים' : 'אין שאלות'}`
+      `${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : isCase ? 'אין מקרים' : isShinun ? 'אין פריטי שינון' : 'אין שאלות'}`
     );
     continue;
   }
@@ -167,6 +170,17 @@ for (const file of files) {
         });
       });
     });
+  } else if (isShinun) {
+    if (!Array.isArray(data.groups) || !data.groups.length)
+      problems.push(`${file}: אין groups`);
+    (data.groups || []).forEach((g, gi) => {
+      if (!g.label) problems.push(`${file} · קבוצה ${gi + 1}: אין label`);
+      (g.items || []).forEach((it, i) => {
+        const at = `${file} · ${g.label || 'קבוצה ' + (gi + 1)} · פריט ${i + 1}`;
+        if (!it.front) problems.push(`${at}: אין front (הרמז)`);
+        if (!it.back) problems.push(`${at}: אין back (העובדה)`);
+      });
+    });
   } else {
     items.forEach((q, i) => {
       const n = i + 1;
@@ -181,7 +195,7 @@ for (const file of files) {
   /* הנושאים שבפועל בשאלות — מהם נבנית הטקסונומיה שמולה נבדקת המפה.
      רק ממה שנכנס לבריכת התרגול: כרטיסיות מוחרגות מ-quizzesOf, ולכן נושא
      שקיים רק בהן עדיין יוביל את הצ׳יפ לרשימה ריקה. */
-  if (!isGuide && !isCards && !isCase) {
+  if (!isGuide && !isCards && !isCase && !isShinun) {
     const set = (topicsByCourse[data.course] ??= new Set());
     items.forEach((q) => q.topic && set.add(q.topic));
 
