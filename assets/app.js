@@ -7463,28 +7463,6 @@ function guideDisclaimer(g) {
   return d;
 }
 
-function guideHero(courseId) {
-  const meta = guideOf(courseId);
-  if (!meta) return null;
-  const a = el('a', 'lhero guide-hero');
-  a.dataset.tour = 'guide';
-  a.href = '#/guide/' + courseId;
-  const left = el('div', 'lhero-main');
-  left.append(el('div', 'lhero-eyebrow', '📚 מפת החומרים'));
-  left.append(el('h2', null, 'מאיפה ללמוד כל נושא — ומה לא ללמוד'));
-  /* מה נסרק ומה נמצא שונה בין מקצועות (לביומול יש סילבוס וסרטונים מאומתים,
-     לאלקטרו יש מאגר רשמי ואין אף אחד משניהם) — ולכן הכותרת מגיעה מהנתונים. */
-  left.append(el('p', 'lhero-sub', meta.heroSub ||
-    'תשעה סיכומים משבעה מחזורים נסרקו מול הסילבוס הרשמי ומול כל השאלות בארכיון. ' +
-    'לכל נושא: מאיזה סיכום ומאיזה עמוד, איזה סרטון באמת מכסה אותו, ומה המרצה אמר במפורש שלא צריך.'));
-  a.append(left);
-  const right = el('div', 'lhero-side');
-  right.append(el('div', 'lhero-n', String(meta.count)));
-  right.append(el('div', 'lhero-n-lbl', 'יחידות'));
-  a.append(right);
-  return a;
-}
-
 function srcLine(s, cls) {
   const d = el('div', 'g-src ' + (cls || ''));
   const head = el('div', 'g-src-head');

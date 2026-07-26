@@ -1065,12 +1065,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 /* ═══════════ מפת החומרים ═══════════ */
 .tag.guide{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
 
-.guide-hero{background:linear-gradient(135deg, var(--accent-sl), var(--surface) 75%); border-color:var(--accent);}
-.guide-hero .lhero-eyebrow{color:var(--accent-dk);}
-.guide-hero h2{color:var(--accent-dk);}
-.guide-hero .lhero-side{border-inline-start-color:var(--accent);}
-.guide-hero .lhero-n{color:var(--accent-dk);}
-
 .g-head h1{margin:0 0 6px; font-size:26px;}
 .g-head-sub{margin:0 0 22px; font-size:13px; color:var(--dim); line-height:1.6; max-width:78ch;}
 .g-h2{font-size:19px; margin:34px 0 6px; padding-bottom:8px; border-bottom:2px solid var(--line);}
