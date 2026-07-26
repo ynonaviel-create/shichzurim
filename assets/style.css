@@ -2060,3 +2060,20 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .sheet-chip{font-size:12px; padding:5px 10px;}
   .sheet-mark-tag{font-size:10px;}
 }
+
+/* ===== מבחן חריג =====
+   שני צירים בבת אחת: מהימנות נמוכה ורלוונטיות גבוהה. תג רגיל מסמן אחד מהם,
+   וכאן צריך שהעין תיעצר ותקרא את שניהם לפני שמתחילים לענות. */
+.tag.spotlight{
+  background:var(--warn-bg); color:var(--warn);
+  border:1px solid var(--warn-ln); font-weight:800;
+}
+.spotlight-box{
+  margin:0 0 22px; padding:15px 18px;
+  background:var(--warn-bg); color:var(--text);
+  border:1px solid var(--warn-ln); border-inline-start:4px solid var(--warn);
+  border-radius:10px;
+}
+.spotlight-box b{display:block; margin-bottom:7px; color:var(--warn); font-size:15px;}
+.spotlight-box p{font-size:14px; line-height:1.7;}
+.practice-hero-extra .tag.spotlight{margin-inline-start:7px; font-size:11px; padding:1px 7px;}

@@ -1239,7 +1239,11 @@ function renderCourse(courseId) {
       const a = el('a', null, `🩺 ${d.title}`); a.href = '#/case/' + d.id; extra.append(a);
     });
     practiceExams.forEach((m) => {
-      const a = el('a', null, `🔁 ${m.title}`); a.dataset.tour = 'exam'; a.href = '#/exam/' + m.id; extra.append(a);
+      const a = el('a', null, `🔁 ${m.title}`); a.dataset.tour = 'exam'; a.href = '#/exam/' + m.id;
+      /* בנק תרגול מוצג כאן כקישור קומפקטי בלי מטא — ולכן מבחן חריג היה נבלע
+         בשורה. התג נכנס גם כאן, אחרת הסימון קיים רק אחרי שכבר נכנסים. */
+      if (m.spotlight) a.append(el('span', 'tag spotlight', m.spotlight.tag));
+      extra.append(a);
     });
     hero.append(extra);
   }
@@ -1401,6 +1405,8 @@ function examCard(m) {
   a.append(el('h3', null, m.title));
 
   const meta = el('div', 'card-meta');
+  /* קודם לכול: מבחן שאינו רגיל. תג שנה או „40 שאלות” אינם מה שצריך לקרוא ראשון. */
+  if (m.spotlight) meta.append(el('span', 'tag spotlight', m.spotlight.tag));
   if (m.year) meta.append(el('span', 'tag year', m.year));
   meta.append(el('span', 'tag ' + m.kind, KIND_LABEL[m.kind] || m.kind));
   // רק אם הכותרת לא אומרת את זה כבר ("מועד א׳" ככותרת + תג "מועד א׳" = רעש).
@@ -1467,6 +1473,7 @@ async function renderExam(id, focusIdx = null) {
     title: exam.title,
     subtitle: `${c ? c.name : ''} ${exam.part || ''} · ${exam.questions.length} שאלות`.trim(),
     note: exam.note,
+    spotlight: exam.spotlight || null,
     // examId+idx מזהים כל שאלה באופן יציב, כדי שנוכל לסמן אותה כ"נראתה"
     // גם כשהיא מוצגת מתוך תרגול חופשי ולא מתוך המבחן שלה.
     questions: exam.questions.map((q, i) => ({ ...q, examId: exam.id, idx: i })),
@@ -2425,6 +2432,16 @@ function playQuestions(cfg) {
   head.append(el('h1', null, title));
   head.append(el('p', null, subtitle));
   view.append(head);
+
+  /* ההסבר המלא — למה המבחן הזה חריג, ומה זה אומר על איך לתרגל אותו.
+     לפני ה-note ולפני השאלות: מי שמתחיל לענות בלי לדעת את זה, לומד לא נכון. */
+  if (cfg.spotlight) {
+    const sp = el('div', 'spotlight-box');
+    sp.append(el('b', null, cfg.spotlight.title));
+    const body = el('p', null); body.innerHTML = cfg.spotlight.body;
+    sp.append(body);
+    view.append(sp);
+  }
 
   if (note) {
     const n = el('div', 'q-note');
@@ -4436,9 +4453,9 @@ function shinunHomePush() {
    ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
    כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
    לשמוע על פיצ׳ר ב׳. */
-const ANNOUNCE_V5_KEY = 'shichzurim.announce.v5';
+const ANNOUNCE_V6_KEY = 'shichzurim.announce.v6';
 function whatsNewBanner() {
-  try { if (localStorage.getItem(ANNOUNCE_V5_KEY)) return null; } catch { return null; }
+  try { if (localStorage.getItem(ANNOUNCE_V6_KEY)) return null; } catch { return null; }
 
   const b = el('div', 'intro whatsnew');
   const txt = el('div');
@@ -4446,32 +4463,20 @@ function whatsNewBanner() {
 
   const list = el('ul', 'whatsnew-list');
   [
-    ['🪤', 'המלכודות',
-     'טעית? האתר מראה לך עכשיו את המלכודת שנפלת בה — התפיסה השגויה עצמה, לא רק התשובה הנכונה. ' +
-     'יש 341 מלכודות כאלה בארכיון, ולכל מקצוע יש דף „המלכודות שלי” שמקבץ אותן לפי הסיבה.'],
-    ['🌙', 'הלילה לפני המבחן',
-     'אומרים כמה זמן נשאר, והאתר בונה מסלול: הנושאים הכבדים במבחן, כפול מה שאתה חלש בו, ' +
-     'כפול מה שנפלת בו. מופיע בעמוד המקצוע כשהמבחן מתקרב.'],
-    ['🔁', 'חזרה מרווחת',
-     'האתר זוכר מתי ענית ולא רק אם צדקת, ומחזיר לך שאלה כשהגיע הזמן לרענן אותה. ' +
-     'יש מצב תרגול חדש — „בשל לחזרה”.'],
-    ['🎯', '„הטעויות שלי” נהיה הוגן',
-     'עד היום תשובה נכונה אחת הורידה שאלה מהרשימה לתמיד. עכשיו צריך שתיים ברצף — ' +
-     'כי פעם אחת זה יכול להיות ניחוש, וזה בדיוק מה שגרם לשאלות לברוח בלי שידעת אותן.'],
-    ['🔍', 'חיפוש בכל הארכיון',
-     'כפתור הזכוכית למעלה, או „/” מהמקלדת. מחפש בבת אחת בכל השאלות, בנקודות מהמפה, ' +
-     'בכרטיסיות ובשינון — בלי לדעת מראש באיזה מקצוע זה.'],
-    ['🔖', 'סימון וקישור לשאלה',
-     'בפינת כל שאלה יש עכשיו 🏷️ לסמן „לחזור לזה”, ו-🔗 שמעתיק קישור לשאלה הבודדת — ' +
-     'כדי שאפשר יהיה לשלוח אותה בוואטסאפ במקום „תפתח מועד א׳ ותגלול”.'],
-    ['🎧', 'מצב שמע',
-     'ב-i❤️Shinun יש לשונית „שמע”: האתר מקריא רמז, שותק, ואז אומר את התשובה. ' +
-     'ללימוד בהליכה ובנסיעה. מונחים באנגלית עלולים להישמע משובש.'],
-    /* בלי „ל-i❤️Shinun”: תחילית עברית שדבוקה לטקסט לטיני עוברת סידור דו-כיווני
-       ויוצאת הפוכה על המסך („Shinun-ל❤️i”). מנסחים סביב זה. */
-    ['☁️', 'תיקון סנכרון',
-     'היה באג שהשתיק את שמירת ההתקדמות בענן למי שנכנס למסך השינון. תוקן — ההתקדמות שלכם ' +
-     'שוב עוברת בין מכשירים. שווה להיכנס מהנייד ולוודא שהכול שם.'],
+    ['⚡', 'שחזור מהמבחן של מדעי המוח — ואצלנו זה חדשות',
+     'לפרופ׳ גיטלר יש קורס מקביל בתואר במדעי המוח, והמבחן שלהם היה ב-21/07 — שבוע לפני שלנו. ' +
+     'שחזרנו ממנו 20 שאלות שנמצאות בסילבוס שלנו. שימו לב לתג הכתום: זה החומר הכי פחות רשמי באתר ' +
+     'והכי קרוב למבחן בו-זמנית, וההסבר בראש המבחן אומר איך לתרגל אותו נכון.'],
+    ['📄', 'דף הנוסחאות הרשמי נכנס למנוע',
+     'הדף שמחולק במבחן זמין עכשיו בתוך התרגול — כפתור בסרגל, ואייקון 📄 בכל שאלה שפותח אותו ' +
+     'ישר על הסעיף הרלוונטי. אחרי שעונים, המשוב מראה איפה בדיוק בדף זה היה. ' +
+     'כדאי להתאמן למצוא דברים בדף, לא רק לדעת אותם.'],
+    ['📕', 'ALS ו-SOD1 ירדו מהסילבוס',
+     'הנושא הועבר לשנה ג׳. 11 שאלות במאגר סומנו „מחוץ לחומר” ואינן נספרות בציון, ' +
+     'והן ירדו מה-High Yield וממפת החומרים. אפשר לדלג עליהן בלב שלם.'],
+    ['🎯', 'מבנה המבחן השתנה — 40 שאלות בשעתיים וחצי',
+     'במקום 60 בשלוש שעות. צוות ההוראה אמר גם שהוא מכוון לשליש קל, שליש סביר ושליש קשה, ' +
+     'ושחלק מהשאלות במבחנים ישנים כבר אינן רלוונטיות למתכונת. מפת החומרים עודכנה בהתאם.'],
   ].forEach(([ico, title, body]) => {
     const li = el('li');
     li.append(el('span', 'whatsnew-ico', ico));
@@ -4487,7 +4492,7 @@ function whatsNewBanner() {
   const acts = el('div', 'btn-row');
   const ok = el('button', 'btn primary', 'הבנתי, תודה 👍');
   ok.onclick = () => {
-    try { localStorage.setItem(ANNOUNCE_V5_KEY, '1'); } catch {}
+    try { localStorage.setItem(ANNOUNCE_V6_KEY, '1'); } catch {}
     b.remove();
   };
   acts.append(ok);

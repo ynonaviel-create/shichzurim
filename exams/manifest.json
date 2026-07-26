@@ -1,11 +1,11 @@
 {
   "updated": "2026-07-26",
-  "version": "b1bcf0e6",
+  "version": "cde2f78d",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
-    "css": "c8520a1b",
-    "js": "43aec69f",
+    "css": "4f4cf978",
+    "js": "0c83795a",
     "cloud": "1153c3de"
   },
   "courses": [
@@ -199,6 +199,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 100
@@ -216,6 +217,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 50
@@ -233,6 +235,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -250,6 +253,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -267,6 +271,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 30
@@ -284,6 +289,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -301,6 +307,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 42
@@ -318,6 +325,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 35
@@ -335,6 +343,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 34
@@ -352,6 +361,7 @@
       "added": "2026-07-15",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
@@ -369,6 +379,7 @@
       "added": "2026-07-15",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -386,6 +397,7 @@
       "added": "2026-07-17",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 5
@@ -403,6 +415,7 @@
       "added": "2026-07-17",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": "המתרגלים שלחו מיקוד למבחן. כאן הוא מפורק לכרטיסיות: מה בדיוק נשאל בכל נושא, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
       "heroEyebrow": "🎯 המיקוד מהמתרגלים",
       "count": 19
@@ -420,6 +433,7 @@
       "added": "2026-07-15",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 35
@@ -437,6 +451,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -454,6 +469,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -471,6 +487,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 45
@@ -488,6 +505,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 44
@@ -505,6 +523,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -522,6 +541,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -539,6 +559,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -556,6 +577,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -573,6 +595,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -590,6 +613,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -607,6 +631,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -624,6 +649,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -641,6 +667,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 32
@@ -658,6 +685,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 32
@@ -675,6 +703,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -692,6 +721,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -709,6 +739,7 @@
       "added": "2026-07-15",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 31
@@ -726,6 +757,7 @@
       "added": "2026-07-16",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 33
@@ -743,6 +775,7 @@
       "added": "2026-07-24",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 9
@@ -760,6 +793,7 @@
       "added": "2026-07-24",
       "official": true,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -777,6 +811,11 @@
       "added": "2026-07-26",
       "official": null,
       "trust": null,
+      "spotlight": {
+        "tag": "⚡ קרוב למבחן · לא רשמי",
+        "title": "המבחן הזה אינו מהמאגר הרשמי — ודווקא לכן שווה לתרגל אותו",
+        "body": "אלה שאלות מ<b>מבחן של קורס אחר</b>: „נוירופיזיולוגיה של התא” בתואר במדעי המוח, שנבחן ב-21/07/2026 — <b>שבוע לפני שלכם, אצל אותו מרצה, פרופ׳ גיטלר</b>. שני הצדדים של זה חשובים באותה מידה. <b>מצד המהימנות זה החומר החלש ביותר באתר:</b> השחזור נכתב מהזיכרון דקות אחרי המבחן, רוב המסיחים לא נזכרו והושלמו על ידי שני מודלים בנפרד, ואין מפתח תשובות רשמי. אל תתייחסו לניסוח כאל מדויק. <b>מצד הרלוונטיות זה החומר החם ביותר:</b> אותו מרצה, אותו חומר, ומבחן שנכתב לפני ימים — ובחמש שאלות כבר אימתנו שהמאגר הרשמי שלנו מכיל גרסאות כמעט זהות. <b>תרגלו את המנגנון, לא את הניסוח.</b>"
+      },
       "heroSub": null,
       "heroEyebrow": null,
       "count": 20
@@ -794,6 +833,7 @@
       "added": "2026-07-17",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 12
@@ -811,6 +851,7 @@
       "added": "2026-07-26",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 23
@@ -828,6 +869,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": "חמש שיטות מחקר, וסיפור אחד שמחבר ביניהן: איך סינפסין מארגן את הווזיקולות כטיפת נוזל, ולמה בלעדיו אלפא-סינוקלאין מפסיק להיות רעיל.",
       "heroEyebrow": "🔬 השיעור האחרון",
       "count": 10
@@ -845,6 +887,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 20
@@ -862,6 +905,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": "כל מחלה, רעלן ותרופה בקורס — דרך המשקפיים של הקורס: איזה זרם, איזו תעלה, איזה שלב במחזור הווזיקולה. ולכל כרטיסייה: השאלות מהמאגר הרשמי שבדקו בדיוק את זה.",
       "heroEyebrow": "🧠 פתולוגיות ותרופות",
       "count": 27
@@ -879,6 +923,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
@@ -896,6 +941,7 @@
       "added": "2026-07-26",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, רעלנים, רצפטורים, בופרים ותאי גליה — ולצידן ארבע עובדות מהמודל החשמלי שכולן נגזרות מדף הנוסחאות ובכל זאת נופלים עליהן. מרוכז — לבדיקה עצמית ולחזרה אחרונה.",
       "heroEyebrow": null,
       "count": 49
@@ -913,6 +959,7 @@
       "added": "2026-07-16",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": "פרופ׳ תומר קוקס עבר איתנו בזום על השאלות שיהיו במבחן. כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
       "heroEyebrow": "🎓 ישירות מהמרצה",
       "count": 15
@@ -930,6 +977,7 @@
       "added": "2026-07-17",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 12
@@ -947,6 +995,7 @@
       "added": "2026-07-26",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 54
@@ -964,6 +1013,7 @@
       "added": "2026-07-15",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 28
@@ -981,6 +1031,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "partial",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 59
@@ -998,6 +1049,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "unverified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 38
@@ -1015,6 +1067,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 55
@@ -1032,6 +1085,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "verified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 54
@@ -1049,6 +1103,7 @@
       "added": "2026-07-15",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 11
@@ -1066,6 +1121,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "partial",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 29
@@ -1083,6 +1139,7 @@
       "added": "2026-07-14",
       "official": null,
       "trust": "unverified",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 60
@@ -1100,6 +1157,7 @@
       "added": "2026-07-21",
       "official": null,
       "trust": "partial",
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
@@ -1117,6 +1175,7 @@
       "added": "2026-07-23",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -1134,6 +1193,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 66
@@ -1151,6 +1211,7 @@
       "added": "2026-07-23",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1168,6 +1229,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 26
@@ -1185,6 +1247,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 21
@@ -1202,6 +1265,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 27
@@ -1219,6 +1283,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 19
@@ -1236,6 +1301,7 @@
       "added": "2026-07-23",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 7
@@ -1253,6 +1319,7 @@
       "added": "2026-07-24",
       "official": null,
       "trust": null,
+      "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 22
