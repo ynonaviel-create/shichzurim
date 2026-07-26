@@ -487,12 +487,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   display:grid; place-items:center;
   background:transparent; border:1px solid transparent;
   color:var(--muted); font-size:12.5px; font-weight:800;
-  cursor:pointer; opacity:0; transition:.13s;
+  cursor:pointer; opacity:.28; transition:.13s;
 }
-.opt:hover .opt-x, .opt-x:focus-visible{opacity:.7;}
+/* לא שקוף לגמרי במנוחה: פיצ'ר שאי אפשר לגלות בלי לרחף עליו הוא פיצ'ר שלא קיים. */
+.opt:hover .opt-x, .opt-x:focus-visible{opacity:.8;}
 .opt-x:hover{opacity:1; color:var(--bad); background:var(--bad-bg); border-color:var(--line);}
-/* במסך מגע אין hover — ה-✕ גלוי תמיד, עדין. */
-@media (hover:none){.opt-x{opacity:.45;}}
+/* במסך מגע אין hover בכלל — שם ה-✕ צריך להיות ברור מהרגע הראשון. */
+@media (hover:none){.opt-x{opacity:.5;}}
 .opt.ruledout{opacity:.55; background:var(--surface-2); border-style:dashed;}
 .opt.ruledout > span:not(.key){text-decoration:line-through; text-decoration-thickness:1.5px;}
 .opt.ruledout .opt-x{opacity:1; color:var(--bad);}
@@ -503,12 +504,23 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .opt.ruledout.correct, .opt.ruledout.wrong{opacity:1; border-style:solid;}
 
 .elim-reset{
-  margin-top:10px; padding:5px 11px; border-radius:8px;
+  display:block; margin-top:10px; margin-inline-end:auto;
+  padding:5px 11px; border-radius:8px;
   background:transparent; border:1px dashed var(--line);
   color:var(--muted); font-size:12.5px; font-weight:700;
   cursor:pointer; transition:.13s;
 }
 .elim-reset:hover{color:var(--text); border-color:var(--accent);}
+/* display:block שלמעלה גובר על ה-UA של [hidden], אז מחזירים אותו במפורש. */
+.elim-reset[hidden]{display:none;}
+
+.elim-note{
+  margin-top:11px; padding:9px 12px; border-radius:8px;
+  font-size:13.5px; font-weight:700; line-height:1.6;
+  border:1px solid var(--line); background:var(--surface);
+}
+.elim-note.bad{border-color:var(--bad); color:var(--bad);}
+.elim-note.ok{border-color:var(--good); color:var(--good);}
 
 .fb{margin-top:16px; padding:14px 17px; border-radius:var(--radius-sm); font-size:14.5px; font-weight:700; display:none;}
 .fb.show{display:block;}

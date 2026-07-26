@@ -2785,7 +2785,7 @@ function playQuestions(cfg) {
     const paintFns = [];
     const clearEx = el('button', 'elim-reset');
     clearEx.type = 'button';
-    clearEx.textContent = '↺ ביטול כל הפסילות';
+    clearEx.textContent = 'ביטול כל הפסילות';
     clearEx.onclick = () => { exSet.clear(); paintFns.forEach((f) => f()); };
     const syncClear = () => { clearEx.hidden = exSet.size === 0 || answers[qi] != null; };
 
@@ -2891,6 +2891,20 @@ function playQuestions(cfg) {
     fb.innerHTML = '';
     fb.append(el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`));
     if (item.explain) fb.append(el('div', 'explain', item.explain));
+
+    /* הפסילות הן חלון לחשיבה שהובילה לתשובה, ולא רק לתוצאה. שני מצבים
+       שווים אמירה: פסלת את הנכונה (הטעות קרתה לפני הבחירה — שם צריך לתקן),
+       או צמצמת נכון והכרעת נכון (זה מה שהמיומנות הזאת אמורה לעשות). */
+    const ex = elim.get(qi);
+    if (ex && ex.size) {
+      if (ex.has(item.a))
+        fb.append(el('div', 'elim-note bad',
+          '⚠︎ פסלת את התשובה הנכונה. הטעות כאן קרתה עוד לפני הבחירה — שווה להבין למה היא נראתה לך פסולה.'));
+      else if (isRight && ex.size >= item.opts.length - 2)
+        fb.append(el('div', 'elim-note ok',
+          `✓ צמצמת ל-${item.opts.length - ex.size} והכרעת נכון — בדיוק מה שפסילה טובה אמורה לעשות.`));
+    }
+
     /* המלכודת — רק כשטועים, ורק אם באמת יש כזו לשאלה הזאת. "הנה התשובה
        הנכונה" מתקן; "זו המלכודת שנפלת בה, והיא תופסת גם כאן וכאן" מלמד. */
     if (!isRight) { const tb = trapBox(item); if (tb) fb.append(tb); }
