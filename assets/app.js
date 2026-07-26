@@ -2163,6 +2163,9 @@ async function renderCase(id, caseId = null) {
 
   const save = () => caseProg.set(deck.id, cs.id, answers);
 
+  // פסילת תשובות בשלבי המקרה — זיכרון בלבד, כמו בנגן הראשי.
+  const elim = new Map();   // אינדקס שלב → Set של מסיחים פסולים
+
   /* לוח המבדלת נגזר מהתשובות — לא נשמר בנפרד. מצב שנגזר לא יכול להיסתר
      מהמקור שלו: מאפסים תשובה, והלוח חוזר אחורה נכון בלי טיפול מיוחד. */
   function ddxState() {
@@ -2197,6 +2200,7 @@ async function renderCase(id, caseId = null) {
       const rst = el('button', 'btn-ghost case-reset', 'התחל את המקרה מחדש');
       rst.onclick = () => {
         answers = cs.stages.map(() => null);
+        elim.clear();
         caseProg.clear(deck.id, cs.id);
         paint();
         toTop();
@@ -2243,17 +2247,33 @@ async function renderCase(id, caseId = null) {
     card.append(el('div', 'case-ask', s.ask));
 
     const opts = el('div', 'opts');
+    const exSet = elim.get(i) || elim.set(i, new Set()).get(i);
     s.opts.forEach((text, oi) => {
       const o = el('div', 'opt');
       o.append(el('span', 'key', String(oi + 1)));
       o.append(el('span', null, text));
+      if (exSet.has(oi)) o.classList.add('ruledout');
       if (answers[i] != null) {
         o.classList.add('locked');
         if (oi === s.a) o.classList.add('correct');
         else if (oi === answers[i]) o.classList.add('wrong');
         if (oi === answers[i]) o.classList.add('chosen');
       } else {
+        const ex = el('button', 'opt-x');
+        ex.type = 'button';
+        ex.tabIndex = -1;
+        ex.textContent = exSet.has(oi) ? '↺' : '✕';
+        ex.title = exSet.has(oi) ? 'ביטול הפסילה' : 'פסילת המסיח';
+        ex.setAttribute('aria-label', ex.title);
+        ex.onclick = (e) => {
+          e.stopPropagation();
+          if (exSet.has(oi)) exSet.delete(oi); else exSet.add(oi);
+          paint();
+        };
+        o.append(ex);
         o.onclick = () => {
+          // מסיח פסול מוגן מבחירה בטעות — לחיצה עליו מחזירה אותו לחיים.
+          if (exSet.has(oi)) { exSet.delete(oi); paint(); return; }
           answers[i] = oi;
           save();
           paint();
@@ -2386,6 +2406,11 @@ function playQuestions(cfg) {
      יכול להיות "12345678", ומפתח אינדקס נראה בדיוק אותו דבר. */
   const rec = persist ? store.exam(key) : { answers: {} };
   const answers = persist ? fromStore(rec, questions) : {};
+
+  /* פסילת תשובות — עבודה כמו על דף מבחן אמיתי: מוחקים בקו את המסיחים שברור
+     שהם לא, ורק אז מכריעים בין מה שנשאר. הפסילות חיות בזיכרון בלבד ולא
+     נשמרות: הן חלק מרגע החשיבה על השאלה, לא מההתקדמות. */
+  const elim = new Map();   // qi → Set של אינדקסי מסיחים פסולים
 
   /* שאלות "מחוץ לחומר" (offSyllabus) — נושא שיצא מהסילבוס (למשל הלב במחזור נ״ב).
      מוצגות ומתורגלות להעשרה, אבל לא נספרות בציון, בהתקדמות ובפילוח הנושאים. */
@@ -2613,6 +2638,7 @@ function playQuestions(cfg) {
 
   function doReset() {
     for (const k of Object.keys(answers)) delete answers[k];
+    elim.clear();
     if (persist) store.reset(key);
     streak = 0; celebratedResult = false; paintStreak();
     render();
@@ -2755,6 +2781,14 @@ function playQuestions(cfg) {
     const opts = el('div', 'opts');
     const fb = el('div', 'fb');
 
+    const exSet = elim.get(qi) || elim.set(qi, new Set()).get(qi);
+    const paintFns = [];
+    const clearEx = el('button', 'elim-reset');
+    clearEx.type = 'button';
+    clearEx.textContent = '↺ ביטול כל הפסילות';
+    clearEx.onclick = () => { exSet.clear(); paintFns.forEach((f) => f()); };
+    const syncClear = () => { clearEx.hidden = exSet.size === 0 || answers[qi] != null; };
+
     /* מסיח הוא div ולא button כי button דורס את הטיפוגרפיה והעטיפה של טקסט
        ארוך בעברית. המחיר הוא שהתפקיד והמקלדת לא מגיעים בחינם — ובלעדיהם
        אפשר לענות רק בעכבר או בקיצור 1-9, וקורא מסך לא יודע שזו בחירה. */
@@ -2764,7 +2798,34 @@ function playQuestions(cfg) {
       o.tabIndex = 0;
       o.append(el('span', 'key', String(oi + 1)));
       o.append(el('span', null, text));
-      const pick = () => choose(qi, oi, card, opts, fb, item);
+
+      const ex = el('button', 'opt-x');
+      ex.type = 'button';
+      ex.tabIndex = -1;   // פסילה היא ג'סטה משנית — לא עוצרים עליה בטאב
+      const paintX = () => {
+        const off = exSet.has(oi);
+        o.classList.toggle('ruledout', off);
+        ex.textContent = off ? '↺' : '✕';
+        ex.title = off ? 'ביטול הפסילה' : 'פסילת המסיח';
+        ex.setAttribute('aria-label', ex.title);
+        syncClear();
+      };
+      paintFns.push(paintX);
+      paintX();
+      ex.onclick = (e) => {
+        e.stopPropagation();
+        if (answers[qi] != null) return;
+        if (exSet.has(oi)) exSet.delete(oi); else exSet.add(oi);
+        paintX();
+      };
+      o.append(ex);
+
+      const pick = () => {
+        /* מסיח פסול מוגן מבחירה בטעות — לחיצה עליו קודם מחזירה אותו לחיים. */
+        if (answers[qi] == null && exSet.has(oi)) { exSet.delete(oi); paintX(); return; }
+        choose(qi, oi, card, opts, fb, item);
+        syncClear();
+      };
       o.onclick = pick;
       o.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
@@ -2772,7 +2833,8 @@ function playQuestions(cfg) {
       opts.append(o);
     });
 
-    card.append(opts, fb);
+    card.append(opts, clearEx, fb);
+    syncClear();
     if (answers[qi] != null) paint(qi, answers[qi], card, opts, fb, item);
     return card;
   }
@@ -4366,57 +4428,184 @@ function admCard(title, hint) {
   return c;
 }
 
-/* רשימה מדורגת עם פסים — "מה הכי בשימוש". */
-function rankBars(rows, labelOf, valueOf) {
-  const max = Math.max(1, ...rows.map(valueOf));
+/* כותרת סקשן בלוח — מקבצת כמה כרטיסים תחת נושא אחד. extra (אופציונלי)
+   נכנס לצד הכותרת — כך הצ׳יפים 7/30/90 יושבים *בתוך* סקשן המגמות, וברור
+   שהם חלים רק עליו ולא על ה-KPI שלמעלה. */
+function admSection(title, extra) {
+  const s = el('div', 'adm-sec');
+  const h = el('div', 'adm-sec-head');
+  h.append(el('h2', null, title));
+  if (extra) h.append(extra);
+  s.append(h);
+  return s;
+}
+
+/* רשימה מדורגת עם פסים — "מה הכי בשימוש".
+   rows: [{label, n, users}]. n מוצג תמיד; users (ייחודיים) אם קיים —
+   ההבחנה בין "נפתח הרבה" ל"נפתח על-ידי רבים". */
+function rankBars(rows) {
+  const max = Math.max(1, ...rows.map((r) => r.n));
   const box = el('div', 'rank');
   if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים בטווח הזה.')); return box; }
   rows.forEach((r, i) => {
     const row = el('div', 'rank-row');
     row.append(el('span', 'rank-i', String(i + 1)));
-    row.append(el('span', 'rank-name', labelOf(r)));
+    const name = el('span', 'rank-name', r.label);
+    name.title = r.label;
+    row.append(name);
     const track = el('div', 'rank-bar');
-    const f = el('i'); f.style.width = Math.round((valueOf(r) / max) * 100) + '%';
+    const f = el('i'); f.style.width = Math.round((r.n / max) * 100) + '%';
     track.append(f); row.append(track);
-    row.append(el('span', 'rank-n', String(valueOf(r))));
+    row.append(el('span', 'rank-n', String(r.n)));
+    if (r.users != null) row.append(el('span', 'rank-u', `👤 ${r.users}`));
     box.append(row);
   });
   return box;
 }
 
-/* היסטוגרמת עמודות קומפקטית (שעות/ימים). direction:ltr כדי שציר הזמן
-   יזרום שמאל→ימין כמקובל בגרף, גם בעמוד RTL. everyNth — כל כמה עמודות תווית. */
-function columnChart(rows, valueOf, labelOf, everyNth, accent) {
-  const max = Math.max(1, ...rows.map(valueOf));
-  const box = el('div', 'col-chart' + (accent ? ' accent' : ''));
-  if (!rows.length) { box.append(el('p', 'adm-empty', 'אין עדיין נתונים בטווח הזה.')); return box; }
-  rows.forEach((r, i) => {
-    const col = el('div', 'col');
-    col.title = labelOf(r, i) + ' · ' + valueOf(r);
-    const bar = el('div', 'col-bar');
-    const f = el('i'); f.style.height = Math.round((valueOf(r) / max) * 100) + '%';
-    bar.append(f); col.append(bar);
-    col.append(el('span', 'col-lab', i % everyNth === 0 ? labelOf(r, i) : ''));
-    box.append(col);
+/* תקרה "עגולה" לציר ה-Y: המספר הנוח הקטן ביותר שגדול מהמקסימום, כזה
+   שגם חצי ממנו הוא מספר שלם — כדי שקו האמצע יציג ערך קריא. */
+function niceMax(v) {
+  if (v <= 2) return 2;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 2, 3, 4, 5, 6, 8, 10, 20]) {
+    const c = m * p;
+    if (c >= v && (c / 2) % 1 === 0) return c;
+  }
+  return 10 * p;
+}
+
+/* היסטוגרמת עמודות עם ציר אמיתי: קווי-רשת עם ערכים (0 / אמצע / תקרה),
+   תוויות X, ו-tooltip שעובד גם במגע (hover בעכבר, הקשה בטלפון) — במקום
+   ה-title הנייטיב שלא עבד במגע. direction:ltr כדי שציר הזמן יזרום
+   שמאל→ימין כמקובל בגרף, גם בעמוד RTL.
+
+   rows: [{label, vals:[..], tip}] — vals נערמים, סדרה 0 בתחתית.
+   opts: everyNth — כל כמה עמודות תווית; colors — מחלקת צבע לכל סדרה
+   ('accent'/'good'); legend — [{label, cls}]. */
+function axisChart(rows, opts = {}) {
+  const { everyNth = 1, colors = ['accent'], legend = null } = opts;
+  const box = el('div', 'chx');
+  box.dir = 'ltr';
+  const totals = rows.map((r) => r.vals.reduce((a, b) => a + b, 0));
+  if (!rows.length || !totals.some((t) => t > 0)) {
+    box.append(el('p', 'adm-empty', 'אין עדיין נתונים בטווח הזה.'));
+    return box;
+  }
+  const max = niceMax(Math.max(...totals));
+
+  const plot = el('div', 'chx-plot');
+  [[0, 0], [50, max / 2], [100, max]].forEach(([pct, val]) => {
+    const g = el('div', 'chx-gl');
+    g.style.bottom = pct + '%';
+    g.append(el('span', 'chx-gv', String(val)));
+    plot.append(g);
   });
+
+  const tip = el('div', 'chx-tip');
+  const bars = el('div', 'chx-bars');
+  rows.forEach((r, i) => {
+    const col = el('div', 'chx-col');
+    const bar = el('div', 'chx-bar');
+    r.vals.forEach((v, si) => {
+      const seg = el('i', 'chx-s ' + (colors[si] || 'accent'));
+      seg.style.height = (v / max * 100) + '%';
+      bar.append(seg);
+    });
+    col.append(bar);
+    col.append(el('span', 'chx-lab', i % everyNth === 0 ? r.label : ''));
+
+    const show = () => {
+      tip.textContent = r.tip || `${r.label} · ${totals[i]}`;
+      tip.classList.add('on');
+      col.classList.add('lit');
+      /* ממקמים אחרי שהטקסט נכנס, כדי שהרוחב ידוע ואפשר להצמיד לגבולות */
+      const x = col.offsetLeft + col.offsetWidth / 2;
+      const w = tip.offsetWidth, pw = plot.offsetWidth;
+      tip.style.left = Math.max(0, Math.min(pw - w, x - w / 2)) + 'px';
+    };
+    const hide = () => { tip.classList.remove('on'); col.classList.remove('lit'); };
+    col.addEventListener('pointerenter', show);
+    col.addEventListener('pointerleave', hide);
+    col.addEventListener('click', () => (col.classList.contains('lit') ? hide() : show()));
+    bars.append(col);
+  });
+  plot.append(bars, tip);
+  box.append(plot);
+
+  if (legend) {
+    const lg = el('div', 'chx-legend');
+    lg.dir = 'rtl';
+    legend.forEach((l) => {
+      const item = el('span', 'chx-lg');
+      item.append(el('i', 'chx-s ' + l.cls));
+      item.append(document.createTextNode(l.label));
+      lg.append(item);
+    });
+    box.append(lg);
+  }
   return box;
 }
 
-/* ציר של N הימים האחרונים (UTC, כדי להתאים ל-created_at::date בשרת), עם 0
-   לימים בלי פעילות — כך הגרף רציף ולא מדלג על ימים שקטים. */
-function lastDaysUTC(n) {
-  const out = [];
-  const t = new Date();
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate() - i));
-    out.push(d.toISOString().slice(0, 10));
-  }
+/* ציר של N הימים האחרונים לפי שעון ישראל — תואם לחלוקה היומית בשרת (v2).
+   ימים בלי פעילות מקבלים 0, כך הגרף רציף ולא מדלג על ימים שקטים.
+   keys — אילו שדות מספריים להעתיק מכל שורה. */
+const IL_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' });  // YYYY-MM-DD
+function lastDaysIL(n) {
+  const out = [], now = Date.now();
+  for (let i = n - 1; i >= 0; i--) out.push(IL_DAY.format(new Date(now - i * 864e5)));
   return out;
 }
-function fillDays(rows, n) {
+function fillDays(rows, n, keys = ['n']) {
   const map = {};
-  (rows || []).forEach((r) => { map[String(r.day).slice(0, 10)] = Number(r.n); });
-  return lastDaysUTC(n).map((day) => ({ day, n: map[day] || 0 }));
+  (rows || []).forEach((r) => { map[String(r.day).slice(0, 10)] = r; });
+  return lastDaysIL(n).map((day) => {
+    const src = map[day] || {};
+    const out = { day };
+    keys.forEach((k) => { out[k] = Number(src[k] || 0); });
+    return out;
+  });
+}
+
+/* "לפני X" קצר — לשורת הבריאות התפעולית. */
+function admAgo(ts) {
+  if (!ts) return '—';
+  const m = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
+  if (m < 1) return 'ממש עכשיו';
+  if (m < 60) return `לפני ${m} דק׳`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `לפני ${h} שע׳`;
+  return `לפני ${Math.round(h / 24)} ימים`;
+}
+
+/* מפת qid → שאלה + מטא — נטענת פעם אחת (בעצלנות) לצורך סקשן בריאות התוכן:
+   הופכת qid עירום מהשרת לטקסט שאלה, מסיחים ותשובה נכונה. HY שנבנה משחזור
+   חולק qid עם המקור — המופע הראשון (השחזור עצמו) מנצח, כמו ב"הטעויות שלי". */
+let admContent = null;
+async function admLoadContent() {
+  if (admContent) return admContent;
+  const byQid = new Map();
+  const exams = new Map();
+  for (const c of COURSES) {
+    const metas = quizzesOf(c.id);
+    const loaded = await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
+    metas.forEach((m, mi) => {
+      const d = loaded[mi];
+      if (!d) return;
+      const qs = d.questions || [];
+      exams.set(m.id, {
+        title: d.title || m.title || m.id, course: c.name,
+        scored: qs.filter((q) => !q.offSyllabus).length,
+      });
+      qs.forEach((q, i) => {
+        if (q.qid && !byQid.has(q.qid)) {
+          byQid.set(q.qid, { q, examId: m.id, examTitle: d.title || m.title || m.id, courseName: c.name, idx: i });
+        }
+      });
+    });
+  }
+  admContent = { byQid, exams };
+  return admContent;
 }
 
 async function renderAdmin() {
@@ -4433,17 +4622,110 @@ async function renderAdmin() {
   view.append(crumb('לארכיון', '#/'));
   const head = el('div', 'page-head');
   head.append(el('h1', null, '📊 לוח הבקרה'));
-  head.append(el('p', null, 'סטטיסטיקות שימוש אגרגטיביות — מספרים ומגמות בלבד, בלי מידע על משתמש בודד. מתעדכן בזמן אמת.'));
+  head.append(el('p', null,
+    'אגרגטיבי בלבד — מספרים ומגמות, בלי מידע על משתמש בודד. ' +
+    'הנתונים נטענים ברגע הפתיחה; „רענון" מושך אותם מחדש.'));
   view.append(head);
 
-  const kpis = el('div', 'adm-kpis');
-  view.append(kpis);
+  /* עוזר: מריץ טעינה לתוך מכל, עם מצבי טעינה/שגיאה אחידים. fill מקבל את
+     המכל הריק ואחראי למלא אותו. */
+  function section(target, fill) {
+    target.innerHTML = '';
+    target.append(el('div', 'adm-loading', 'טוען…'));
+    Promise.resolve().then(async () => {
+      const frag = el('div');
+      await fill(frag);
+      target.innerHTML = '';
+      while (frag.firstChild) target.append(frag.firstChild);
+    }).catch((err) => {
+      target.innerHTML = '';
+      target.append(el('p', 'adm-empty', '⚠️ לא הצלחתי לטעון: ' + String(err && err.message || err)));
+    });
+  }
+  /* RPC של Supabase לא זורק — מחזיר {error}. מיישרים לזריקה כדי ש-section יתפוס. */
+  const rpc = async (p) => {
+    const r = await p;
+    if (r.error) throw new Error(r.error.message || 'שגיאת שרת');
+    return r.data;
+  };
 
+  /* ── 1. מצב הקהילה — חלונות קבועים, מוצהרים בתווית ─────────────── */
+  const refreshBtn = el('button', 'adm-chip', '🔄 רענון');
+  refreshBtn.onclick = () => renderAdmin();
+  const s1 = admSection('👥 מצב הקהילה', refreshBtn);
+  const kpis = el('div', 'adm-kpis');
+  s1.append(kpis);
+  view.append(s1);
+
+  section(kpis, async (box) => {
+    const o = await rpc(C.admin.overviewV2());
+    box.append(kpiCard(o.total_users, 'משתמשים רשומים', '👥', 'accent'));
+    box.append(kpiCard(o.active_today, 'פעילים היום', '🟢', 'good'));
+    box.append(kpiCard(o.active_7d, 'פעילים · 7 ימים', '📅'));
+    box.append(kpiCard(o.active_30d, 'פעילים · 30 יום', '🗓️'));
+    box.append(kpiCard(o.new_7d, 'הצטרפו · 7 ימים', '🆕'));
+    /* דביקות: איזה חלק מהפעילים החודשיים חוזר בשבוע האחרון. */
+    const stick = o.active_30d ? Math.round((o.active_7d / o.active_30d) * 100) + '%' : '—';
+    const stickC = kpiCard(stick, 'דביקות (7 מתוך 30)', '🧲');
+    stickC.title = 'איזה אחוז מהפעילים ב-30 הימים האחרונים היה פעיל גם בשבוע האחרון';
+    box.append(stickC);
+    /* נטישה: נרשמו ולא ייצרו אף אירוע + כאלה שכל הפעילות שלהם ביממה אחת. */
+    const lost = (o.never_active ?? 0) + (o.one_and_done ?? 0);
+    const lostC = kpiCard(lost, 'באו ולא נשארו', '👻');
+    lostC.title = `${o.never_active ?? 0} נרשמו ומעולם לא פעלו · ${o.one_and_done ?? 0} פעלו יממה אחת ונעלמו`;
+    box.append(lostC);
+  });
+
+  /* ── 2. בריאות תפעולית — הגלאי לתקלות שקטות כמו תקלת shinunProg ── */
+  const s2 = admSection('🩺 בריאות תפעולית');
+  const opsBox = el('div');
+  s2.append(opsBox);
+  view.append(s2);
+
+  section(opsBox, async (box) => {
+    const o = await rpc(C.admin.opsHealth());
+    const card = admCard('דופק הענן', 'אירועים מול כתיבות user_kv');
+    const line = el('div', 'adm-ops');
+    line.append(el('span', 'adm-ops-stat', `⚡ ${o.events_1h ?? 0} אירועים בשעה האחרונה`));
+    line.append(el('span', 'adm-ops-stat', `🕓 אירוע אחרון: ${admAgo(o.last_event_at)}`));
+    line.append(el('span', 'adm-ops-stat', `📥 היום: ${o.event_users_today ?? 0} פעילים לפי אירועים · ${o.kv_users_today ?? 0} כתבו לענן`));
+    card.append(line);
+
+    /* פער בין "פעיל" ל"כותב לענן" = תור סנכרון מורעל אצל חלק מהמשתמשים —
+       בדיוק התקלה של 0003, שלא נראתה בשום מקום. */
+    const a = o.event_users_today ?? 0, b = o.kv_users_today ?? 0;
+    if (a >= 5 && b < a / 2) {
+      card.append(el('p', 'adm-alert bad',
+        `⚠️ פער חשוד: רק ${b} מתוך ${a} פעילים כתבו היום ל-user_kv. ` +
+        'ייתכן שתור הסנכרון מורעל אצל חלק מהמשתמשים (כמו תקלת shinunProg) — שווה לבדוק.'));
+    } else {
+      card.append(el('p', 'adm-alert ok', '✓ אין פער חשוד בין פעילות לכתיבה לענן.'));
+    }
+
+    /* כותבים לפי namespace בשבוע. מרחב מוכר שצנח לאפס = דגל אדום. */
+    const KNOWN_NS = ['progress', 'seen', 'seenH', 'shinunProg', 'cardsRead', 'caseProg'];
+    const got = {};
+    (o.ns_7d || []).forEach((r) => { got[r.ns] = r; });
+    const nsWrap = el('div', 'adm-ns');
+    KNOWN_NS.forEach((ns) => {
+      const r = got[ns];
+      const chip = el('span', 'adm-ns-chip' + (r ? '' : ' dead'));
+      chip.textContent = r ? `${ns} · ${r.users} כותבים` : `${ns} · 0 ‼️`;
+      chip.title = r ? `${r.rows} שורות עודכנו ב-7 הימים האחרונים` : 'אף משתמש לא כתב למרחב הזה השבוע — תקלה, או פיצ׳ר שטרם הופץ';
+      nsWrap.append(chip);
+    });
+    card.append(el('p', 'adm-hint', 'כותבים ייחודיים לכל מרחב שם ב-7 הימים האחרונים:'));
+    card.append(nsWrap);
+    box.append(card);
+  });
+
+  /* ── 3. מגמות שימוש — הצ׳יפים חלים על הסקשן הזה בלבד ─────────────── */
   let days = 30;
   const chipRow = el('div', 'adm-range');
-  view.append(chipRow);
+  const s3 = admSection('📈 מגמות שימוש', chipRow);
   const charts = el('div');
-  view.append(charts);
+  s3.append(charts);
+  view.append(s3);
 
   function drawChips() {
     chipRow.innerHTML = '';
@@ -4454,90 +4736,273 @@ async function renderAdmin() {
     });
   }
 
-  async function loadCharts() {
-    charts.innerHTML = '';
-    charts.append(el('div', 'adm-loading', 'טוען…'));
-    let targets, hourly, active, signups;
-    try {
-      [targets, hourly, active, signups] = await Promise.all([
-        C.admin.topTargets(days, 10),
-        C.admin.activeHourly(days),
-        C.admin.activeDaily(days),
-        C.admin.signupsDaily(days),
+  function loadCharts() {
+    section(charts, async (box) => {
+      const [activity, hourly, targets, signups] = await Promise.all([
+        rpc(C.admin.activityDaily(days)),
+        rpc(C.admin.hourlyUsers(days)),
+        rpc(C.admin.topTargets(days, 10)),
+        rpc(C.admin.signupsDailyV2(days)),
       ]);
-    } catch (err) {
-      charts.innerHTML = '';
-      charts.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err && err.message || err)));
-      return;
-    }
-    charts.innerHTML = '';
 
-    // ── מה הכי בשימוש ──
-    const cT = admCard('🔥 מה הכי בשימוש', 'הקורסים, המבחנים והכלים הכי נפתחים');
-    cT.append(rankBars(
-      (targets.data || []).map((r) => ({ label: prettyTarget(r.target, r.type), n: r.n })),
-      (r) => r.label, (r) => r.n,
-    ));
-    charts.append(cT);
+      // ── פעילים ליום: חוזרים (תכלת) + חדשים (ירוק) ──
+      const aRows = fillDays(activity, days, ['n', 'new_n']);
+      const nth = Math.max(1, Math.ceil(aRows.length / 7));
+      const cA = admCard('📈 פעילים ליום', `שעון ישראל · ${days} הימים האחרונים`);
+      cA.append(axisChart(aRows.map((r) => ({
+        label: fmtDay(r.day),
+        vals: [r.n - r.new_n, r.new_n],
+        tip: `${fmtDay(r.day)} · ${r.n} פעילים` + (r.new_n ? ` (${r.new_n} חדשים)` : ''),
+      })), {
+        everyNth: nth, colors: ['accent', 'good'],
+        legend: [{ label: 'חוזרים', cls: 'accent' }, { label: 'ביום הראשון שלהם', cls: 'good' }],
+      }));
+      box.append(cA);
 
-    // ── שעות שיא ──
-    const byHour = {};
-    (hourly.data || []).forEach((r) => { byHour[r.hour] = Number(r.n); });
-    const hRows = Array.from({ length: 24 }, (_, h) => ({ h, n: byHour[h] || 0 }));
-    const cH = admCard('🕐 מתי משתמשים', 'שעה ביום · שעון ישראל');
-    cH.append(columnChart(hRows, (r) => r.n, (r) => String(r.h).padStart(2, '0'), 6));
-    charts.append(cH);
+      // ── מתי לומדים: משתמשים ייחודיים לפי שעה ──
+      const byHour = {};
+      (hourly || []).forEach((r) => { byHour[r.hour] = Number(r.n); });
+      const cH = admCard('🕐 מתי לומדים', 'משתמשים ייחודיים בכל שעה · שעון ישראל · מצטבר על הטווח');
+      cH.append(axisChart(Array.from({ length: 24 }, (_, h) => ({
+        label: String(h).padStart(2, '0'),
+        vals: [byHour[h] || 0],
+        tip: `${String(h).padStart(2, '0')}:00–${String((h + 1) % 24).padStart(2, '0')}:00 · ${byHour[h] || 0} משתמשים`,
+      })), { everyNth: 3 }));
+      box.append(cH);
 
-    // ── פעילות יומית ──
-    const aRows = fillDays(active.data, days);
-    const nth = Math.max(1, Math.ceil(aRows.length / 6));
-    const cA = admCard('📈 פעילים ליום', `${days} הימים האחרונים`);
-    cA.append(columnChart(aRows, (r) => r.n, (r) => fmtDay(r.day), nth));
-    charts.append(cA);
+      // ── מה הכי בשימוש: פתיחות + כמה משתמשים שונים ──
+      const cT = admCard('🔥 מה הכי בשימוש', 'פתיחות בטווח · 👤 מכמה משתמשים שונים');
+      cT.append(rankBars((targets || []).map((r) => ({
+        label: prettyTarget(r.target, r.type), n: r.n, users: r.users,
+      }))));
+      box.append(cT);
 
-    // ── הרשמות יומיות ──
-    const sRows = fillDays(signups.data, days);
-    const cS = admCard('🆕 הצטרפות לפי יום', `${days} הימים האחרונים`);
-    cS.append(columnChart(sRows, (r) => r.n, (r) => fmtDay(r.day), nth, true));
-    charts.append(cS);
+      // ── הצטרפות לפי יום ──
+      const sRows = fillDays(signups, days);
+      const cS = admCard('🆕 הצטרפות לפי יום', `שעון ישראל · ${days} הימים האחרונים`);
+      cS.append(axisChart(sRows.map((r) => ({
+        label: fmtDay(r.day), vals: [r.n],
+        tip: `${fmtDay(r.day)} · ${r.n} נרשמו`,
+      })), { everyNth: nth, colors: ['good'] }));
+      box.append(cS);
+    });
   }
 
   drawChips();
+  loadCharts();
 
-  try {
-    const ov = await C.admin.overview();
-    if (ov.error) {
-      view.innerHTML = '';
-      view.append(emptyState('🔒', 'אין גישה', 'השרת דחה את הבקשה — לוח הבקרה למנהל בלבד.'));
+  /* ── 4. בריאות התוכן — הנתונים מ-user_kv, כל הזמנים ──────────────── */
+  const s4 = admSection('🔬 בריאות התוכן');
+  s4.append(el('p', 'adm-note',
+    'נצבר מכל הזמנים ולא מושפע מבחירת הטווח. סייג חשוב: תרגול חופשי ו„הטעויות שלי" ' +
+    'לא שומרים את המסיח שנבחר — פילוח המסיחים משקף מענה במבחנים בלבד, בעוד אחוזי ' +
+    'הטעות (מ-seen) מכסים הכול. רצפת פרטיות: נתון ברמת שאלה/מבחן מוצג רק מ-10 עונים ומעלה.'));
+  const qBox = el('div'), eBox = el('div'), shBox = el('div');
+  s4.append(qBox, eBox, shBox);
+  view.append(s4);
+
+  // ── השאלות שנופלים בהן ──
+  section(qBox, async (box) => {
+    const [stats, content] = await Promise.all([
+      rpc(C.admin.questionStats(10, 25)),
+      admLoadContent(),
+    ]);
+    const card = admCard('🧗 השאלות שהכי נופלים בהן',
+      'לפי המצב האחרון של כל משתמש (seen) · ממוין מהקשה לקלה');
+    if (!stats || !stats.length) {
+      card.append(el('p', 'adm-empty', 'עוד אין שאלה שענו עליה 10 משתמשים.'));
+      box.append(card);
       return;
     }
-    const o = ov.data || {};
-    kpis.append(kpiCard(o.total_users ?? '—', 'משתמשים רשומים', '👥', 'accent'));
-    kpis.append(kpiCard(o.active_today ?? '—', 'פעילים היום', '🟢', 'good'));
-    kpis.append(kpiCard(o.active_7d ?? '—', 'פעילים השבוע', '📅'));
-    kpis.append(kpiCard(o.new_7d ?? '—', 'הצטרפו השבוע', '🆕'));
-  } catch (err) {
-    view.innerHTML = '';
-    view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err && err.message || err)));
-    return;
-  }
+    let breakdown = {};
+    try {
+      const rows = await rpc(C.admin.answerBreakdown(stats.map((r) => r.qid), 10));
+      (rows || []).forEach((r) => { (breakdown[r.qid] = breakdown[r.qid] || []).push(r); });
+    } catch { /* בלי פילוח — הרשימה עצמה עדיין שווה הצגה */ }
 
-  await loadCharts();
+    stats.forEach((r, rank) => {
+      const pct = Math.round((r.wrong / r.attempts) * 100);
+      const info = content.byQid.get(r.qid);
+      const det = el('details', 'adm-q');
+      const sum = el('summary', 'adm-q-sum');
+
+      const pcts = el('span', 'adm-q-pct' + (pct >= 60 ? ' bad' : pct >= 40 ? ' warn' : ''), pct + '%');
+      pcts.title = `${r.wrong} מתוך ${r.attempts} — המצב האחרון שלהם בשאלה הוא טעות`;
+      sum.append(el('span', 'rank-i', String(rank + 1)));
+      sum.append(pcts);
+
+      const txt = el('span', 'adm-q-txt');
+      if (info) {
+        txt.append(el('b', null, (info.q.q || '').slice(0, 90) + ((info.q.q || '').length > 90 ? '…' : '')));
+        txt.append(el('span', 'adm-q-src', `${info.courseName} · ${info.examTitle} · ${r.attempts} ענו`));
+      } else {
+        txt.append(el('b', null, `שאלה ${r.qid}`));
+        txt.append(el('span', 'adm-q-src', `לא נמצאה בארכיון (הוסרה?) · ${r.attempts} ענו`));
+      }
+      sum.append(txt);
+
+      /* מתחת ל-25% הצלחה — גרוע מניחוש אקראי בשאלת 4 מסיחים. כך נמצאו
+         ידנית שתי טעויות המפתח הקודמות; עכשיו זה צף מעצמו. */
+      if (100 - pct < 25) sum.append(el('span', 'adm-flag', '🚨 חשד למפתח שגוי'));
+
+      if (info) {
+        const link = el('a', 'adm-q-link', 'לשאלה ↗');
+        link.href = '#/q/' + r.qid;
+        link.onclick = (e) => e.stopPropagation();
+        sum.append(link);
+      }
+      det.append(sum);
+
+      /* גוף: פילוח המסיחים. rulingA — הכרעת תוכן גוברת על מפתח שגוי במקור. */
+      const body = el('div', 'adm-q-body');
+      const bd = breakdown[r.qid];
+      if (info && bd) {
+        const q = rulingA(info.q);
+        const total = bd.reduce((s, x) => s + Number(x.n), 0);
+        const byChoice = {};
+        bd.forEach((x) => { byChoice[x.choice] = Number(x.n); });
+        const topWrong = Object.entries(byChoice)
+          .filter(([c]) => Number(c) !== q.a)
+          .sort((x, y) => y[1] - x[1])[0];
+        (q.opts || []).forEach((opt, oi) => {
+          const n = byChoice[oi] || 0;
+          const p = total ? Math.round((n / total) * 100) : 0;
+          const isC = oi === q.a;
+          const isTrap = topWrong && Number(topWrong[0]) === oi && p >= 35;
+          const row = el('div', 'adm-opt' + (isC ? ' correct' : isTrap ? ' trap' : ''));
+          const bar = el('div', 'adm-opt-bar');
+          const f = el('i'); f.style.width = p + '%';
+          bar.append(f);
+          row.append(bar);
+          row.append(el('span', 'adm-opt-n', `${p}% · ${n}`));
+          row.append(el('span', 'adm-opt-t', (isC ? '✓ ' : isTrap ? '🪤 ' : '') + opt));
+          body.append(row);
+        });
+        body.append(el('p', 'adm-hint',
+          `${total} בחירות במבחנים.` +
+          (topWrong && Math.round((topWrong[1] / total) * 100) >= 35
+            ? ' המסיח 🪤 מושך שליש ומעלה — כנראה תפיסה שגויה משותפת, חומר למלכודת במפה.'
+            : '')));
+      } else {
+        body.append(el('p', 'adm-empty',
+          info ? 'אין פילוח מסיחים — פחות מ-10 ענו עליה בתוך מבחן (תרגול חופשי לא שומר את הבחירה).'
+               : 'אין תוכן להצגת מסיחים.'));
+      }
+      det.append(body);
+      card.append(det);
+    });
+    box.append(card);
+  });
+
+  // ── ציונים ונטישה לפי מבחן ──
+  section(eBox, async (box) => {
+    const [stats, content] = await Promise.all([
+      rpc(C.admin.examStats(10)),
+      admLoadContent(),
+    ]);
+    const card = admCard('🎯 ציונים ונטישה לפי מבחן',
+      'התפלגות ציונים מוצגת רק כשיש 10 מסיימים');
+    const rows = (stats || []).filter((r) => content.exams.has(r.exam_id));
+    if (!rows.length) {
+      card.append(el('p', 'adm-empty', 'עוד אין נתוני מבחנים בענן.'));
+      box.append(card);
+      return;
+    }
+    rows.slice(0, 15).forEach((r) => {
+      const meta = content.exams.get(r.exam_id);
+      const row = el('div', 'adm-exam');
+      const t = el('a', 'adm-exam-t', meta.title);
+      t.href = '#/exam/' + r.exam_id;
+      row.append(t);
+      const drop = Number(r.zero) || 0;
+      row.append(el('span', 'adm-exam-s',
+        `${meta.course} · ${r.started} התחילו · ${r.finished} סיימו` +
+        (drop ? ` · ${drop} פתחו ולא ענו` : '')));
+
+      if (r.hist && meta.scored) {
+        /* היסטוגרמת correct → אחוזים לפי מספר השאלות שנספרות בציון. */
+        const buckets = [0, 0, 0, 0, 0];   // ‹60 / 60–69 / 70–79 / 80–89 / 90+
+        let sum = 0, cnt = 0;
+        Object.entries(r.hist).forEach(([c, n]) => {
+          const p = (Number(c) / meta.scored) * 100;
+          sum += p * n; cnt += n;
+          buckets[p >= 90 ? 4 : p >= 80 ? 3 : p >= 70 ? 2 : p >= 60 ? 1 : 0] += n;
+        });
+        const avg = cnt ? Math.round(sum / cnt) : 0;
+        const dist = el('div', 'adm-dist');
+        dist.append(el('b', 'adm-dist-avg' + (avg >= 80 ? ' good' : avg < 60 ? ' bad' : ''), `ממוצע ${avg}%`));
+        const labels = ['‹60', '60–69', '70–79', '80–89', '90+'];
+        buckets.forEach((n, i) => {
+          const seg = el('span', 'adm-dist-b b' + i, `${labels[i]}: ${n}`);
+          if (!n) seg.classList.add('zero');
+          dist.append(seg);
+        });
+        row.append(dist);
+      } else if (Number(r.finished) > 0) {
+        row.append(el('span', 'adm-hint', 'פחות מ-10 מסיימים — אין התפלגות (פרטיות).'));
+      }
+      card.append(row);
+    });
+    if (rows.length > 15) card.append(el('p', 'adm-hint', `מוצגים 15 מתוך ${rows.length} מבחנים (לפי מספר מתחילים).`));
+    box.append(card);
+  });
+
+  // ── בריאות השינון ──
+  section(shBox, async (box) => {
+    const o = await rpc(C.admin.shinunHealth());
+    const card = admCard('🧠 בריאות השינון', 'קופסאות לייטנר · כל המשתמשים יחד');
+    if (!o || !o.users) {
+      card.append(el('p', 'adm-empty',
+        'אף פריט שינון לא הגיע לענן. אם יש משתמשים פעילים בשינון — זה סימן לתקלת סנכרון (ר׳ בריאות תפעולית).'));
+      box.append(card);
+      return;
+    }
+    card.append(el('p', 'adm-ops-stat',
+      `👤 ${o.users} משתמשים · 🗂️ ${o.items} פריטים מדורגים · ` +
+      `🐌 ${o.stuck} תקועים בקופסה 0 שבועיים ומעלה`));
+    const boxes = o.boxes || {};
+    card.append(axisChart([0, 1, 2, 3].map((b) => ({
+      label: 'קופסה ' + b,
+      vals: [Number(boxes[b] || 0)],
+      tip: `קופסה ${b} · ${Number(boxes[b] || 0)} פריטים`,
+    })), { colors: ['accent'] }));
+    card.append(el('p', 'adm-hint',
+      'קופסה 3 = יודעים; קופסה 0 = בתחילת הדרך. הרבה פריטים תקועים ב-0 = חומר שכדאי לפשט או לפצל.'));
+    box.append(card);
+  });
+
   toTop();
   updateFooter();
 }
 
-/* מזהה target → שם קריא. 'course:electro' → 'אלקטרו', 'exam:<id>' → כותרת המבחן. */
+/* מזהה target → שם קריא. 'course:electro' → 'אלקטרו', 'exam:<id>' → כותרת המבחן.
+   מסלול בלי פרמטר (target='course' בלי ':') מקבל תווית כללית — בעבר זה
+   רינדר '📚 undefined'. */
 function prettyTarget(target, type) {
   if (!target) return type;
   const [kind, id] = String(target).split(':');
-  if (kind === 'course') { const c = courseOf(id); return '📚 ' + (c ? c.name : id); }
-  if (kind === 'exam') { const e = EXAMS.find((x) => x.id === id); return '📄 ' + (e ? e.title : id); }
-  if (kind === 'sim') return '🎛️ סימולציה: ' + id;
-  if (kind === 'drill') return '🧮 תרגיל: ' + id;
-  if (kind === 'practice') { const c = courseOf(id); return '🏋️ תרגול: ' + (c ? c.name : id); }
-  if (kind === 'review') { const c = courseOf(id); return '🎯 טעויות: ' + (c ? c.name : id); }
-  if (kind === 'guide') { const c = courseOf(id); return '🗺️ מפה: ' + (c ? c.name : id); }
+  if (id === undefined) {
+    const plain = {
+      course: '📚 עמוד מקצוע', exam: '📄 מבחן', sim: '🎛️ סימולציה', drill: '🧮 תרגיל',
+      practice: '🏋️ תרגול', review: '🎯 טעויות', guide: '🗺️ מפה', traps: '🪤 מלכודות',
+      shinun: '🧠 שינון', cards: '📇 כרטיסיות', case: '🩺 מקרים', formulas: '🧾 נוסחאות',
+    };
+    return plain[kind] || target;
+  }
+  const cName = (x) => { const c = courseOf(x); return c ? c.name : x; };
+  const eTitle = (x) => { const e = EXAMS.find((v) => v.id === x); return e ? e.title : x; };
+  if (kind === 'course')   return '📚 ' + cName(id);
+  if (kind === 'exam')     return '📄 ' + eTitle(id);
+  if (kind === 'sim')      return '🎛️ סימולציה: ' + id;
+  if (kind === 'drill')    return '🧮 תרגיל: ' + id;
+  if (kind === 'practice') return '🏋️ תרגול: ' + cName(id);
+  if (kind === 'review')   return '🎯 טעויות: ' + cName(id);
+  if (kind === 'guide')    return '🗺️ מפה: ' + cName(id);
+  if (kind === 'traps')    return '🪤 מלכודות: ' + cName(id);
+  if (kind === 'shinun')   return '🧠 שינון: ' + cName(id);
+  if (kind === 'cards')    return '📇 כרטיסיות: ' + eTitle(id);
+  if (kind === 'case')     return '🩺 מקרים: ' + eTitle(id);
+  if (kind === 'formulas') return '🧾 נוסחאות: ' + cName(id);
   return target;
 }
 

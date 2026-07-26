@@ -385,13 +385,25 @@
     /* מעקב אגרגטיבי — app.js קורא Cloud.track('view', courseId) וכו׳. */
     track,
 
-    /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת). */
+    /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת).
+       הפונקציות הישנות (0002) נשארות לקליינטים שמורים במטמון; הלוח הנוכחי
+       קורא ל-v2 (0004): יום לפי שעון ישראל, ותובנות מ-user_kv. */
     admin: {
       overview:     ()   => sb.rpc('admin_overview'),
       signupsDaily: (d)  => sb.rpc('admin_signups_daily', { days: d ?? 30 }),
       activeDaily:  (d)  => sb.rpc('admin_active_daily',  { days: d ?? 30 }),
       activeHourly: (d)  => sb.rpc('admin_active_hourly', { days: d ?? 30 }),
       topTargets:   (d, l) => sb.rpc('admin_top_targets', { days: d ?? 30, lim: l ?? 20 }),
+
+      overviewV2:      ()   => sb.rpc('admin_overview_v2'),
+      activityDaily:   (d)  => sb.rpc('admin_activity_daily',   { days: d ?? 30 }),
+      signupsDailyV2:  (d)  => sb.rpc('admin_signups_daily_v2', { days: d ?? 30 }),
+      hourlyUsers:     (d)  => sb.rpc('admin_hourly_users',     { days: d ?? 30 }),
+      questionStats:   (n, l) => sb.rpc('admin_question_stats', { min_n: n ?? 10, lim: l ?? 25 }),
+      answerBreakdown: (qids, n) => sb.rpc('admin_answer_breakdown', { qids, min_n: n ?? 10 }),
+      examStats:       (n)  => sb.rpc('admin_exam_stats',       { min_n: n ?? 10 }),
+      shinunHealth:    ()   => sb.rpc('admin_shinun_health'),
+      opsHealth:       ()   => sb.rpc('admin_ops_health'),
     },
 
     status: () => ({ pending: outbox.length, lastSync: state.lastSync, syncing: state.syncing }),

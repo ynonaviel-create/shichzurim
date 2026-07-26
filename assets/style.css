@@ -480,6 +480,36 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .opt.wrong{border-color:var(--bad); background:var(--bad-bg);}
 .opt.wrong .key{background:var(--bad); color:#fff; border-color:var(--bad);}
 
+/* --- פסילת תשובות — כמו למחוק מסיח בקו על דף מבחן אמיתי --- */
+.opt-x{
+  flex:none; margin-inline-start:auto;
+  width:27px; height:27px; border-radius:7px;
+  display:grid; place-items:center;
+  background:transparent; border:1px solid transparent;
+  color:var(--muted); font-size:12.5px; font-weight:800;
+  cursor:pointer; opacity:0; transition:.13s;
+}
+.opt:hover .opt-x, .opt-x:focus-visible{opacity:.7;}
+.opt-x:hover{opacity:1; color:var(--bad); background:var(--bad-bg); border-color:var(--line);}
+/* במסך מגע אין hover — ה-✕ גלוי תמיד, עדין. */
+@media (hover:none){.opt-x{opacity:.45;}}
+.opt.ruledout{opacity:.55; background:var(--surface-2); border-style:dashed;}
+.opt.ruledout > span:not(.key){text-decoration:line-through; text-decoration-thickness:1.5px;}
+.opt.ruledout .opt-x{opacity:1; color:var(--bad);}
+.opt.ruledout:hover{border-color:var(--line); background:var(--surface-2);}
+/* אחרי המענה הפסילה נשארת כעדות (מעניין לראות אם פסלת את הנכונה),
+   אבל ה-✕ עצמו נעלם ותצוגת נכון/טעות חוזרת לבהירות מלאה. */
+.opt.locked .opt-x{display:none;}
+.opt.ruledout.correct, .opt.ruledout.wrong{opacity:1; border-style:solid;}
+
+.elim-reset{
+  margin-top:10px; padding:5px 11px; border-radius:8px;
+  background:transparent; border:1px dashed var(--line);
+  color:var(--muted); font-size:12.5px; font-weight:700;
+  cursor:pointer; transition:.13s;
+}
+.elim-reset:hover{color:var(--text); border-color:var(--accent);}
+
 .fb{margin-top:16px; padding:14px 17px; border-radius:var(--radius-sm); font-size:14.5px; font-weight:700; display:none;}
 .fb.show{display:block;}
 .fb.ok{background:var(--good-bg); border:1px solid var(--good-ln); color:var(--good);}
@@ -1606,6 +1636,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .adm-loading{color:var(--dim); font-size:14px; padding:26px; text-align:center;}
 .adm-empty{color:var(--dim); font-size:13.5px; text-align:center; padding:16px;}
 
+/* סקשנים בלוח */
+.adm-sec{margin-bottom:30px;}
+.adm-sec-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+.adm-sec-head h2{font-size:19px; font-weight:800; letter-spacing:-.3px;}
+.adm-sec-head .adm-range{margin-bottom:0;}
+.adm-note{font-size:13px; color:var(--dim); line-height:1.7; margin-bottom:14px;}
+
 /* מדורג — מה הכי בשימוש */
 .rank{display:flex; flex-direction:column; gap:11px;}
 .rank-row{display:flex; align-items:center; gap:11px;}
@@ -1614,18 +1651,106 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .rank-bar{flex:1; height:9px; background:var(--surface-2); border-radius:99px; overflow:hidden;}
 .rank-bar i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-dk)); border-radius:99px;}
 .rank-n{width:32px; text-align:left; direction:ltr; font-size:13px; font-weight:800; color:var(--accent-dk); flex:none;}
+.rank-u{width:52px; text-align:left; direction:ltr; font-size:11.5px; font-weight:700; color:var(--dim); flex:none;}
 
-/* היסטוגרמת עמודות */
-.col-chart{display:flex; align-items:flex-end; gap:3px; direction:ltr; height:148px; padding-top:6px;}
-.col{flex:1; min-width:0; height:100%; display:flex; flex-direction:column; align-items:center; gap:6px;}
-.col-bar{flex:1; width:100%; max-width:24px; display:flex; align-items:flex-end; background:var(--surface-2); border-radius:5px 5px 0 0; overflow:hidden;}
-.col-bar i{display:block; width:100%; min-height:2px; background:linear-gradient(180deg,var(--accent),var(--accent-dk)); border-radius:5px 5px 0 0;}
-.col-chart.accent .col-bar i{background:linear-gradient(180deg,var(--good),var(--good-ln));}
-.col-lab{font-size:10px; color:var(--dim); font-weight:700; height:12px; line-height:12px; white-space:nowrap;}
+/* גרף עמודות עם ציר — chx */
+.chx{position:relative;}
+.chx-plot{position:relative; height:150px; margin-top:8px; padding-top:14px;}
+.chx-gl{position:absolute; left:0; right:0; border-top:1px dashed var(--line-soft); pointer-events:none;}
+.chx-gl:last-of-type{border-top-style:solid;}
+.chx-gv{position:absolute; top:-7px; left:0; transform:translateX(calc(-100% - 6px));
+  font-size:10.5px; font-weight:700; color:var(--dim); line-height:14px;}
+.chx-plot{margin-inline-start:30px;}   /* מקום לערכי הציר משמאל (dir=ltr) */
+.chx-bars{display:flex; align-items:flex-end; gap:3px; height:100%;}
+.chx-col{flex:1; min-width:0; height:100%; display:flex; flex-direction:column; align-items:center; cursor:default;}
+.chx-bar{flex:1; width:100%; max-width:26px; display:flex; flex-direction:column-reverse; justify-content:flex-start;}
+.chx-s{display:block; width:100%;}
+.chx-s.accent{background:linear-gradient(180deg,var(--accent),var(--accent-dk));}
+.chx-s.good{background:linear-gradient(180deg,var(--good),var(--good-ln));}
+.chx-bar .chx-s:last-child{border-radius:4px 4px 0 0;}
+.chx-col.lit .chx-s{filter:brightness(1.15);}
+.chx-lab{font-size:10px; color:var(--dim); font-weight:700; height:14px; line-height:14px; white-space:nowrap; margin-top:4px;}
+.chx-lab:empty::before{content:''; display:inline-block;}
+.chx-tip{
+  position:absolute; top:-8px; z-index:3; display:none; pointer-events:none;
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  padding:4px 9px; font-size:12px; font-weight:700; color:var(--text);
+  box-shadow:var(--shadow); direction:rtl; white-space:nowrap;
+}
+.chx-tip.on{display:block;}
+.chx-legend{display:flex; gap:14px; margin-top:8px; font-size:12px; font-weight:700; color:var(--muted);}
+.chx-lg{display:inline-flex; align-items:center; gap:6px;}
+.chx-lg .chx-s{width:11px; height:11px; border-radius:3px;}
+
+/* בריאות תפעולית */
+.adm-ops{display:flex; gap:8px 18px; flex-wrap:wrap; margin-bottom:12px;}
+.adm-ops-stat{font-size:13.5px; font-weight:700; color:var(--muted);}
+.adm-alert{font-size:13.5px; font-weight:700; border-radius:var(--radius-sm); padding:9px 13px; margin-bottom:12px; line-height:1.6;}
+.adm-alert.bad{background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad-ln);}
+.adm-alert.ok{background:var(--surface-2); color:var(--good); border:1px solid var(--line-soft);}
+.adm-ns{display:flex; gap:8px; flex-wrap:wrap;}
+.adm-ns-chip{
+  font-size:12px; font-weight:700; color:var(--muted); background:var(--surface-2);
+  border:1px solid var(--line-soft); border-radius:99px; padding:4px 12px; direction:ltr;
+}
+.adm-ns-chip.dead{background:var(--bad-bg); color:var(--bad); border-color:var(--bad-ln);}
+
+/* בריאות התוכן — שאלות */
+.adm-q{border-top:1px solid var(--line-soft); }
+.adm-q:first-of-type{border-top:none;}
+.adm-q-sum{
+  display:flex; align-items:center; gap:10px; padding:11px 2px; cursor:pointer;
+  list-style:none; flex-wrap:wrap;
+}
+.adm-q-sum::-webkit-details-marker{display:none;}
+.adm-q[open] .adm-q-sum{background:var(--surface-2); border-radius:var(--radius-sm);}
+.adm-q-pct{font-size:15px; font-weight:800; color:var(--muted); width:44px; flex:none; text-align:center; direction:ltr;}
+.adm-q-pct.warn{color:#a86a06;}
+.adm-q-pct.bad{color:var(--bad);}
+.adm-q-txt{flex:1; min-width:180px; display:flex; flex-direction:column; gap:2px;}
+.adm-q-txt b{font-size:13.5px; font-weight:700; line-height:1.5;}
+.adm-q-src{font-size:12px; color:var(--dim); font-weight:600;}
+.adm-flag{
+  font-size:11.5px; font-weight:800; color:var(--bad); background:var(--bad-bg);
+  border:1px solid var(--bad-ln); border-radius:99px; padding:3px 10px; flex:none;
+}
+.adm-q-link{font-size:12.5px; font-weight:700; color:var(--accent-dk); flex:none;}
+.adm-q-body{padding:6px 8px 14px;}
+.adm-opt{display:flex; align-items:center; gap:10px; padding:5px 0;}
+.adm-opt-bar{flex:0 0 110px; height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden; direction:ltr;}
+.adm-opt-bar i{display:block; height:100%; background:var(--dim); border-radius:99px;}
+.adm-opt.correct .adm-opt-bar i{background:var(--good);}
+.adm-opt.trap .adm-opt-bar i{background:var(--bad);}
+.adm-opt-n{flex:0 0 64px; font-size:12px; font-weight:800; color:var(--muted); direction:ltr; text-align:left;}
+.adm-opt-t{flex:1; font-size:13px; line-height:1.5;}
+.adm-opt.correct .adm-opt-t{color:var(--good); font-weight:700;}
+.adm-opt.trap .adm-opt-t{color:var(--bad); font-weight:700;}
+
+/* בריאות התוכן — מבחנים */
+.adm-exam{border-top:1px solid var(--line-soft); padding:12px 2px; display:flex; flex-direction:column; gap:6px;}
+.adm-exam:first-of-type{border-top:none;}
+.adm-exam-t{font-size:14px; font-weight:800; color:var(--text);}
+.adm-exam-t:hover{color:var(--accent-dk);}
+.adm-exam-s{font-size:12.5px; color:var(--dim); font-weight:600;}
+.adm-dist{display:flex; align-items:center; gap:7px; flex-wrap:wrap;}
+.adm-dist-avg{font-size:13px; font-weight:800; color:var(--muted);}
+.adm-dist-avg.good{color:var(--good);}
+.adm-dist-avg.bad{color:var(--bad);}
+.adm-dist-b{
+  font-size:11.5px; font-weight:700; color:var(--muted); background:var(--surface-2);
+  border-radius:7px; padding:3px 9px; border-inline-start:3px solid var(--dim); direction:ltr;
+}
+.adm-dist-b.b0{border-inline-start-color:var(--bad);}
+.adm-dist-b.b1{border-inline-start-color:#a86a06;}
+.adm-dist-b.b2{border-inline-start-color:var(--dim);}
+.adm-dist-b.b3, .adm-dist-b.b4{border-inline-start-color:var(--good);}
+.adm-dist-b.zero{opacity:.45;}
 
 @media (max-width:560px){
-  .rank-name{flex-basis:120px; max-width:120px;}
-  .col-chart{height:120px;}
+  .rank-name{flex-basis:110px; max-width:110px;}
+  .rank-u{display:none;}
+  .chx-plot{height:120px;}
+  .adm-opt-bar{flex-basis:70px;}
 }
 
 /* ===== פנייה אישית בשם ===== */
