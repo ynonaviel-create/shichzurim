@@ -853,7 +853,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   if (route === 'admin') return renderAdmin();
@@ -870,6 +870,8 @@ function router() {
   if (route === 'drills' && param) return renderDrills(param);
   if (route === 'drill' && param) return renderDrill(param);
   if (route === 'formulas' && param) return renderFormulas(param, sub ? decodeURIComponent(sub) : null);
+  // #/sheet/<course> — דף הנוסחאות הרשמי, לעיון מחוץ לתרגול
+  if (route === 'sheet' && param) return renderSheet(param);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
@@ -1461,6 +1463,7 @@ async function renderExam(id, focusIdx = null) {
   if (exam.course) view.dataset.course = exam.course;
   playQuestions({
     key: exam.id,
+    courseId: exam.course,
     title: exam.title,
     subtitle: `${c ? c.name : ''} ${exam.part || ''} · ${exam.questions.length} שאלות`.trim(),
     note: exam.note,
@@ -2455,6 +2458,16 @@ function playQuestions(cfg) {
 
   const resetBtn = el('button', 'btn ghost', 'איפוס');
   bar.append(resetBtn);
+
+  /* דף הנוסחאות זמין כאן *לפני* התשובה, ובכוונה: במבחן הוא על השולחן. תרגול
+     שמחזיק אותו רק במשוב מאמן פתרון-מהזיכרון, וזה לא מה שנבחן. */
+  if (sheetOf(cfg.courseId)) {
+    const sb = el('button', 'btn ghost sheet-open', '📄 דף נוסחאות');
+    sb.type = 'button';
+    sb.title = 'הדף הרשמי שמחולק במבחן — פתיחה בלי לצאת מהשאלה';
+    sb.onclick = () => openSheet(cfg.courseId);
+    bar.append(sb);
+  }
   bar.append(rewardToggles());
 
   /* מצב מבחן — רק בשחזורים (cfg.allowExam). מבחן = משוב נדחה לסוף; לימוד = מיידי. */
@@ -2694,6 +2707,19 @@ function playQuestions(cfg) {
         setTimeout(() => { lk.textContent = '🔗'; }, 1400);
       };
       tools.append(lk);
+
+      /* פתיחת דף הנוסחאות ישר על הסעיף של השאלה הזאת — לפני התשובה, כי זה
+         בדיוק מה שעושים במבחן: מזהים את סוג החישוב ומדפדפים למקום הנכון. */
+      const sec = sheetRefFor(cfg.courseId, item);
+      if (sec) {
+        const sq = el('button', 'q-tool');
+        sq.type = 'button';
+        sq.textContent = '📄';
+        sq.title = `דף הנוסחאות · ${sec.label}`;
+        sq.setAttribute('aria-label', sq.title);
+        sq.onclick = () => openSheet(cfg.courseId, sec.k);
+        tools.append(sq);
+      }
       top.append(tools);
     }
 
@@ -2913,6 +2939,9 @@ function playQuestions(cfg) {
     /* טעית בשאלת שעתוק? הרגע הזה הוא בדיוק הרגע לדעת מאיזה עמוד ללמוד אותו. */
     const gb = guideButton(item.topic);
     if (gb) fb.append(gb);
+    /* ובשאלת חישוב — הנוסחה קיימת על השולחן במבחן, והמיומנות היא למצוא אותה. */
+    const sh = sheetButton(cfg.courseId, sheetRefFor(cfg.courseId, item));
+    if (sh) fb.append(sh);
     fb.append(notebookButton(item, oi));
   }
 
@@ -3072,6 +3101,210 @@ function openLightbox(src) {
   document.addEventListener('keydown', onKey);
   document.body.append(overlay);
   btn.focus();
+}
+
+/* ================= דף הנוסחאות הרשמי =================
+   הדף שמחולק על השולחן במבחן. הוא לא עוד תמונה בארכיון אלא הכלי שאיתו פותרים,
+   ולכן הוא נגיש משלושה מצבים שונים: כפתור קבוע בתרגול — זמין *לפני* התשובה,
+   בדיוק כמו במבחן; שבב במשוב שמצביע על הסעיף הרלוונטי דווקא — *אחרי* התשובה,
+   כשהשאלה "איפה זה היה בדף" היא בדיוק מה שצריך ללמוד; ועמוד עצמאי לעיון.
+
+   הסעיפים אינם חיתוכים אלא מלבנים מנורמלים מעל עמוד המקור. זה מכוון: מי
+   שלומד לזהות "זה בעמוד השני, שליש מלמטה" מוצא את זה במבחן בשניות, ומי
+   שרואה רק חיתוך לומד נוסחה מרחפת בלי מפה. הקואורדינטות נגזרו מ-blocks
+   של ה-PDF ולא מהערכה בעין. */
+const SHEET = {
+  electro: {
+    title: 'דף נוסחאות — פיזיולוגיה כללית ואלקטרופיזיולוגיה',
+    sub: 'הדף הרשמי שמחולק במבחן (תשפ״ה). לדעת איפה כל דבר יושב שווה דקות.',
+    img: (p) => `assets/img/electro-sheet-${p}.png`,
+    pages: [
+      { p: 1, title: 'דיפוזיה ונרנסט' },
+      { p: 2, title: 'הממברנה כמעגל חשמלי' },
+      { p: 3, title: 'סינפסות והבסיס הקוונטאלי' },
+    ],
+    /* סדר הרשימה = סדר הסריקה. מהספציפי לכללי, כי "התנגדות כניסה" מופיעה גם
+       בשאלת כבל וגם בשאלת צימוד, ומי שנסרק ראשון מנצח. */
+    sections: [
+      { k: 'quantal',  p: 3, y: 0.8545, h: 0.1440, label: 'הבסיס הקוונטאלי — m=EPP/mEPP · npq',
+        re: /תכולה קוונטית|קוונטל|קוונטא?לי|mEPP|EPP|npq/ },
+      { k: 'coupling', p: 3, y: 0.6340, h: 0.2144, label: 'מקדם צימוד · Rin של תא מצומד',
+        re: /מקדם צימוד|סינפסה חשמלית|gap.?junction|קונקסין|connexin/i },
+      { k: 'clamp',    p: 3, y: 0.4441, h: 0.1868, label: 'קיבוע מתח — I_H ו-I_syn',
+        re: /קיבוע מתח|voltage.?clamp|זרם החזקה|פוטנציאל החזקה/i },
+      { k: 'erev',     p: 3, y: 0.3706, h: 0.0674, label: 'פוטנציאל היפוך סינפטי — Erev',
+        re: /פוטנציאל היפוך|E ?rev|Esyn|E_syn/i },
+      { k: 'gsyn',     p: 3, y: 0.2328, h: 0.1317, label: 'Vmem לפי מוליכות סינפטית יחסית',
+        re: /מוליכות סינפטית יחסית|g ?syn|gsyn/i },
+      { k: 'epsp',     p: 3, y: 0.0551, h: 0.1746, label: 'פוטנציאל סינפטי במצב עמיד — EPSPss',
+        re: /EPSP|gExc|gInh|מעורר.{0,25}מעכב.{0,25}מוליכות/ },
+      { k: 'rinput',   p: 2, y: 0.8849, h: 0.1084, label: 'התנגדות כניסה בכבל אין-סופי',
+        re: /כבל אין.?סופי|r ?input|התנגדות כניסה/i },
+      { k: 'lambda',   p: 2, y: 0.7765, h: 0.1084, label: 'קבוע המרחק — λ=√(aRm/2Ri)',
+        re: /קבוע המרחק|קבוע מרחק|λ|למבדה/ },
+      { k: 'tau',      p: 2, y: 0.6862, h: 0.0767, label: 'קבוע הזמן — τ=RmCm',
+        re: /קבוע הזמן|τ/ },
+      { k: 'decay',    p: 2, y: 0.5869, h: 0.0858, label: 'דעיכת מתח לפי קבוע מרחק',
+        re: /דעיכת המתח|דועך|Vx ?=|V0 ?e/ },
+      { k: 'charge',   p: 2, y: 0.4379, h: 0.1490, label: 'טעינת הממברנה — I_R, I_C, ΔV',
+        re: /זרם קיבולי|טעינת הקבל|נטען|הזרקת זרם|הזרקה של זרם/ },
+      { k: 'vmem',     p: 2, y: 0.3070, h: 0.1309, label: 'Vmem — מוליכות מקבילית',
+        re: /מוליכות מקביל|Vmem|V ?mem/i },
+      { k: 'basics',   p: 2, y: 0.0045, h: 0.3025, label: 'חוק אוהם · קיבול · זרם כללי',
+        re: /חוק אוהם|V ?= ?IR|קיבול הממברנה/ },
+      { k: 'nernst',   p: 1, y: 0.5762, h: 0.4015, label: 'פוטנציאל נרנסט — 58/z ו-61.5/z',
+        re: /נרנסט|nernst|61\.5|58\/z|פוטנציאל שיווי המשקל/i },
+      { k: 'diff',     p: 1, y: 0.2825, h: 0.2937, label: 'דיפוזיה — γ²=2Dt וקבוע הדיפוזיה',
+        /* "דיפוזיה" לבדה רחבה מדי — פעפוע המוליך במרווח הסינפטי מופיע בעשרות
+           הסברים ואין לו שום קשר ל-γ²=2Dt. רק סימני הנוסחה עצמה נחשבים. */
+        re: /חזית הדיפוזיה|קבוע הדיפוזיה|מקדם הדיפוזיה|צמיגות|אבוגדרו|2Dt/ },
+      { k: 'geom',     p: 1, y: 0.1227, h: 0.1152, label: 'גאומטריה — שטח פנים, נפח, היקף',
+        re: /שטח פנים|נפח הכדור|היקף/ },
+    ],
+    /* נפילה-לאחור כשאין התאמת מילים: הסעיף שהנושא חי בו. רק נושאים שבאמת יש
+       להם בית בדף — נושא בלי נוסחה לא יקבל שבב, ועדיף כך מאשר להצביע לחלל. */
+    byTopic: {
+      /* 'תנועת חלקיקים ודיפוזיה' אינו כאן בכוונה: רוב שאלותיו הן אוסמולריות,
+         ואוסמולריות פשוט אינה בדף הנוסחאות. עדיף בלי שבב מאשר שבב שמצביע
+         על הנוסחה השכנה. */
+      'פוטנציאל מנוחה': 'nernst',
+      'תכונות פאסיביות של הממברנה': 'tau',
+      'הסינפסה: המודל החשמלי': 'epsp',
+      'התאוריה הקוונטאלית': 'quantal',
+      /* גם 'רצפטורים ותגובה פוסט-סינפטית' אינו כאן: רובו ביולוגיה של קולטנים
+         ולא חישוב, ושבב "פוטנציאל היפוך" על שאלת AChR הוא רעש. מי שכן שואל
+         על Erev כותב את המילים, והביטוי תופס אותו. */
+    },
+  },
+};
+
+const sheetOf = (courseId) => SHEET[courseId] || null;
+function sheetSection(courseId, key) {
+  const s = sheetOf(courseId);
+  return s ? s.sections.find((x) => x.k === key) || null : null;
+}
+
+/* מהשאלה לסעיף. קודם מילים בגוף השאלה — הן הראיה החזקה; ורק אם אין, הנושא.
+   מחזיר null בשמחה: שבב שמצביע על הסעיף הלא-נכון גרוע משבב שאינו קיים. */
+function sheetRefFor(courseId, item) {
+  const s = sheetOf(courseId);
+  if (!s || !item) return null;
+  const hay = [item.q, (item.opts || []).join(' '), item.explain || ''].join(' ');
+  const hit = s.sections.find((sec) => sec.re && sec.re.test(hay));
+  if (hit) return hit;
+  const k = s.byTopic[item.topic];
+  return k ? sheetSection(courseId, k) : null;
+}
+
+/* גוף התצוגה — אותו קוד לעמוד העצמאי ולחלון הצף, כי זה אותו דף.
+   focusKey מדליק מלבן על סעיף אחד וגולל אליו. */
+function sheetNode(courseId, focusKey = null) {
+  const s = sheetOf(courseId);
+  const wrap = el('div', 'sheet');
+  if (!s) return wrap;
+
+  const idx = el('div', 'sheet-idx');
+  const marks = {};
+  s.sections.forEach((sec) => {
+    const b = el('button', 'sheet-chip', sec.label);
+    b.type = 'button';
+    b.dataset.k = sec.k;
+    b.onclick = () => focus(sec.k);
+    idx.append(b);
+  });
+  wrap.append(idx);
+
+  const pagesBox = el('div', 'sheet-pages');
+  s.pages.forEach((pg) => {
+    const box = el('div', 'sheet-page');
+    const cap = el('div', 'sheet-cap', `עמוד ${pg.p} — ${pg.title}`);
+    const holder = el('div', 'sheet-holder');
+    const img = el('img');
+    img.src = s.img(pg.p);
+    img.alt = `דף הנוסחאות, עמוד ${pg.p} — ${pg.title}`;
+    img.loading = 'lazy';
+    holder.append(img);
+    s.sections.filter((sec) => sec.p === pg.p).forEach((sec) => {
+      const m = el('div', 'sheet-mark');
+      m.style.top = (sec.y * 100).toFixed(2) + '%';
+      m.style.height = (sec.h * 100).toFixed(2) + '%';
+      m.append(el('span', 'sheet-mark-tag', sec.label));
+      holder.append(m);
+      marks[sec.k] = m;
+    });
+    box.append(cap, holder);
+    pagesBox.append(box);
+  });
+  wrap.append(pagesBox);
+
+  function focus(k) {
+    Object.entries(marks).forEach(([key, m]) => m.classList.toggle('is-on', key === k));
+    idx.querySelectorAll('.sheet-chip').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
+    const m = marks[k];
+    if (m) setTimeout(() => m.scrollIntoView({ behavior: 'smooth', block: 'center' }), 40);
+  }
+  if (focusKey) focus(focusKey);
+  return wrap;
+}
+
+/* החלון הצף. אותה התנהגות כמו הלייטבוקס של האיורים — Escape סוגר, המיקוד
+   נלכד, לחיצה על הרקע סוגרת — כדי שלא יהיו כאן שני חוזי-מקלדת שונים. */
+function openSheet(courseId, focusKey = null) {
+  if (!sheetOf(courseId)) return;
+  const overlay = el('div', 'lightbox sheet-lb');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'דף הנוסחאות');
+
+  const pane = el('div', 'lb-pane sheet-pane');
+  pane.addEventListener('click', (e) => e.stopPropagation());
+  pane.append(sheetNode(courseId, focusKey));
+
+  const btn = el('button', 'lb-close', '✕');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'סגירה');
+  btn.onclick = close;
+
+  overlay.append(pane, btn);
+  const prev = document.activeElement;
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+    if (prev && prev.focus) prev.focus();
+  }
+  const onKey = (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'Tab') { e.preventDefault(); btn.focus(); }
+  };
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.body.append(overlay);
+  btn.focus();
+}
+
+/* השבב במשוב: לא "הנה דף הנוסחאות" אלא "זה היה בעמוד 2, סעיף קבוע הזמן". */
+function sheetButton(courseId, sec, label) {
+  if (!sec) return null;
+  const b = el('button', 'btn sheet-btn', label || `📄 בדף הנוסחאות · ${sec.label}`);
+  b.type = 'button';
+  b.onclick = () => openSheet(courseId, sec.k);
+  return b;
+}
+
+function renderSheet(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  const s = sheetOf(courseId);
+  if (c) view.dataset.course = courseId;
+  view.innerHTML = '';
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + courseId));
+  if (!s) { view.append(emptyState('📄', 'אין דף נוסחאות למקצוע הזה', 'הוא מוגדר לכל מקצוע בנפרד.')); return toTop(); }
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '📄 ' + s.title));
+  head.append(el('p', null, s.sub));
+  view.append(head);
+  view.append(sheetNode(courseId));
+  toTop();
 }
 
 /* ================= תרגול חופשי =================
@@ -3461,6 +3694,7 @@ async function renderPractice(courseId, seedTopic = null) {
 
     playQuestions({
       key: 'practice',
+      courseId,
       title: `תרגול חופשי — ${c.name}`,
       subtitle: `${picked.length} שאלות · ${bits.join(' · ')}`,
       questions: picked,
@@ -3546,6 +3780,7 @@ async function renderReview(courseId) {
   shuffle(wrong);
   playQuestions({
     key: 'review',
+    courseId,
     title: `הטעויות שלי — ${c.name}`,
     subtitle: `${wrong.length} שאלות שטעית בהן`,
     note: 'תענה נכון פעמיים ברצף — והשאלה תרד מהרשימה. תטעה — היא מתאפסת. ' +
@@ -3726,6 +3961,7 @@ async function renderOneQuestion(qid) {
 
   playQuestions({
     key: 'one',
+    courseId: found.course.id,
     title: 'שאלה מהארכיון',
     subtitle: `${found.course.name} · ${found.exam.title} · שאלה ${found.idx + 1}`,
     note: 'שאלה בודדת ששותפה בקישור. התשובה נספרת בהתקדמות שלך כרגיל.',
@@ -3907,6 +4143,7 @@ async function renderTonight(courseId) {
     if (!picked.length) return;
     playQuestions({
       key: 'tonight',
+      courseId,
       title: `🌙 הלילה לפני — ${c.name}`,
       subtitle: `${picked.length} שאלות · ${minutes} דקות`,
       note: 'המסלול מסודר מהנושא הכבד ביותר שאתה הכי חלש בו, ובתוכו — קודם מה שנפלת בו.',
@@ -3961,6 +4198,7 @@ async function renderFlagged(courseId) {
 
   playQuestions({
     key: 'flagged',
+    courseId,
     title: `מה שסימנתי — ${c.name}`,
     subtitle: `${plural(picked.length, 'שאלה מסומנת', 'שאלות מסומנות', true)}`,
     note: 'להסרת סימון — לחץ על 🔖 בפינת השאלה.',
@@ -5017,6 +5255,7 @@ function prettyTarget(target, type) {
   if (kind === 'cards')    return '📇 כרטיסיות: ' + eTitle(id);
   if (kind === 'case')     return '🩺 מקרים: ' + eTitle(id);
   if (kind === 'formulas') return '🧾 נוסחאות: ' + cName(id);
+  if (kind === 'sheet')    return '📄 דף נוסחאות: ' + cName(id);
   return target;
 }
 
@@ -6540,6 +6779,11 @@ function drillsHero(courseId) {
   const fa = el('a', 'btn', '📖 כרטיס הנוסחאות');
   fa.href = '#/formulas/' + courseId;
   row.append(fa);
+  if (sheetOf(courseId)) {
+    const sa = el('a', 'btn', '📄 דף הנוסחאות של המבחן');
+    sa.href = '#/sheet/' + courseId;
+    row.append(sa);
+  }
   box.append(row);
   return box;
 }
@@ -6881,7 +7125,7 @@ function renderDrill(id) {
    את זה. נגיש מכל תרגיל ("📖 הנוסחה") ומעמוד המקצוע. */
 const FORMULAS = [
   {
-    id: 'nernst', course: 'electro', title: 'פוטנציאל נרנסט', unit: 'mV',
+    id: 'nernst', course: 'electro', sheet: 'nernst', title: 'פוטנציאל נרנסט', unit: 'mV',
     expr: 'E = (RT/zF) · ln([out]/[in])',
     note: 'פוטנציאל שיווי המשקל של יון בודד. RT/F ב-37°C ≈ 26.7 mV; ב-z=1 זה 61.5·log₁₀ ב-37°, 58·log₁₀ ב-20°.',
     vars: [
@@ -6893,7 +7137,7 @@ const FORMULAS = [
     compute: (v) => nernst(v.T, v.z, v.Co, v.Ci),
   },
   {
-    id: 'vm', course: 'electro', title: 'מתח מנוחה — מוליכות מקבילית', unit: 'mV',
+    id: 'vm', course: 'electro', sheet: 'vmem', title: 'מתח מנוחה — מוליכות מקבילית', unit: 'mV',
     expr: 'Vm = Σ(g·E) / Σg',
     note: 'כשנתונה מוליכות g — הממברנה היא ממוצע הבטריות משוקלל במוליכויות. (חדירות P → גולדמן, נוסחה אחרת.)',
     vars: [
@@ -6904,7 +7148,7 @@ const FORMULAS = [
     compute: (v) => (v.gK * v.EK + v.gNa * v.ENa + v.gCl * v.ECl) / (v.gK + v.gNa + v.gCl),
   },
   {
-    id: 'tau', course: 'electro', title: 'קבוע הזמן τ', unit: 'ms',
+    id: 'tau', course: 'electro', sheet: 'tau', title: 'קבוע הזמן τ', unit: 'ms',
     expr: 'τ = Rin · Cmem',
     note: 'כמה מהר הממברנה נטענת. MΩ·pF → מחלקים ב-1000 ל-ms.',
     vars: [
@@ -6914,7 +7158,7 @@ const FORMULAS = [
     compute: (v) => (v.Rin * v.Cm) / 1000,
   },
   {
-    id: 'lambda', course: 'electro', title: 'קבוע המרחק λ', unit: 'mm',
+    id: 'lambda', course: 'electro', sheet: 'lambda', title: 'קבוע המרחק λ', unit: 'mm',
     expr: 'λ = √(d·Rm / 4·Ri)',
     note: 'כמה רחוק אות דועך. λ ∝ √d — פי 4 בקוטר = פי 2 ב-λ. (עם רדיוס a: √(a·Rm/2·Ri).)',
     vars: [
@@ -6925,7 +7169,7 @@ const FORMULAS = [
     compute: (v) => Math.sqrt((v.d * v.Rm) / (40 * v.Ri)) * 10,
   },
   {
-    id: 'rin', course: 'electro', title: 'התנגדות כניסה Rin', unit: 'MΩ',
+    id: 'rin', course: 'electro', sheet: 'basics', title: 'התנגדות כניסה Rin', unit: 'MΩ',
     expr: 'Rin = ΔV / ΔI',
     note: 'חוק אוהם על ההיסט במצב היציב. mV/nA = MΩ.',
     vars: [
@@ -6935,7 +7179,7 @@ const FORMULAS = [
     compute: (v) => v.dV / v.dI,
   },
   {
-    id: 'osmo', course: 'electro', title: 'אוסמולריות', unit: 'mOsm',
+    id: 'osmo', course: 'electro', sheet: null, title: 'אוסמולריות', unit: 'mOsm',
     expr: 'אוסמולריות = ריכוז × מספר חלקיקים',
     note: 'המלכודת: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
     vars: [
@@ -6945,7 +7189,7 @@ const FORMULAS = [
     compute: (v) => v.C * v.factor,
   },
   {
-    id: 'quantal', course: 'electro', title: 'תכולה קוונטית', unit: 'mV',
+    id: 'quantal', course: 'electro', sheet: 'quantal', title: 'תכולה קוונטית', unit: 'mV',
     expr: 'תגובה ממוצעת = m·q = (n·p)·q',
     note: 'משרעת התגובה = מספר הווזיקולות × הסתברות שחרור × גודל קוונטום.',
     vars: [
@@ -6983,6 +7227,14 @@ function renderFormulas(courseId, focusId = null) {
     box.append(el('div', 'formula-title', f.title));
     box.append(el('div', 'formula-expr', f.expr));
     if (f.note) box.append(el('p', 'formula-note', f.note));
+
+    /* "האם זה בדף שנותנים לי?" היא שאלה שמשנה איך לומדים. נוסחה שיושבת בדף
+       צריך רק לדעת למצוא; נוסחה שאינה בו — לזכור בעל פה. שתיהן מוצהרות. */
+    if (sheetOf(courseId)) {
+      const sec = f.sheet ? sheetSection(courseId, f.sheet) : null;
+      if (sec) box.append(sheetButton(courseId, sec, `📄 בדף הנוסחאות · ${sec.label}`));
+      else box.append(el('p', 'formula-nosheet', '⚠︎ לא בדף הנוסחאות — את זה צריך לדעת בעל פה.'));
+    }
 
     const p = {};
     f.vars.forEach((q) => (p[q.k] = q.options ? q.options[0].val : q.default));

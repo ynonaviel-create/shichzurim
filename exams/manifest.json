@@ -1,11 +1,11 @@
 {
   "updated": "2026-07-26",
-  "version": "530eaafb",
+  "version": "064dc75c",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
-    "css": "51a0cc8e",
-    "js": "a1ce159e",
+    "css": "1631badc",
+    "js": "81495657",
     "cloud": "1153c3de"
   },
   "courses": [
@@ -847,7 +847,7 @@
       "trust": null,
       "heroSub": "כל מחלה, רעלן ותרופה בקורס — דרך המשקפיים של הקורס: איזה זרם, איזו תעלה, איזה שלב במחזור הווזיקולה. ולכל כרטיסייה: השאלות מהמאגר הרשמי שבדקו בדיוק את זה.",
       "heroEyebrow": "🧠 פתולוגיות ותרופות",
-      "count": 29
+      "count": 27
     },
     {
       "id": "electro-patho-practice",
@@ -864,7 +864,7 @@
       "trust": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 51
+      "count": 46
     },
     {
       "id": "electro-shinun",
