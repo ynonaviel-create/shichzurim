@@ -104,16 +104,7 @@
       "qid": "fb394e02",
       "topic": "מבנה ותפקוד הנוירון",
       "explain": "נוכחות SOD1 מוטנטי בתאי גליה (כמו מיקרוגליה) תורמת לרעילות סביבתית סביב הנוירונים המוטוריים (neuroinflammation), מה שמאיץ את קצב התקדמות מחלת ה-ALS בשלביה המאוחרים, אף שאינו הטריגר הראשוני למחלה.",
-      "offSyllabus": true,
-      "repeat": {
-        "n": 2,
-        "unit": "שנים",
-        "in": [
-          "מועד ב׳ 2025",
-          "מועד ב׳ 2021"
-        ],
-        "span": 4
-      }
+      "offSyllabus": true
     },
     {
       "q": "מהי התגובה שמאפיינת LAMBERT EATON MYASTHENIC SYNDROME (LEMS) בבדיקת REPETITIVE NERVE STIMULATION (RNS) לאחר הפעלה מקסימלית של השריר?",

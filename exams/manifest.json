@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-26",
-  "version": "064dc75c",
+  "version": "b069e800",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
@@ -796,7 +796,7 @@
       "trust": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 26
+      "count": 23
     },
     {
       "id": "electro-methods-cards",
@@ -876,12 +876,12 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-25",
+      "added": "2026-07-26",
       "official": null,
       "trust": null,
-      "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, רעלנים, רצפטורים, בופרים ותאי גליה. מרוכז — לבדיקה עצמית ולחזרה אחרונה.",
+      "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, רעלנים, רצפטורים, בופרים ותאי גליה — ולצידן ארבע עובדות מהמודל החשמלי שכולן נגזרות מדף הנוסחאות ובכל זאת נופלים עליהן. מרוכז — לבדיקה עצמית ולחזרה אחרונה.",
       "heroEyebrow": null,
-      "count": 44
+      "count": 48
     },
     {
       "id": "molecular-cox-cards",

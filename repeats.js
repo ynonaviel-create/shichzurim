@@ -314,11 +314,16 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
   const exams = loadCourse(courseId, cfg);
   if (exams.length < 2) continue;
 
+  /* שאלות שסומנו `offSyllabus` (נושא שירד מהסילבוס — הלב, ומ-26/07 גם ALS/SOD1)
+     אינן נכנסות לאשכולות בכלל. הן עדיין מוצגות בשחזור שלהן להעשרה, אבל
+     ה-High Yield הוא רשימת "מה ללמוד עכשיו" — ושאלה שחזרה ארבע שנים ברצף
+     ואינה בחומר היא בדיוק ההמלצה הגרועה ביותר שאפשר לתת. */
   const qs = [];
   exams.forEach((e) =>
-    e.data.questions.forEach((q, i) =>
-      qs.push({ ...q, _exam: e, _n: i + 1, _cycle: e.data[cfg.axis], _trust: TRUST[e.data.trust] || 1 })
-    )
+    e.data.questions.forEach((q, i) => {
+      if (q.offSyllabus) return;
+      qs.push({ ...q, _exam: e, _n: i + 1, _cycle: e.data[cfg.axis], _trust: TRUST[e.data.trust] || 1 });
+    })
   );
 
   /* --- ניקוד כל זוג משני מחזורים שונים --- */
