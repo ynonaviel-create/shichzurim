@@ -682,6 +682,17 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .topbar{padding:11px 15px; gap:8px;}
   .brand-text small{display:none;}
   .topnav a{padding:7px 12px; font-size:13.5px;}
+  /* סרגל העליון לא נכנס ל-375px: המותג והניווט יחד רוצים ~444, ופריט flex
+     לא מתכווץ מתחת לתוכן שלו (min-width:auto) — אז *הדף כולו* נמתח, וכל
+     עמוד באתר גלש אופקית בטלפון. min-width:0 מחזיר את הכיווץ, והניווט גולל
+     בתוך עצמו במקום לדחוף את הדף — החשבון והתמה נמצאים בהחלקה אחת.
+     זה גם עמיד לעתיד: שם משתמש ארוך בכפתור החשבון כבר לא שובר את הפריסה. */
+  .topbar{min-width:0;}
+  .brand{flex:none;}   /* שם האתר נשאר שלם; מי שמתכווץ הוא הניווט */
+  .brand-text strong{white-space:nowrap;}
+  .topnav{min-width:0; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none;}
+  .topnav::-webkit-scrollbar{display:none;}
+  .topnav > *{flex:none;}
   main{padding:26px 15px 60px;}
   .page-head h1{font-size:24px;}
   .courses,.cards{grid-template-columns:1fr;}
