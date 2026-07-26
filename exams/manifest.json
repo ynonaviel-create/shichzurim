@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-26",
-  "version": "bbe5faef",
+  "version": "b1bcf0e6",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
@@ -763,6 +763,23 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
+    },
+    {
+      "id": "electro-brainsci-practice",
+      "file": "electro-brainsci-practice.json",
+      "course": "electro",
+      "part": null,
+      "title": "תרגול — מהמבחן של מדעי המוח",
+      "kind": "practice",
+      "year": 2026,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-26",
+      "official": null,
+      "trust": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 20
     },
     {
       "id": "electro-guide",
