@@ -853,7 +853,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet','simexam'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   if (route === 'admin') return renderAdmin();
@@ -867,6 +867,8 @@ function router() {
   // #/case/<id>/<caseId> — קופץ ישר למקרה מסוים בתוך הדק
   if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
+  // #/simexam/<course> — סימולציית מבחן מלאה: N שאלות, טיימר, משוב רק בסוף
+  if (route === 'simexam' && param) return renderSimExam(param);
   if (route === 'drills' && param) return renderDrills(param);
   if (route === 'drill' && param) return renderDrill(param);
   if (route === 'formulas' && param) return renderFormulas(param, sub ? decodeURIComponent(sub) : null);
@@ -1209,6 +1211,14 @@ function renderCourse(courseId) {
   rv.dataset.tour = 'review';
   rv.href = '#/review/' + courseId;
   lRow.append(rv);
+  /* סימולציית מבחן — רק למקצוע שהגדיר simExam ב-courses.json (כרגע פיזיקה:
+     אין שחזורים, אז חוויית "מבחן אמיתי" חסרה — וזה התחליף). */
+  if (c.simExam) {
+    const sx = el('a', 'btn', '🎓 סימולציית מבחן');
+    sx.href = '#/simexam/' + courseId;
+    sx.title = `${c.simExam.questions} שאלות · ${Math.round(c.simExam.minutes / 60)} שעות · בתנאי אמת`;
+    lRow.append(sx);
+  }
   /* המלכודות — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. בקליני ובביוכימיה
      הדף היה מציג מצב ריק, וכפתור שמוביל לכלום גרוע מכפתור שאינו. */
   if (guideOf(courseId)) {
@@ -2506,9 +2516,10 @@ function playQuestions(cfg) {
   let celebratedResult = false;
 
   /* מצב מבחן: כשדולק, המשוב (נכון/שגוי/הסבר) והספירה נדחים עד סוף המבחן או עד
-     לחיצה על "הצג תשובות". ברירת מחדל: מצב לימוד (revealed=true, משוב מיידי). */
-  let examMode = false;
-  let revealed = true;
+     לחיצה על "הצג תשובות". ברירת מחדל: מצב לימוד (revealed=true, משוב מיידי).
+     בסימולציה (cfg.startExam) מתחילים ישר במצב מבחן — זו כל הפואנטה. */
+  let examMode = !!cfg.startExam;
+  let revealed = !examMode;
   function updateExamUI() {
     examToggle.setAttribute('aria-pressed', examMode ? 'true' : 'false');
     examToggle.textContent = examMode ? '📝 מצב מבחן' : '💡 מצב לימוד';
@@ -2519,6 +2530,38 @@ function playQuestions(cfg) {
   }
   function setExamMode(on) { examMode = on; revealed = !on; updateExamUI(); render(); }
   function revealAnswers() { revealed = true; updateExamUI(); render(); }
+
+  /* טיימר ספירה לאחור — סימולציית מבחן. הזמן נמדד מ-startedAt (שנשמר ע"י
+     הקורא), כך שרענון או יציאה-וחזרה לא מאפסים את השעון. בתום הזמן — "הגשה":
+     חשיפת כל התשובות, כמו שהמשגיח לוקח את הטופס. */
+  if (cfg.timer) {
+    const clock = el('div', 'exam-clock');
+    bar.insertBefore(clock, resetBtn);
+    const endAt = cfg.timer.startedAt + cfg.timer.minutes * 60000;
+    const fmt = (s) => {
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+      return (h ? h + ':' : '') + String(m).padStart(h ? 2 : 1, '0') + ':' + String(ss).padStart(2, '0');
+    };
+    let clockIv = null;
+    const tick = () => {
+      /* עזבו את העמוד (SPA — הסרגל הוחלף) → הטיימר מנקה את עצמו. */
+      if (!document.contains(clock)) { clearInterval(clockIv); return; }
+      const left = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+      clock.classList.toggle('warn', left <= 30 * 60 && left > 10 * 60);
+      clock.classList.toggle('crit', left > 0 && left <= 10 * 60);
+      clock.title = left <= 10 * 60 ? 'פחות מ-10 דקות!' : left <= 30 * 60 ? 'חצי שעה אחרונה' : 'הזמן שנותר';
+      if (left === 0) {
+        clearInterval(clockIv);
+        clock.textContent = '⏰ הזמן נגמר';
+        clock.classList.add('crit');
+        if (examMode && !revealed) revealAnswers();
+        return;
+      }
+      clock.textContent = '⏱ ' + fmt(left);
+    };
+    clockIv = setInterval(tick, 1000);
+    tick();
+  }
   /* השיא כפי שהיה *בתחילת* הסבב. "שיא אישי" נחגג רק כשעוברים אותו — כלומר
      שוברים שיא מסבב קודם, לא סתם מתקדמים בתוך הסבב הנוכחי. */
   const bestAtStart = bestStreak();
@@ -3734,6 +3777,142 @@ function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+/* ================= סימולציית מבחן מלאה =================
+   מדמה את המבחן האמיתי מקצה לקצה: N שאלות בפיזור הנושאים של המבחן, טיימר,
+   ומשוב שנחשף רק בהגשה. ההגדרות (כמות, זמן, מכסות לפי בלוק) יושבות
+   ב-courses.json תחת simExam — המנגנון גנרי לכל מקצוע שיגדיר אותן.
+
+   הדגימה: קודם מכסת "שאלות הכיתה" (בפיזיקה המרצה אמר שייקח מהן — הן הכי
+   קרובות למבחן), אחר כך מכסה לכל בלוק לפי מפת החומרים (topic→בלוק), ולבסוף
+   השלמה אקראית אם מכסה כלשהי לא התמלאה. בתוך כל מאגר — שאלות שטרם נראו
+   קודמות, כדי שכל סימולציה תרחיב את הכיסוי ולא תמחזר.
+
+   הסבב שנדגם נשמר (רשימת qids + שעת התחלה), כך שרענון בטעות באמצע שלוש
+   השעות לא מוחק כלום — חוזרים לאותן שאלות ולאותו שעון. */
+async function renderSimExam(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  const se = c?.simExam;
+  if (!se) {
+    view.innerHTML = '';
+    view.append(emptyState('⚠️', 'אין סימולציה למקצוע הזה', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  view.dataset.course = courseId;
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>מרכיב את המבחן…</b></div>';
+
+  const g = await loadGuide(courseId).catch(() => null);
+  const metas = quizzesOf(courseId).filter((m) => m.kind !== 'highyield');
+  const loaded = await Promise.all(metas.map((m) => loadExam(m.id)));
+  const pool = [];
+  metas.forEach((m, mi) => {
+    loaded[mi].questions.forEach((q, i) => {
+      if (q.offSyllabus) return;   // במבחן אמיתי אין שאלות מחוץ לחומר
+      pool.push({ ...q, part: m.part || '', origin: loaded[mi].title, examId: m.id, idx: i });
+    });
+  });
+  const byQid = new Map(pool.map((q) => [q.qid, q]));
+
+  /* topic → שם בלוק, מתוך מפת החומרים. שאלות שהנושא שלהן לא במפה (שאלות
+     הכיתה, הניסויים) נכנסות דרך מכסת classBanks או דרך ההשלמה. */
+  const blockOf = {};
+  (g?.blocks || []).forEach((b) => (b.topics || []).forEach((t) => { blockOf[t] = b.title; }));
+
+  const KEY = 'simexam-' + courseId;
+  const META_KEY = 'simexam-meta-' + courseId;
+  const meta = (() => { try { return JSON.parse(localStorage.getItem(META_KEY)); } catch { return null; } })();
+  const savedQs = (meta?.qids || []).map((id) => byQid.get(id)).filter(Boolean);
+  const rec = store.exam(KEY);
+  const unfinished = savedQs.length > 0 && !rec.done;
+
+  function sample() {
+    const map = seenH.read();
+    const unseenFirst = (arr) => {
+      const sh = shuffle([...arr]);
+      return [...sh.filter((q) => !seenH.has(qKey(q), map)), ...sh.filter((q) => seenH.has(qKey(q), map))];
+    };
+    const picked = [], used = new Set();
+    const take = (arr, n) => {
+      for (const q of arr) {
+        if (n <= 0 || picked.length >= se.questions) return;
+        if (used.has(q.qid)) continue;
+        picked.push(q); used.add(q.qid); n--;
+      }
+    };
+    take(unseenFirst(pool.filter((q) => (se.classBanks || []).includes(q.examId))), se.classQuota || 0);
+    for (const [block, quota] of Object.entries(se.blocks || {}))
+      take(unseenFirst(pool.filter((q) => blockOf[q.topic] === block)), quota);
+    take(unseenFirst(pool), se.questions - picked.length);   // השלמה אם מאגר כלשהו קצר
+    return shuffle(picked);
+  }
+
+  function start(questions, startedAt) {
+    playQuestions({
+      key: KEY,
+      courseId,
+      title: `🎓 סימולציית מבחן — ${c.name}`,
+      subtitle: `${questions.length} שאלות · ${Math.round(se.minutes / 60)} שעות · התשובות נחשפות בהגשה`,
+      note: 'כמו במבחן: אין משוב תוך כדי. עונים על הכול, והציון וההסברים מחכים בסוף. ' +
+        'אפשר לצאת ולחזור — השאלות והשעון נשמרים.',
+      persist: true,
+      allowExam: true,
+      startExam: true,
+      timer: { minutes: se.minutes, startedAt },
+      back: { text: c.name, href: '#/course/' + courseId },
+      questions,
+    });
+  }
+
+  /* --- מסך פתיחה --- */
+  view.innerHTML = '';
+  view.append(crumb(c.name, '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `🎓 סימולציית מבחן — ${c.name}`));
+  head.append(el('p', null, 'הדבר הכי קרוב למבחן האמיתי: אותו מספר שאלות, אותו זמן, אותו פיזור נושאים — ובלי משוב עד ההגשה.'));
+  view.append(head);
+
+  const box = el('div', 'form');
+  const dash = el('div', 'dash');
+  dash.append(stat(se.questions, 'שאלות'));
+  dash.append(stat(Math.round(se.minutes / 60), 'שעות'));
+  dash.append(stat(Object.keys(se.blocks || {}).length, 'בלוקים בפיזור אמיתי'));
+  box.append(dash);
+  box.append(el('p', 'bd-sub',
+    'ההרכב: ' + (se.classQuota ? `${se.classQuota} משאלות הכיתה (המרצה אמר שייקח מהן), ` : '') +
+    'והשאר לפי משקל הבלוקים במבחן. שאלות שטרם ראית מקבלות עדיפות — כל סימולציה מרחיבה את הכיסוי.'));
+
+  const row = el('div', 'btn-row');
+  if (unfinished) {
+    const cont = el('button', 'btn primary', '⏵ המשך את הסימולציה שהתחלת');
+    cont.onclick = () => start(savedQs, meta.startedAt);
+    row.append(cont);
+    const fresh = el('button', 'btn ghost', '🎲 סימולציה חדשה (מוחק את הנוכחית)');
+    fresh.onclick = () => {
+      if (!confirm('להתחיל סימולציה חדשה? התשובות מהסימולציה הנוכחית יימחקו.')) return;
+      store.reset(KEY);
+      const qs = sample();
+      localStorage.setItem(META_KEY, JSON.stringify({ qids: qs.map((q) => q.qid), startedAt: Date.now() }));
+      start(qs, Date.now());
+    };
+    row.append(fresh);
+  } else {
+    const go = el('button', 'btn primary', '▶ התחל סימולציה');
+    go.onclick = () => {
+      store.reset(KEY);
+      const qs = sample();
+      const startedAt = Date.now();
+      localStorage.setItem(META_KEY, JSON.stringify({ qids: qs.map((q) => q.qid), startedAt }));
+      start(qs, startedAt);
+    };
+    row.append(go);
+  }
+  box.append(row);
+  view.append(box);
+  toTop();
+  updateFooter();
 }
 
 /* ================= הטעויות שלי (בתוך מקצוע) ================= */

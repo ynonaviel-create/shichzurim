@@ -4,8 +4,8 @@
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
-    "css": "4f4cf978",
-    "js": "0c83795a",
+    "css": "6cbb53ae",
+    "js": "960036ac",
     "cloud": "1153c3de"
   },
   "courses": [
@@ -149,7 +149,23 @@
           "moed": "ב",
           "at": "2026-08-14T09:00"
         }
-      ]
+      ],
+      "simExam": {
+        "questions": 50,
+        "minutes": 180,
+        "classQuota": 10,
+        "classBanks": [
+          "physics-class",
+          "physics-submitted"
+        ],
+        "blocks": {
+          "חשמל": 12,
+          "מגנטיות": 6,
+          "גלים ותנודות": 7,
+          "נוזלים ולחץ": 6,
+          "דימות רפואי": 9
+        }
+      }
     },
     {
       "id": "biochem",
