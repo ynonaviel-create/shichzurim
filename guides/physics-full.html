@@ -16,13 +16,43 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{
+  --ink:#1a222c; --dim:#5a6773; --faint:#7a8a99;
+  --bg:#fff; --panel:#f4f7fa; --line:#e2e9f0;
+  --brand:#185FA5; --brand-dp:#0d3f74; --brand-lt:#7fc4ff;
+  --warn:#a35a08; --warn-bg:#fff8f1; --warn-ln:#f5ddc4;
+  --ok:#1a7a4a;
+}
+:root[data-theme="dark"]{
+  --ink:#dde5ec; --dim:#a7b4c0; --faint:#8494a2;
+  --bg:#0f151c; --panel:#151d26; --line:#26313d;
+  --brand:#7fc4ff; --brand-dp:#a8d8ff; --brand-lt:#7fc4ff;
+  --warn:#e5a95f; --warn-bg:#1e1810; --warn-ln:#3d3020;
+  --ok:#5fd39b;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-html{font-size:19px;font-family:'Assistant',sans-serif}
-body{direction:rtl;line-height:1.85;color:#1a222c;background:#fff;
+html{font-size:19px;font-family:'Assistant',sans-serif;scroll-behavior:smooth;scroll-padding-top:64px}
+body{direction:rtl;line-height:1.85;color:var(--ink);background:var(--bg);
   max-width:50rem;margin:0 auto;padding:0 1.6rem 6rem}
 h1,h2,h3,h4,b,strong{font-family:'Heebo',sans-serif;line-height:1.3;font-weight:800}
 p{margin-bottom:.75rem}
-a{color:#185FA5}
+a{color:var(--brand)}
+
+/* ── סרגל ניווט צף ── */
+.navbar{position:sticky;top:0;z-index:50;margin:0 -1.6rem 0;padding:.5rem 1.6rem;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;gap:.4rem;overflow-x:auto;
+  scrollbar-width:none}
+.navbar::-webkit-scrollbar{display:none}
+.navbar a{flex:none;font-size:.8rem;font-weight:800;font-family:'Heebo';text-decoration:none;
+  color:var(--dim);padding:.3rem .7rem;border-radius:99px;border:1px solid transparent;transition:.15s}
+.navbar a:hover{color:var(--brand);border-color:var(--line)}
+.navbar a.on{background:var(--brand);color:#fff}
+:root[data-theme="dark"] .navbar a.on{color:#0f151c}
+.totop{position:fixed;bottom:1.1rem;inset-inline-start:1.1rem;z-index:60;width:2.6rem;height:2.6rem;
+  border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--brand);
+  font-size:1.1rem;cursor:pointer;display:none;box-shadow:0 3px 14px rgba(0,0,0,.14)}
+.totop.show{display:block}
 
 /* ── כותרת ── */
 .cover{margin:0 -1.6rem 2.5rem;padding:3.4rem 1.9rem 2.6rem;color:#fff;
@@ -30,115 +60,181 @@ a{color:#185FA5}
 .cover .eyebrow{font-size:.78rem;letter-spacing:.1em;opacity:.72}
 .cover h1{font-size:2.9rem;letter-spacing:-.02em;margin:.8rem 0 0}
 .cover .sub{font-size:1.06rem;font-weight:400;opacity:.93;margin-top:.7rem;
-  border-right:3px solid #7fc4ff;padding-right:.9rem}
-.cover .st{display:flex;flex-wrap:wrap;gap:1.8rem;margin-top:1.8rem}
+  border-right:3px solid var(--brand-lt);padding-right:.9rem}
+.cover .st{display:flex;flex-wrap:wrap;gap:1.6rem;margin-top:1.8rem}
 .cover .st b{display:block;font-size:1.7rem;color:#9fd4ff;line-height:1.1}
 .cover .st span{font-size:.8rem;opacity:.75}
 
-/* ── ניווט ── */
-.toc{background:#f4f7fa;border:1px solid #e2e9f0;border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:2.4rem}
-.toc h2{font-size:1rem;color:#185FA5;margin-bottom:.6rem}
+/* ── פאנלים ── */
+.toc,.route,.howto{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:1.2rem 1.35rem;margin-bottom:2rem}
+.toc h2,.howto h2{font-size:1.05rem;color:var(--brand);margin-bottom:.6rem}
 .toc ol{margin:0;padding-inline-start:1.2rem;font-size:.95rem}
-.toc li{margin-bottom:.2rem}
-.toc .blk{font-weight:800;margin-top:.5rem}
-
-/* ── מבנה ── */
-.block{margin-top:3.2rem;padding-top:1.6rem;border-top:3px solid #185FA5}
-.block>h2{font-size:2rem;color:#185FA5}
-.block>.bsub{font-size:.98rem;color:#55636f;margin-bottom:.4rem}
-.unit{margin-top:2.4rem;padding-top:1.2rem;border-top:1px solid #e6ecf2}
-.unit h3{font-size:1.32rem;color:#0d3f74;margin-bottom:.5rem}
-.unit h4{font-size:.83rem;letter-spacing:.06em;color:#7a8a99;margin:1.2rem 0 .45rem;text-transform:none}
-.lead{font-size:1.04rem;color:#28323e;background:#f7fafd;border-inline-start:3px solid #7fc4ff;
-  padding:.7rem .95rem;border-radius:0 8px 8px 0}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.3rem;background:#fff8f1;border:1px solid #f5ddc4;border-radius:10px;padding:.9rem 1.1rem}
-.traps h4{margin-top:0;color:#a35a08}
-.trap{font-size:.95rem;padding:.5rem 0;border-bottom:1px dashed #f0dcc4}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:#a35a08}
-.trap b:nth-of-type(2){color:#1a7a4a}
-
-/* ── סרטונים ── */
-.vids{margin-top:1.3rem}
-.vid{border:1px solid #e2e9f0;border-radius:10px;padding:.7rem .9rem;margin-bottom:.55rem;cursor:pointer;
-  display:flex;flex-direction:column;gap:.15rem;transition:.15s;background:#fff}
-.vid:hover{border-color:#185FA5;box-shadow:0 2px 10px rgba(24,95,165,.1)}
-.vid b{font-size:.97rem}
-.vid b::before{content:"▶ ";color:#c0392b}
-.vid span{font-size:.87rem;color:#5a6773}
-.vid.open{border-color:#185FA5}
-.vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;margin-top:.6rem}
+.toc li{margin-bottom:.22rem}
+.howto-g{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.howto-g>div{display:flex;flex-direction:column;gap:.15rem}
+.howto-g b{font-size:.95rem}
+.howto-g span{font-size:.88rem;color:var(--dim);line-height:1.6}
+.note{background:color-mix(in srgb,var(--brand) 7%,transparent);border-inline-start:3px solid var(--brand);
+  padding:.8rem 1rem;border-radius:0 10px 10px 0;font-size:.95rem;margin:1.1rem 0}
 
 /* ── מסלול הצפייה ── */
-.route{background:#f4f7fa;border:1px solid #e2e9f0;border-radius:12px;padding:1.2rem 1.3rem;margin-top:1.4rem}
-.route h3{font-size:1.05rem;color:#185FA5;margin:1rem 0 .5rem}
-.route h3:first-child{margin-top:0}
-.route ol{padding-inline-start:1.3rem;font-size:.95rem}
-.route li{margin-bottom:.3rem}
-.route .why{color:#5a6773;font-size:.88rem}
-.note{background:#f0f7ff;border-inline-start:3px solid #185FA5;padding:.75rem 1rem;border-radius:0 8px 8px 0;
-  font-size:.95rem;margin:1rem 0}
+.route h2{font-size:1.5rem;color:var(--brand);margin-bottom:.5rem}
+.route h3{font-size:1.05rem;color:var(--brand);margin:1.6rem 0 .5rem}
+.route-lead{font-size:.96rem;color:var(--ink)}
+.legend{display:flex;flex-direction:column;gap:.3rem;font-size:.88rem;color:var(--dim);
+  margin:.9rem 0 .3rem;padding:.7rem .9rem;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.legend b{margin-inline-end:.35rem}
+.star{color:#c9911a} .plus{color:var(--brand)} .part{color:var(--warn)}
+.vtable{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;background:var(--bg);margin-top:.5rem}
+.vrow{display:grid;grid-template-columns:2.7rem 12rem 1fr 9rem;gap:.75rem;
+  padding:.6rem .8rem;border-bottom:1px solid var(--line);font-size:.88rem;align-items:start}
+.vrow:last-child{border-bottom:0}
+.vhead{background:var(--panel);font-family:'Heebo';font-weight:800;font-size:.8rem;color:var(--brand-dp)}
+:root[data-theme="dark"] .vhead{color:var(--brand)}
+.vrow>span:first-child{font-family:'Heebo';font-weight:800;font-size:.92rem}
+.vrow b{display:block;font-size:.92rem;line-height:1.4}
+.vrow i{display:block;font-style:normal;font-size:.78rem;color:var(--faint);margin-top:.1rem}
+.vrow a{font-size:.85rem;font-weight:700}
+
+/* ── מבנה ── */
+.block{margin-top:3.4rem;padding-top:1.6rem;border-top:3px solid var(--brand)}
+.block>h2{font-size:2rem;color:var(--brand)}
+.block>.bsub{font-size:.98rem;color:var(--dim);margin-bottom:.4rem}
+.unit{margin-top:2.6rem;padding-top:1.3rem;border-top:1px solid var(--line)}
+.unit h3{font-size:1.32rem;color:var(--brand-dp);margin-bottom:.5rem;display:flex;align-items:baseline;
+  justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+:root[data-theme="dark"] .unit h3{color:var(--brand)}
+.unit h4{font-size:.8rem;letter-spacing:.07em;color:var(--faint);margin:1.3rem 0 .45rem}
+.lead{font-size:1.04rem;color:var(--ink);background:color-mix(in srgb,var(--brand) 6%,transparent);
+  border-inline-start:3px solid var(--brand-lt);padding:.75rem 1rem;border-radius:0 10px 10px 0}
+
+/* כפתור הקראה */
+.speak{font:inherit;font-family:'Heebo';font-size:.76rem;font-weight:800;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--dim);
+  border-radius:99px;padding:.2rem .7rem;white-space:nowrap;transition:.15s}
+.speak:hover{border-color:var(--brand);color:var(--brand)}
+.speak.on{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-theme="dark"] .speak.on{color:#0f151c}
+
+/* קישור לתרגול */
+.drill{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;
+  font-family:'Heebo';font-size:.88rem;font-weight:800;text-decoration:none;
+  background:color-mix(in srgb,var(--brand) 10%,transparent);color:var(--brand);
+  border:1px solid color-mix(in srgb,var(--brand) 30%,transparent);
+  border-radius:99px;padding:.4rem 1rem;transition:.15s}
+.drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+:root[data-theme="dark"] .drill:hover{color:#0f151c}
+
+/* ── מלכודות ── */
+.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
+  border-radius:12px;padding:.95rem 1.15rem}
+.traps h4{margin-top:0;color:var(--warn)}
+.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
+.trap:last-child{border-bottom:0;padding-bottom:0}
+.trap b{color:var(--warn)}
+.trap b:nth-of-type(2){color:var(--ok)}
+
+/* ── סרטונים ── */
+.vids{margin-top:1.4rem}
+.vid{border:1px solid var(--line);border-radius:12px;padding:.75rem .95rem;margin-bottom:.55rem;
+  cursor:pointer;display:flex;flex-direction:column;gap:.15rem;transition:.15s;background:var(--panel)}
+.vid:hover{border-color:var(--brand);box-shadow:0 2px 12px color-mix(in srgb,var(--brand) 14%,transparent)}
+.vid b{font-size:.97rem}
+.vid b::before{content:"▶ ";color:#c0392b}
+:root[data-theme="dark"] .vid b::before{color:#ff7a6b}
+.vid span{font-size:.87rem;color:var(--dim)}
+.vid.open{border-color:var(--brand)}
+.vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:9px;margin-top:.6rem}
+
+/* ── איורים ── */
+figure{margin:1.5rem 0;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:1.1rem 1rem .8rem;overflow:hidden}
+figure svg{display:block;width:100%;height:auto;max-width:34rem;margin:0 auto;overflow:visible}
+figcaption{font-size:.87rem;color:var(--dim);text-align:center;margin-top:.7rem;line-height:1.6}
+figcaption b{color:var(--brand)}
+svg text{font-family:'Assistant',sans-serif;fill:var(--ink)}
+svg .lbl{font-size:12px;font-weight:700}
+svg .sml{font-size:10.5px;fill:var(--dim)}
+svg .ttl{font-size:12.5px;font-weight:800;fill:var(--brand)}
+svg .ln{stroke:var(--ink);stroke-width:1.6;fill:none}
+svg .gd{stroke:var(--line);stroke-width:1.2;fill:none}
+svg .pos{fill:#e05252} svg .neg{fill:#3d7fd6}
+svg .fld{stroke:#8a6fd6;stroke-width:1.5;fill:none}
+svg .hot{stroke:#e05252;stroke-width:2;fill:none}
+svg .cool{stroke:#2f9e7a;stroke-width:2;fill:none}
+svg .fill-b{fill:color-mix(in srgb,var(--brand) 16%,transparent)}
+svg .fill-w{fill:color-mix(in srgb,#e0a33c 22%,transparent)}
+svg .fill-g{fill:color-mix(in srgb,#2f9e7a 18%,transparent)}
 
 /* ── טבלה ── */
 table{width:100%;border-collapse:collapse;font-size:.93rem;margin:.8rem 0}
-th,td{border:1px solid #e2e9f0;padding:.5rem .65rem;text-align:right;vertical-align:top}
-th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
+th,td{border:1px solid var(--line);padding:.55rem .7rem;text-align:right;vertical-align:top}
+th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand-dp)}
+:root[data-theme="dark"] th{color:var(--brand)}
 
-@media (max-width:640px){
+@media (max-width:700px){
   html{font-size:18px}
   body{padding:0 1.05rem 4rem}
+  .navbar{margin:0 -1.05rem 0;padding:.45rem 1.05rem}
   .cover{margin:0 -1.05rem 2rem;padding:2.4rem 1.2rem 2rem}
   .cover h1{font-size:2.2rem}
+  .cover .st{gap:1.1rem}
+  .howto-g{grid-template-columns:1fr}
+  .vrow{grid-template-columns:2.2rem 1fr;gap:.4rem .6rem}
+  .vrow>span:nth-child(3),.vrow>span:nth-child(4){grid-column:2}
+  .vrow>span:nth-child(3){color:var(--dim);font-size:.85rem}
+  .vhead{display:none}
 }
-/* מצב כהה — האתר עצמו כהה, ומסמך לבן בוהק באמצע הלילה הוא לא הבחירה. */
-@media (prefers-color-scheme:dark){
-  :root[data-theme="dark"] body{background:#0f151c;color:#dde5ec}
-  :root[data-theme="dark"] .toc,:root[data-theme="dark"] .route{background:#151d26;border-color:#26313d}
-  :root[data-theme="dark"] .lead{background:#141d27;color:#cfd9e2}
-  :root[data-theme="dark"] .unit h3{color:#7fc4ff}
-  :root[data-theme="dark"] .block>h2{color:#7fc4ff}
-  :root[data-theme="dark"] .unit{border-color:#232d38}
-  :root[data-theme="dark"] .vid{background:#151d26;border-color:#26313d}
-  :root[data-theme="dark"] .traps{background:#1e1810;border-color:#3d3020}
-  :root[data-theme="dark"] th{background:#151d26;color:#7fc4ff}
-  :root[data-theme="dark"] td,:root[data-theme="dark"] th{border-color:#26313d}
-  :root[data-theme="dark"] .note{background:#141d27}
+@media print{
+  .navbar,.totop,.speak,.drill{display:none}
+  body{max-width:none}
 }
-:root[data-theme="dark"] body{background:#0f151c;color:#dde5ec}
-:root[data-theme="dark"] .toc,:root[data-theme="dark"] .route{background:#151d26;border-color:#26313d}
-:root[data-theme="dark"] .lead{background:#141d27;color:#cfd9e2}
-:root[data-theme="dark"] .unit h3,:root[data-theme="dark"] .block>h2{color:#7fc4ff}
-:root[data-theme="dark"] .unit{border-color:#232d38}
-:root[data-theme="dark"] .vid{background:#151d26;border-color:#26313d}
-:root[data-theme="dark"] .traps{background:#1e1810;border-color:#3d3020}
-:root[data-theme="dark"] th{background:#151d26;color:#7fc4ff}
-:root[data-theme="dark"] td,:root[data-theme="dark"] th{border-color:#26313d}
-:root[data-theme="dark"] .note{background:#141d27}
 </style>
 </head><body>
+<nav class="navbar">
+  <a href="#route">🎬 סרטונים</a>
+  <a href="#b-electricity">⚡ חשמל</a>
+  <a href="#b-magnetism">🧲 מגנטיות</a>
+  <a href="#b-waves">〰️ גלים</a>
+  <a href="#b-fluids">💧 נוזלים</a>
+  <a href="#b-imaging">🩻 דימות</a>
+  <a href="#last">⏱️ הרגע האחרון</a>
+</nav>
+<button class="totop" title="לראש העמוד" aria-label="לראש העמוד">↑</button>
 
 <div class="cover">
   <div class="eyebrow">ארכיון השחזורים · פיסיקה לרפואנים ב׳ · פרופ׳ נצח פרביאש</div>
   <h1>הסיכום המלא</h1>
-  <div class="sub">21 נושאים בחמישה בלוקים — הרעיון, החיבור הרפואי, המלכודות, והסרטון שמסביר את זה הכי טוב.</div>
+  <div class="sub">21 הנושאים של הקורס — הרעיון, החיבור הרפואי, המלכודות שנבחנות, והסרטון שמסביר את זה הכי טוב.</div>
   <div class="st">
     <div><b>50</b><span>שאלות במבחן</span></div>
     <div><b>3</b><span>שעות</span></div>
     <div><b>21</b><span>נושאים</span></div>
-    <div><b>34</b><span>סרטונים מאומתים</span></div>
+    <div><b>101</b><span>מלכודות</span></div>
+    <div><b>34</b><span>סרטונים</span></div>
   </div>
 </div>
 
 <div class="note">
-<b>קודם כול — אופי המבחן.</b> המבחן הזה בודק <b>הבנה</b>, לא חישוב. השאלות הן "למה קורה X", "מה יקרה אם נשנה את Y", "מה ההבדל בין A ל-B". לכן המסמך הזה כתוב כך: כל נושא מתחיל ברעיון, ממשיך לחיבור הרפואי, ונגמר במלכודות — התפיסות השגויות שדווקא הן מה שנבחן. נוסחה מופיעה כאן רק כשהיא מסבירה משהו, לא כשצריך להציב בה.
+<b>קודם כול — אופי המבחן.</b> המבחן הזה בודק <b>הבנה</b>, לא חישוב. השאלות הן "למה קורה X", "מה יקרה אם נשנה את Y", "מה ההבדל בין A ל-B". לכן כל נושא כאן מתחיל ברעיון, ממשיך לחיבור הרפואי, ונגמר במלכודות — התפיסות השגויות שדווקא הן מה שנבחן. נוסחה מופיעה רק כשהיא מסבירה משהו, לא כשצריך להציב בה.
+</div>
+
+<div class="howto">
+<h2>איך משתמשים במסמך הזה</h2>
+<div class="howto-g">
+  <div><b>🔊 האזנה</b><span>לכל נושא יש כפתור הקראה. אפשר להאזין בדרך, תוך כדי כתיבה, או כשהעיניים כבר עייפות.</span></div>
+  <div><b>🎬 סרטונים</b><span>לחיצה על סרטון פותחת אותו כאן, בתוך הדף. יש מסלול צפייה מסודר למטה — לא צריך לראות את כולם.</span></div>
+  <div><b>✍️ תרגול</b><span>בסוף כל נושא יש קישור ישיר לשאלות התרגול שלו בארכיון. לקרוא ואז מיד לתרגל.</span></div>
+  <div><b>🧭 ניווט</b><span>הסרגל שלמעלה מקפיץ לכל בלוק, והכפתור בפינה מחזיר לראש העמוד.</span></div>
+</div>
 </div>
 
 <div class="toc">
 <h2>מה יש כאן</h2>
 <ol>
-<li><a href="#route">מסלול הצפייה — באיזה סדר לראות את הסרטונים, ובלי כפילות</a></li>
+<li><a href="#route">מסלול הצפייה — מה לראות, באיזה סדר, ומה אפשר לדלג עליו</a></li>
 <li><a href="#b-electricity">חשמל</a> — 7 נושאים</li>
 <li><a href="#b-magnetism">מגנטיות</a> — 3 נושאים</li>
 <li><a href="#b-waves">גלים ותנודות</a> — 3 נושאים</li>
@@ -149,43 +245,71 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 </div>
 
 <section id="route" class="route">
-<h2 style="font-size:1.5rem;color:#185FA5;margin-bottom:.5rem">מסלול הצפייה</h2>
-<p style="font-size:.96rem">יש 34 סרטונים בארכיון, ואין זמן לכולם. הרשימה הזאת היא הסדר שבו כדאי לצפות, בלי כפילויות — כל סרטון מופיע פעם אחת, במקום שבו הוא הכי מועיל. <b>המסלול הקצר</b> (מסומן ★) הוא כשעתיים וחצי ומכסה את השלד; השאר להעמקה בנושא שלא יושב.</p>
+<h2>🎬 מסלול הצפייה</h2>
+<p class="route-lead">בארכיון יש 34 סרטונים, ו<b>אין צורך לראות את כולם</b>. הטבלה הזאת אומרת בדיוק מה לראות, באיזה סדר, ומה תקבלו מכל אחד. <b>כל סרטון שמופיע כאן מופיע גם בתוך הנושא שלו במסמך</b> — אפשר ללחוץ על שם הנושא ולקפוץ לשם, ולצפות בו בהקשר.</p>
 
-<h3>אם יש לכם רק שעתיים — המסלול הקצר ★</h3>
-<ol>
-<li>★ <b>Electric Fields</b> (CrashCourse #26) — <span class="why">השדה כמושג: מה הוא, למה הוא וקטור, ואיך נראים קווי שדה. הבסיס לכל בלוק החשמל.</span></li>
-<li>★ <b>Voltage, Energy &amp; Capacitors</b> (#27) — <span class="why">פוטנציאל, מתח וקבלים במכה אחת. חוסך שני סרטונים נפרדים.</span></li>
-<li>★ <b>DC Resistors &amp; Batteries</b> (#29) — <span class="why">טור ומקביל, התנגדות פנימית. אחריו כל שאלת מעגל נראית אחרת.</span></li>
-<li>★ <b>Magnetism</b> (#32) — <span class="why">כוח לורנץ ולמה הוא לא מבצע עבודה — הנקודה שנבחנת הכי הרבה במגנטיות.</span></li>
-<li>★ <b>Induction: An Introduction</b> (#34) — <span class="why">פאראדיי ולנץ. זה גם הבסיס להבנת האות ב-MRI.</span></li>
-<li>★ <b>Simple Harmonic Motion</b> (#16) — <span class="why">מה קובע את התדירות ומה לא. המלכודת הקלאסית של הבלוק.</span></li>
-<li>★ <b>Fluids at Rest</b> (#14) — <span class="why">לחץ הידרוסטטי וארכימדס יחד.</span></li>
-<li>★ <b>Fluids in Motion</b> (#15) — <span class="why">רציפות וברנולי. הבסיס לכל שאלת היצרות וזרימה.</span></li>
-<li>★ <b>How X-rays See Through Your Skin</b> (TED-Ed) — <span class="why">חמש דקות שמסבירות את כל עקרון הרנטגן.</span></li>
-<li>★ <b>How Does an MRI Scan Work?</b> (NIBIB) — <span class="why">מבוא קצר ל-MRI. אם יש זמן, אחריו thePIRL המעמיק.</span></li>
-</ol>
+<div class="legend">
+  <span><b class="star">★</b> מסלול הליבה — עשרה סרטונים, כשעתיים. אם יש זמן לדבר אחד, זה הדבר.</span>
+  <span><b class="plus">+</b> להעמקה — רק לנושא שלא יושב אחרי הקריאה.</span>
+  <span><b class="part">◐</b> מכסה חלקית — הסרטון טוב אבל לא מכסה הכול; מה שחסר בו כתוב לידו בתוך הנושא.</span>
+</div>
 
-<h3>להעמקה, לפי נושא</h3>
-<p class="why">כל אחד מאלה יושב בתוך הפרק של הנושא שלו במסמך — אפשר ללחוץ ולצפות שם, בהקשר.</p>
-<ol>
-<li><b>חשמל:</b> Electric Charge (#25) לרענון מטענים · Gauss's Law (Khan) + Electric Flux (OChem Tutor) לחוק גאוס · Electric Current (#28) · Circuit Analysis (#30) לקירכהוף · Capacitors &amp; Kirchhoff (#31) למעגל RC · שלושת סרטוני האקסון לתיאוריית הכבל.</li>
-<li><b>מגנטיות:</b> Ampère's Law (#33) — לביו-סבר, אמפר והשדה סביב תיל וסליל.</li>
-<li><b>גלים:</b> Traveling Waves (#17) · Sound (#18) · Wave Interference (Khan) · How Does Ultrasound Work (NIBIB) · אפקט דופלר (מכון דוידסון, בעברית) · EM Waves (Khan Medicine).</li>
-<li><b>נוזלים:</b> מתח פנים וסורפקטנט (Ninja Nerd) · נימיות (OChem Tutor) · Turbulence &amp; Reynolds (Khan) לצמיגות ולזרימה טורבולנטית.</li>
-<li><b>דימות:</b> Photoelectric Effect (Khan) · X-Rays Meet Matter — קומפטון ויצירת זוגות · CT (NIBIB) · PET ואנטי-חומר · MRI מעמיק (thePIRL, ~42 דק׳ — רק אם MRI לא יושב).</li>
-</ol>
+<h3>מסלול הליבה — לפי הסדר</h3>
+<div class="vtable">
+<div class="vrow vhead"><span>#</span><span>הסרטון</span><span>מה תקבלו ממנו</span><span>איפה בהמשך</span></div>
+<div class="vrow"><span class="star">★1</span><span><b>Electric Fields</b><i>CrashCourse #26 · ~10 דק׳</i></span><span>השדה כמושג: מה הוא, למה הוא וקטור, ואיך נראים קווי שדה. הבסיס לכל בלוק החשמל — בלעדיו שאר החשמל תלוי באוויר.</span><span><a href="#u-charge-field-potential">מטען, שדה ופוטנציאל</a></span></div>
+<div class="vrow"><span class="star">★2</span><span><b>Voltage, Energy &amp; Capacitors</b><i>CrashCourse #27 · ~10 דק׳</i></span><span>פוטנציאל, מתח וקבלים במכה אחת — שלושה נושאים בסרטון אחד. חוסך זמן משמעותי.</span><span><a href="#u-capacitors">קבלים</a></span></div>
+<div class="vrow"><span class="star">★3</span><span><b>DC Resistors &amp; Batteries</b><i>CrashCourse #29 · ~10 דק׳</i></span><span>טור ומקביל, התנגדות שקולה, והתנגדות פנימית של סוללה. אחריו כל שאלת מעגל נראית אחרת.</span><span><a href="#u-current-resistance">זרם והתנגדות</a></span></div>
+<div class="vrow"><span class="star">★4</span><span><b>Magnetism</b><i>CrashCourse #32 · ~10 דק׳</i></span><span>כוח לורנץ, כלל יד ימין, ולמה הכוח לא מבצע עבודה — הנקודה שנבחנת יותר מכל במגנטיות.</span><span><a href="#u-magnetic-field-lorentz">שדה מגנטי וכוח לורנץ</a></span></div>
+<div class="vrow"><span class="star">★5</span><span><b>Induction: An Introduction</b><i>CrashCourse #34 · ~10 דק׳</i></span><span>פאראדיי ולנץ. חשוב פעמיים: גם בלוק המגנטיות וגם ההסבר לאיך נוצר האות ב-MRI.</span><span><a href="#u-induction-faraday-lenz">אינדוקציה</a></span></div>
+<div class="vrow"><span class="star">★6</span><span><b>Simple Harmonic Motion</b><i>CrashCourse #16 · ~10 דק׳</i></span><span>מה קובע את התדירות ומה לא. המלכודת הקלאסית של הבלוק (רמז: המשרעת לא).</span><span><a href="#u-shm">תנועה הרמונית</a></span></div>
+<div class="vrow"><span class="star">★7</span><span><b>Fluids at Rest</b><i>CrashCourse #14 · ~10 דק׳</i></span><span>לחץ הידרוסטטי וארכימדס יחד — שני נושאים בסרטון אחד.</span><span><a href="#u-pressure-density">לחץ וצפיפות</a></span></div>
+<div class="vrow"><span class="star">★8</span><span><b>Fluids in Motion</b><i>CrashCourse #15 · ~10 דק׳</i></span><span>רציפות וברנולי. הבסיס לכל שאלת היצרות, מפרצת וזרימה.</span><span><a href="#u-bernoulli">ברנולי וספיקה</a></span></div>
+<div class="vrow"><span class="star">★9</span><span><b>How X-rays See Through Your Skin</b><i>TED-Ed · ~5 דק׳</i></span><span>חמש דקות שמסבירות את כל עקרון הרנטגן ואת המעבר ל-CT. התשואה הכי גבוהה לזמן במסמך.</span><span><a href="#u-xray-ct">רנטגן ו-CT</a></span></div>
+<div class="vrow"><span class="star">★10</span><span><b>How Does an MRI Scan Work?</b><i>NIBIB · ~1 דק׳ ◐</i></span><span>התמונה הכללית של MRI בדקה. חסר בו הספין לעומק ו-T1/T2 — למי שרוצה את זה, ראו את thePIRL למטה.</span><span><a href="#u-mri">MRI</a></span></div>
+</div>
+
+<h3>להעמקה — לפי נושא, רק אם צריך</h3>
+<p class="route-lead">אלה לא חלק מהמסלול. פתחו אחד מהם רק אם קראתם את הנושא והוא עדיין לא יושב.</p>
+
+<div class="vtable">
+<div class="vrow vhead"><span>+</span><span>הסרטון</span><span>מתי כדאי</span><span>איפה בהמשך</span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Electric Charge</b><i>CrashCourse #25</i></span><span>אם מטען, הולכה והשראה לא ברורים מספיק — רענון של הבסיס.</span><span><a href="#u-charge-field-potential">מטען ושדה</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Electric Flux &amp; Gauss's Law</b><i>OChem Tutor</i></span><span>אם חוק גאוס לא מובן. זה הסרטון העדיף מבין השניים — הוא גוזר את שדה הלוח האינסופי.</span><span><a href="#u-gauss">חוק גאוס</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Gauss's Law of Electricity</b><i>Khan Academy ◐</i></span><span>אינטואיציה של שטף כספירת קווים. חסר בו הלוח האינסופי וכלוב פאראדיי.</span><span><a href="#u-gauss">חוק גאוס</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Electric Current</b><i>CrashCourse #28</i></span><span>אם מהירות סחיפה, כא"מ או חוק אוהם עדיין מעורפלים.</span><span><a href="#u-current-resistance">זרם והתנגדות</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Circuit Analysis</b><i>CrashCourse #30</i></span><span>לפני שאלות קירכהוף — ניתוח מעגל מרובה לולאות שלב אחר שלב.</span><span><a href="#u-circuits-kirchhoff">קירכהוף</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Capacitors &amp; Kirchhoff</b><i>CrashCourse #31</i></span><span>הסרטון המרכזי למעגל RC ולקבוע הזמן τ=RC.</span><span><a href="#u-rc">מעגל RC</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Nerve Conduction</b><i>Byte Size Med ◐</i></span><span>האינטואיציה של מיאלין והולכה קפיצית. חסר בו אוצר המילים Ri/Rm.</span><span><a href="#u-axon-cable">האקסון כמוליך</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Axon Diameter &amp; Myelin</b><i>Science With Tal</i></span><span>ממוקד בדיוק בשתי האסטרטגיות: קוטר האקסון ומיאלין מול מהירות ההולכה.</span><span><a href="#u-axon-cable">האקסון כמוליך</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Cable Theory &amp; λ</b><i>מתמטי ◐</i></span><span>רק אם רוצים את המונחים הפורמליים. יש בו גזירות — לא נדרש למבחן.</span><span><a href="#u-axon-cable">האקסון כמוליך</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Ampère's Law</b><i>CrashCourse #33</i></span><span>לביו-סבר, חוק אמפר, והשדה סביב תיל וסליל.</span><span><a href="#u-wire-force-ampere">ביו-סבר ואמפר</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Traveling Waves</b><i>CrashCourse #17</i></span><span>אם v=λf, גל רוחבי מול אורכי, או מה נשמר במעבר תווך לא ברורים.</span><span><a href="#u-waves-sound-doppler">גלים וקול</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Sound</b><i>CrashCourse #18</i></span><span>קול כגל לחץ, סולם הדציבל, ואפקט דופלר דרך דוגמת האמבולנס.</span><span><a href="#u-waves-sound-doppler">גלים וקול</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Wave Interference</b><i>Khan Academy</i></span><span>התאבכות בונה והורסת — הבסיס לאוזניות ביטול רעש ולגל עומד.</span><span><a href="#u-waves-sound-doppler">גלים וקול</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>How Does Ultrasound Work?</b><i>NIBIB</i></span><span>עקרון ההד ובניית התמונה מהחזרות — אם האולטרסאונד לא ברור.</span><span><a href="#u-waves-sound-doppler">גלים וקול</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>מה זה אפקט דופלר?</b><i>מכון דוידסון · בעברית</i></span><span>היחיד בעברית. הסבר מושגי נקי לדופלר, בלי מחסום שפה.</span><span><a href="#u-waves-sound-doppler">גלים וקול</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>EM Waves &amp; the EM Spectrum</b><i>Khan Medicine ◐</i></span><span>צימוד E-B והספקטרום. הקשר E=hf מוסבר בו מושגית ולא נכתב כנוסחה.</span><span><a href="#u-em-waves">גלים אלקטרומגנטיים</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Surface Tension &amp; Surfactant</b><i>Ninja Nerd ◐</i></span><span>הליבה הרפואית: לפלס, נאדיות וסורפקטנט. חסר בו הצד הפיזיקלי של הקוהזיה.</span><span><a href="#u-surface-tension">מתח פנים ולפלס</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Cohesion &amp; Capillary Action</b><i>OChem Tutor ◐</i></span><span>מקור התופעה: קוהזיה, אדהזיה ונימיות. משלים את הקודם, לא מחליף אותו.</span><span><a href="#u-surface-tension">מתח פנים ולפלס</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Turbulence &amp; Reynolds Number</b><i>Khan Academy</i></span><span>המעבר מלמינרי לטורבולנטי — המפתח להבנת קולות קורוטקוף ואוושות.</span><span><a href="#u-bernoulli">ברנולי וצמיגות</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>Photoelectric Effect</b><i>Khan Academy ◐</i></span><span>הפוטון הבודד ופונקציית העבודה. מכסה רק את הפוטואלקטרי — לא קומפטון.</span><span><a href="#u-photoelectric">ספקטרום ופוטואלקטרי</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>X-Rays Meet Matter</b><i>Radiology Sound</i></span><span>שלוש האינטראקציות יחד: פוטואלקטרי, קומפטון ויצירת זוגות. משלים את הקודם.</span><span><a href="#u-photoelectric">ספקטרום ופוטואלקטרי</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>How Does a CT Scan Work?</b><i>NIBIB ◐</i></span><span>המחשה ויזואלית של הסיבוב מזוויות רבות. מבוא בלבד — ההסבר המלא ב-TED-Ed שבמסלול.</span><span><a href="#u-xray-ct">רנטגן ו-CT</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>PET Scans &amp; Antimatter</b><i>Medical Physics</i></span><span>שרשרת האירועים ב-PET: בטא-פלוס, פוזיטרון, התעיינות, שני פוטונים ב-180°.</span><span><a href="#u-nuclear-pet">רפואה גרעינית ו-PET</a></span></div>
+<div class="vrow"><span class="plus">+</span><span><b>How MRI Works: NMR Basics</b><i>thePIRL · ~42 דק׳</i></span><span>הארוך במסמך. רק אם MRI ממש לא יושב — נקיפה, לרמור, RF ורלקסציה לעומק.</span><span><a href="#u-mri">MRI</a></span></div>
+</div>
 
 <div class="note">
-<b>איך לצפות ביעילות:</b> הסרטונים באנגלית — הפעילו כתוביות אוטומטיות ומהירות 1.25. סרטון של CrashCourse הוא ~10 דקות; ברוב המקרים מספיקות שבע הדקות הראשונות, כי הסוף הוא תרגילי חישוב שלא נבחנים כאן.
+<b>איך לצפות ביעילות:</b> רוב הסרטונים באנגלית — הפעילו כתוביות אוטומטיות ומהירות 1.25. בסרטוני CrashCourse ברוב המקרים מספיקות שבע הדקות הראשונות: הסוף מוקדש לתרגילי חישוב, שלא נבחנים כאן.
 </div>
 </section>
 
 <section class="block" id="b-electricity">
-<h2>חשמל</h2>
+<h2>⚡ חשמל</h2>
 <p class="bsub">שבעה נושאים — מהמטען הבודד ועד לאקסון כמוליך.</p>
 <section class="unit" id="u-charge-field-potential">
-<h3>מטען, שדה ופוטנציאל חשמלי</h3>
+<h3>מטען, שדה ופוטנציאל חשמלי<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כל מה שקורה בבלוק החשמל מתחיל בשלושה מושגים שקל להתבלבל ביניהם: המטען הוא המקור, השדה הוא מה שהמטען עושה למרחב סביבו, והפוטנציאל הוא ה"גובה" האנרגטי שהמרחב הזה מקנה לכל מטען שיוצב בו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -195,6 +319,38 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>האנלוגיה שהמרצה בונה עליה היא <b>המפה הטופוגרפית</b>. הפוטנציאל הוא הגובה בכל נקודה — מספר יחיד. השדה הוא <b>הגרדיאנט</b>, כלומר השיפוע: כמה הגובה משתנה ולאן. מכאן נובעות שתי מסקנות מיידיות. ראשית, אפשר לגזור את השדה מהפוטנציאל, ולכן מפה דו-ממדית של פוטנציאלים מכילה את כל המידע. שנית, <b>משטח שווה פוטנציאל</b> הוא כמו קו גובה: תזוזה לאורכו אינה דורשת עבודה כלל. בתוך מוליך בשיווי משקל כל הנפח הוא משטח שווה פוטנציאל — ולכן אין שם שדה.</p>
 <p><b>מתח</b> הוא בפשטות הפרש פוטנציאלים בין שתי נקודות, והוא ה"מנוע" שמניע מטענים. בלי הפרש — אין תנועה מכוונת. הכיוון המוסכם של הזרם הוא מפוטנציאל גבוה (פלוס) לנמוך (מינוס), למרות שבפועל האלקטרונים נעים בכיוון ההפוך; זו מוסכמה היסטורית של בנג'מין פרנקלין, לא טעות שצריך לתקן. <b>מקור מתח</b> (סוללה, שקע, גנרטור) נקרא גם כא"מ — כוח אלקטרו-מניע — ומסומן ε או V. שימו לב: הסוללה שומרת על הפרש פוטנציאל קבוע; היא לא "מספקת מטען קבוע".</p>
 
+<figure>
+<svg viewBox="0 0 520 190" role="img" aria-label="קווי שדה של מטען חיובי, מטען שלילי ודיפול">
+ <text class="ttl" x="72" y="14" text-anchor="middle">מטען חיובי</text>
+ <text class="ttl" x="260" y="14" text-anchor="middle">מטען שלילי</text>
+ <text class="ttl" x="440" y="14" text-anchor="middle">דיפול</text>
+ <defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#8a6fd6"/></marker>
+ </defs>
+ <g transform="translate(72,105)">
+  <circle class="pos" cx="0" cy="0" r="13"/><text x="0" y="5" text-anchor="middle" fill="#fff" class="lbl">+</text>
+  <g class="fld" marker-end="url(#ar)">
+   <path d="M0,-15 L0,-52"/><path d="M0,15 L0,52"/><path d="M-15,0 L-52,0"/><path d="M15,0 L52,0"/>
+   <path d="M-11,-11 L-38,-38"/><path d="M11,-11 L38,-38"/><path d="M-11,11 L-38,38"/><path d="M11,11 L38,38"/>
+  </g>
+ </g>
+ <g transform="translate(260,105)">
+  <circle class="neg" cx="0" cy="0" r="13"/><text x="0" y="5" text-anchor="middle" fill="#fff" class="lbl">−</text>
+  <g class="fld" marker-end="url(#ar)">
+   <path d="M0,-52 L0,-16"/><path d="M0,52 L0,16"/><path d="M-52,0 L-16,0"/><path d="M52,0 L16,0"/>
+   <path d="M-38,-38 L-12,-12"/><path d="M38,-38 L12,-12"/><path d="M-38,38 L-12,12"/><path d="M38,38 L12,12"/>
+  </g>
+ </g>
+ <g transform="translate(440,105)">
+  <circle class="pos" cx="-38" cy="0" r="12"/><text x="-38" y="4" text-anchor="middle" fill="#fff" class="lbl">+</text>
+  <circle class="neg" cx="38" cy="0" r="12"/><text x="38" y="4" text-anchor="middle" fill="#fff" class="lbl">−</text>
+  <g class="fld" marker-end="url(#ar)">
+   <path d="M-26,0 L24,0"/><path d="M-32,-11 Q0,-46 32,-11"/><path d="M-32,11 Q0,46 32,11"/>
+   <path d="M-30,-22 Q0,-72 30,-22"/><path d="M-30,22 Q0,72 30,22"/>
+  </g>
+ </g>
+</svg><figcaption>קווי שדה <b>יוצאים</b> ממטען חיובי ו<b>נכנסים</b> לשלילי. צפיפות הקווים היא עוצמת השדה — קרוב למטען הם צפופים, ורחוק מדוללים.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>הפרשי פוטנציאל הם השפה שבה הגוף עובד. פוטנציאל המנוחה של תא העצב הוא הפרש פוטנציאלים על פני הממברנה, ופעולת הדפיברילטור היא כפייה של הפרש פוטנציאל חיצוני על הלב. גם הטרמינולוגיה של האלקטרודות שייכת לכאן, והיא מלכודת קלאסית: <b>קתודה</b> היא האלקטרודה השלילית, המושכת אליה קטיונים (חיוביים), ו<b>אנודה</b> היא החיובית, המושכת אניונים (שליליים). מוליכות היא שקובעת היכן הזרם באמת יזרום בגוף: חזה רטוב מקצר את הזרם, כפפה מבודדת חוסמת אותו, ואצבע חשופה מוליכה למסך קיבולי.</p>
 
@@ -212,10 +368,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="mdulzEfQXDE"><b>Electric Fields — CrashCourse #26</b><span>מעבר מכוח בין מטענים לשדה כתכונת המרחב: הגדרת השדה כווקטור, קווי שדה וכיוונם, ושדה של מטען נקודתי.</span></div>
 <div class="vid" data-yt="ZrMltpK6iAw"><b>Voltage, Energy &amp; Capacitors — CrashCourse #27</b><span>הקשר בין אנרגיה פוטנציאלית, פוטנציאל ומתח — ומשם המשך טבעי לקבלים ולאנרגיה האגורה בהם.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/מטען, שדה ופוטנציאל חשמלי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-gauss">
-<h3>חוק גאוס ויישומיו</h3>
+<h3>חוק גאוס ויישומיו<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">חוק גאוס אומר משהו אחד פשוט: כמות קווי השדה שיוצאת ממעטפת סגורה נקבעת אך ורק על ידי המטען הכלוא בתוכה. מכאן נובעות שתי תוצאות שהמבחן אוהב — שדה של לוח אינסופי שאינו דועך, ומוליך שבתוכו השדה אפס.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -225,6 +382,21 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>התוצאה החשובה ביותר למבחן היא שדה של <b>לוח או משטח אינסופי טעון</b>: E = σ/2ε₀. תסתכלו על מה שאין בביטוי הזה — אין בו r. השדה של משטח אינסופי הוא <b>קבוע ואחיד ואינו דועך עם המרחק</b>. זו לא טעות ולא קירוב: כשמתרחקים מהמשטח, כל נקודה על המשטח תורמת פחות, אבל בו-זמנית "רואים" שטח גדול יותר — והשפעות אלה מתקזזות בדיוק. זו התוצאה שעליה נבנה כל מודל <b>קבל הלוחות</b>, ולכן המרצה מדגיש אותה כמעט בכל הרצאה.</p>
 <p>יישום שני: <b>מוליך בשיווי משקל אלקטרוסטטי</b>. המטען העודף יושב כולו על הפנים החיצוני של המוליך, והשדה בתוך המוליך הוא אפס. אילו היה שדה בפנים, הוא היה מניע מטענים — ואז זה לא היה שיווי משקל. מכאן <b>כלוב פאראדיי</b>: חלל בתוך מוליך מוגן משדות חיצוניים. ולבסוף, <b>חומר דיאלקטרי</b> בין לוחות הקבל: מולקולות דיפוליות (מים למשל) מסתדרות לפי כיוון השדה, יוצרות שדה נגדי פנימי שמחליש את השדה הכולל — ולכן לאותו מתח אפשר לאגור יותר מטען, כלומר הקיבול גדל.</p>
 
+<figure>
+<svg viewBox="0 0 520 210" role="img" aria-label="שדה של מטען נקודתי, תיל ולוח כפונקציה של המרחק">
+ <text class="ttl" x="260" y="14" text-anchor="middle">איך השדה דועך — לפי צורת המקור</text>
+ <g class="gd"><path d="M56,178 L470,178"/><path d="M56,178 L56,32"/></g>
+ <text class="sml" x="262" y="198" text-anchor="middle">מרחק מהמקור  r →</text>
+ <text class="sml" x="30" y="106" text-anchor="middle" transform="rotate(-90 30 106)">עוצמת השדה E</text>
+ <path class="hot" d="M78,36 C104,120 150,158 240,168 C320,175 400,176 466,177"/>
+ <path class="fld" style="stroke:#3d7fd6;stroke-width:2" d="M78,52 C118,110 180,143 270,157 C350,168 420,172 466,174"/>
+ <path class="cool" d="M78,86 L466,86"/>
+ <g>
+  <rect x="352" y="41" width="16" height="3.6" rx="2" fill="#e05252"/><text class="lbl" x="344" y="47" text-anchor="end">מטען נקודתי — 1/r²</text>
+  <rect x="352" y="63" width="16" height="3.6" rx="2" fill="#3d7fd6"/><text class="lbl" x="344" y="69" text-anchor="end" fill="#3d7fd6">תיל אינסופי — 1/r</text>
+  <rect x="352" y="85" width="16" height="3.6" rx="2" fill="#2f9e7a"/><text class="lbl" x="344" y="91" text-anchor="end" fill="#2f9e7a">לוח אינסופי — קבוע!</text>
+ </g>
+</svg><figcaption>זו התוצאה שנבחנת: שדה של <b>לוח אינסופי אינו דועך כלל</b>. מטען נקודתי יורד כריבוע המרחק, תיל יורד ליניארית, ולוח נשאר קבוע — כי כשמתרחקים "רואים" שטח גדול יותר, וזה מקזז בדיוק.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>ממברנת התא היא בדיוק המקרה של שני "לוחות" מוליכים במרחק ננומטרי זה מזה — האלקטרוליט מבפנים ומבחוץ, והשכבה הליפידית המבודדת ביניהם. בגלל שהמרחק זעיר ביחס לשטח, אפשר להתייחס אליה כאל לוחות אינסופיים, ולכן השדה החשמלי לרוחב הממברנה אחיד. זהו הבסיס הפיזיקלי להתייחסות לתא כאל קבל — התייחסות שמלווה את שאר הבלוק ומגיעה עד מעגל ה-RC ותיאוריית הכבל.</p>
 
@@ -241,10 +413,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="q1eor6oIuUo"><b>Electric Flux &amp; Gauss's Law — The Organic Chemistry Tutor</b><span>הבחירה המרכזית ליחידה: שטף דרך משטחים סגורים, גזירת שדה הלוח האינסופי, ויישומי החוק לצורות סימטריות.</span></div>
 <div class="vid" data-yt="owMznEZPNt4"><b>Gauss's Law of Electricity — Khan Academy</b><span>הסבר אינטואיטיבי לשטף כספירת קווי שדה ולסימטריה כמפתח לשימוש בחוק. מכסה חלקית בלבד: אינו גוזר את שדה הלוח האינסופי (σ/2ε₀) ואינו נוגע בכלוב פאראדיי — את שניהם השלימו מהסרטון הראשון ומהסיכום.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/חוק גאוס ויישומיו" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-capacitors">
-<h3>קבלים — חיבור ואנרגיה</h3>
+<h3>קבלים — חיבור ואנרגיה<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">קבל הוא מכשיר שאוגר אנרגיה חשמלית לאט ומשחרר אותה מהר. שני הדברים שחייבים להיצמד אליהם: הקיבול הוא תכונה גאומטרית ולא תלוי בסוללה, וכללי החיבור בטור ובמקביל הם בדיוק <b>הפוכים</b> מאלה של נגדים.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -254,6 +427,37 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p><b>חיבור — והנה ההיפוך.</b> בחיבור <b>מקבילי</b> המתח על כל הקבלים זהה (מתח המקור), המטען מתפצל, והקיבול השקול הוא סכום פשוט: C=C₁+C₂. ההיגיון: כל קבל תורם שטח לוח נוסף לאגירה, כמו להוסיף עוד מכלים זה לצד זה. בחיבור <b>טורי</b> אותו <b>מטען</b> חייב לעבור דרך כל הקבלים ברצף — ולכן המטען זהה על כולם — המתח מתחלק ביניהם ביחס הפוך לקיבול (קבל <b>קטן</b> מקבל מתח <b>גדול</b>), והקיבול השקול מחושב לפי 1/C=1/C₁+1/C₂ ויוצא <b>קטן מכל קבל בודד</b>. ההיגיון: כל קבל נוסף בטור הוא עוד "צוואר בקבוק" בדרך. בנגדים ההיגיון הפוך בדיוק — בטור המכשולים מצטברים ובמקביל נפתחים נתיבים — ולכן קל להחליף בין הכללים אם לומדים אותם בעל פה במקום מההיגיון.</p>
 <p>הבחנה אחרונה וקריטית: קבל <b>מחובר</b> לסוללה כפוף למתח קבוע (הסוללה כופה עליו את ε), ולכן אם משנים את הגאומטריה — המטען הוא שישתנה. קבל <b>מנותק</b> שומר על <b>מטען</b> קבוע (אין לאן שילך), ולכן שינוי גאומטרי ישנה את המתח. לפני שעונים על שאלה כזאת, קודם כל שואלים: מחובר או מנותק?</p>
 
+<figure>
+<svg viewBox="0 0 520 200" role="img" aria-label="קבל לוחות, וחיבור בטור ובמקביל">
+ <text class="ttl" x="86" y="14" text-anchor="middle">קבל לוחות</text>
+ <g transform="translate(86,30)">
+  <rect x="-42" y="18" width="84" height="6" class="pos"/><rect x="-42" y="76" width="84" height="6" class="neg"/>
+  <g class="fld"><path d="M-30,26 L-30,74"/><path d="M-10,26 L-10,74"/><path d="M10,26 L10,74"/><path d="M30,26 L30,74"/></g>
+  <path class="gd" d="M52,24 L52,82"/><path class="gd" d="M48,24 L56,24"/><path class="gd" d="M48,82 L56,82"/>
+  <text class="sml" x="62" y="57">d</text>
+  <text class="lbl" x="0" y="104" text-anchor="middle" style="direction:ltr">C = &#949;&#8320;A / d</text>
+  <text class="sml" x="0" y="122" text-anchor="middle">גאומטריה בלבד — לא הסוללה</text>
+ </g>
+ <line class="gd" x1="176" y1="20" x2="176" y2="184"/>
+ <text class="ttl" x="250" y="14" text-anchor="middle">בטור</text>
+ <g transform="translate(250,46)" class="ln">
+  <path d="M-52,0 L-26,0"/><path d="M-26,-13 L-26,13 M-18,-13 L-18,13"/>
+  <path d="M-18,0 L18,0"/><path d="M18,-13 L18,13 M26,-13 L26,13"/><path d="M26,0 L52,0"/>
+ </g>
+ <text class="lbl" x="250" y="82" text-anchor="middle" style="direction:ltr">1/C = 1/C&#8321; + 1/C&#8322;</text>
+ <text class="sml" x="250" y="99" text-anchor="middle">אותו <tspan style="font-weight:800">מטען</tspan> · הקיבול <tspan style="font-weight:800">קטן</tspan></text>
+ <text class="ttl" x="416" y="14" text-anchor="middle">במקביל</text>
+ <g transform="translate(416,46)" class="ln">
+  <path d="M-52,0 L-30,0 M-30,-22 L-30,22"/>
+  <path d="M-30,-22 L-6,-22 M-6,-33 L-6,-11 M2,-33 L2,-11 M2,-22 L30,-22"/>
+  <path d="M-30,22 L-6,22 M-6,11 L-6,33 M2,11 L2,33 M2,22 L30,22"/>
+  <path d="M30,-22 L30,22 M30,0 L52,0"/>
+ </g>
+ <text class="lbl" x="416" y="92" text-anchor="middle" style="direction:ltr">C = C&#8321; + C&#8322;</text>
+ <text class="sml" x="416" y="109" text-anchor="middle">אותו <tspan style="font-weight:800">מתח</tspan> · הקיבול <tspan style="font-weight:800">גדל</tspan></text>
+ <text class="sml" x="336" y="164" text-anchor="middle" style="font-size:11.5px">⚠️ שימו לב: זה בדיוק <tspan style="font-weight:800">הפוך</tspan> מנגדים —</text>
+ <text class="sml" x="336" y="180" text-anchor="middle" style="font-size:11.5px">שם דווקא הטור מתחבר בסכום פשוט</text>
+</svg><figcaption>הקיבול נקבע מהגאומטריה בלבד. וההיפוך שקל ליפול בו: אצל קבלים <b>המקביל</b> מתחבר בסכום פשוט, ואצל נגדים דווקא <b>הטור</b>.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>הקבל הוא הרכיב המרכזי בדפיברילטור ובקוצב הלב, ומהסיבה המדויקת הזאת: צריך לספק כמות אנרגיה גדולה בפרק זמן קצר מאוד, בלי לשאת סוללה ענקית. הפתרון הוא אגירה איטית מהסוללה ופריקה מהירה מהקבל — בדיוק כמו סכר שמתמלא מנהר לאט ומשחרר את כל המים בבת אחת. התלות הריבועית באנרגיה היא שמאפשרת להגיע לאנרגיות הגבוהות הנדרשות: העלאה מתונה של מתח הטעינה מקפיצה את האנרגיה הזמינה. בפריקה, זרם הפריקה זורם <b>בכיוון ההפוך</b> לזרם הטעינה, והקבל עצמו משמש כמקור המתח.</p>
 
@@ -270,10 +474,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="ZrMltpK6iAw"><b>Voltage, Energy &amp; Capacitors — CrashCourse #27</b><span>מתחיל מפוטנציאל ומתח ומגיע לקיבול ולאנרגיה האגורה U=½CV² — הבסיס המושגי של היחידה.</span></div>
 <div class="vid" data-yt="vuCJP_5KOlI"><b>Capacitors &amp; Kirchhoff — CrashCourse #31</b><span>הצד המעגלי: קבלים בטור ובמקביל, ואיך משתמשים בחוקי קירכהוף במעגל שיש בו קבלים.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/קבלים — חיבור ואנרגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-current-resistance">
-<h3>זרם, התנגדות וחוק אוהם</h3>
+<h3>זרם, התנגדות וחוק אוהם<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">זרם הוא <b>קצב</b> ולא כמות, והתנגדות היא מה שמתרגם הפרש מתח לזרם. ההבחנה שהיחידה הזאת עומדת עליה: בין ρ, שהיא תכונת החומר בלבד, לבין R, שתלויה גם בגאומטריה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -283,6 +488,27 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p><b>חוק אוהם</b> V=IR הוא ה"מתרגם" בין מתח לזרם: לאותו הפרש מתח, ככל שההתנגדות גדולה יותר כך פחות מטען יעבור בשנייה. באנלוגיית המים, מקור המתח הוא סכר עם מאגר בגובה מסוים (ככל שגבוה יותר, ה"לחץ" הדוחף גדול יותר), הזרם הוא קצב הזרימה, וההתנגדות היא הצרות והעקמומיות של התעלה.</p>
 <p><b>ההספק</b> P = VI = I²R = V²/R הוא קצב ההמרה של אנרגיה חשמלית לצורות אחרות — חום, אור, תנועה. הוא מסביר למה נגד מתחמם: כל מטען שעובר בו מאבד חלק מהאנרגיה שלו, שיוצאת כחום. ומכאן ההנדסה של גוף חימום: תיל <b>דק וארוך</b> מחומר בעל ρ <b>גבוה</b> — שלושת הגורמים יחד מקסמים את R, וכל אחד מהם ניתן לזיהוי ישירות מ-R=ρL/A. שני מקרי קיצון סוגרים את היחידה: <b>קצר</b> הוא חיבור בין שתי נקודות בעלות פוטנציאל שונה ללא התנגדות משמעותית ביניהן, ולכן זרם עצום שעלול לגרום לחימום ולשריפה — ומכאן שלמעגל תמיד צריכה להיות התנגדות כלשהי, ולו רק כהגנה. <b>נתק</b> הוא התנגדות אינסופית (אוויר למשל), ולכן אין זרם כלל, גם אם קיים הפרש פוטנציאלים גדול.</p>
 
+<figure>
+<svg viewBox="0 0 520 168" role="img" aria-label="ההתנגדות תלויה באורך ובשטח החתך">
+ <text class="ttl" x="260" y="14" text-anchor="middle">R = ρ·L / A — למה אקסון עבה מוליך טוב יותר</text>
+ <g transform="translate(30,42)">
+  <rect x="0" y="26" width="180" height="16" rx="4" class="fill-b" stroke="#3d7fd6" stroke-width="1.4"/>
+  <text class="lbl" x="90" y="16" text-anchor="middle">ארוך וצר</text>
+  <text class="sml" x="90" y="60" text-anchor="middle">התנגדות <tspan style="font-weight:800;fill:#e05252">גבוהה</tspan> — זרם קטן</text>
+  <g class="hot" marker-end="url(#ar2)"><path d="M20,34 L52,34"/></g>
+ </g>
+ <defs><marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+   <path d="M0,0 L10,5 L0,10 z" fill="#e05252"/></marker></defs>
+ <g transform="translate(280,42)">
+  <rect x="0" y="14" width="110" height="42" rx="6" class="fill-b" stroke="#3d7fd6" stroke-width="1.4"/>
+  <text class="lbl" x="55" y="6" text-anchor="middle">קצר ורחב</text>
+  <text class="sml" x="55" y="74" text-anchor="middle">התנגדות <tspan style="font-weight:800;fill:#2f9e7a">נמוכה</tspan> — זרם גדול</text>
+  <g class="cool" marker-end="url(#ar3)"><path d="M14,26 L64,26"/><path d="M14,36 L64,36"/><path d="M14,46 L64,46"/></g>
+ </g>
+ <defs><marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+   <path d="M0,0 L10,5 L0,10 z" fill="#2f9e7a"/></marker></defs>
+ <text class="sml" x="260" y="152" text-anchor="middle">ρ היא תכונת <tspan style="font-weight:800">החומר</tspan> ואינה משתנה · R תלויה גם ב<tspan style="font-weight:800">גאומטריה</tspan></text>
+</svg><figcaption>צינור ארוך וצר מקשה על זרימה; קצר ורחב מקל. חיתוך תיל לחצי אורכו מחצה את R — אבל ρ, שהיא תכונת החומר, נשארת בדיוק אותו דבר.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>העור היבש הוא נגד גדול, ולפי חוק אוהם I=V/R הוא זה שמגביל את הזרם שעובר דרך הגוף ומגן מפני התחשמלות. הנקודה שהמבחן בודק: מה שמסוכן הוא <b>הזרם</b>, לא המתח כשלעצמו — אותו מתח מסוכן על עור רטוב ולא מסוכן על עור יבש, כי ההתנגדות שונה. מאותה סיבה בדיוק מרטיבים את החזה או משתמשים בג'ל לפני דפיברילציה: המים יוצרים נתיב בעל התנגדות נמוכה שמאפשר לזרם להגיע ללב במקום להיחסם בעור.</p>
 
@@ -299,10 +525,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="HXOok3mfMLM"><b>Electric Current — CrashCourse #28</b><span>מגדיר זרם ומהירות סחיפה, מסביר מהו כא"מ ומקור מתח, ומגיע לחוק אוהם ולהתנגדות.</span></div>
 <div class="vid" data-yt="g-wjP1otQWI"><b>DC Resistors &amp; Batteries — CrashCourse #29</b><span>הצד המעשי: נגדים בטור ובמקביל, חישוב התנגדות שקולה, וההתנגדות הפנימית של הסוללה שהמרצה מדגיש.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/זרם, התנגדות וחוק אוהם" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-circuits-kirchhoff">
-<h3>מעגלים וחוקי קירכהוף</h3>
+<h3>מעגלים וחוקי קירכהוף<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">שני חוקי קירכהוף אינם שני טריקים לפתרון מעגלים אלא שני חוקי שימור בתחפושת: הצומת הוא שימור המטען, והלולאה היא שימור האנרגיה. אם זוכרים את זה, אי אפשר להתבלבל ביניהם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -312,6 +539,29 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p><b>נגדים במקביל:</b> אותו מתח על כולם (מתח המקור), הזרם מתפצל, וההתנגדות השקולה מחושבת לפי 1/R=1/R₁+1/R₂ ויוצאת תמיד <b>קטנה מכל נגד בודד</b>. ההיגיון: כל נגד נוסף פותח נתיב נוסף לזרם, ופתיחת נתיב תמיד מקלה. התוצאה השימושית היא <b>מחלק זרם</b> — הזרם מתחלק ביחס <b>הפוך</b> להתנגדות, ולכן הנגד הקטן מקבל את הזרם הגדול.</p>
 <p>ומכאן מסקנה שהיא מלכודת אמיתית: <b>הוספת צרכן במקביל מקטינה את ההתנגדות השקולה ולכן מגדילה את הזרם הכולל</b> שהסוללה מספקת. האינטואיציה השגויה "עוד צרכן שיתחלק באותו זרם" מובילה לתשובה הפוכה. חשוב גם לזכור שהסוללה עצמה אינה אידיאלית: יש לה <b>התנגדות פנימית</b> קטנה, ולכן המתח שמתקבל בפועל על ההדקים הוא ε פחות הירידה על ההתנגדות הפנימית שלה.</p>
 
+<figure>
+<svg viewBox="0 0 520 180" role="img" aria-label="נגדים בטור ובמקביל">
+ <text class="ttl" x="130" y="14" text-anchor="middle">בטור — אותו זרם</text>
+ <g transform="translate(130,60)" class="ln">
+  <path d="M-84,0 L-58,0"/><rect x="-58" y="-9" width="34" height="18" rx="3" class="fill-w" stroke="var(--ink)" stroke-width="1.4"/>
+  <path d="M-24,0 L10,0"/><rect x="10" y="-9" width="34" height="18" rx="3" class="fill-w" stroke="var(--ink)" stroke-width="1.4"/>
+  <path d="M44,0 L84,0"/>
+  <text class="sml" x="-41" y="-16" text-anchor="middle">R₁</text><text class="sml" x="27" y="-16" text-anchor="middle">R₂</text>
+ </g>
+ <text class="lbl" x="130" y="102" text-anchor="middle" style="direction:ltr">R = R&#8321; + R&#8322;</text>
+ <text class="sml" x="130" y="122" text-anchor="middle">המתח מתחלק · המכשולים מצטברים</text>
+ <line class="gd" x1="260" y1="22" x2="260" y2="158"/>
+ <text class="ttl" x="392" y="14" text-anchor="middle">במקביל — אותו מתח</text>
+ <g transform="translate(392,60)" class="ln">
+  <path d="M-84,0 L-56,0 M-56,-26 L-56,26"/>
+  <path d="M-56,-26 L-20,-26"/><rect x="-20" y="-35" width="34" height="18" rx="3" class="fill-w" stroke="var(--ink)" stroke-width="1.4"/><path d="M14,-26 L56,-26"/>
+  <path d="M-56,26 L-20,26"/><rect x="-20" y="17" width="34" height="18" rx="3" class="fill-w" stroke="var(--ink)" stroke-width="1.4"/><path d="M14,26 L56,26"/>
+  <path d="M56,-26 L56,26 M56,0 L84,0"/>
+ </g>
+ <text class="lbl" x="392" y="112" text-anchor="middle" style="direction:ltr">1/R = 1/R&#8321; + 1/R&#8322;</text>
+ <text class="sml" x="392" y="132" text-anchor="middle">הזרם מתפצל · תמיד <tspan style="font-weight:800">קטן מכל נגד</tspan></text>
+ <text class="sml" x="260" y="170" text-anchor="middle">כל צרכן שמוסיפים במקביל פותח נתיב נוסף — ולכן <tspan style="font-weight:800">מגדיל</tspan> את הזרם הכולל מהסוללה</text>
+</svg><figcaption>בטור המכשולים מצטברים; במקביל כל נגד פותח נתיב חדש, ולכן ההתנגדות השקולה תמיד קטנה מכל אחד מהם.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>מערכת הדם היא מעגל מקבילי ענק. עורק בודד מתפצל למיליוני נימים המסודרים <b>במקביל</b>, וכל נים נוסף מוסיף שטח חתך למערכת. שטח החתך הכולל של מצע הנימים גדול בהרבה משטח החתך של העורק שהזין אותו — ולכן, על אף שהזרימה הכוללת נשמרת, המהירות בכל נים בודד נמוכה מאוד. ההאטה הזאת אינה תקלה אלא בדיוק המטרה: היא נותנת לדם זמן שהות מספיק לשחלוף חמצן, פחמן דו-חמצני וחומרים מומסים עם הרקמה.</p>
 
@@ -328,10 +578,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="-w-VTw0tQlE"><b>Circuit Analysis — CrashCourse #30</b><span>הסרטון המרכזי ליחידה: שני חוקי קירכהוף בפעולה, ניתוח מעגלים מרובי לולאות, ומעקב אחר מתח וזרם בכל ענף.</span></div>
 <div class="vid" data-yt="vuCJP_5KOlI"><b>Capacitors &amp; Kirchhoff — CrashCourse #31</b><span>הרחבה: יישום אותם חוקי קירכהוף על מעגלים שיש בהם גם קבלים — גשר טבעי ליחידת ה-RC.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/מעגלים וחוקי קירכהוף" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-rc">
-<h3>מעגל RC</h3>
+<h3>מעגל RC<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">מעגל RC הוא הנושא שבגללו נבנה כל הבלוק, והרעיון היחיד שמאחוריו הוא שהקבל אינו יכול לשנות את מתחו מיידית. מכאן נובעים שני מצבי הקיצון וכל הדינמיקה שביניהם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -342,6 +593,33 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>הנוסחאות: בטעינה Q(t)=Cε(1−e^(−t/RC)) והזרם I(t)=(ε/R)e^(−t/RC); בפריקה Q(t)=Q₀e^(−t/RC). מה שחשוב הוא לא הביטויים אלא <b>קבוע הזמן τ=RC</b>, שהוא יחידת הזמן הטבעית של המעגל. אחרי τ אחד הקבל נטען ל-63.2% מהמטען המקסימלי, ובפריקה יורד ל-36.8% מהמטען ההתחלתי. תיאורטית התהליך <b>לעולם אינו מסתיים</b> — 100% ו-0% מושגים רק ב-t→∞, אסימפטוטית — ובפועל אחרי כחמישה קבועי זמן נחשב "טעון או פרוק לגמרי". שימו לב שהזרם דועך מעריכית <b>גם בטעינה וגם בפריקה</b>: בשני המקרים הוא מתחיל מרבי ושואף לאפס.</p>
 <p>למה τ גדל עם R ועם C? נגד גדול יותר מגביל את קצב זרימת המטען, כמו צינור צר, ולכן מאט את התהליך. קיבול גדול יותר פשוט דורש יותר מטען כדי להתמלא לאותה רמת מתח, ולכן גם הוא לוקח יותר זמן. המסקנה המעשית: כדי לקצר את זמן הטעינה או הפריקה חייבים להקטין את R או את C — אין דרך אחרת.</p>
 
+<figure>
+<svg viewBox="0 0 520 228" role="img" aria-label="עקומות טעינה ופריקה של קבל וקבוע הזמן">
+ <text class="ttl" x="130" y="14" text-anchor="middle">טעינה</text>
+ <text class="ttl" x="390" y="14" text-anchor="middle">פריקה</text>
+ <g transform="translate(30,26)">
+  <g class="gd"><path d="M28,148 L226,148"/><path d="M28,148 L28,22"/></g>
+  <path class="hot" d="M28,148 C60,58 96,36 220,30"/>
+  <path class="gd" style="stroke-dasharray:4 4" d="M28,30 L220,30"/>
+  <path class="gd" style="stroke-dasharray:3 3" d="M66,148 L66,73 L28,73"/>
+  <text class="sml" x="22" y="34" text-anchor="end">100%</text>
+  <text class="sml" x="22" y="77" text-anchor="end">63%</text>
+  <text class="sml" x="66" y="163" text-anchor="middle">τ</text>
+  <text class="sml" x="130" y="163" text-anchor="middle">זמן →</text>
+  <text class="sml" x="150" y="60">מטען על הקבל</text>
+ </g>
+ <line class="gd" x1="264" y1="26" x2="264" y2="196"/>
+ <g transform="translate(290,26)">
+  <g class="gd"><path d="M28,148 L226,148"/><path d="M28,148 L28,22"/></g>
+  <path class="cool" d="M28,30 C60,120 96,142 220,147"/>
+  <path class="gd" style="stroke-dasharray:3 3" d="M66,148 L66,104 L28,104"/>
+  <text class="sml" x="22" y="34" text-anchor="end">100%</text>
+  <text class="sml" x="22" y="108" text-anchor="end">37%</text>
+  <text class="sml" x="66" y="163" text-anchor="middle">τ</text>
+  <text class="sml" x="130" y="163" text-anchor="middle">זמן →</text>
+ </g>
+ <text class="lbl" x="260" y="220" text-anchor="middle"><tspan style="direction:ltr">&#964; = RC</tspan> — כל ההתנהגות של המעגל נדחסת למספר אחד</text>
+</svg><figcaption>אחרי זמן τ אחד הקבל הגיע ל-63% מהטעינה (או ירד ל-37% בפריקה). התהליך <b>מאט את עצמו</b>: ככל שנצבר מטען, המתח הנגדי גדל והזרם קטן — ולכן העקומה מעריכית ולעולם אינה נוגעת ב-100%.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>מעגל ה-RC הוא המודל של הולכה עצבית ושל תפקוד הלב, והוא הסיבה שהמרצה מדגיש שהחומר הזה יידרש בקורסים הבאים. בקוצב לב, בחירת R ו-C היא שמכתיבה את קצב הפולסים: זמן הטעינה בין פולס לפולס הוא בדיוק τ המהונדס לצורך הרפואי. בדפיברילטור, מצב "טעון ומוכן" פירושו שהקבל הגיע קרוב מספיק למתח המרבי — קרוב, כי תיאורטית הוא לעולם לא יגיע אליו במדויק — ומשך הפריקה נקבע גם הוא על ידי R ו-C של המעגל.</p>
 
@@ -358,10 +636,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="vuCJP_5KOlI"><b>Capacitors &amp; Kirchhoff — CrashCourse #31</b><span>הסרטון המרכזי ליחידה: מעגל RC, תהליך טעינת הקבל וקבוע הזמן τ=RC, על רקע קבלים בטור ובמקביל.</span></div>
 <div class="vid" data-yt="ZrMltpK6iAw"><b>Voltage, Energy &amp; Capacitors — CrashCourse #27</b><span>רקע משלים על מתח ועל האנרגיה האגורה בקבל — עוזר להבין מה בדיוק "נטען" בתהליך.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/מעגל RC" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-axon-cable">
-<h3>האקסון כמוליך — תיאוריית הכבל</h3>
+<h3>האקסון כמוליך — תיאוריית הכבל<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">היחידה הזאת היא הפואנטה של כל הבלוק: כל מה שנלמד על התנגדות ובידוד מוחל על האקסון, שמתנהג כמו כבל חשמלי לא-אידיאלי. שתי התנגדויות שונות קובעות את מהירות ההולכה, וכל הביולוגיה נגזרת מהן.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -371,6 +650,29 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>מכאן שתי אסטרטגיות אבולוציוניות נפרדות. <b>הראשונה — הגדלת רדיוס האקסון</b>, שבה נוקטים דיונונים ותולעים. הגדלת שטח החתך A מקטינה ישירות את Ri לפי R=ρL/A, בדיוק כמו צינור רחב יותר. המגבלה שלה פיזית ופשוטה: אין מקום. מוח אנושי מכיל כמות אדירה של נוירונים בתוך חלל גולגולת מוגבל, ולא ניתן להגדיל את כולם. <b>השנייה — עטיפת מיאלין</b>, שפיתחו בעלי החוליות. המיאלין הוא חומר מבודד שמגדיל את Rm ובכך מצמצם את זרם הזליגה, בלי לתפוס נפח כמו שהגדלת קוטר הייתה תופסת. באקסון ממואלן האות "קופץ" בין מרווחי ראנוויה החשופים — <b>הולכה קפיצית</b> — ולכן היא גם מהירה וגם חסכונית אנרגטית. אקסונים שמעבירים מסרים קריטיים, כמו כאב חד ורפלקסים, עטופים ברובם במיאלין.</p>
 <p>לסיכום בשתי שורות שכדאי לזכור כלשונן: אקסון עבה יותר ← Ri קטנה יותר ← הולכה מהירה יותר. מיאלין עבה יותר ← Rm גדולה יותר ← פחות זרם דלף ← הולכה מהירה יותר.</p>
 
+<figure>
+<svg viewBox="0 0 520 200" role="img" aria-label="האקסון כמוליך — התנגדות אורכית ורדיאלית">
+ <text class="ttl" x="260" y="14" text-anchor="middle">שתי התנגדויות, שני כיוונים, שתי מטרות הפוכות</text>
+ <g transform="translate(40,34)">
+  <rect x="0" y="30" width="440" height="46" rx="10" class="fill-b" stroke="#3d7fd6" stroke-width="1.6"/>
+  <g fill="#e0a33c" opacity=".55">
+   <rect x="24" y="22" width="86" height="62" rx="9"/><rect x="132" y="22" width="86" height="62" rx="9"/>
+   <rect x="240" y="22" width="86" height="62" rx="9"/><rect x="348" y="22" width="86" height="62" rx="9"/>
+  </g>
+  <text class="sml" x="67" y="14" text-anchor="middle" style="font-weight:800;fill:#b57f18">מיאלין</text>
+  <text class="sml" x="121" y="102" text-anchor="middle">מפרק ראנוויה</text>
+  <path class="gd" d="M121,84 L121,94"/>
+  <g class="cool" marker-end="url(#ar4)"><path d="M20,53 L120,53"/><path d="M240,53 L340,53"/></g>
+  <text class="lbl" x="180" y="58" text-anchor="middle" style="fill:#2f9e7a">Ri</text>
+  <text class="sml" x="180" y="72" text-anchor="middle">אורכית — רוצים <tspan style="font-weight:800">קטנה</tspan></text>
+  <g class="hot" marker-end="url(#ar2)" opacity=".85"><path d="M270,30 L270,8"/><path d="M300,76 L300,98"/></g>
+  <text class="lbl" x="330" y="14" style="fill:#e05252">Rm</text>
+  <text class="sml" x="352" y="30">רדיאלית — רוצים <tspan style="font-weight:800">גדולה</tspan></text>
+ </g>
+ <defs><marker id="ar4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+   <path d="M0,0 L10,5 L0,10 z" fill="#2f9e7a"/></marker></defs>
+ <text class="sml" x="260" y="184" text-anchor="middle">אקסון עבה יותר ← Ri קטנה · מיאלין עבה יותר ← Rm גדולה · שניהם ← הולכה מהירה יותר</text>
+</svg><figcaption>זו כל היחידה בשורה אחת: <b>Ri</b> היא ההתנגדות לזרימה <b>לאורך</b> התא ורוצים אותה קטנה, ו<b>Rm</b> היא ההתנגדות לדליפה <b>לרוחב</b> ורוצים אותה גדולה. דמיאלינציה מקטינה את Rm — ולכן מאטה את ההולכה.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>מחלה דמיאלינטיבית היא בדיוק ההיפוך של האסטרטגיה השנייה. פגיעה בעטיפת המיאלין מקטינה את Rm, כלומר הופכת את הבידוד לגרוע יותר, ולכן זרם זולג החוצה דרך הממברנה במקום להתקדם לאורך האקסון. האות נחלש ומואט, ובמקרים חמורים אינו מגיע כלל ליעדו וההולכה נעצרת. שימו לב שהמנגנון פיזיקלי לחלוטין — לא "פגיעה בעצב" במובן מעורפל, אלא ירידה קונקרטית בהתנגדות הרדיאלית של הכבל. אותה הבנה מסבירה גם למה המערכת בנויה כפי שהיא: הצירים המהירים ביותר בגוף הם אלה שמשלבים את שני הפתרונות — קוטר גדול יחסית יחד עם עטיפת מיאלין עבה.</p>
 
@@ -388,14 +690,15 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="w-waXZ2LDRE"><b>Nerve Conduction &amp; Saltatory Conduction — Byte Size Med</b><span>האינטואיציה הביולוגית: מיאלין כבידוד המונע דליפת זרם, הולכה קפיצית בין מפרקי רנוויה, וכיוון ההתפשטות. מכסה חלקית: אינו נוקב במונחי הכבל Ri/Rm במפורש — נותן את התמונה בלי אוצר המילים הפורמלי.</span></div>
 <div class="vid" data-yt="2VzAY8pEbEE"><b>Cable Theory &amp; Space Constant λ</b><span>הרקע התיאורטי: מודל הכבל של האקסון ויחסי Rm ו-Ri. מכסה חלקית: מכיל גזירות מתמטיות — לצפייה כדי לקבע את אוצר המונחים, לא לצורך חישוב.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/האקסון כמוליך — תיאוריית הכבל" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 </section>
 
 <section class="block" id="b-magnetism">
-<h2>מגנטיות</h2>
+<h2>🧲 מגנטיות</h2>
 <p class="bsub">שלושה נושאים — הכוח שלא מבצע עבודה, מי יוצר שדה, ומה מייצר מתח.</p>
 <section class="unit" id="u-magnetic-field-lorentz">
-<h3>שדה מגנטי וכוח לורנץ</h3>
+<h3>שדה מגנטי וכוח לורנץ<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">שדה מגנטי הוא תכונה של המרחב שמתארת את הכוח הפועל על מטענים חשמליים <b>הנעים</b> בו. זהו ההבדל המהותי מהשדה החשמלי: החשמלי "מרגיש" כל מטען, גם נייח; המגנטי מרגיש רק תנועה — ובכיוון מאונך לה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -405,6 +708,41 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>מכאן לנקודה שנבחנת תמיד: <b>הכוח המגנטי אינו מבצע עבודה — W=0 תמיד</b>. הנימוק אינו "כי ככה", אלא הגדרת העבודה עצמה: ההעתק הרגעי הוא תמיד בכיוון המהירות, הכוח תמיד ניצב למהירות, הזווית בין הכוח להעתק היא 90°, ולכן העבודה מתאפסת. המשמעות הפיזיקלית: <b>האנרגיה הקינטית של החלקיק לא משתנה</b> ו<b>גודל המהירות נשמר</b> — רק הכיוון משתנה. זה בדיוק המצב של כוח צנטריפטלי, כמו חוט המושך כדור המסתובב במעגל, ולכן מטען שנכנס בניצב לשדה אחיד נע ב<b>תנועה מעגלית</b> ברדיוס R = mv/(qB). גם הרדיוס הזה קריא מושגית: הוא <b>גדל עם המסה</b> (יותר אינרציה דורשת מסלול רחב יותר) ו<b>קטן עם השדה ועם המטען</b> (כוח חזק יותר מכופף את המסלול חזק יותר). כשהמהירות אינה ניצבת לחלוטין, השילוב של רכיב מקביל (שממשיך ישר) ורכיב מאונך (שמסתובב) נותן <b>תנועה ספירלית</b> — בדיוק מה שקורה לחלקיקי הרוח השמשית הנלכדים בשדה כדור הארץ ויוצרים את הזוהר הקוטבי.</p>
 <p>הכיוון נקבע ב<b>כלל יד ימין הראשון</b>, שכדאי לזכור כ-FBI: ארבע האצבעות = כיוון השדה B, האגודל = כיוון המהירות v, וכף היד "דוחפת" בכיוון הכוח F. הערה קריטית: הכלל מנוסח ל<b>מטען חיובי</b>. עבור אלקטרון או כל מטען שלילי יש להפוך את התוצאה (או להשתמש ביד שמאל). ולבסוף — חוק לורנץ המלא מסכם את שני העולמות: F = qE + qv×B, כלומר הכוח החשמלי (שפועל תמיד, בכיוון השדה, וכן מבצע עבודה) ועל גביו הכוח המגנטי (שדורש תנועה, ניצב לה, ואינו מבצע עבודה).</p>
 
+<figure>
+<svg viewBox="0 0 520 200" role="img" aria-label="כוח לורנץ מאונך למהירות ולשדה, ומסלול מעגלי">
+ <text class="ttl" x="128" y="14" text-anchor="middle">שלושה וקטורים מאונכים</text>
+ <text class="ttl" x="390" y="14" text-anchor="middle">ולכן מסלול מעגלי</text>
+ <g transform="translate(128,105)">
+  <circle cx="0" cy="0" r="7" class="pos"/><text x="0" y="4" text-anchor="middle" fill="#fff" style="font-size:9px;font-weight:800">q</text>
+  <defs>
+   <marker id="av" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3d7fd6"/></marker>
+   <marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a6fd6"/></marker>
+   <marker id="af" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e05252"/></marker>
+  </defs>
+  <path stroke="#3d7fd6" stroke-width="2.4" fill="none" marker-end="url(#av)" d="M8,0 L74,0"/>
+  <text class="lbl" x="82" y="4" fill="#3d7fd6">v</text>
+  <path stroke="#8a6fd6" stroke-width="2.4" fill="none" marker-end="url(#ab)" d="M-6,-6 L-52,-48"/>
+  <text class="lbl" x="-60" y="-52" fill="#8a6fd6">B</text>
+  <path stroke="#e05252" stroke-width="2.4" fill="none" marker-end="url(#af)" d="M0,-8 L0,-70"/>
+  <text class="lbl" x="6" y="-74" fill="#e05252">F</text>
+  <path class="gd" d="M0,-18 L12,-18 L12,0" />
+ </g>
+ <text class="sml" x="128" y="180" text-anchor="middle">F ⊥ v תמיד ← <tspan style="font-weight:800">עבודה אפס</tspan> ← המהירות בגודלה נשמרת</text>
+ <line class="gd" x1="262" y1="24" x2="262" y2="186"/>
+ <g transform="translate(390,100)">
+  <circle cx="0" cy="0" r="46" fill="none" stroke="#3d7fd6" stroke-width="1.8" stroke-dasharray="5 4"/>
+  <circle cx="46" cy="0" r="7" class="pos"/>
+  <path stroke="#3d7fd6" stroke-width="2.2" fill="none" marker-end="url(#av)" d="M46,-8 L46,-40"/>
+  <path stroke="#e05252" stroke-width="2.2" fill="none" marker-end="url(#af)" d="M38,0 L10,0"/>
+  <g fill="none" stroke="#8a6fd6" stroke-width="1.2" opacity=".65">
+   <circle cx="-58" cy="-42" r="6"/><circle cx="-58" cy="0" r="6"/><circle cx="-58" cy="42" r="6"/>
+   <path d="M-61,-45 L-55,-39 M-55,-45 L-61,-39 M-61,-3 L-55,3 M-55,-3 L-61,3 M-61,39 L-55,45 M-55,39 L-61,45"/>
+  </g>
+  <text class="sml" x="-58" y="66" text-anchor="middle" fill="#8a6fd6">B נכנס לדף</text>
+  <text class="lbl" x="0" y="-2" text-anchor="middle" style="direction:ltr">R = mv/qB</text>
+ </g>
+ <text class="sml" x="390" y="180" text-anchor="middle">מהיר יותר = מעגל גדול יותר, <tspan style="font-weight:800">באותו זמן מחזור</tspan></text>
+</svg><figcaption>הכוח מאונך גם למהירות וגם לשדה, ולכן הוא <b>מסובב ולא מאיץ</b>. שימו לב לתוצאה שנבחנת: תדירות הסיבוב אינה תלויה במהירות — חלקיק מהיר פשוט נע במעגל רחב יותר.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>העיקרון של הסטת אלומת חלקיקים טעונים בשדה מגנטי הוא הבסיס למסך CRT: קרן אלקטרונים מואצת על ידי שדה חשמלי, מוסטת על ידי סלילים מגנטיים ופוגעת בחומר פלואורסצנטי שפולט אור — ולכן קירוב מגנט חיצוני מעוות את התמונה. אותו רעיון של שליטה בתנועת חלקיקים טעונים עומד ברקע של הפיזיקה שמאחורי PET (פוזיטרון מול אלקטרון).</p>
 
@@ -421,10 +759,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="s94suB5uLWw"><b>Magnetism — CrashCourse #32</b><span>מכסה קטבים וקווי שדה, כוח לורנץ F=qvB עם כלל יד ימין, וגם הכוח על תיל נושא זרם — בדיוק שלד היחידה.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/שדה מגנטי וכוח לורנץ" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-wire-force-ampere">
-<h3>כוח מגנטי על תיל, ביו-סבאר ואמפר</h3>
+<h3>כוח מגנטי על תיל, ביו-סבאר ואמפר<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">היחידה הזאת עונה על שתי שאלות הפוכות שקל לבלבל ביניהן: מה הכוח שפועל על תיל שכבר נמצא בתוך שדה קיים, ואיזה שדה תיל נושא זרם <b>מייצר</b> סביבו. שתיהן משתמשות בכלל יד ימין — אבל בתפקידים הפוכים.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -435,6 +774,41 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>שאר הגאומטריות בונות זו על זו: <b>לולאה מעגלית</b> נותנת במרכזה B = μ₀I/2R; <b>סליל</b> בעל N ליפופים הוא בסך הכול לולאה שהוכפלה, ולכן B = μ₀NI/2R; ו<b>סלנואיד (סילונית)</b> — סליל ארוך שרדיוסו זניח ביחס לאורכו — נותן בפנים שדה אחיד B = μ₀nI, כאשר n=N/L היא <b>צפיפות הליפופים ליחידת אורך</b>. שימו לב לתובנה: בסלנואיד <b>הרדיוס אינו מופיע כלל</b>. מה שקובע הוא כמה ליפופים נדחסו לכל מטר וכמה זרם עובר בהם — ולכן אפשר לבנות סלנואיד רחב מספיק להכניס לתוכו אדם ועדיין לקבל שדה חזק ואחיד. זה בדיוק המגנט של MRI.</p>
 <p>לבסוף, <b>כוח בין שני תילים מקבילים</b>, שהוא שילוב של שני החצאים: כל תיל מייצר שדה, וכל תיל מרגיש את שדה חברו. חשוב מאוד — <b>תיל אינו מפעיל כוח מגנטי על עצמו</b>; השדה שהוא יוצר משפיע רק על מטענים ותילים אחרים. הפתרון בשני שלבים: מציירים את השדה שיוצר תיל א' במקום שבו נמצא תיל ב' (כלל הבורג), ואז מפעילים את כלל יד ימין הראשון על תיל ב'. התוצאה, שאפשר וכדאי לזכור בעל פה: <b>זרמים באותו כיוון → משיכה; זרמים בכיוונים מנוגדים → דחייה</b>. גודל הכוח F = μ₀I₁I₂L/(2πd), ולתילים אינסופיים מדברים על כוח ליחידת אורך F/L = μ₀I₁I₂/(2πd).</p>
 
+<figure>
+<svg viewBox="0 0 520 190" role="img" aria-label="שדה סביב תיל, בתוך סליל, וכוח בין שני תיילים">
+ <text class="ttl" x="96" y="14" text-anchor="middle">תיל ישר</text>
+ <text class="ttl" x="262" y="14" text-anchor="middle">סולנואיד</text>
+ <text class="ttl" x="440" y="14" text-anchor="middle">שני תיילים</text>
+ <g transform="translate(96,98)">
+  <path class="ln" style="stroke-width:3;stroke:#e05252" d="M0,-58 L0,58"/>
+  <path class="hot" marker-end="url(#ar2)" d="M0,26 L0,-4"/>
+  <text class="lbl" x="8" y="-40" fill="#e05252">I</text>
+  <g class="fld" fill="none"><ellipse cx="0" cy="0" rx="22" ry="9"/><ellipse cx="0" cy="0" rx="40" ry="15"/><ellipse cx="0" cy="0" rx="58" ry="21"/></g>
+  <text class="sml" x="0" y="76" text-anchor="middle" style="direction:ltr">B &#8733; 1/r</text>
+  <text class="sml" x="0" y="90" text-anchor="middle">דועך ליניארית — לא כריבוע</text>
+ </g>
+ <line class="gd" x1="178" y1="24" x2="178" y2="176"/>
+ <g transform="translate(262,92)">
+  <g class="ln" style="stroke:#e05252;stroke-width:2">
+   <path d="M-52,-20 q10,-16 20,0 q10,16 20,0 q10,-16 20,0 q10,16 20,0 q10,-16 20,0"/>
+   <path d="M-52,20 q10,16 20,0 q10,-16 20,0 q10,16 20,0 q10,-16 20,0 q10,16 20,0"/>
+  </g>
+  <g class="fld" marker-end="url(#ar)"><path d="M-42,0 L34,0"/><path d="M-42,-9 L34,-9"/><path d="M-42,9 L34,9"/></g>
+  <text class="sml" x="0" y="46" text-anchor="middle">שדה אחיד בפנים</text>
+  <text class="sml" x="0" y="62" text-anchor="middle" style="direction:ltr">B = &#956;&#8320;nI</text>
+  <text class="sml" x="0" y="76" text-anchor="middle" style="font-weight:800">הרדיוס לא מופיע כלל</text>
+ </g>
+ <line class="gd" x1="352" y1="24" x2="352" y2="176"/>
+ <g transform="translate(440,86)">
+  <path class="ln" style="stroke:#e05252;stroke-width:2.6" d="M-30,-48 L-30,44"/>
+  <path class="ln" style="stroke:#e05252;stroke-width:2.6" d="M30,-48 L30,44"/>
+  <path class="hot" marker-end="url(#ar2)" d="M-30,10 L-30,-16"/>
+  <path class="hot" marker-end="url(#ar2)" d="M30,10 L30,-16"/>
+  <g class="cool" marker-end="url(#ar4)" style="stroke-width:2.4"><path d="M-26,28 L-6,28"/><path d="M26,28 L6,28"/></g>
+  <text class="sml" x="0" y="66" text-anchor="middle">אותו כיוון ← <tspan style="font-weight:800">משיכה</tspan></text>
+  <text class="sml" x="0" y="82" text-anchor="middle">כיוון מנוגד ← דחייה</text>
+ </g>
+</svg><figcaption>שתי שאלות הפוכות: מה הכוח <b>על</b> תיל בשדה, ואיזה שדה תיל <b>יוצר</b>. שימו לב שבסולנואיד הרדיוס לא מופיע בכלל — ולכן אפשר לבנות מגנט MRI בקוטר אדם ועדיין לקבל שדה חזק ואחיד.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>הסלנואיד הוא הרכיב שמייצר את השדה החזק והאחיד במגנט של ה-MRI — ומכיוון שהשדה תלוי בצפיפות הליפופים ובזרם ולא ברדיוס, אפשר לבנות אותו בקוטר שמכיל מטופל. הכוח על תיל נושא זרם בשדה הוא עקרון פעולת המנוע החשמלי, שנמצא בכל מכשור רפואי מכני.</p>
 
@@ -451,10 +825,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="5fqwJyt4Lus"><b>Ampère's Law — CrashCourse #33</b><span>בונה את השדה סביב תיל ישר ואת חוק אמפר, וממשיך לסולנואיד ולמנוע החשמלי — בדיוק רצף היחידה.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/כוח מגנטי על תיל, ביו-סבאר ואמפר" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-induction-faraday-lenz">
-<h3>אינדוקציה — פאראדיי-לנץ</h3>
+<h3>אינדוקציה — פאראדיי-לנץ<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">עד כה ראינו שזרם מייצר שדה מגנטי. עכשיו סוגרים את המעגל בכיוון ההפוך: שדה מגנטי מייצר זרם — אבל <b>רק אם הוא משתנה</b>. שדה קבוע, חזק ככל שיהיה, לא ייצר שום דבר.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -466,6 +841,33 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>שיטת פתרון מסודרת בארבעה שלבים, שכדאי לעבוד לפיה גם בשאלה אמריקאית: (1) לזהות אם השטף <b>גדל או קטן</b>; (2) לקבוע את כיוון <b>השדה המושרה</b> לפי לנץ (מנוגד אם גדל, עם השדה אם קטן); (3) להשתמש בכלל הבורג <b>בכיוון ההפוך</b> — האגודל בכיוון השדה שכבר נקבע, והאצבעות נותנות את כיוון הזרם המושרה; (4) אם נדרש הכוח על החלק הנע, להפעיל את כלל יד ימין הראשון. שימו לב לסדר: קודם השדה המושרה, ורק אחריו הזרם.</p>
 <p>שתי הדגמות סוגרות את הפרק, והן שני צדדים של אותו מטבע. <b>מוט מוליך הנע בתוך שדה מגנטי</b> הופך למעין סוללה: כוח לורנץ דוחף את המטענים שבתוך המוט לקצה אחד, ונוצר הפרש פוטנציאלים. זהו העיקרון הבסיסי של <b>ייצור חשמל</b> — כל טורבינה, בתחנת כוח מכל סוג (פחם, גז, מים, גרעין), עושה בדיוק את זה. וההפך: הזרמת זרם דרך מעגל הנמצא בשדה מגנטי גורמת לתנועה מכנית — זהו <b>המנוע החשמלי</b>. שילוב מוצלח של שניהם הוא בלימה רגנרטיבית ברכב חשמלי: הזרם המושרה מתנגד לתנועה (לנץ), ובכך בולם את הגלגל, ובמקביל טוען את הסוללה.</p>
 
+<figure>
+<svg viewBox="0 0 520 175" role="img" aria-label="שלוש הדרכים לשנות שטף מגנטי">
+ <text class="ttl" x="260" y="14" text-anchor="middle">Φ = B · A · cosθ — שלושה מרכיבים, שלוש דרכים לשנות</text>
+ <g transform="translate(88,60)">
+  <rect x="-34" y="-24" width="68" height="48" rx="4" fill="none" class="ln" stroke-width="2.2"/>
+  <g class="fld" opacity=".8"><path d="M-24,-34 L-24,34"/><path d="M-8,-34 L-8,34"/><path d="M8,-34 L8,34"/><path d="M24,-34 L24,34"/></g>
+  <path class="hot" marker-end="url(#ar2)" d="M44,-8 L70,-8"/>
+  <text class="lbl" x="0" y="60" text-anchor="middle">1. לשנות את B</text>
+  <text class="sml" x="0" y="76" text-anchor="middle">לקרב או להרחיק מגנט</text>
+ </g>
+ <g transform="translate(260,60)">
+  <rect x="-34" y="-24" width="68" height="48" rx="4" fill="none" class="ln" stroke-width="2.2"/>
+  <rect x="-20" y="-14" width="40" height="28" rx="3" fill="none" stroke="#e05252" stroke-width="2" stroke-dasharray="4 3"/>
+  <g class="fld" opacity=".55"><path d="M-24,-34 L-24,34"/><path d="M-8,-34 L-8,34"/><path d="M8,-34 L8,34"/><path d="M24,-34 L24,34"/></g>
+  <path class="hot" marker-end="url(#ar2)" d="M40,0 L22,0"/>
+  <text class="lbl" x="0" y="60" text-anchor="middle">2. לשנות את A</text>
+  <text class="sml" x="0" y="76" text-anchor="middle">צלע נעה, לולאה מתכווצת</text>
+ </g>
+ <g transform="translate(432,60)">
+  <g transform="rotate(-28)"><rect x="-32" y="-22" width="64" height="44" rx="4" fill="none" class="ln" stroke-width="2.2"/></g>
+  <g class="fld" opacity=".8"><path d="M-24,-34 L-24,34"/><path d="M-8,-34 L-8,34"/><path d="M8,-34 L8,34"/><path d="M24,-34 L24,34"/></g>
+  <path class="hot" fill="none" marker-end="url(#ar2)" d="M28,-30 A34,34 0 0,1 40,-4"/>
+  <text class="lbl" x="0" y="60" text-anchor="middle">3. לשנות את θ</text>
+  <text class="sml" x="0" y="76" text-anchor="middle">סיבוב — זה הגנרטור</text>
+ </g>
+ <text class="sml" x="260" y="164" text-anchor="middle">בכל שלושתן: רק <tspan style="font-weight:800">קצב השינוי</tspan> מייצר כא״מ. שטף עצום אך קבוע ← אפס.</text>
+</svg><figcaption>זו הנקודה שנופלים בה: מגנט חזק שמונח בשקט בתוך לולאה נותן שטף גדול — ו<b>אפס זרם</b>. מה שמניע את המטענים הוא קצב השינוי, לא הערך.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>אותו עיקרון של המרה בין תנועה לחשמל מפעיל את המנועים בכל מכשור רפואי מכני. וב-MRI האות עצמו הוא אות גל-רדיו משתנה בזמן שסלילי הקליטה מזהים — כלומר גם שם מה שמייצר את הקריאה הוא שינוי, לא מצב קבוע.</p>
 
@@ -482,14 +884,15 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="pQp6bmJPU_0"><b>Induction: An Introduction — CrashCourse #34</b><span>עובר על שטף מגנטי, חוק פאראדיי וכא"מ משינוי שטף, ומסיים בחוק לנץ וכיוון הזרם המושרה.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/אינדוקציה — פאראדיי-לנץ" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 </section>
 
 <section class="block" id="b-waves">
-<h2>גלים ותנודות</h2>
+<h2>〰️ גלים ותנודות</h2>
 <p class="bsub">שלושה נושאים — מתנודה בודדת, דרך קול ואולטרסאונד, ועד לגל שלא צריך תווך.</p>
 <section class="unit" id="u-shm">
-<h3>תנועה הרמונית פשוטה</h3>
+<h3>תנועה הרמונית פשוטה<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כל תנודה בטבע — מיתר גיטרה, מטוטלת שעון, מסה על קפיץ — נולדת מאותו מנגנון יחיד: כוח שמושך את הגוף בחזרה לנקודת שיווי המשקל, וחזק יותר ככל שהגוף רחוק ממנה. מהתנאי הפשוט הזה נובעת כל ההתנהגות של תנועה הרמונית, וגם התשובה לשאלה שנשאלת במבחן שוב ושוב: מה קובע את התדירות ומה לא.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -499,6 +902,28 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>וכאן מגיעה השאלה המרכזית: <b>מה קובע את התדירות?</b> במסה על קפיץ, ω=√(k/m) — כלומר רק קבוע הקפיץ והמסה. מסה כבדה יותר על אותו קפיץ מתנודדת לאט יותר, קפיץ קשיח יותר מתנודד מהר יותר. ב<b>מטוטלת</b> התשובה מפתיעה עוד יותר: התדירות תלויה רק באורך החוט ובתאוצת הכובד g, ו<b>לא במסה</b> כלל. והדבר הקריטי לשתי המערכות: <b>המשרעת אינה מופיעה בביטוי לתדירות</b>. אם נמשוך את המסה רחוק יותר או נפרוט על המיתר בעוצמה, נגדיל את המשרעת — כלומר את האנרגיה ואת עוצמת הצליל — אבל התדירות, ולכן גובה הצליל, לא תשתנה כלל.</p>
 <p><b>תהודה (רזוננס)</b> היא ההשלכה המעשית של כל זה. לכל גוף יש תדירות טבעית משלו, ואם נזרים אליו אנרגיה בדיוק בתדירות הזאת — אפילו בעוצמה נמוכה — כל דחיפה תיפול "בקצב" ותוסיף אנרגיה במקום לקזז אותה, והמשרעת תלך ותגדל. זה המנגנון שמאפשר לזמרת אופרה לנפץ כוס זכוכית בקולה, וזה מה שהפיל את גשר טקומה כשהרוח נשבה בקצב שתאם לתדירות הטבעית של הגשר. ההדגשה החשובה: תהודה אינה "רק צליל חזק יותר", אלא בנייה מצטברת של משרעת עד לערכי קיצון הרסניים.</p>
 
+<figure>
+<svg viewBox="0 0 520 200" role="img" aria-label="מיקום מהירות ותאוצה בתנועה הרמונית וחילופי אנרגיה">
+ <text class="ttl" x="260" y="14" text-anchor="middle">איפה מה מקסימלי — ולמה זו המלכודת</text>
+ <g transform="translate(46,30)">
+  <g class="gd"><path d="M0,68 L420,68"/></g>
+  <path class="hot" d="M0,68 C26,20 78,20 105,68 C131,116 183,116 210,68 C236,20 288,20 315,68 C341,116 393,116 420,68"/>
+  <text class="lbl" x="424" y="72" fill="#e05252">x</text>
+  <g class="gd" style="stroke-dasharray:3 3"><path d="M0,20 L420,20"/><path d="M0,116 L420,116"/></g>
+  <circle cx="52" cy="21" r="4" fill="#e05252"/><circle cx="157" cy="115" r="4" fill="#e05252"/><circle cx="262" cy="21" r="4" fill="#e05252"/>
+  <circle cx="105" cy="68" r="4" fill="#2f9e7a"/><circle cx="210" cy="68" r="4" fill="#2f9e7a"/><circle cx="315" cy="68" r="4" fill="#2f9e7a"/>
+  <text class="sml" x="52" y="12" text-anchor="middle" fill="#e05252">קצה</text>
+  <text class="sml" x="105" y="88" text-anchor="middle" fill="#2f9e7a">מרכז</text>
+ </g>
+ <g transform="translate(46,128)">
+  <rect x="0" y="0" width="200" height="52" rx="9" class="fill-w" stroke="#e0a33c" stroke-width="1.3"/>
+  <text class="lbl" x="100" y="20" text-anchor="middle" fill="#b57f18">בנקודות הקיצון</text>
+  <text class="sml" x="100" y="38" text-anchor="middle">מהירות = 0 · תאוצה וכוח <tspan style="font-weight:800">מקסימליים</tspan></text>
+  <rect x="220" y="0" width="200" height="52" rx="9" class="fill-g" stroke="#2f9e7a" stroke-width="1.3"/>
+  <text class="lbl" x="320" y="20" text-anchor="middle" fill="#2f9e7a">בשיווי משקל</text>
+  <text class="sml" x="320" y="38" text-anchor="middle">מהירות <tspan style="font-weight:800">מקסימלית</tspan> · תאוצה = 0</text>
+ </g>
+</svg><figcaption>האינטואיציה מטעה: דווקא ברגע שהגוף <b>עוצר</b> בקצה, הכוח עליו הוא הגדול ביותר. והתדירות? נקבעת מהמסה ומקבוע הקפיץ — <b>לא מהמשרעת</b>.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>התנועה ההרמונית היא נקודת המוצא לכל בלוק הגלים, ולכן לכל האולטרסאונד: המקור של כל גל — קול, אור, או כל גל אחר — הוא משהו מתנודד. באולטרסאונד זה הגביש הפיאזואלקטרי שבתוך המתמר, שזרם חשמלי קצר גורם לו לרטוט ולייצר פולס גלים. גם התהודה חיה בגוף: כל מערכת עם תדירות טבעית מגיבה באופן חריג להנעה בדיוק בתדר שלה.</p>
 
@@ -515,10 +940,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="jxstE6A_CYQ"><b>Simple Harmonic Motion — CrashCourse #16</b><span>מכסה את התנועה ההרמונית וחילופי האנרגיה, את הקשר ω=√(k/m) וזמן המחזור, ואת התהודה דרך דוגמת גשר המילניום.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/תנועה הרמונית פשוטה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-waves-sound-doppler">
-<h3>גלים, קול ואפקט דופלר</h3>
+<h3>גלים, קול ואפקט דופלר<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">גל הוא הפרעה שמתקדמת במרחב ובזמן ומעבירה <b>אנרגיה בלי להסיע חומר</b>. ברגע שמבינים את חלוקת התפקידים — התווך קובע את המהירות, המקור קובע את התדירות, ואורך הגל הוא רק התוצאה — כל שאר הבלוק (מעבר בין תווכים, שבירה, אולטרסאונד, דופלר) נגזר מעצמו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -529,6 +955,46 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>בקול, <b>תדירות = גובה הצליל</b> ו<b>משרעת = עוצמה</b>. ספקטרום התדרים מחולק לשלושה: <b>אינפרסאונד</b> מתחת ל-20 הרץ (פילים מתקשרים בו למרחקים עצומים), <b>תחום השמע</b> 20 הרץ עד 20,000 הרץ (טווח שמצטמצם עם הגיל), ו<b>אולטרסאונד</b> מעל 20 קילוהרץ — עטלפים ודולפינים משתמשים בו לניווט ולציד, וברפואה משתמשים בטווח גבוה בהרבה, כ-2 עד 10 מגה-הרץ. העוצמה נמדדת בסולם לוגריתמי, <b>דציבל</b>: β=10·log₁₀(I/I₀), כשסף השמיעה I₀ הוא 10⁻¹² W/m². מפני שהקול מתפשט כדורית, העוצמה יורדת כ-1/R².</p>
 <p>כשגלים נפגשים חל <b>עקרון הסופרפוזיציה</b>: בניגוד לגופים חומריים, שני גלים יכולים לתפוס את אותו מקום באותו זמן, והגל השקול הוא פשוט סכומם. התוצאה בפועל היא <b>התאבכות</b>: שיא הפוגש שיא נותן <b>התאבכות בונה</b> ומשרעת מוגדלת; שיא הפוגש שפל נותן <b>התאבכות הורסת</b> ומשרעת מוחלשת עד כדי ביטול מוחלט. שני גלים זהים הנעים בכיוונים מנוגדים (למשל גל ישיר וגל מוחזר ממיתר) יוצרים <b>גל עומד</b> — דפוס שאינו מתקדם, עם <b>צמתים</b> שאינם זזים כלל ו<b>אנטי-צמתים</b> בעלי תנודה מרבית.</p>
 
+<figure>
+<svg viewBox="0 0 520 210" role="img" aria-label="גל רוחבי מול אורכי, ואפקט דופלר">
+ <text class="ttl" x="140" y="14" text-anchor="middle">גל רוחבי</text>
+ <text class="ttl" x="140" y="86" text-anchor="middle">גל אורכי (קול)</text>
+ <text class="ttl" x="410" y="14" text-anchor="middle">אפקט דופלר</text>
+ <g transform="translate(20,42)">
+  <path class="hot" d="M0,10 C18,-14 42,-14 60,10 C78,34 102,34 120,10 C138,-14 162,-14 180,10 C198,34 222,34 240,10"/>
+  <path class="cool" marker-end="url(#ar4)" d="M60,10 L60,-16"/>
+  <text class="sml" x="66" y="-14">תנודה</text>
+  <path class="gd" marker-end="url(#ar5)" d="M0,32 L240,32"/>
+  <text class="sml" x="246" y="36">התקדמות</text>
+ </g>
+ <defs><marker id="ar5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+   <path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker></defs>
+ <g transform="translate(20,112)">
+  <g fill="#3d7fd6" opacity=".8">
+   <circle cx="6" cy="12" r="3.4"/><circle cx="16" cy="12" r="3.4"/><circle cx="24" cy="12" r="3.4"/><circle cx="30" cy="12" r="3.4"/>
+   <circle cx="48" cy="12" r="3.4"/><circle cx="66" cy="12" r="3.4"/>
+   <circle cx="86" cy="12" r="3.4"/><circle cx="94" cy="12" r="3.4"/><circle cx="100" cy="12" r="3.4"/><circle cx="110" cy="12" r="3.4"/>
+   <circle cx="128" cy="12" r="3.4"/><circle cx="146" cy="12" r="3.4"/>
+   <circle cx="166" cy="12" r="3.4"/><circle cx="174" cy="12" r="3.4"/><circle cx="180" cy="12" r="3.4"/><circle cx="190" cy="12" r="3.4"/>
+   <circle cx="208" cy="12" r="3.4"/><circle cx="226" cy="12" r="3.4"/><circle cx="238" cy="12" r="3.4"/>
+  </g>
+  <text class="sml" x="22" y="34">דחיסה</text><text class="sml" x="52" y="34">דלילות</text>
+  <path class="cool" marker-end="url(#ar4)" d="M100,-6 L124,-6"/>
+  <text class="sml" x="130" y="-2">התנודה <tspan style="font-weight:800">בכיוון</tspan> ההתקדמות</text>
+ </g>
+ <line class="gd" x1="290" y1="24" x2="290" y2="192"/>
+ <g transform="translate(408,108)">
+  <g fill="none" stroke="#8a6fd6" stroke-width="1.5">
+   <circle cx="-14" cy="0" r="16"/><circle cx="-20" cy="0" r="30"/><circle cx="-26" cy="0" r="44"/><circle cx="-32" cy="0" r="58"/>
+  </g>
+  <rect x="-14" y="-9" width="26" height="18" rx="4" fill="#e05252"/>
+  <path class="hot" marker-end="url(#ar2)" d="M16,0 L44,0"/>
+  <text class="sml" x="-78" y="-40" text-anchor="middle">מלפנים: צפוף</text>
+  <text class="sml" x="-78" y="-26" text-anchor="middle" style="font-weight:800">תדר גבוה</text>
+  <text class="sml" x="-70" y="46" text-anchor="middle">מאחור: מרווח</text>
+  <text class="sml" x="-70" y="60" text-anchor="middle" style="font-weight:800">תדר נמוך</text>
+ </g>
+</svg><figcaption>בגל רוחבי החלקיקים מתנודדים <b>בניצב</b> להתקדמות; בקול — <b>במקביל</b>, ויוצרים אזורי דחיסה ודלילות. ובדופלר: החזיתות נדחסות לפנים ונמתחות לאחור, ולכן התדר עולה בהתקרבות ויורד בהתרחקות.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>האולטרסאונד הוא יישום ישיר של ההחזרה: המתמר משדר פולס קצר, ממתין רוב הזמן להדים החוזרים, ומחשב מרחק לפי d=c·t/2 עם c=1540 מ'/ש'. מה שקובע כמה מהגל מוחזר הוא <b>האימפדנס האקוסטי</b> Z=ρ·c — ובעיקר <b>ההפרש</b> בין האימפדנסים של שתי רקמות סמוכות: הפרש גדול (רקמה רכה מול עצם, או מול אוויר) מחזיר כמעט את כל האנרגיה ויוצר תמונה לבנה ו<b>צל אקוסטי</b> שחור מאחוריה; הפרש קטן (כבד מול כליה) מחזיר מעט והגל ממשיך. זו הסיבה לג'ל — בלעדיו הפרש האימפדנסים בין האוויר לעור היה מחזיר כמעט הכול ומטשטש את התמונה. וזהו גם ה<b>טרייד-אוף</b> המרכזי: תדר גבוה = אורך גל קצר = פחות עקיפה = אלומה צרה ורזולוציה רוחבית טובה, אבל גם ניחות ובליעה מוגברים ולכן חדירה שטחית בלבד (פלאורת הריאה, כלי דם שטחיים). תדר נמוך חודר עמוק אך ברזולוציה נמוכה (לב, פרנכימת ריאה). <b>אקוקרדיוגרפיית דופלר</b> מודדת את שינוי התדר מהדם הזורם כדי להעריך כיוון ומהירות זרימה: אדום = דם הנע לכיוון המתמר, כחול = דם המתרחק ממנו. ואוזניות מבטלות רעש הן התאבכות הורסת קלינית-יומיומית: מיקרופון קולט את הרעש, הרמקול מייצר גל הפוך בדיוק, והם מבטלים זה את זה.</p>
 
@@ -550,10 +1016,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="I1Bdp2tMFsY"><b>How Does Ultrasound Work? — NIBIB (NIH)</b><span>עקרון ההד — שידור וקליטה של גלי קול ובניית תמונה מהחזרות ברקמות.</span></div>
 <div class="vid" data-yt="NZ528bAqP1g"><b>מה זה אפקט דופלר? — מכון דוידסון</b><span>הסבר מושגי בעברית לשינוי התדירות הנקלטת מתנועה יחסית בין מקור לצופה.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/גלים, קול ואפקט דופלר" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-em-waves">
-<h3>גלים אלקטרומגנטיים</h3>
+<h3>גלים אלקטרומגנטיים<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">גל אלקטרומגנטי הוא היוצא מן הכלל בעולם הגלים: הוא היחיד שאינו זקוק לתווך. הסיבה לכך היא שהוא אינו תנודה של חומר אלא של שדות — ומכאן נובעים גם המהירות האחידה שלו וגם הסולם העצום של הספקטרום, מרדיו לא-מזיק ועד גמא הרסני.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -564,6 +1031,32 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>הביטוי החד ביותר לרעיון הזה הוא <b>האפקט הפוטואלקטרי</b>: E_קינטית = hν − W₀. פוטון בעל אנרגיה מספקת משחרר אלקטרון ממתכת, והאפקט <b>אינו מצטבר</b> — צריך פוטון בודד עם מספיק אנרגיה. לכן אור עז מאוד בתדירות נמוכה לא ישחרר אלקטרון כלל, ואילו אור חלש מאוד בתדירות גבוהה כן ישחרר. <b>האנרגיה של כל פוטון בודד היא שקובעת, לא העוצמה הכוללת של הקרינה</b> — וזה בדיוק אותו היגיון שמסביר למה נורת רדיו חזקה בטוחה וקרן רנטגן חלשה מסוכנת.</p>
 <p>אינטראקציות נוספות של פוטונים אנרגטיים עם חומר: ב<b>פיזור קומפטון</b> הפוטון פוגע באלקטרון כמו התנגשות כדורי ביליארד, מוסר לו חלק מאנרגיתו, וממשיך בכיוון שונה עם תדירות נמוכה יותר (אורך גל ארוך יותר). ב<b>יצירת זוגות</b> פוטון בעל אנרגיה של 1.022 MeV לפחות "נעלם" ויוצר זוג חלקיק־אנטי-חלקיק (אלקטרון-פוזיטרון) — המרה ישירה של אנרגיה למסה לפי E=mc².</p>
 
+<figure>
+<svg viewBox="0 0 520 210" role="img" aria-label="הספקטרום האלקטרומגנטי ומבנה הגל">
+ <text class="ttl" x="260" y="14" text-anchor="middle">הספקטרום — אותה מהירות, אנרגיה שונה לחלוטין</text>
+ <defs><linearGradient id="spec" x1="1" y1="0" x2="0" y2="0">
+   <stop offset="0" stop-color="#8b1a1a"/><stop offset=".18" stop-color="#c0392b"/><stop offset=".33" stop-color="#e0a33c"/>
+   <stop offset=".47" stop-color="#4caf50"/><stop offset=".62" stop-color="#3d7fd6"/><stop offset=".78" stop-color="#8a6fd6"/>
+   <stop offset="1" stop-color="#4a148c"/></linearGradient></defs>
+ <rect x="34" y="30" width="452" height="26" rx="6" fill="url(#spec)"/>
+ <g class="sml" text-anchor="middle" style="font-size:9.5px">
+  <text x="66" y="72">רדיו</text><text x="132" y="72">מיקרוגל</text><text x="196" y="72">אינפרא</text>
+  <text x="258" y="72">נראה</text><text x="322" y="72">UV</text><text x="392" y="72">רנטגן</text><text x="462" y="72">גמא</text>
+ </g>
+ <path class="gd" marker-end="url(#ar5)" d="M470,90 L50,90"/>
+ <text class="sml" x="260" y="106" text-anchor="middle">תדירות ואנרגיית פוטון (E=hf) גדלות ←   ·   אורך גל מתקצר</text>
+ <rect x="330" y="20" width="156" height="46" rx="6" fill="none" stroke="#e05252" stroke-width="1.8" stroke-dasharray="5 4"/>
+ <text class="sml" x="408" y="16" text-anchor="middle" style="fill:#e05252;font-weight:800">קרינה מייננת</text>
+ <line class="gd" x1="34" y1="122" x2="486" y2="122"/>
+ <text class="ttl" x="260" y="142" text-anchor="middle">מבנה הגל: E ⊥ B ⊥ כיוון ההתקדמות</text>
+ <g transform="translate(120,178)">
+  <path class="gd" marker-end="url(#ar5)" d="M0,0 L292,0"/>
+  <path stroke="#e05252" stroke-width="2" fill="none" d="M0,0 C18,-26 42,-26 60,0 C78,26 102,26 120,0 C138,-26 162,-26 180,0 C198,26 222,26 240,0"/>
+  <path stroke="#3d7fd6" stroke-width="2" fill="none" opacity=".75" d="M0,0 C14,-11 32,-13 48,-6 C64,1 88,15 108,10 C126,6 148,-10 168,-8 C186,-6 214,7 240,2"/>
+  <text class="lbl" x="-8" y="-18" fill="#e05252" text-anchor="end">E</text>
+  <text class="lbl" x="-8" y="10" fill="#3d7fd6" text-anchor="end">B</text>
+ </g>
+</svg><figcaption>כל הגלים האלקטרומגנטיים נעים <b>באותה מהירות</b> — ההבדל הוא בתדירות, ואיתה באנרגיית הפוטון הבודד. זה בדיוק הגבול בין מיקרוגל לא-מזיק לרנטגן מייננת, ולא כמות האנרגיה הכוללת.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>כל מכשור הדימות שאינו אולטרסאונד עומד על הפיזיקה הזאת. ב<b>צילום רנטגן</b> שלוש האינטראקציות — פוטואלקטרי, קומפטון ויצירת זוגות — מתרחשות בגוף, ורקמות שונות (עצם, נוזל, רקמה רכה) בולעות ומפזרות פוטונים בקצב שונה; לכן כמות הקרינה שמגיעה לגלאי משתנה ממקום למקום ויוצרת את הניגודיות בתמונה. <b>CT</b> עומד על אותה פיזיקה בדיוק וההבדל הוא אלגוריתמי בלבד — צילום רב-זוויתי ואיחוד לתלת-ממד. <b>PET</b> מנצל את התהליך ההפוך ליצירת זוגות: פוזיטרון מאיזוטופ (פלואור-18 המוצמד לגלוקוז) פוגש אלקטרון בגוף, ההתעיינות פולטת שני פוטוני גמא ב-180° זה מזה, וגלאים סביב הגוף קולטים אותם. וכאן ההבדל הקליני החשוב: האולטרסאונד משתמש ב<b>קרינה בלתי מייננת</b> — גלי קול — ולכן אין לו הסיכון הביולוגי של רנטגן, CT ו-PET.</p>
 
@@ -580,14 +1073,15 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="7eutept5h0Q"><b>EM Waves &amp; the EM Spectrum — Khan Academy Medicine</b><span>מכסה את צימוד E-B, מהירות c אחידה לכולם, והספקטרום מרדיו ועד גמא — אך שימו לב שהקשר E=hf מוסבר בו מושגית בלבד ואינו נכתב כנוסחה על המסך.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/גלים אלקטרומגנטיים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 </section>
 
 <section class="block" id="b-fluids">
-<h2>נוזלים ולחץ</h2>
+<h2>💧 נוזלים ולחץ</h2>
 <p class="bsub">ארבעה נושאים — נוזל במנוחה, בציפה, בקרום המתוח, ובזרימה.</p>
 <section class="unit" id="u-pressure-density">
-<h3>לחץ וצפיפות</h3>
+<h3>לחץ וצפיפות<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כשעוברים ממכניקה של גופים קשיחים אל זורמים, המושג המרכזי מתחלף: לא הכוח קובע, אלא הלחץ — הכוח המחולק על השטח שעליו הוא פועל. וברגע שמבינים שמקור הלחץ בנוזל הוא משקל עמוד הנוזל שמעל הנקודה, מתבררת המסקנה שנבחנת שוב ושוב: הלחץ ההידרוסטטי תלוי רק בצפיפות ובעומק, ולא בכמות הנוזל או בצורת הכלי.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -598,6 +1092,29 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>הבחנה שנייה שחייבים לשלוט בה היא בין <b>לחץ מנומטרי</b> ל<b>לחץ מוחלט</b>. הלחץ המנומטרי נמדד ביחס ללחץ האטמוספרי המקומי — נקודת האפס שלו היא האטמוספרה, ולכן מכשיר הפתוח לאוויר יראה אפס, והוא מושפע ממזג האוויר ומהגובה מעל פני הים. הלחץ המוחלט הוא המנומטרי בתוספת האטמוספרי, ולכן הוא תמיד גבוה מהמנומטרי בשיעור אטמוספרה אחת. "לחץ שלילי" אינו לחץ שלילי ממש אלא <b>תת-לחץ</b> — נמוך מלחץ הסביבה. הכלל שמניע הכול: מולקולות נעות מאזור בלחץ גבוה לאזור בלחץ נמוך עד להשוואה, וזה הבסיס לרוח, לפעולת הריאות ולזרימת הדם.</p>
 <p><b>המכבש ההידראולי</b> הוא היישום המפורסם של פסקל: לחץ המופעל על נוזל כלוא מועבר לכל חלקיו, ולכן כוח קטן על בוכנה קטנה מייצר כוח גדול על בוכנה גדולה, לפי היחס בין השטחים. אין כאן "ארוחת חינם": מרוויחים בכוח ומשלמים במרחק, והעבודה נשמרת.</p>
 
+<figure>
+<svg viewBox="0 0 520 175" role="img" aria-label="הפרדוקס ההידרוסטטי — אותו גובה, אותו לחץ">
+ <text class="ttl" x="260" y="14" text-anchor="middle">הפרדוקס ההידרוסטטי: אותו גובה ← אותו לחץ בדיוק</text>
+ <g class="ln" stroke-width="2">
+  <path d="M40,40 L40,128 L100,128 L100,40" fill="none"/>
+  <path d="M150,40 L150,70 L128,128 L212,128 L190,70 L190,40" fill="none"/>
+  <path d="M258,40 L258,128 L400,128 L400,40" fill="none"/>
+  <path d="M440,40 L440,128 L470,128 L470,40" fill="none"/>
+ </g>
+ <g class="fill-b">
+  <rect x="41" y="48" width="58" height="79"/>
+  <path d="M151,48 L151,70 L130,127 L210,127 L189,70 L189,48 z"/>
+  <rect x="259" y="48" width="140" height="79"/>
+  <rect x="441" y="48" width="28" height="79"/>
+ </g>
+ <path class="gd" style="stroke-dasharray:5 4;stroke:#e05252;stroke-width:1.6" d="M24,48 L494,48"/>
+ <text class="sml" x="24" y="42" fill="#e05252">גובה פני הנוזל</text>
+ <g fill="#e05252">
+  <circle cx="70" cy="122" r="4"/><circle cx="170" cy="122" r="4"/><circle cx="330" cy="122" r="4"/><circle cx="455" cy="122" r="4"/>
+ </g>
+ <text class="lbl" x="260" y="152" text-anchor="middle" style="direction:ltr">P = P&#8320; + &#961;gh</text>
+ <text class="sml" x="260" y="168" text-anchor="middle">לא משנה כמה מים יש, ולא באיזו צורה — רק <tspan style="font-weight:800">העומק</tspan> ו<tspan style="font-weight:800">הצפיפות</tspan></text>
+</svg><figcaption>בארבעת הכלים כמות המים שונה לחלוטין, אבל הלחץ בתחתית זהה. מכאן גם הכלים השלובים — וגם למה גובה עמוד הדם ביחס ללב משנה את הלחץ הנמדד.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>יחידות הלחץ הרפואיות נולדו מכאן — מדידת לחץ דם במ"מ כספית היא ירושה ישירה של מד הלחץ הכספיתי, וערכי לחץ הדם הם ערכים <b>מנומטריים</b> (מעל האטמוספרה), לא מוחלטים. הצפיפות היחסית משמשת קלינית ב<b>סטיק שתן</b>: בדיקת המשקל הסגולי של השתן ביחס למים משמשת להערכת הידרציה, לתפקוד כליות ולאבחון הפרעות הורמונליות. ותלות הלחץ בגובה עמוד הנוזל היא הסיבה שגובה עמוד הדם ביחס ללב משנה את הלחץ הנמדד.</p>
 
@@ -614,10 +1131,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="b5SqYuWT4-4"><b>Fluids at Rest — CrashCourse #14</b><span>מכסה בדיוק את הליבה של היחידה: לחץ הידרוסטטי, צפיפות ועקרון פסקל עם המכבש ההידראולי.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/לחץ וצפיפות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-archimedes">
-<h3>עקרון ארכימדס והציפה</h3>
+<h3>עקרון ארכימדס והציפה<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">ארכימדס עונה על שאלה אחת: מה קורה כשגוף מכריח נוזל לפנות לו מקום. התשובה — הנוזל דוחף בחזרה בכוח השווה למשקל הנוזל שנדחק — היא הסיבה שספינת פלדה צפה ואבן קטנה שוקעת, ושהמפתח לציפה הוא הצפיפות, לא המסה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -628,6 +1146,31 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p><b>פרדוקס המסות</b> מסביר למה אבן קטנה שוקעת וספינת פלדה ענקית צפה. ההתנהגות של גוף בנוזל אינה תלויה רק במסתו אלא בתגובת הנוזל לנוכחותו — השאלה האמיתית אינה כמה הגוף שוקל אלא <b>כמה מקום הוא תופס</b>. הספינה חלולה, ולכן הצפיפות הממוצעת שלה (פלדה ואוויר יחד) נמוכה מזו של המים, והנפח העצום שהיא דוחה נותן כוח ציפה עצום. אותו רעיון בכיוון הפוך: קרח וברזל באותה מסה — הקרח, שצפיפותו נמוכה, תופס נפח גדול בהרבה ולכן צף.</p>
 <p>מקרה בוחן חביב על מבחנים: <b>קוביית קרח שצפה בכוס ונמסה אינה משנה את מפלס המים</b>. בזמן שהיא צפה היא דוחה נפח מים שמשקלו שווה למשקלה; כשהיא נמסה היא הופכת בדיוק לאותה מסת מים, שתופסת בדיוק את הנפח שהיא דחקה. המפלס נשאר. וגם בגזים העיקרון עובד — בלון פורח צף באוויר כי חימום האוויר בתוכו מקטין את צפיפותו מתחת לזו של האוויר שמסביב.</p>
 
+<figure>
+<svg viewBox="0 0 520 175" role="img" aria-label="שלושת מצבי הציפה לפי יחס הצפיפויות">
+ <text class="ttl" x="260" y="14" text-anchor="middle">מה שקובע הוא <tspan style="font-weight:800">יחס הצפיפויות</tspan>, לא המשקל</text>
+ <g class="fill-b"><rect x="24" y="46" width="140" height="88" rx="3"/><rect x="190" y="46" width="140" height="88" rx="3"/><rect x="356" y="46" width="140" height="88" rx="3"/></g>
+ <g class="ln" stroke-width="1.6" fill="none">
+  <path d="M24,46 L24,134 L164,134 L164,46"/><path d="M190,46 L190,134 L330,134 L330,46"/><path d="M356,46 L356,134 L496,134 L496,46"/>
+ </g>
+ <g>
+  <rect x="74" y="34" width="40" height="26" rx="3" fill="#e0a33c" stroke="#b57f18" stroke-width="1.4"/>
+  <text class="sml" x="94" y="76" text-anchor="middle" style="font-weight:800">צף</text>
+  <text class="sml" x="94" y="92" text-anchor="middle">ρ גוף &lt; ρ נוזל</text>
+  <text class="sml" x="94" y="152" text-anchor="middle">החלק השקוע = יחס הצפיפויות</text>
+ </g>
+ <g>
+  <rect x="240" y="76" width="40" height="26" rx="3" fill="#8a6fd6" stroke="#6a4fb6" stroke-width="1.4"/>
+  <text class="sml" x="260" y="118" text-anchor="middle" style="font-weight:800">מרחף</text>
+  <text class="sml" x="260" y="152" text-anchor="middle">ρ גוף = ρ נוזל</text>
+ </g>
+ <g>
+  <rect x="406" y="106" width="40" height="26" rx="3" fill="#5a6773" stroke="#3d4750" stroke-width="1.4"/>
+  <text class="sml" x="426" y="90" text-anchor="middle" style="font-weight:800">שוקע</text>
+  <text class="sml" x="426" y="152" text-anchor="middle">ρ גוף &gt; ρ נוזל</text>
+ </g>
+ <g class="cool" marker-end="url(#ar4)"><path d="M94,34 L94,18"/><path d="M260,76 L260,60"/></g>
+</svg><figcaption>כוח הציפה תלוי ב<b>נפח הנדחק</b> ובצפיפות הנוזל — לא במסת הגוף. לכן ספינת פלדה צפה ואבן קטנה שוקעת, והחלק השקוע בגוף צף שווה בדיוק ליחס הצפיפויות.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>שקילה תת-מימית מודדת אחוז שומן בגוף על בסיס ארכימדס: רקמת שומן פחות צפופה מרקמת שריר ועצם, ולכן גוף עם אחוז שומן גבוה יותר מקבל יחסית יותר ציפה ונשקל "קל יותר" במים. אותו רעיון של השוואת צפיפויות עומד גם מאחורי המשקל הסגולי בסטיק השתן.</p>
 
@@ -644,10 +1187,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="b5SqYuWT4-4"><b>Fluids at Rest — CrashCourse #14</b><span>ההסבר של עקרון ארכימדס וכוח הציפה, בהמשך ישיר ללחץ ההידרוסטטי מהיחידה הקודמת.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/עקרון ארכימדס והציפה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-surface-tension">
-<h3>מתח פנים וחוק לפלס</h3>
+<h3>מתח פנים וחוק לפלס<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">שטח הפנים של נוזל מתנהג כמו קרום מתוח, כי המולקולות שעליו חסרות שכנים מלמעלה. מהמאמץ הזה לכווץ את שטח הפנים נובע חוק לפלס — ומתוכו התובנה הרפואית החשובה ביותר בבלוק: רדיוס קטן דורש לחץ גדול, ולכן בלי סורפקטנט הנאדיות הקטנות היו קורסות.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -659,6 +1203,24 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>הפתרון הוא <b>סורפקטנט</b> — חומר אמפיפטי, בעל קצה הידרופילי וקצה הידרופובי, שמסתדר בין מולקולות המים ומחליש את כוחות המשיכה ביניהן, כלומר <b>מוריד את מתח הפנים</b>. המפתח אינו רק בהורדה עצמה אלא בכך שהיא <b>לא אחידה</b>: הסורפקטנט מתפזר בין הנאדיות, אך מכיוון שבנאדית הקטנה הוא <b>מרוכז יותר</b>, השפעתו עליה גדולה יותר. מתח הפנים בקטנה יורד יותר, וכך הלחץ הפנימי בה מושווה לזה שבגדולה — והקריסה נמנעת.</p>
 <p>תופעה נוספת שנשענת על אותם כוחות היא <b>נימיות</b>: טיפוס נוזל בצינורית דקה נגד הכבידה, כאשר כוחות ה<b>אדהזיה</b> (משיכה אל דפנות הצינורית) גוברים על כוחות ה<b>קוהזיה</b> (משיכה בין מולקולות הנוזל לעצמן).</p>
 
+<figure>
+<svg viewBox="0 0 520 180" role="img" aria-label="חוק לפלס — בועה קטנה בלחץ גבוה יותר">
+ <text class="ttl" x="260" y="14" text-anchor="middle">ΔP = 2γ/r — רדיוס <tspan style="font-weight:800">קטן</tspan> ← לחץ <tspan style="font-weight:800">גבוה</tspan></text>
+ <g transform="translate(150,92)">
+  <circle cx="0" cy="0" r="26" class="fill-w" stroke="#e0a33c" stroke-width="2.2"/>
+  <text class="lbl" x="0" y="4" text-anchor="middle" fill="#b57f18">P גבוה</text>
+  <text class="sml" x="0" y="48" text-anchor="middle">נאדית קטנה</text>
+ </g>
+ <g transform="translate(340,92)">
+  <circle cx="0" cy="0" r="46" class="fill-b" stroke="#3d7fd6" stroke-width="2.2"/>
+  <text class="lbl" x="0" y="4" text-anchor="middle" fill="#3d7fd6">P נמוך</text>
+  <text class="sml" x="0" y="66" text-anchor="middle">נאדית גדולה</text>
+ </g>
+ <path class="ln" stroke-width="2.4" d="M176,92 L294,92"/>
+ <path class="hot" marker-end="url(#ar2)" d="M200,80 L270,80"/>
+ <text class="sml" x="235" y="70" text-anchor="middle" fill="#e05252">האוויר זורם מהקטנה לגדולה</text>
+ <text class="sml" x="260" y="164" text-anchor="middle">בלי סורפקטנט הקטנה הייתה קורסת — <tspan style="font-weight:800">הוא מוריד את γ יותר דווקא בה</tspan>, ומשווה את הלחצים</text>
+</svg><figcaption>מנוגד לאינטואיציה: הבועה <b>הקטנה</b> היא זו שכולאת לחץ גבוה. זה בדיוק המנגנון שמאחורי מצוקה נשימתית של פגים — בלי סורפקטנט הנאדיות הקטנות מתרוקנות לתוך הגדולות.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>חוסר בסורפקטנט הוא הבסיס למצוקה נשימתית של פגים (RDS): בלי הורדת מתח הפנים הדיפרנציאלית, נאדיות קטנות קורסות ושטח פני חילוף הגזים מצטמצם. זו הסיבה שהמושג "רדיוס קטן = לחץ גבוה" אינו טריוויה פיזיקלית אלא הסבר קליני ישיר.</p>
 
@@ -676,10 +1238,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="gjLCu8qe2nI"><b>Surface Tension &amp; Surfactant in Alveoli — Ninja Nerd</b><span>הליבה הרפואית: לפלס, נאדיות וסורפקטנט. חסר בו הצד הפיזיקלי של הקוהזיה והנימיות — לכן צפה גם בסרטון הבא.</span></div>
 <div class="vid" data-yt="WBk7mGb7TKw"><b>Surface Tension, Cohesion &amp; Capillary Action — The Organic Chemistry Tutor</b><span>משלים את מקור התופעה: קוהזיה, אדהזיה ונימיות. אינו מכסה את חוק לפלס ואת הנאדיות.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/מתח פנים וחוק לפלס" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-bernoulli">
-<h3>משוואת ברנולי וספיקה</h3>
+<h3>משוואת ברנולי וספיקה<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כשהנוזל זז, שני חוקי שימור מנהלים את התמונה: שימור החומר נותן את שימור הספיקה (חתך צר = מהירות גבוהה), ושימור האנרגיה נותן את ברנולי (מהירות גבוהה = לחץ נמוך). שניהם נכונים לנוזל אידיאלי — והמעבר לדם אמיתי, עם צמיגות, הוא בדיוק המקום שבו נכנסים פואזיי וריינולדס.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -689,6 +1252,33 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>ב<b>נוזל ריאלי</b> נכנסת <b>הצמיגות</b> — התנגדות פנימית לזרימה, תלוית טמפרטורה וריכוז מומסים. כוחות החיכוך הפנימיים האלה גורמים לכך שהאנרגיה הכוללת אינה נשמרת, ולכן יש ירידת לחץ לאורך הזרימה, המתוארת ב<b>חוק פואזיי</b>. הביט הקריטי: ירידת הלחץ תלויה ב<b>חזקה הרביעית</b> של הרדיוס (ביחס הפוך). היצרות הכלי פי שניים ברדיוס מצריכה לחץ גדול פי שישה-עשר. מקור התלות החזקה: צינור צר לא רק לוקח משטח החתך הזמין לזרימה, אלא גם מכריח יותר ויותר מהנוזל לזרום קרוב לדופן שמאיטה אותו — כך שכיווץ קטן ברדיוס "מתגלגל" למכפלה גדולה בהתנגדות.</p>
 <p>הצמיגות גם קובעת את <b>אופי</b> הזרימה. ב<b>זרימה למינרית</b> המולקולות נעות בקווים מקבילים — זרימה שקטה, מסודרת ויעילה, שבה פרופיל המהירויות <b>פרבולי</b>: מהירות מרבית במרכז הצינור ואפס בדופן, בגלל הצמיגות. ב<b>זרימה טורבולנטית</b> יש כאוס מקומי (אף שהשקול הכולל הוא עדיין כיוון הזרימה), והיא יוצרת רעשים ורעידות. מה מכריע? <b>מספר ריינולדס</b>, המבטא את היחס בין כוחות האינרציה — הנוטים לשמור על תנועה מהירה וכאוטית — לכוחות הצמיגות, הנוטים למתן ולסדר. מספר קטן (מתחת ל-2000) → למינרית; מספר גדול (מעל 4000) → טורבולנטית.</p>
 
+<figure>
+<svg viewBox="0 0 520 200" role="img" aria-label="רציפות וברנולי בהיצרות, וזרימה למינרית מול טורבולנטית">
+ <text class="ttl" x="260" y="14" text-anchor="middle">היצרות: מהירות עולה ← לחץ יורד</text>
+ <path class="fill-b" d="M24,42 L180,42 C210,42 210,62 240,62 L280,62 C310,62 310,42 340,42 L496,42 L496,110 L340,110 C310,110 310,90 280,90 L240,90 C210,90 210,110 180,110 L24,110 z"/>
+ <path class="ln" stroke-width="1.8" fill="none" d="M24,42 L180,42 C210,42 210,62 240,62 L280,62 C310,62 310,42 340,42 L496,42"/>
+ <path class="ln" stroke-width="1.8" fill="none" d="M24,110 L180,110 C210,110 210,90 240,90 L280,90 C310,90 310,110 340,110 L496,110"/>
+ <g class="cool" marker-end="url(#ar4)"><path d="M50,76 L92,76"/></g>
+ <g class="hot" marker-end="url(#ar2)"><path d="M238,76 L288,76"/></g>
+ <g class="cool" marker-end="url(#ar4)"><path d="M400,76 L442,76"/></g>
+ <text class="sml" x="80" y="128" text-anchor="middle">איטי · לחץ <tspan style="font-weight:800">גבוה</tspan></text>
+ <text class="sml" x="262" y="46" text-anchor="middle" fill="#e05252" style="font-weight:800">מהיר · לחץ נמוך</text>
+ <text class="sml" x="430" y="128" text-anchor="middle">איטי · לחץ <tspan style="font-weight:800">גבוה</tspan></text>
+ <line class="gd" x1="24" y1="144" x2="496" y2="144"/>
+ <g transform="translate(24,158)">
+  <text class="lbl" x="0" y="0" fill="#2f9e7a">למינרית</text>
+  <g stroke="#2f9e7a" stroke-width="1.5" fill="none">
+   <path d="M76,-4 L186,-4"/><path d="M76,2 L186,2"/><path d="M76,8 L186,8"/><path d="M76,14 L186,14"/>
+  </g>
+  <text class="sml" x="196" y="8">Re &lt; 2000</text>
+ </g>
+ <g transform="translate(280,158)">
+  <text class="lbl" x="0" y="0" fill="#e05252">טורבולנטית</text>
+  <path stroke="#e05252" stroke-width="1.5" fill="none" d="M96,6 q10,-14 20,0 q10,14 22,-4 q8,-10 16,6 q8,14 18,-6 q8,-12 18,4"/>
+  <path stroke="#e05252" stroke-width="1.3" fill="none" opacity=".6" d="M96,12 q14,10 26,-4 q10,-12 20,6 q10,14 20,-8"/>
+  <text class="sml" x="196" y="10">Re &gt; 4000</text>
+ </g>
+</svg><figcaption>רציפות אומרת שבחתך צר המהירות גדלה, וברנולי אומר שאיפה שמהיר — הלחץ נמוך. ומעבר לזה: בזרימה ריאלית ΔP∝1/R⁴, ולכן <b>היצרות קטנה מייקרת את הלחץ דרמטית</b>. מערבולת = האוושה בסטטוסקופ.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>שלושה יישומים. <b>מפרצת</b>: בהתרחבות פתולוגית של כלי הדם שטח החתך גדל, ולכן לפי הספיקה המהירות יורדת, ולפי ברנולי הלחץ על הדופן עולה — על דופן שכבר נחלשה והולכת ומידקקת ככל שההיקף גדל, ומכאן סכנת הקרע. <b>טרשת עורקים</b>: לפי פואזיי, היצרות קטנה ברדיוס מחייבת עלייה עצומה בלחץ שהלב צריך לייצר. <b>מדידת לחץ דם</b>: המנג'טה מעלה לחץ מעל הסיסטולי, הזרימה נעצרת ושקט. כשהלחץ יורד ללחץ הסיסטולי מתחילה זרימה טורבולנטית — קול קורוטקוף בסטטוסקופ. כשהלחץ מגיע לדיאסטולי ההפרעה נעלמת, הזרימה חוזרת ללמינרית ושוב שקט. ומדוע דווקא טורבולנטית, למרות שהקוטר הוקטן (מה שהיה אמור להקטין את ריינולדס)? כי לפי שימור הספיקה, כשהחתך קטן המהירות גדלה משמעותית — והגידול במהירות מגדיל את ריינולדס יותר משהקטנת הקוטר מקטינה אותו.</p>
 <p>ועוד דוגמה פיזיולוגית חשובה: קוטר נים בודד קטן בהרבה מקוטר האורטה, ולכן היינו מצפים למהירות גבוהה יותר בנימים. בפועל הזרימה שם איטית — כי יש המון נימים במקביל, ושטח החתך <b>הכולל</b> שלהם גדול משל האורטה. האטה זו היא שמאפשרת חילוף חומרים יעיל עם הרקמות.</p>
@@ -708,14 +1298,15 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="fJefjG3xhW0"><b>Fluids in Motion — CrashCourse #15</b><span>משוואת הרציפות ועקרון ברנולי — בדיוק הבסיס שממנו נגזרות דוגמאות המפרצת וההיצרות.</span></div>
 <div class="vid" data-yt="ZcaPndok1hc"><b>Turbulence &amp; Reynolds Number — Khan Academy</b><span>המעבר מלמינרי לטורבולנטי כיחס בין כוחות אינרציה לצמיגות — המפתח להבנת קולות קורוטקוף.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/משוואת ברנולי וספיקה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 </section>
 
 <section class="block" id="b-imaging">
-<h2>דימות רפואי</h2>
+<h2>🩻 דימות רפואי</h2>
 <p class="bsub">ארבעה נושאים — הפיזיקה שמאחורי כל מכשיר, ומה המחיר של כל אחד.</p>
 <section class="unit" id="u-photoelectric">
-<h3>הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי</h3>
+<h3>הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כל בלוק הדימות עומד על רעיון אחד: קרינה אלקטרומגנטית אינה "זרם אנרגיה רציף" אלא חבילות בדידות — פוטונים — ואנרגיית הפוטון הבודד נקבעת אך ורק על ידי התדירות. מהרעיון הזה נגזרות שלוש האינטראקציות של קרינה עם רקמה, ומהן נגזרת כל תמונה רפואית שתראו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -725,6 +1316,36 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p><b>פיזור קומפטון</b> (ארתור קומפטון, 1922; נובל 1927) הוא הצעד הבא באותו כיוון. קרני X וגמא מתפזרות מהחומר, ותוך כדי כך <b>אורך הגל שלהן גדל</b> — עובדה שהפיזיקה הקלאסית לא ידעה להסביר. קומפטון הראה שאם מתייחסים לפיזור כאל אוסף התנגשויות אלסטיות בין פוטונים לאלקטרונים חופשיים, הכול מסתדר: הפוטון מוסר לאלקטרון חלק מאנרגייתו, זו הופכת לאנרגיה קינטית של האלקטרון, והפוטון ממשיך בכיוון אחר עם <b>פחות אנרגיה, תדירות נמוכה יותר ואורך גל ארוך יותר</b>. שוב — האופי החלקיקי של האור.</p>
 <p>ובקצה האנרגטי נמצאת <b>יצירת זוגות</b>: פוטון בעל אנרגיה של לפחות <b>1.022 MeV</b> (כבר בתחום קרינת הגמא) נעלם, ואנרגייתו הופכת לזוג חלקיק ואנטי-חלקיק — אלקטרון ופוזיטרון. זו המחשה ישירה של <b>E=mc²</b>: אנרגיה טהורה הופכת למסה. הסף אינו שרירותי — הוא בדיוק פעמיים מסת המנוחה של החלקיק כפול c². התהליך אינו יכול להתרחש בריק, כי אז אי אפשר לשמר תנע ואנרגיה בו-זמנית; לכן הוא מתרחש תמיד בתוך חומר, בקרבת גרעין כבד שקולט חלק מהתנע. שימו לב שזהו התהליך ההפוך בדיוק להתעיינות שעליה בנוי ה-PET.</p>
 
+<figure>
+<svg viewBox="0 0 520 180" role="img" aria-label="האפקט הפוטואלקטרי — עוצמה לא מחליפה תדירות">
+ <text class="ttl" x="260" y="14" text-anchor="middle">האנרגיה <tspan style="font-weight:800">לא מצטברת</tspan> — פוטון בודד קובע</text>
+ <g transform="translate(30,34)">
+  <rect x="0" y="52" width="180" height="34" rx="4" fill="#5a6773"/>
+  <g stroke="#c0392b" stroke-width="2" fill="none" marker-end="url(#arR)">
+   <path d="M22,4 L48,46"/><path d="M60,4 L86,46"/><path d="M98,4 L124,46"/><path d="M136,4 L162,46"/>
+  </g>
+  <text class="sml" x="90" y="106" text-anchor="middle" style="fill:#c0392b;font-weight:800">אור אדום עז מאוד</text>
+  <text class="sml" x="90" y="122" text-anchor="middle">תדר נמוך ← אף אלקטרון לא נפלט</text>
+  <text class="lbl" x="90" y="140" text-anchor="middle" style="fill:#c0392b">✗</text>
+ </g>
+ <defs>
+  <marker id="arR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+  <marker id="arV" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a6fd6"/></marker>
+  <marker id="arE" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2f9e7a"/></marker>
+ </defs>
+ <line class="gd" x1="248" y1="30" x2="248" y2="168"/>
+ <g transform="translate(290,34)">
+  <rect x="0" y="52" width="180" height="34" rx="4" fill="#5a6773"/>
+  <path stroke="#8a6fd6" stroke-width="2" fill="none" marker-end="url(#arV)" d="M84,4 L110,46"/>
+  <g stroke="#2f9e7a" stroke-width="1.8" fill="none" marker-end="url(#arE)">
+   <path d="M104,48 L128,10"/><circle cx="132" cy="6" r="0"/>
+  </g>
+  <circle cx="130" cy="8" r="4.5" fill="#2f9e7a"/>
+  <text class="sml" x="90" y="106" text-anchor="middle" style="fill:#8a6fd6;font-weight:800">אור סגול חלש אחד</text>
+  <text class="sml" x="90" y="122" text-anchor="middle">תדר גבוה ← אלקטרון נפלט מיד</text>
+  <text class="lbl" x="90" y="140" text-anchor="middle" style="fill:#2f9e7a">✓</text>
+ </g>
+</svg><figcaption>E=hf, והאנרגיה של פוטון בודד היא שקובעת. עוצמה מגדילה רק את <b>מספר</b> הפוטונים — ולכן אור אדום מסנוור לא יוציא אלקטרון, בעוד אור סגול חלש כן. אותו היגיון בדיוק מסביר למה מיקרוגל אינו מייינן ורנטגן כן.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>שלוש האינטראקציות אינן תיאוריה — הן קורות בגוף בכל צילום רנטגן, ותחומי האנרגיה שלהן הם שקובעים מה בדיוק מתרחש: בין 10 ל-500 קילו-אלקטרון-וולט שולט <b>האפקט הפוטואלקטרי</b>, שמתבטא ב<b>בליעה</b> של הקרינה בחומר; בין 0.1 ל-0.3 מגה-אלקטרון-וולט שולט <b>קומפטון</b>, שהוא <b>פיזור</b>; ומעל 1.02 MeV נכנסת יצירת הזוגות. ההבחנה הזאת היא לב העניין הקליני: בליעה היא מה שיוצר את הדמות בתמונה (רקמות שונות בולעות בשיעור שונה), ואילו פיזור הוא מה ש<b>מטשטש</b> אותה — פוטון שהוסט ממסלולו משחיר נקודה בתמונה שלא במקום המדויק שממנו הגיע. המחיר הכללי של השימוש בפוטונים אנרגטיים הוא היותם קרינה מייננת, ומכאן כל שיקולי המינון והמיגון שילוו אתכם בשאר הבלוק.</p>
 
@@ -742,10 +1363,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="vuGpUFjLaYE"><b>Photoelectric Effect — Khan Academy</b><span>ההסבר הנקי ביותר לפוטון הבודד ולפונקציית העבודה — אך הוא מכסה רק את האפקט הפוטואלקטרי, וקומפטון ויצירת זוגות חסרים בו (הם בסרטון הבא).</span></div>
 <div class="vid" data-yt="aQUazLpaVao"><b>X-Rays Meet Matter: Photoelectric, Compton &amp; Pair Production — Radiology Sound</b><span>מחבר את שלוש האינטראקציות יחד ומראה איך כל אחת מהן משפיעה על הניגודיות בתמונה ועל המינון.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-xray-ct">
-<h3>רנטגן ו-CT</h3>
+<h3>רנטגן ו-CT<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">צילום רנטגן אינו "צילום" במובן הרגיל: לא אוספים אור שהוחזר מהעצם, אלא מירים קרינה <i>דרך</i> הגוף ומודדים כמה ממנה שרדה. התמונה היא מפה של הנחתה, ו-CT אינו סוג קרינה חדש אלא אלגוריתם שמרכיב מפות כאלה מזוויות רבות לכדי חתך.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -755,6 +1377,40 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>לצילום הרנטגן יש מגבלות שנובעות ישירות מכך שאין החזרה אלא העברה. <b>אי אפשר למקד את האלומה בעדשות</b> או באמצעים אופטיים אחרים, ולכן קרן שמגיעה לאיבר באלכסון מטילה דמות מושלכת כמו צל — <b>אי-חדות גאומטרית</b>. הקרינה עלולה לחדור גם את סרט הצילום, לחזור אליו מהצד השני ולטשטש. והאינטראקציות עם החומר יוצרות <b>אי-חדות אינהרנטית</b>, כי חלק מהקרינה מוסטת קלות מכיוונה. הפתרונות כולם מכוונים למנוע מקרינה לא רצויה להגיע לסרט: מיסוך עופרת סביב האיבר ובעיקר מתחתיו, וסדרת מסננים על חלון ההקרנה בשפופרת שמתפקדת כמעין צמצם.</p>
 <p><b>CT</b> משתמש באותה פיזיקה בדיוק. הנבדק שוכב על מיטה שעוברת דרך חישוק המשגר קרני רנטגן וקולט אותן בחיישנים דיגיטליים מן הצד השני; הקרניים עוברות <b>היקפית</b> דרך כל נפח האיבר, ועוצמתן פוחתת בהתאם לצפיפות הרקמות. ההבדל מרנטגן אינו פיזיקלי אלא <b>אלגוריתמי</b>: בעוד שבצילום רגיל כל המבנים נדחסים זה על זה למישור אחד, ה-CT בונה תמונה שבה הפרטים מופיעים במיקומם המרחבי — פרוסות במישור <b>האקסיאלי</b>, שהמחשב מצרף זו לצד זו לתמונה תלת-ממדית. השיטה הומצאה ב-1972 על ידי גודפרי האונספילד (נובל לרפואה 1979, יחד עם אלן קורמק).</p>
 
+<figure>
+<svg viewBox="0 0 520 190" role="img" aria-label="שפופרת רנטגן ובליעה דיפרנציאלית">
+ <text class="ttl" x="130" y="14" text-anchor="middle">שפופרת הרנטגן</text>
+ <text class="ttl" x="392" y="14" text-anchor="middle">למה עצם לבנה</text>
+ <g transform="translate(20,32)">
+  <rect x="0" y="16" width="220" height="86" rx="14" fill="none" class="ln" stroke-width="1.8"/>
+  <path d="M22,40 L22,78" stroke="#e05252" stroke-width="3"/>
+  <text class="sml" x="22" y="112" text-anchor="middle">קתודה −</text>
+  <path d="M176,34 L196,52 L176,84 z" fill="#8a6fd6"/>
+  <text class="sml" x="190" y="112" text-anchor="middle">אנודה +</text>
+  <g stroke="#2f9e7a" stroke-width="1.6" fill="none" marker-end="url(#arE)"><path d="M32,59 L160,59"/></g>
+  <text class="sml" x="96" y="52" text-anchor="middle" fill="#2f9e7a">אלקטרונים מואצים</text>
+  <g stroke="#8a6fd6" stroke-width="1.5" fill="none" marker-end="url(#arV)">
+   <path d="M196,66 L228,88"/><path d="M198,60 L232,66"/><path d="M196,54 L228,38"/>
+  </g>
+  <text class="sml" x="110" y="132" text-anchor="middle"><tspan style="font-weight:800">מתח</tspan> קובע אנרגיה · <tspan style="font-weight:800">זרם</tspan> קובע כמות</text>
+ </g>
+ <line class="gd" x1="268" y1="26" x2="268" y2="176"/>
+ <g transform="translate(300,36)">
+  <g stroke="#8a6fd6" stroke-width="1.5" fill="none" marker-end="url(#arV)">
+   <path d="M0,14 L36,14"/><path d="M0,40 L36,40"/><path d="M0,66 L36,66"/><path d="M0,92 L36,92"/>
+  </g>
+  <rect x="44" y="0" width="52" height="106" rx="6" class="fill-b" stroke="#3d7fd6" stroke-width="1.4"/>
+  <rect x="56" y="26" width="28" height="54" rx="5" fill="#dfe6ec" stroke="#9aa8b4" stroke-width="1.4"/>
+  <text class="sml" x="70" y="56" text-anchor="middle" style="font-size:9px">עצם</text>
+  <g stroke="#8a6fd6" stroke-width="1.5" fill="none" marker-end="url(#arV)" opacity=".9">
+   <path d="M100,14 L142,14"/><path d="M100,92 L142,92"/>
+  </g>
+  <rect x="150" y="-4" width="14" height="114" rx="3" fill="#2b3440"/>
+  <rect x="150" y="24" width="14" height="58" rx="3" fill="#f2f5f8"/>
+  <text class="sml" x="182" y="18" style="font-size:9.5px">שחור = עבר</text>
+  <text class="sml" x="182" y="56" style="font-size:9.5px;font-weight:800">לבן = נבלע</text>
+ </g>
+</svg><figcaption>רנטגן אינו "צילום": לא אוספים אור שחזר, אלא מודדים כמה קרינה <b>שרדה</b> את המעבר. עצם בולעת יותר ← פחות פוטונים מגיעים לגלאי ← לבן. ו-CT הוא אותה פיזיקה בדיוק, רק ממאות זוויות.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>בוחרים ברנטגן כשהשאלה היא שאלה של ניגודיות טבעית חזקה — עצם מול רקמה רכה, אוויר מול נוזל. בוחרים ב-CT כדי לאבחן בעיות שאי אפשר לאתר בצילום רנטגן, וכן להנחיית טיפולים פולשניים. החיסרון הבסיסי של שתי השיטות הוא שרקמות רכות דומות זו לזו בבליעה, ולכן גידול ברקמה רכה כמעט שקוף לרנטגן פשוט. הפתרון הראשון הוא <b>חומר ניגודי</b> — בריום בשתייה או יוד בהזרקה לכלי הדם — חומרים בעלי מספר אטומי גבוה ש"מאירים" לבן איברים חלולים וכלי דם, ומקובלים במיוחד בסריקות בטן; זהו בדיוק העיקרון שהוזכר בפתיחת הבלוק: צובעים את האיבר כשהוא עצמו שקוף לבדיקה. המחיר של CT הוא <b>מנת קרינה מייננת גבוהה בהרבה</b> מצילום יחיד, שיקול מרכזי בילדים ובמעקבים חוזרים. ולגבי הצוות: הסכנה אינה הקרן הראשית אלא <b>הקרינה המפוזרת מגוף המטופל</b> (קומפטון) — ומכאן סינר העופרת והמיסוך.</p>
 
@@ -772,10 +1428,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="gsV7SJDDCY4"><b>How X-rays See Through Your Skin — TED-Ed (Ge Wang)</b><span>מייצור הקרן בשפופרת ועד שחזור חתך ה-CT — כל שרשרת ההיגיון של היחידה בסרטון אחד.</span></div>
 <div class="vid" data-yt="l9swbAtRRbg"><b>How Does a CT Scan Work? — NIBIB</b><span>קליפ של כדקה שממחיש ויזואלית את הסיבוב מזוויות רבות; זהו מבוא בלבד, וההסבר המושגי המלא נמצא בסרטון שמעליו.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/רנטגן ו-CT" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-nuclear-pet">
-<h3>רפואה גרעינית ו-PET</h3>
+<h3>רפואה גרעינית ו-PET<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">כאן מתהפכת הארכיטקטורה של הדימות: מקור הקרינה אינו מכשיר חיצוני אלא <b>המטופל עצמו</b>. מזריקים סמן רדיואקטיבי, והמערכת אוספת באופן פסיבי את קרינת הגמא הבוקעת מן הגוף — ולכן התמונה מתארת לא אנטומיה אלא <b>תפקוד</b>.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -784,6 +1441,30 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>הזוגיות הזאת היא כל היופי ההנדסי של השיטה. המתקן שבתוכו שוכב הנבדק רגיש דווקא ל<b>קרני גמא כפולות</b>: כאשר שני גלאים בקצוות מנוגדים של הטבעת קולטים פוטון באותו רגע, המחשב יודע שאירוע ההתעיינות התרחש אי-שם על הקו הישר שמחבר ביניהם. הצטלבות של אלפי קווים כאלה מגדירה את מיקום המקור במרחב. שימו לב מה בדיוק נמדד: <b>הגלאים אינם קולטים את הפוזיטרון</b>. הפוזיטרון נעלם כבר מילימטרים ספורים מנקודת פליטתו, ומה שיוצא מהגוף ומגיע לחיישנים הם אך ורק שני פוטוני הגמא.</p>
 <p>הסמן הנפוץ ביותר הוא <b>פלואורו-דאוקסי-גלוקוז (FDG)</b> — מולקולת גלוקוז שבה אחת מקבוצות ההידרוקסיל הוחלפה באיזוטופ הרדיואקטיבי <b>פלואור-18</b>, פולט פוזיטרונים. ההנחה הביולוגית פשוטה: אזורים בעלי פעילות מטבולית גבוהה — גידולים סרטניים, פעילות מוחית — צורכים כמויות גדולות של גלוקוז, ולכן הסמן מצטבר בהם, ובסביבתם צפויות פליטות גמא רבות יותר. התמונה שמתקבלת היא מפה של <b>קצב צריכת סוכר</b>, לא של צורה.</p>
 
+<figure>
+<svg viewBox="0 0 520 185" role="img" aria-label="PET — התעיינות ושני פוטונים ב-180 מעלות">
+ <text class="ttl" x="260" y="14" text-anchor="middle">התעיינות: מסה הופכת לאנרגיה, ושני הפוטונים חייבים לצאת הפוך</text>
+ <g transform="translate(260,100)">
+  <circle cx="0" cy="0" r="66" fill="none" stroke="var(--line)" stroke-width="14"/>
+  <g fill="#3d7fd6">
+   <circle cx="0" cy="-66" r="5"/><circle cx="47" cy="-47" r="5"/><circle cx="66" cy="0" r="5"/><circle cx="47" cy="47" r="5"/>
+   <circle cx="0" cy="66" r="5"/><circle cx="-47" cy="47" r="5"/><circle cx="-66" cy="0" r="5"/><circle cx="-47" cy="-47" r="5"/>
+  </g>
+  <circle cx="-16" cy="10" r="5" class="pos"/>
+  <text class="sml" x="-16" y="30" text-anchor="middle" style="font-size:9.5px">e⁺ + e⁻</text>
+  <g stroke="#8a6fd6" stroke-width="2.2" fill="none" marker-end="url(#arV)">
+   <path d="M-21,7 L-62,-18"/><path d="M-11,13 L30,38"/>
+  </g>
+  <path class="gd" style="stroke-dasharray:4 3;stroke:#e05252" d="M-72,-24 L38,44"/>
+  <text class="sml" x="76" y="-56" style="fill:#8a6fd6;font-weight:800">511 keV</text>
+  <text class="sml" x="76" y="-40" style="font-size:9.5px">שני פוטונים</text>
+  <text class="sml" x="76" y="-26" style="font-size:9.5px">בזווית 180°</text>
+ </g>
+ <text class="sml" x="128" y="150" text-anchor="middle">התנע לפני היה אפס —</text>
+ <text class="sml" x="128" y="166" text-anchor="middle">ולכן הוא חייב להיות אפס גם אחרי</text>
+ <text class="sml" x="410" y="150" text-anchor="middle">שני גלאים נגדיים שקלטו יחד</text>
+ <text class="sml" x="410" y="166" text-anchor="middle">← האירוע על הקו שביניהם</text>
+</svg><figcaption>מקור הקרינה כאן הוא <b>המטופל עצמו</b>, ולא מכשיר חיצוני. הגלאים לעולם אינם קולטים את הפוזיטרון — הוא מתאיין מילימטרים מנקודת הפליטה, ומה שיוצא מהגוף הם שני פוטוני הגמא.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>בזה טמון ההבדל העקרוני בין דימות <b>אנטומי</b> לדימות <b>תפקודי</b>. CT עונה על השאלה "מה נמצא איפה ובאיזו צורה" — הוא ממפה צפיפויות. PET עונה על שאלה אחרת לגמרי: "מה כאן פעיל". גוש שנראה זהה לחלוטין לרקמה שכנה בסריקת CT עשוי לזהור ב-PET משום שהוא זולל גלוקוז, ולהפך — נגע שנראה בבירור ב-CT עשוי להיות דומם מטבולית. לכן השיטות אינן מתחרות אלא משלימות: האחת נותנת מפה, השנייה נותנת פעילות. המחיר של PET הוא כפול — המטופל בולע מנת קרינה מייננת מבפנים, והרזולוציה המרחבית מוגבלת מטבע הדברים, שכן הפוזיטרון נודד מרחק קצר לפני שהוא מתאיין, כך שהאירוע הנמדד אינו בדיוק במקום ההתפרקות. מכאן גם ההצדקה הפיזיקלית לדרישה לחצי חיים קצר: היא זו שמאפשרת לקבל אות חזק במהלך הבדיקה מבלי לשלם עליו בחשיפה ממושכת.</p>
 
@@ -800,10 +1481,11 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <h4>לצפייה</h4>
 <div class="vid" data-yt="qfsX5p4CSmo"><b>PET Scans, Positron Annihilation &amp; Antimatter — Medical Physics</b><span>מראה בבירור את שרשרת האירועים: בטא-פלוס ← פוזיטרון ← התעיינות ← שני פוטוני 511keV ב-180°, ואת הקשר ל-E=mc².</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/רפואה גרעינית ו-PET" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-mri">
-<h3>MRI</h3>
+<h3>MRI<button class="speak" type="button">🔊 הקראה</button></h3>
 <p class="lead">MRI הוא היחיד בבלוק שאינו משתמש בפוטונים אנרגטיים כלל. הוא מנצל את <b>הספין המגנטי של הפרוטונים באטומי המימן שבמים שבגוף</b>, ואת האות הוא מפיק בדיוק כפי שגנרטור מפיק חשמל: שדה מגנטי מסתובב ליד סליל <b>משרה</b> בו זרם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -813,6 +1495,35 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <p>התהודה עצמה כפופה למשוואה פשוטה: <b>ν = γ·B₀</b> — תדירות התהודה של הספין פרופורציונית לשדה המגנטי שהוא חווה, כאשר γ הוא היחס הג'ירומגנטי. מכאן נובע פתרון בעיית המיקום, שעליו זכו ב-2003 פול לוטרבור ופיטר מנספילד בפרס נובל לרפואה: <b>סלילי גרדיאנט</b> מוסיפים ל-B₀ שינוי לינארי הדרגתי לאורך הציר. במרכז שדה הגרדיאנט התדירות שווה לזו של B₀, ובמרחק x ממנו השדה — ולכן גם תדירות התהודה — שונים. כך <b>התדירות הופכת לכתובת</b>: המערכת יודעת לקשר בין תדירות שנקלטה לבין מיקום מרחבי.</p>
 <p>ומה מייצר את הניגודיות? לכל יחידת נפח רקמה יש מספר תאים, בתאים יש מולקולות מים, ובכל מולקולת מים שני אטומי מימן שבגרעין כל אחד מהם פרוטון. רקמות שונות מייצרות תמונות שונות על בסיס <b>כמות אטומי המימן שמייצרים אות</b>, ועל בסיס העובדה ששינוי תכונות הספין תלוי ברקמה שבה הפרוטון נמצא — למשל חומר לבן מול חומר אפור במוח. מכאן ההפרדה החדה בין רקמות רכות, שהיא סימן ההיכר של השיטה.</p>
 
+<figure>
+<svg viewBox="0 0 520 180" role="img" aria-label="שלבי ה-MRI — יישור, פולס, ורלקסציה">
+ <text class="ttl" x="88" y="14" text-anchor="middle">1. בלי שדה</text>
+ <text class="ttl" x="260" y="14" text-anchor="middle">2. בתוך B₀</text>
+ <text class="ttl" x="432" y="14" text-anchor="middle">3. פולס RF ורלקסציה</text>
+ <defs><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3d7fd6"/></marker></defs>
+ <g transform="translate(88,80)" stroke="#3d7fd6" stroke-width="1.8" fill="none" marker-end="url(#arS)">
+  <path d="M-40,16 L-26,-2"/><path d="M-8,20 L4,-4"/><path d="M24,14 L14,-8"/><path d="M-30,-14 L-44,-30"/>
+  <path d="M6,-16 L26,-28"/><path d="M36,-6 L48,-24"/><path d="M-14,-20 L-6,-42"/>
+ </g>
+ <text class="sml" x="88" y="130" text-anchor="middle">אקראי לגמרי —</text>
+ <text class="sml" x="88" y="146" text-anchor="middle">המגנטיזציה הכוללת אפס</text>
+ <g transform="translate(260,80)" stroke="#3d7fd6" stroke-width="1.8" fill="none" marker-end="url(#arS)">
+  <path d="M-42,22 L-42,-22"/><path d="M-22,22 L-22,-22"/><path d="M-2,22 L-2,-22"/><path d="M18,22 L18,-22"/><path d="M38,-22 L38,22"/>
+ </g>
+ <text class="sml" x="260" y="130" text-anchor="middle">מסתדרים לפי השדה —</text>
+ <text class="sml" x="260" y="146" text-anchor="middle"><tspan style="font-weight:800">עודף קטן</tspan> הוא כל האות</text>
+ <g transform="translate(432,80)">
+  <path stroke="#3d7fd6" stroke-width="2" fill="none" marker-end="url(#arS)" d="M0,24 L26,-14"/>
+  <path class="gd" style="stroke-dasharray:3 3" d="M0,24 L0,-24"/>
+  <ellipse cx="13" cy="-18" rx="20" ry="7" fill="none" stroke="#8a6fd6" stroke-width="1.5"/>
+  <path stroke="#e05252" stroke-width="1.8" fill="none" d="M-46,-4 q7,-13 14,0 q7,13 14,0 q7,-13 14,0"/>
+  <text class="sml" x="-46" y="-20" style="fill:#e05252;font-size:9.5px">RF</text>
+  <g stroke="#2f9e7a" stroke-width="1.8" fill="none"><path d="M22,26 a16,16 0 1,0 16,-16"/></g>
+  <text class="sml" x="46" y="34" style="fill:#2f9e7a;font-size:9.5px">סליל</text>
+ </g>
+ <text class="sml" x="432" y="130" text-anchor="middle">הווקטור מוטה ומנדנד —</text>
+ <text class="sml" x="432" y="146" text-anchor="middle">וה<tspan style="font-weight:800">השראה</tspan> בסליל היא האות</text>
+</svg><figcaption>הנקודה שנשאלת: ה-MRI אינו "מודד קרינה". האות הוא <b>זרם מושרה בסליל</b> — בדיוק חוק פאראדיי מבלוק המגנטיות, רק שהמגנט המסתובב הוא ספין של פרוטון.</figcaption></figure>
 <h4>החיבור הרפואי</h4>
 <p>בוחרים ב-MRI כשהשאלה הקלינית נוגעת ל<b>רקמה רכה</b> — בדיוק המקום שבו רנטגן ו-CT חלשים, מפני שרקמות רכות דומות זו לזו בבליעת רנטגן אך שונות מאוד בהתנהגות הספין שלהן. שימו לב למגבלה המשלימה, ההופכית לזו של הרנטגן: <b>בתמונת MRI רואים רק רקמות רכות — את העצם עצמה לא רואים, אלא רק את מח העצם</b>. היתרון השני הוא בטיחותי ומכריע: MRI משתמש בשדה מגנטי ובגלי רדיו בלבד ואינו כרוך ב<b>קרינה מייננת</b>, ולכן הוא מועדף בילדים, בהיריון ובמעקבים חוזרים שבהם מנות ה-CT מצטברות. המחיר: בדיקה ארוכה ויקרה, ומעל הכול <b>סכנת המגנט</b> — השדה חזק ופעיל תמיד, ולכן חפץ פרומגנטי בקרבתו נמשך אליו בעוצמה והופך לקליע ("אפקט הקליע"). ולבסוף עניין ההיסטוריה שהוא גם עניין מושגי: השיטה נקראה תחילה "דימות תהודה מגנטית <b>גרעינית</b>", וה"גרעינית" הושמטה מחשש שהציבור יקשר אותה שלא בצדק לפצצה ולרדיואקטיביות. ה-Nuclear התייחס לגרעין האטום שבו מתרחשת התהודה — לא לביקוע ולא לקרינה. הבדיקה זהה לחלוטין.</p>
 
@@ -831,7 +1542,8 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 <div class="vid" data-yt="1CGzk-nV06g"><b>How Does an MRI Scan Work? — NIBIB</b><span>קליפ של כדקה לתמונה הכללית: יישור גרעיני המימן, גלי רדיו, אות חוזר וללא קרינה מייננת; אין בו ספין לעומק ואין T1/T2.</span></div>
 <div class="vid" data-yt="TQegSF4ZiIQ"><b>How MRI Works: NMR Basics — thePIRL</b><span>הסבר מעמיק (כ-42 דק') על נקיפת הספין, משוואת לרמור, פולס ה-RF והרלקסציה — לצפייה אם רוצים להבין באמת מאיפה מגיע האות.</span></div>
 </div>
-</section>
+
+<a class="drill" href="../index.html#/practice/physics/MRI" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 </section>
 
 <section id="last" class="block">
@@ -875,14 +1587,15 @@ th{background:#f4f7fa;font-family:'Heebo';font-weight:800;color:#0d3f74}
 </div>
 </section>
 
-<footer style="margin-top:3.5rem;padding-top:1.2rem;border-top:1px solid #e6ecf2;font-size:.85rem;color:#7a8a99">
+<footer style="margin-top:3.5rem;padding-top:1.2rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--faint)">
 <p><b>מקורות:</b> הקלטות ההרצאות של פרופ׳ נצח פרביאש, מצגות הקורס והדימות, סיכום הקורס של מחזור נ״ב, ותרגולים 6–9. הסרטונים אומתו מול התמלול שלהם — סרטון המסומן כמכסה חלקית מצוין ככזה במקום שבו הוא מופיע.</p>
 <p style="margin-top:.5rem"><b>הבהרה:</b> לקורס אין שחזורים — הוא חדש והמבחן לא שוחזר מעולם. המסמך הזה הוא סיכום של חומר הקורס, לא ניחוש של המבחן. <a href="../index.html#/course/physics">חזרה לעמוד הקורס</a></p>
 </footer>
 
 <script>
-/* הטמעה עצלה: iframe של יוטיוב נטען רק בלחיצה. עשרות iframes בטעינה
-   הראשונה היו הופכים את המסמך לאיטי בטלפון — וממילא לא צופים בכולם. */
+/* ── הטמעת יוטיוב עצלה: iframe נטען רק בלחיצה ──
+   עשרות iframes בטעינה הראשונה היו הופכים את המסמך לאיטי בטלפון,
+   וממילא איש לא צופה בכולם. */
 document.querySelectorAll('.vid').forEach(function(v){
   v.addEventListener('click', function(){
     if (v.classList.contains('open')) {
@@ -894,12 +1607,74 @@ document.querySelectorAll('.vid').forEach(function(v){
     var f = document.createElement('iframe');
     f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0';
     f.allow = 'accelerometer; encrypted-media; picture-in-picture';
-    f.allowFullscreen = true;
-    f.loading = 'lazy';
-    f.title = 'סרטון הסבר';
-    v.append(f);
-    v.classList.add('open');
+    f.allowFullscreen = true; f.loading = 'lazy'; f.title = 'סרטון הסבר';
+    v.append(f); v.classList.add('open');
   });
 });
+
+/* ── הקראה ──
+   קורא את גוף הנושא בקול. השמעה אחת בכל רגע: לחיצה על נושא אחר עוצרת
+   את הקודם, אחרת שני קולות מדברים זה על זה. הכפתורים והאיורים מוחרגים —
+   אין טעם להקריא "הקראה" או תוויות שיושבות על גרף. */
+(function(){
+  var synth = window.speechSynthesis;
+  if (!synth) { document.querySelectorAll('.speak').forEach(function(b){ b.remove(); }); return; }
+  var current = null;
+
+  function textOf(unit){
+    var clone = unit.cloneNode(true);
+    clone.querySelectorAll('.speak, .drill, .vids, figure svg').forEach(function(n){ n.remove(); });
+    /* נקודה בסוף כל מלכודת — בלעדיה כל המלכודות נשמעות כמשפט אחד ארוך. */
+    clone.querySelectorAll('.trap').forEach(function(t){ t.textContent = t.textContent + '.'; });
+    return clone.textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  function stop(){
+    synth.cancel();
+    if (current) { current.classList.remove('on'); current.textContent = '🔊 הקראה'; current = null; }
+  }
+
+  document.querySelectorAll('.speak').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var wasThis = (current === btn);
+      stop();
+      if (wasThis) return;
+      var u = new SpeechSynthesisUtterance(textOf(btn.closest('.unit')));
+      u.lang = 'he-IL';
+      u.rate = 1.0;
+      /* קול עברי אם המערכת מציעה אחד; אחרת ברירת המחדל, שעדיין מובנת. */
+      var he = (synth.getVoices() || []).filter(function(v){ return /^he/i.test(v.lang); })[0];
+      if (he) u.voice = he;
+      u.onend = stop;
+      u.onerror = stop;
+      current = btn; btn.classList.add('on'); btn.textContent = '⏹ עצור';
+      synth.speak(u);
+    });
+  });
+  /* יציאה מהעמוד באמצע הקראה משאירה בחלק מהדפדפנים קול שממשיך ברקע. */
+  window.addEventListener('beforeunload', function(){ synth.cancel(); });
+})();
+
+/* ── ניווט: סימון הבלוק שנמצאים בו, וכפתור חזרה לראש ── */
+(function(){
+  var links = [].slice.call(document.querySelectorAll('.navbar a'));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  var top = document.querySelector('.totop');
+  top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+
+  function paint(){
+    top.classList.toggle('show', window.scrollY > 700);
+    var y = window.scrollY + 90, on = -1;
+    targets.forEach(function(t,i){ if (t && t.offsetTop <= y) on = i; });
+    links.forEach(function(a,i){ a.classList.toggle('on', i === on); });
+  }
+  var tick = false;
+  window.addEventListener('scroll', function(){
+    if (tick) return; tick = true;
+    requestAnimationFrame(function(){ paint(); tick = false; });
+  }, {passive:true});
+  paint();
+})();
 </script>
 </body></html>
