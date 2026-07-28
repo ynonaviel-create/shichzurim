@@ -2055,6 +2055,18 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   padding:2px 8px; border-radius:7px 0 7px 0; white-space:nowrap;
   max-width:100%; overflow:hidden; text-overflow:ellipsis;
 }
+/* "מה הרעיון כאן" — ההסבר המושגי של הסעיף שנבחר. יושב מעל התמונות, כי
+   במבחן הבנתי הוא החלק שבאמת לומדים ממנו, והנייר הוא רק המפה. */
+.sheet-info{
+  background:var(--surface-2); border:1px solid var(--line);
+  border-inline-start:3px solid var(--accent);
+  border-radius:10px; padding:12px 15px;
+}
+.sheet-info[hidden]{display:none;}
+.sheet-info-t{font-size:13.5px; font-weight:800; color:var(--accent); margin-bottom:6px;}
+.sheet-info p{margin:0; font-size:14.5px; line-height:1.7; color:var(--text);}
+.sheet-info b{color:var(--accent);}
+
 /* בחלון הצף העוטף הוא שגולל, והדף מקבל רוחב קריא במקום להתכווץ למסך. */
 .sheet-lb{cursor:default; align-items:flex-start;}
 .sheet-pane{
