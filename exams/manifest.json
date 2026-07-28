@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-28",
-  "version": "b4fd4156",
+  "version": "986b89f7",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
@@ -1285,13 +1285,13 @@
       "year": 2026,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-24",
+      "added": "2026-07-29",
       "official": null,
       "trust": null,
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 27
+      "count": 56
     },
     {
       "id": "physics-magnetism",
@@ -1339,13 +1339,13 @@
       "year": 2026,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-24",
+      "added": "2026-07-29",
       "official": null,
       "trust": null,
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 22
+      "count": 51
     }
   ]
 }
