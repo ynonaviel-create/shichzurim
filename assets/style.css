@@ -1934,6 +1934,14 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .whatsnew-ico{ font-size:17px; line-height:1.5; flex:0 0 auto; }
 .whatsnew-list b{ font-size:14.5px; margin-bottom:2px; }
 .whatsnew-list span{ display:block; max-width:66ch; }
+/* ההמלצה שבסוף ההכרזה — מובחנת מרשימת החידושים, כי היא אומרת מה לעשות
+   ולא מה נוסף. */
+.whatsnew-tip{
+  margin-top:15px; padding:11px 14px; border-radius:10px;
+  background:var(--surface-2); border-inline-start:3px solid var(--accent);
+}
+.whatsnew-tip b{ display:block; font-size:14.5px; margin-bottom:3px; color:var(--accent); }
+.whatsnew-tip span{ display:block; max-width:70ch; font-size:14px; line-height:1.75; }
 
 /* ═══════════════ כלי השאלה — סימון וקישור ═══════════════
    פינה שקטה בראש כל שאלה. לא כפתורים בולטים: הם עוזרים למי שמחפש אותם
