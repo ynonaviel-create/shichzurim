@@ -1,6 +1,6 @@
 {
   "updated": "2026-07-28",
-  "version": "5f3b0f9a",
+  "version": "b4fd4156",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
@@ -1303,13 +1303,13 @@
       "year": 2026,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-24",
+      "added": "2026-07-29",
       "official": null,
       "trust": null,
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 19
+      "count": 49
     },
     {
       "id": "physics-submitted",
