@@ -40,20 +40,16 @@ p{margin-bottom:.75rem}
 a{color:var(--brand)}
 
 /* ── סרגל ניווט צף ── */
-.navbar{position:sticky;top:0;z-index:50;margin:0 -1.6rem 0;padding:.45rem 1.1rem;
+.navbar{position:sticky;top:0;z-index:50;margin:0 -1.6rem 0;padding:.6rem 1.6rem;
   background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line);display:flex;gap:.28rem;align-items:center;
+  border-bottom:1px solid var(--line);display:flex;gap:.5rem;align-items:center;
   overflow-x:auto;scrollbar-width:none}
 .navbar::-webkit-scrollbar{display:none}
-.navbar a{flex:none;font-size:.76rem;font-weight:800;font-family:'Heebo';text-decoration:none;
-  color:var(--dim);padding:.28rem .55rem;border-radius:99px;border:1px solid transparent;transition:.15s}
+.navbar a{flex:none;font-size:.8rem;font-weight:800;font-family:'Heebo';text-decoration:none;
+  color:var(--dim);padding:.34rem .8rem;border-radius:99px;border:1px solid transparent;transition:.15s}
 .navbar a:hover{color:var(--brand);border-color:var(--line)}
 .navbar a.on{background:var(--brand);color:#fff}
 :root[data-theme="dark"] .navbar a.on{color:#0f151c}
-.totop{position:fixed;bottom:1.1rem;inset-inline-start:1.1rem;z-index:60;width:2.6rem;height:2.6rem;
-  border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--brand);
-  font-size:1.1rem;cursor:pointer;display:none;box-shadow:0 3px 14px rgba(0,0,0,.14)}
-.totop.show{display:block}
 
 /* ── כותרת ── */
 .cover{margin:0 -1.6rem 2.5rem;padding:3.4rem 1.9rem 2.6rem;color:#fff;
@@ -161,64 +157,57 @@ a{color:var(--brand)}
 .vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:9px;margin-top:.6rem}
 
 
-/* ── בקרת גודל טקסט ──
-   משנה את font-size של השורש, וכל המסמך בנוי ב-rem — אז הכול גדל יחד. */
-.fontctl{display:inline-flex;align-items:center;gap:2px;flex:none;
-  position:sticky;left:0;background:var(--bg);padding-inline-end:.15rem}
-.rate-ctl{display:inline-flex;gap:2px;margin-inline-start:auto;flex:none;
-  position:sticky;inset-inline-end:auto;left:0;
-  border:1px solid var(--line);border-radius:9px;padding:1px;background:var(--panel)}
-.rate-ctl button{font:inherit;font-family:'Heebo';font-weight:800;font-size:.62rem;cursor:pointer;
-  border:0;background:none;color:var(--faint);padding:.16rem .38rem;border-radius:7px;
-  line-height:1;transition:.14s}
-.rate-ctl button:hover{color:var(--brand)}
+/* ── אשכול הבקרות ──
+   יושב בפינה ולא בסרגל העליון: שם הוא נאלץ להתחרות על רוחב עם קישורי
+   הבלוקים, ובחלון צר הוא נחתך. כאן יש לו מקום, והוא ליד היד. */
+.tools{position:fixed;bottom:1.1rem;inset-inline-start:1.1rem;z-index:60;
+  display:flex;flex-direction:column;gap:.4rem;align-items:flex-start}
+.tools-row{display:flex;align-items:center;gap:.15rem;padding:.22rem;
+  background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(8px);
+  border:1px solid var(--line);border-radius:11px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.tools-row .sep{width:1px;height:1rem;background:var(--line);margin:0 .18rem}
+.tools button{font:inherit;font-family:'Heebo';font-weight:800;cursor:pointer;border:0;
+  background:none;color:var(--faint);border-radius:8px;line-height:1;transition:.14s;
+  display:flex;align-items:center;justify-content:center}
+.tools button:hover:not(:disabled){color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.tools button:disabled{opacity:.3;cursor:default}
+.fontctl button{width:1.6rem;height:1.6rem}
+.fontctl .a-sm{font-size:.62rem} .fontctl .a-lg{font-size:.9rem}
+.fontctl .lvl{font-size:.6rem;color:var(--faint);min-width:2.2rem;text-align:center;
+  font-family:'Heebo';font-weight:700}
+.rate-ctl button{font-size:.63rem;padding:.24rem .42rem;height:1.6rem}
 .rate-ctl button.on{background:var(--brand);color:#fff}
 :root[data-theme="dark"] .rate-ctl button.on{color:#0f151c}
-@media (max-width:700px){ .rate-ctl{display:none} }
-.fontctl button{
-  font:inherit;font-family:'Heebo';font-weight:800;cursor:pointer;
-  border:1px solid var(--line);background:var(--panel);color:var(--dim);
-  width:1.65rem;height:1.65rem;border-radius:8px;line-height:1;padding:0;transition:.15s;
-  display:flex;align-items:center;justify-content:center}
-.fontctl button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
-.fontctl button:disabled{opacity:.35;cursor:default}
-.fontctl .a-sm{font-size:.62rem} .fontctl .a-lg{font-size:.86rem}
-.fontctl .lvl{font-size:.62rem;color:var(--faint);min-width:2.1rem;text-align:center;
-  font-family:'Heebo';font-weight:700}
+.tools .lbl{font-size:.58rem;font-family:'Heebo';font-weight:800;color:var(--faint);
+  padding:0 .3rem;letter-spacing:.03em}
+.totop{width:2.3rem;height:2.3rem;border-radius:50%;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(8px);
+  color:var(--brand);font-size:1rem;cursor:pointer;display:none;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);align-items:center;justify-content:center}
+.totop.show{display:flex}
+@media (max-width:640px){ .tools .rate-ctl,.tools .lbl{display:none} }
 
-/* ── תוכן עניינים צדדי ──
-   קבוע בצד השמאלי (הצד ה"ריק" ב-RTL), מסמן איפה נמצאים, ונעלם לגמרי
-   במסכים צרים — שם סרגל הבלוקים שלמעלה כבר עושה את העבודה. */
-.sidetoc{
-  position:fixed;top:4.6rem;inset-inline-end:auto;left:1.1rem;width:13.5rem;z-index:40;
-  max-height:calc(100vh - 6.5rem);display:flex;flex-direction:column;
-  background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(8px);
-  border:1px solid var(--line);border-radius:14px;overflow:hidden;
-  transition:transform .22s cubic-bezier(.4,0,.2,1),opacity .22s}
-.sidetoc-head{display:flex;align-items:center;gap:.4rem;padding:.5rem .7rem;
-  border-bottom:1px solid var(--line);flex:none}
-.sidetoc-head b{font-size:.72rem;font-family:'Heebo';color:var(--faint);letter-spacing:.05em;flex:1}
-.sidetoc-tog{font:inherit;cursor:pointer;border:0;background:none;color:var(--dim);
-  font-size:.85rem;padding:0 .2rem;line-height:1;transition:.15s}
-.sidetoc-tog:hover{color:var(--brand)}
-.sidetoc-body{overflow-y:auto;padding:.45rem 0 .6rem;scrollbar-width:thin}
-.sidetoc-body::-webkit-scrollbar{width:5px}
-.sidetoc-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
-.stoc-blk{font-size:.68rem;font-family:'Heebo';font-weight:800;color:var(--brand);
-  padding:.5rem .8rem .18rem;letter-spacing:.02em}
-.stoc-blk:first-child{padding-top:.1rem}
-.sidetoc a{display:block;font-size:.72rem;line-height:1.45;text-decoration:none;
-  color:var(--dim);padding:.24rem .8rem .24rem 1.1rem;position:relative;transition:.13s;
-  border-inline-start:2px solid transparent}
-.sidetoc a:hover{color:var(--ink);background:color-mix(in srgb,var(--brand) 7%,transparent)}
-.sidetoc a.on{color:var(--brand);font-weight:800;border-inline-start-color:var(--brand);
-  background:color-mix(in srgb,var(--brand) 10%,transparent)}
-/* מקופל — נשארת רק לשונית דקה שאפשר להחזיר ממנה */
-.sidetoc.folded{transform:translateX(calc(-100% + 2.1rem))}
-.sidetoc.folded .sidetoc-body{opacity:0;pointer-events:none}
-.sidetoc.folded .sidetoc-head b{opacity:0}
-@media (max-width:1180px){ .sidetoc{display:none} }
-@media print{ .sidetoc,.fontctl{display:none} }
+/* ── ריל הניווט ──
+   פסים אנכיים דקים, אחד לכל נושא, ושם הנושא מופיע בריחוף. אין פאנל ואין
+   קיפול — כלום לא מכסה את הטקסט, ולכן גם אין מה לפתוח ולסגור. */
+.rail{position:fixed;left:1.1rem;top:50%;transform:translateY(-50%);z-index:40;
+  display:flex;flex-direction:column;gap:.28rem;align-items:flex-start}
+.rail-grp{display:flex;flex-direction:column;gap:.22rem;padding:.28rem 0;position:relative}
+.rail-grp + .rail-grp{border-top:1px solid var(--line);margin-top:.1rem}
+.rail button{position:relative;border:0;background:none;padding:0;cursor:pointer;
+  display:flex;align-items:center;height:.7rem}
+.rail button i{display:block;width:1.05rem;height:2.5px;border-radius:2px;
+  background:var(--faint);opacity:.42;transition:all .17s}
+.rail button:hover i{background:var(--brand);opacity:1;width:1.5rem}
+.rail button.on i{background:var(--brand);opacity:1;width:1.9rem;height:3.5px}
+.rail button span{position:absolute;left:2.2rem;white-space:nowrap;opacity:0;
+  transform:translateX(-5px);transition:.16s;pointer-events:none;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:9px;padding:.24rem .65rem;font-family:'Heebo';font-size:.7rem;
+  font-weight:700;box-shadow:0 3px 14px rgba(0,0,0,.14)}
+.rail button:hover span,.rail button:focus-visible span{opacity:1;transform:translateX(0)}
+@media (max-width:1080px){ .rail{display:none} }
+@media print{ .rail,.tools{display:none} }
 
 .tts-hint{margin-top:1rem;padding:.75rem 1rem;border-radius:10px;font-size:.88rem;line-height:1.7;
   background:var(--warn-bg);border:1px solid var(--warn-ln);color:var(--ink)}
@@ -284,7 +273,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   .vhead{display:none}
 }
 @media print{
-  .navbar,.totop,.speak,.drill{display:none}
+  .navbar,.totop,.tools,.rail,.speak,.drill{display:none}
   body{max-width:none}
 }
 </style>
@@ -297,25 +286,22 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   <a href="#b-fluids">💧 נוזלים</a>
   <a href="#b-imaging">🩻 דימות</a>
   <a href="#last">⏱️ הרגע האחרון</a>
-  <div class="rate-ctl" role="group" aria-label="מהירות הקראה" title="מהירות ההקראה">
-    <button type="button" data-rate="0.85">0.85×</button>
-    <button type="button" data-rate="1">1×</button>
-    <button type="button" data-rate="1.25">1.25×</button>
+</nav>
+<nav class="rail" aria-label="ניווט לפי נושא"></nav>
+<div class="tools">
+  <div class="tools-row rate-ctl" role="group" aria-label="מהירות הקראה">
+    <span class="lbl">קריאה</span>
+    <button type="button" data-rate="0.85" title="הקראה איטית">0.85×</button>
+    <button type="button" data-rate="1" title="מהירות רגילה">1×</button>
+    <button type="button" data-rate="1.25" title="הקראה מהירה">1.25×</button>
   </div>
-  <div class="fontctl" role="group" aria-label="גודל טקסט">
+  <div class="tools-row fontctl" role="group" aria-label="גודל טקסט">
     <button class="a-sm" type="button" data-font="-" title="הקטנת הטקסט" aria-label="הקטנת הטקסט">א</button>
     <span class="lvl">100%</span>
     <button class="a-lg" type="button" data-font="+" title="הגדלת הטקסט" aria-label="הגדלת הטקסט">א</button>
   </div>
-</nav>
-<aside class="sidetoc" aria-label="תוכן עניינים">
-  <div class="sidetoc-head">
-    <b>תוכן העניינים</b>
-    <button class="sidetoc-tog" type="button" title="קיפול" aria-label="קיפול תוכן העניינים">⟨</button>
-  </div>
-  <div class="sidetoc-body"></div>
-</aside>
-<button class="totop" title="לראש העמוד" aria-label="לראש העמוד">↑</button>
+  <button class="totop" title="לראש העמוד" aria-label="לראש העמוד">↑</button>
+</div>
 
 <div class="cover">
   <div class="eyebrow">ארכיון השחזורים · פיסיקה לרפואנים ב׳ · פרופ׳ נצח פרביאש</div>
@@ -340,7 +326,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — אפשר להשהות ולהמשיך, לשנות מהירות, והפסקה שנקראת מסומנת בטקסט.</span></div>
   <div><b>🎬 סרטונים</b><span>לחיצה על סרטון פותחת אותו כאן, בתוך הדף. יש מסלול צפייה מסודר למטה — לא צריך לראות את כולם.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא יש קישור ישיר לשאלות התרגול שלו בארכיון. לקרוא ואז מיד לתרגל.</span></div>
-  <div><b>🧭 ניווט</b><span>תוכן עניינים בצד שמסמן איפה אתם (אפשר לקפל), סרגל בלוקים למעלה, ושליטה בגודל הטקסט.</span></div>
+  <div><b>🧭 ניווט</b><span>פסי הניווט בצד — ריחוף מראה את שם הנושא, לחיצה קופצת אליו. בפינה: מהירות הקראה וגודל טקסט.</span></div>
 </div>
 <div class="tts-hint" hidden>
 <b>🎧 הקול בהקראה נשמע דחוס?</b> במכשיר שלכם מותקנת כנראה רק הגרסה הבסיסית של הקול העברי.
@@ -1927,42 +1913,38 @@ document.querySelectorAll('.vq').forEach(function(q){
   apply();
 })();
 
-/* ── ניווט: סרגל עליון, תוכן עניינים צדדי, וכפתור חזרה לראש ── */
+/* ── ניווט ──
+   ריל של פסים דקים בצד, אחד לכל נושא, שנבנה מה-DOM (לא נכתב ידנית — כך הוא
+   לא יכול להיפרד מהמסמך). בלי פאנל ובלי קיפול: אין מה לכסות ואין מה לשבור. */
 (function(){
   var links = [].slice.call(document.querySelectorAll('.navbar a'));
   var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
   var top = document.querySelector('.totop');
   top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
 
-  /* התוכן נבנה מה-DOM ולא נכתב ידנית — כך הוא לא יכול להיפרד מהמסמך. */
-  var body = document.querySelector('.sidetoc-body');
-  var stocLinks = [], stocUnits = [];
+  var rail = document.querySelector('.rail');
+  var segs = [], units = [];
   document.querySelectorAll('.block').forEach(function(blk){
-    var units = blk.querySelectorAll('.unit');
-    if (!units.length) return;
-    var h = document.createElement('div');
-    h.className = 'stoc-blk';
-    h.textContent = blk.querySelector('h2').textContent.trim();
-    body.append(h);
-    units.forEach(function(u){
-      var a = document.createElement('a');
-      a.href = '#' + u.id;
-      /* בלי כפתורי ההקראה שיושבים בתוך ה-h3 */
-      a.textContent = u.querySelector('h3').childNodes[0].textContent.trim();
-      body.append(a);
-      stocLinks.push(a); stocUnits.push(u);
+    var us = blk.querySelectorAll('.unit');
+    if (!us.length) return;
+    var grp = document.createElement('div');
+    grp.className = 'rail-grp';
+    us.forEach(function(u){
+      var b = document.createElement('button');
+      b.type = 'button';
+      var bar = document.createElement('i');
+      var lbl = document.createElement('span');
+      /* childNodes[0] — הכותרת בלי כפתורי ההקראה שיושבים בתוך ה-h3 */
+      lbl.textContent = u.querySelector('h3').childNodes[0].textContent.trim();
+      b.title = lbl.textContent;
+      b.append(bar, lbl);
+      b.addEventListener('click', function(){
+        u.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+      grp.append(b);
+      segs.push(b); units.push(u);
     });
-  });
-
-  var toc = document.querySelector('.sidetoc');
-  var tog = toc.querySelector('.sidetoc-tog');
-  var FKEY = 'shichzurim.physToc';
-  try { if (localStorage.getItem(FKEY) === '1') { toc.classList.add('folded'); tog.textContent = '⟩'; } } catch (e) {}
-  tog.addEventListener('click', function(){
-    var folded = toc.classList.toggle('folded');
-    tog.textContent = folded ? '⟩' : '⟨';
-    tog.title = folded ? 'פתיחה' : 'קיפול';
-    try { localStorage.setItem(FKEY, folded ? '1' : '0'); } catch (e) {}
+    rail.append(grp);
   });
 
   var lastOn = -1;
@@ -1973,24 +1955,25 @@ document.querySelectorAll('.vq').forEach(function(q){
     links.forEach(function(a,i){ a.classList.toggle('on', i === on); });
 
     var uOn = -1;
-    stocUnits.forEach(function(u,i){ if (u.offsetTop <= y + 40) uOn = i; });
+    units.forEach(function(u,i){ if (u.offsetTop <= y + 40) uOn = i; });
     if (uOn !== lastOn) {
-      stocLinks.forEach(function(a,i){ a.classList.toggle('on', i === uOn); });
-      /* גלילת התוכן עצמו, כדי שהנושא הפעיל לא ייצא מהמסגרת */
-      if (uOn >= 0 && !toc.classList.contains('folded')) {
-        var a = stocLinks[uOn], box = body.getBoundingClientRect(), r = a.getBoundingClientRect();
-        if (r.top < box.top + 8 || r.bottom > box.bottom - 8) {
-          body.scrollTop += (r.top - box.top) - box.height / 2 + r.height;
-        }
-      }
+      segs.forEach(function(b,i){ b.classList.toggle('on', i === uOn); });
       lastOn = uOn;
     }
   }
+  /* ויסות ל-rAF, אבל עם שחרור הדגל *לפני* הציור: אחרת כשל אחד ב-paint
+     משאיר את הדגל דלוק והניווט מושתק עד רענון. ה-try הוא מאותה סיבה. */
   var tick = false;
-  window.addEventListener('scroll', function(){
-    if (tick) return; tick = true;
-    requestAnimationFrame(function(){ paint(); tick = false; });
-  }, {passive:true});
+  function onScroll(){
+    if (tick) return;
+    tick = true;
+    requestAnimationFrame(function(){
+      tick = false;
+      try { paint(); } catch (e) {}
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
   paint();
 })();
 </script>
