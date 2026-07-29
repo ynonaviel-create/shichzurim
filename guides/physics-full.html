@@ -1747,11 +1747,13 @@ document.querySelectorAll('.vid').forEach(function(v){
 /* ── חשיפת תשובה בבדיקת ההבנה ──
    stopPropagation כי הכפתור יושב בתוך כרטיס הסרטון, שלחיצה עליו סוגרת אותו. */
 document.querySelectorAll('.vq-a').forEach(function(b){
+  b.title = 'חשיפת התשובה — נסו לענות בעצמכם קודם';
   b.addEventListener('click', function(e){
     e.stopPropagation();
     var box = b.nextElementSibling;
     var open = box.classList.toggle('show');
     b.textContent = open ? 'הסתר' : 'הצג תשובה';
+    b.title = open ? 'הסתרת התשובה בחזרה' : 'חשיפת התשובה — נסו לענות בעצמכם קודם';
   });
 });
 /* לחיצה על גוף השאלה לא אמורה לסגור את הסרטון. */
@@ -1860,6 +1862,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var play = wrap.querySelector('.speak');
     var stopBtn = wrap.querySelector('.speak-stop');
     var unit = wrap.closest('.unit');
+    play.title = 'הקראת הפרק בקול — לחיצה נוספת משהה וממשיכה';
     stopBtn.hidden = true;
 
     play.addEventListener('click', function(e){

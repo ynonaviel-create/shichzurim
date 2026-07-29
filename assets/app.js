@@ -99,8 +99,9 @@ function stopSpeech() { try { if (speechOK()) speechSynthesis.cancel(); } catch 
    מחלקה כן נוצרת כ-button (ראו s.toggles) — הפער הזה הוא הסיבה שזה נשמט.
    אין כאן aria-pressed בכוונה: מצב ה-on מתחלף דרך classList בשישה מקומות
    שונים, ותכונה שלא מסונכרנת גרועה מתכונה חסרה — היא משקרת לקורא המסך. */
-const chipEl = (cls, txt) => {
+const chipEl = (cls, txt, tip) => {
   const c = el('div', cls, txt);
+  if (tip) c.title = tip;
   c.setAttribute('role', 'button');
   c.tabIndex = 0;
   c.addEventListener('keydown', (e) => {
@@ -1189,6 +1190,7 @@ function renderCourse(courseId) {
   const nav = el('div', 'verbnav');
   const addChip = (id, label) => {
     const ch = el('button', 'verb-chip', label);
+    ch.title = 'גלילה מהירה אל הסקשן הזה בעמוד';
     ch.onclick = () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     nav.append(ch);
   };
@@ -1204,10 +1206,12 @@ function renderCourse(courseId) {
     'בחרו נושאים, כמה שאלות, ומה להציג — חדשות, מה שטעיתם, או הכול. או פשוט התחילו לתרגל מעורב.'));
   const lRow = el('div', 'btn-row');
   const pr = el('a', 'btn primary', '🏋️ בחרו ותרגלו');
+  pr.title = 'בחירת נושאים, כמות ומה להציג — ותרגול מותאם אישית';
   pr.dataset.tour = 'practice';
   pr.href = '#/practice/' + courseId;
   lRow.append(pr);
   const rv = el('a', 'btn', '🎯 הטעויות שלי');
+  rv.title = 'סבב חוזר על כל השאלות שטעית בהן';
   rv.dataset.tour = 'review';
   rv.href = '#/review/' + courseId;
   lRow.append(rv);
@@ -1223,6 +1227,7 @@ function renderCourse(courseId) {
      הדף היה מציג מצב ריק, וכפתור שמוביל לכלום גרוע מכפתור שאינו. */
   if (guideOf(courseId)) {
     const tr = el('a', 'btn', '🪤 המלכודות שלי');
+    tr.title = 'המלכודות שנפלת בהן בתרגול — מה הטעות, מה הנכון, ואיפה ללמוד';
     tr.href = '#/traps/' + courseId;
     lRow.append(tr);
   }
@@ -1231,12 +1236,14 @@ function renderCourse(courseId) {
   const nd = nextDate(c);
   if (nd && nd.ts - Date.now() < 8 * MS.day) {
     const tn = el('a', 'btn', '🌙 הלילה לפני');
+    tn.title = 'מסלול חזרה מרוכז לערב שלפני המבחן — לפי הזמן שנשאר לך';
     tn.href = '#/tonight/' + courseId;
     lRow.append(tn);
   }
   /* המסומנות — רק אם יש מה להראות. */
   if (Object.keys(flags.read()).length) {
     const fg = el('a', 'btn', '🔖 מה שסימנתי');
+    fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
     fg.href = '#/flagged/' + courseId;
     lRow.append(fg);
   }
@@ -1596,6 +1603,7 @@ async function renderCards(id) {
   const cnt = el('span', 'cards-count');
   bar.append(cnt);
   const reset = el('button', 'btn-ghost', 'איפוס הסימונים');
+  reset.title = 'מחיקת סימוני „נקרא” מכל הכרטיסים';
   reset.onclick = () => { cardsRead.clear(deck.id); paint(); };
   bar.append(reset);
   view.append(bar);
@@ -1619,6 +1627,7 @@ async function renderCards(id) {
     top.append(el('span', 'lcard-num', `${i + 1}`));
     top.append(el('span', 'lcard-topic', card.topic));
     const chk = el('button', 'lcard-chk' + (done ? ' on' : ''), done ? '✓ נקרא' : 'סמן כנקרא');
+    chk.title = done ? 'ביטול סימון הקריאה' : 'סימון הכרטיס כנקרא — מתעדכן במונה ההתקדמות';
     chk.onclick = () => { cardsRead.set(deck.id, i, !cardsRead.is(deck.id, i)); paint(); };
     top.append(chk);
     box.append(top);
@@ -1717,6 +1726,7 @@ async function renderShinun(courseId, topicFilter) {
       'שלושה מצבים: 🎴 היפוך (ידעתי/לא), 📋 כסה־וגלה לחזרה מהירה, ו-📝 מבחן קצר.'));
     intro.append(txt);
     const close = el('button', 'btn ghost', 'הבנתי, בואו נתחיל');
+    close.title = 'סגירת ההסבר — לא יופיע שוב';
     close.onclick = () => { localStorage.setItem(INTRO_KEY, '1'); intro.remove(); };
     const acts = el('div', 'btn-row'); acts.append(close); intro.append(acts);
     view.append(intro);
@@ -1733,11 +1743,15 @@ async function renderShinun(courseId, topicFilter) {
   /* מצב השמע מוצג רק אם לדפדפן יש בכלל מנוע הקראה. את *קיום הקול העברי*
      אי אפשר לבדוק כאן — רשימת הקולות נטענת אסינכרונית ולעיתים ריקה ברינדור
      הראשון — ולכן זה נבדק בתוך המצב עצמו. */
-  const MODES = [['flip', '🎴 היפוך'], ['list', '📋 כסה־וגלה'], ['quiz', '📝 מבחן']];
-  if (speechOK()) MODES.push(['audio', '🎧 שמע']);
+  const MODES = [
+    ['flip', '🎴 היפוך', 'כרטיסי היפוך — ידעתי/עוד לא, עם חזרה חכמה על מה שקשה'],
+    ['list', '📋 כסה־וגלה', 'רשימה לחזרה מהירה — לחיצה על שורה חושפת את התשובה'],
+    ['quiz', '📝 מבחן', 'מבחן אמריקאי קצר עם מסיחים דומים מאותה משפחה']];
+  if (speechOK()) MODES.push(['audio', '🎧 שמע', 'הקראה רציפה של הכרטיסים — לשינון בהאזנה']);
   const tabBtns = {};
-  MODES.forEach(([m, label]) => {
+  MODES.forEach(([m, label, tip]) => {
     const b = el('button', 'shn-tab', label); b.type = 'button';
+    b.title = tip;
     b.addEventListener('click', () => { state.mode = m; sync(); });
     tabBtns[m] = b; tabs.append(b);
   });
@@ -1747,6 +1761,7 @@ async function renderShinun(courseId, topicFilter) {
   const filters = el('div', 'shn-filters');
   const mkChip = (label, active, on) => {
     const b = el('button', 'shn-chip' + (active ? ' on' : ''), label); b.type = 'button';
+    b.title = 'סינון — הצגת הפריטים של הקבוצה הזאת בלבד (המספר: כמה כבר נשלטו)';
     b.addEventListener('click', on); return b;
   };
   /* מד שליטה: כמה מכל קבוצה כבר נשלטו (box≥3). מוצג על הצ׳יפ, ו-✓ כשהכול נשלט. */
@@ -1833,8 +1848,10 @@ async function renderShinun(courseId, topicFilter) {
     const row = el('div', 'btn-row');
     const playBtn = el('button', 'btn primary', '▶ הפעל');
     playBtn.type = 'button';
+    playBtn.title = 'הפעלה או השהיה של ההקראה הרציפה';
     const stopBtn = el('button', 'btn ghost', '⏹ עצור');
     stopBtn.type = 'button';
+    stopBtn.title = 'עצירה מלאה וחזרה לתחילת הרשימה';
     stopBtn.disabled = true;
     row.append(playBtn, stopBtn);
 
@@ -1900,10 +1917,13 @@ async function renderShinun(courseId, topicFilter) {
     /* כפתורי ההערכה מתחת לקלף — קליק עליהם מקדם, קליק על הקלף מהפך. */
     const judge = el('div', 'shn-judge');
     const no = el('button', 'btn shn-no', '✗ עוד לא'); no.type = 'button';
+    no.title = 'עוד לא זוכר — הכרטיס יחזור בקרוב (או חץ שמאלה במקלדת)';
     const yes = el('button', 'btn shn-yes', '✓ ידעתי'); yes.type = 'button';
+    yes.title = 'ידעתי — הכרטיס יתקדם קופסה ויחזור מאוחר יותר (או חץ ימינה)';
     judge.append(no, yes); body.append(judge);
     const acts = el('div', 'btn-row'); body.append(acts);
     const resetB = el('button', 'btn ghost', '↻ אפס התקדמות'); resetB.type = 'button';
+    resetB.title = 'איפוס כל ההתקדמות בשינון — כל הכרטיסים חוזרים להתחלה';
 
     /* התור: פריטים חדשים או ש„הגיע זמנם” לחזרה (SRS). מה שנשלט ולא בשל — מחוץ
        לסבב, אלא אם ביקשת „חזרה על הכל”. סדר: חדשים קודם, ואז תיבה נמוכה קודם. */
@@ -1969,6 +1989,7 @@ async function renderShinun(courseId, topicFilter) {
       acts.innerHTML = '';
       if (sess.wrongItems.length) {
         const again = el('button', 'btn primary', '↻ עוד סבב על החלשים'); again.type = 'button';
+        again.title = 'סבב חוזר רק על הכרטיסים שסימנת „עוד לא”';
         again.onclick = () => {
           const weak = sess.wrongItems.slice();
           sess = { right: 0, wrong: 0, wrongItems: [] };
@@ -1978,6 +1999,7 @@ async function renderShinun(courseId, topicFilter) {
         acts.append(again);
       }
       const allBtn = el('button', 'btn', '🔁 חזרה על הכל'); allBtn.type = 'button';
+      allBtn.title = 'סבב על כל הכרטיסים — כולל אלה שכבר נשלטו';
       allBtn.onclick = () => { reviewAll = true; sess = { right: 0, wrong: 0, wrongItems: [] }; restart(); };
       acts.append(allBtn, resetB);
     }
@@ -2029,6 +2051,7 @@ async function renderShinun(courseId, topicFilter) {
     if (!pool.length) { body.append(emptyState('🤷', 'אין פריטים', 'נסה מסנן אחר.')); return; }
     const bar = el('div', 'shn-listbar');
     const revealAll = el('button', 'btn btn-sm', '👁️ גלה הכל'); revealAll.type = 'button';
+    revealAll.title = 'חשיפה או הסתרה של כל התשובות בבת אחת';
     let open = false;
     revealAll.addEventListener('click', () => {
       open = !open;
@@ -2069,6 +2092,7 @@ async function renderShinun(courseId, topicFilter) {
     const qbox = el('div', 'shn-quiz'); body.append(qbox);
     const acts = el('div', 'btn-row');
     const next = el('button', 'btn primary', 'הבא ⟵'); next.type = 'button';
+    next.title = 'שאלה חדשה מהמאגר';
     acts.append(next); body.append(acts);
     next.addEventListener('click', draw);
 
@@ -2218,6 +2242,7 @@ async function renderCase(id, caseId = null) {
 
     if (answered) {
       const rst = el('button', 'btn-ghost case-reset', 'התחל את המקרה מחדש');
+      rst.title = 'מחיקת התשובות והפסילות במקרה הזה והתחלה מההתחלה';
       rst.onclick = () => {
         answers = cs.stages.map(() => null);
         elim.clear();
@@ -2253,6 +2278,7 @@ async function renderCase(id, caseId = null) {
       main.append(w);
       if (cs.topic) {
         const pr = el('a', 'btn', `🏋️ תרגול שאלות ב${cs.topic}`);
+    pr.title = 'שאלות אמת מהמאגר על הנושא של המקרה';
         pr.href = '#/practice/' + deck.course + '/' + encodeURIComponent(cs.topic);
         main.append(pr);
       }
@@ -2480,10 +2506,12 @@ function playQuestions(cfg) {
   /* מופיע רק כשסיימת. אין גלילה אוטומטית לתוצאה, אז זה מה שמאפשר להגיע
      אליה בלחיצה — במקום להיחטף אליה. */
   const toResult = el('button', 'btn primary', 'לתוצאה ↓');
+  toResult.title = 'גלילה אל הציון וסיכום הסבב';
   toResult.style.display = 'none';
   bar.append(toResult);
 
   const resetBtn = el('button', 'btn ghost', 'איפוס');
+  resetBtn.title = 'מחיקת התשובות של הסבב הזה והתחלה מחדש';
   bar.append(resetBtn);
 
   /* דף הנוסחאות זמין כאן *לפני* התשובה, ובכוונה: במבחן הוא על השולחן. תרגול
@@ -2503,6 +2531,7 @@ function playQuestions(cfg) {
   examToggle.dataset.tour = 'exammode';   // עוגן לסיור
   const revealBtn = el('button', 'btn ghost reveal-btn', '👁️ הצג תשובות');
   revealBtn.type = 'button';
+  revealBtn.title = 'חשיפת התשובות וההסברים עכשיו, בלי לחכות לסוף המבחן';
   revealBtn.style.display = 'none';
   if (cfg.allowExam) {
     examToggle.onclick = () => setExamMode(!examMode);
@@ -2641,9 +2670,11 @@ function playQuestions(cfg) {
     const row = el('div', 'btn-row');
     row.style.justifyContent = 'center';
     const again = el('button', 'btn primary', 'סבב נוסף');
+    again.title = 'איפוס והתחלת סבב חדש על אותן שאלות';
     again.onclick = doReset;
     row.append(again);
     const bk = el('a', 'btn', 'חזרה ל' + back.text);
+    bk.title = 'יציאה מהתרגול — ההתקדמות שלך נשמרת';
     bk.href = back.href;
     row.append(bk);
     box.append(row);
@@ -2874,6 +2905,7 @@ function playQuestions(cfg) {
     const paintFns = [];
     const clearEx = el('button', 'elim-reset');
     clearEx.type = 'button';
+    clearEx.title = 'החזרת כל המסיחים שפסלת בשאלה הזאת';
     clearEx.textContent = 'ביטול כל הפסילות';
     clearEx.onclick = () => { exSet.clear(); paintFns.forEach((f) => f()); };
     const syncClear = () => { clearEx.hidden = exSet.size === 0 || answers[qi] != null; };
@@ -3142,6 +3174,7 @@ function openLightbox(src) {
 
   const btn = el('button', 'lb-close', '✕');
   btn.type = 'button';
+  btn.title = 'סגירה (או Esc)';
   btn.setAttribute('aria-label', 'סגירה');
   btn.onclick = close;
 
@@ -3405,6 +3438,7 @@ function sheetNode(courseId, focusKey = null) {
   s.sections.forEach((sec) => {
     const b = el('button', 'sheet-chip', sec.label);
     b.type = 'button';
+    b.title = 'הדגשת הסעיף על הדף וגלילה אליו';
     b.dataset.k = sec.k;
     b.onclick = () => focus(sec.k);
     idx.append(b);
@@ -3484,6 +3518,7 @@ function openSheet(courseId, focusKey = null) {
 
   const btn = el('button', 'lb-close', '✕');
   btn.type = 'button';
+  btn.title = 'סגירה (או Esc)';
   btn.setAttribute('aria-label', 'סגירה');
   btn.onclick = close;
 
@@ -3509,6 +3544,7 @@ function sheetButton(courseId, sec, label) {
   if (!sec) return null;
   const b = el('button', 'btn sheet-btn', label || `📄 בדף הנוסחאות · ${sec.label}`);
   b.type = 'button';
+  b.title = 'פתיחת דף הנוסחאות של המבחן, ממוקד על הסעיף הזה';
   b.onclick = () => openSheet(courseId, sec.k);
   return b;
 }
@@ -3636,15 +3672,15 @@ async function renderPractice(courseId, seedTopic = null) {
   modeField.append(el('label', null, 'מה לתרגל'));
   const modeChips = el('div', 'chips');
   const MODES = [
-    { id: 'new',   label: '✨ שאלות חדשות' },
-    { id: 'wrong', label: '🎯 רק מה שטעיתי' },
+    { id: 'new',   label: '✨ שאלות חדשות', tip: 'רק שאלות שעוד לא ראית — להרחבת הכיסוי' },
+    { id: 'wrong', label: '🎯 רק מה שטעיתי', tip: 'רק שאלות שהמענה האחרון שלך בהן היה שגוי' },
     /* התשלום של כל מנגנון ההיסטוריה: שאלות שידעת, ושהגיע הזמן לוודא שאתה
        עדיין יודע. כמצב נוסף ולא כברירת מחדל — מי שלא נוגע בו לא מרגיש שינוי. */
-    { id: 'due',   label: '🔁 בשל לחזרה' },
-    { id: 'all',   label: '📚 הכול, כולל מה שראיתי' },
+    { id: 'due',   label: '🔁 בשל לחזרה', tip: 'שאלות שידעת בעבר והגיע הזמן לוודא שאתה עדיין יודע' },
+    { id: 'all',   label: '📚 הכול, כולל מה שראיתי', tip: 'כל השאלות שעוברות את המסננים, בלי התחשבות בהיסטוריה' },
   ];
   MODES.forEach((m) => {
-    const ch = chipEl('chip' + (m.id === mode ? ' on' : ''), m.label);
+    const ch = chipEl('chip' + (m.id === mode ? ' on' : ''), m.label, m.tip);
     ch.onclick = () => {
       mode = m.id;
       modeChips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -3699,7 +3735,7 @@ async function renderPractice(courseId, seedTopic = null) {
     partsField.append(el('label', null, 'חלק'));
     const chips = el('div', 'chips');
     allParts.forEach((p) => {
-      const ch = chipEl('chip on', `${c.name} ${p}`);
+      const ch = chipEl('chip on', `${c.name} ${p}`, 'הכללת או הסרת החלק הזה מהתרגול');
       ch.onclick = () => {
         if (selParts.has(p) && selParts.size > 1) { selParts.delete(p); ch.classList.remove('on'); }
         else if (!selParts.has(p)) { selParts.add(p); ch.classList.add('on'); }
@@ -3736,12 +3772,14 @@ async function renderPractice(courseId, seedTopic = null) {
     topicsField.style.display = '';
     topicsLabel.textContent = `נושאים ${selTopics.size ? `(${selTopics.size} נבחרו)` : '(הכול)'}`;
 
-    const all = chipEl('chip' + (selTopics.size === 0 ? ' on' : ''), 'כל הנושאים');
+    const all = chipEl('chip' + (selTopics.size === 0 ? ' on' : ''), 'כל הנושאים',
+      'ביטול סינון הנושאים — שאלות מכל הנושאים');
     all.onclick = () => { selTopics.clear(); drawTopics(); update(); };
     topicChips.append(all);
 
     names.forEach((t) => {
-      const ch = chipEl('chip' + (selTopics.has(t) ? ' on' : ''), `${t} · ${counts[t]}`);
+      const ch = chipEl('chip' + (selTopics.has(t) ? ' on' : ''), `${t} · ${counts[t]}`,
+        'הוספת או הסרת הנושא מהתרגול — המספר: כמה שאלות תואמות עכשיו');
       ch.onclick = () => {
         if (selTopics.has(t)) selTopics.delete(t); else selTopics.add(t);
         drawTopics();
@@ -3765,7 +3803,8 @@ async function renderPractice(courseId, seedTopic = null) {
     ].forEach(({ n, label }) => {
       const have = repeatCounts(n);
       if (n > 1 && !have) return;                       // אל תציע מסנן שמחזיר אפס
-      const ch = chipEl('chip' + (n === minRepeat ? ' on' : ''), n === 1 ? label : `${label} · ${have}`);
+      const ch = chipEl('chip' + (n === minRepeat ? ' on' : ''), n === 1 ? label : `${label} · ${have}`,
+        n === 1 ? 'בלי סינון לפי חזרות' : 'רק שאלות שחזרו במבחנים לפחות ' + n + ' פעמים — סימן שהן אהובות על המרצים');
       ch.onclick = () => {
         minRepeat = n;
         rc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -3786,7 +3825,7 @@ async function renderPractice(courseId, seedTopic = null) {
     const imgField = el('div', 'field');
     imgField.append(el('label', null, 'גרפים'));
     const ic = el('div', 'chips');
-    const ch = chipEl('chip', '🖼️ רק שאלות עם גרף');
+    const ch = chipEl('chip', '🖼️ רק שאלות עם גרף', 'סינון לשאלות עם גרף או תמונה בלבד — ליבת המבחן');
     ch.onclick = () => {
       imagesOnly = !imagesOnly;
       ch.classList.toggle('on', imagesOnly);
@@ -3804,7 +3843,8 @@ async function renderPractice(courseId, seedTopic = null) {
   countField.append(el('label', null, 'כמה שאלות'));
   const cc = el('div', 'chips');
   [10, 20, 30, 50, 0].forEach((n) => {
-    const ch = chipEl('chip' + (n === 20 ? ' on' : ''), n === 0 ? 'הכול' : String(n));
+    const ch = chipEl('chip' + (n === 20 ? ' on' : ''), n === 0 ? 'הכול' : String(n),
+      n === 0 ? 'כל השאלות שעוברות את המסננים — בלי הגבלת כמות' : 'סבב של עד ' + n + ' שאלות');
     ch.onclick = () => {
       count = n;
       cc.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -3821,6 +3861,7 @@ async function renderPractice(courseId, seedTopic = null) {
   form.append(info);
 
   const go = el('button', 'btn primary', 'התחל תרגול');
+  go.title = 'התחלת סבב לפי הנושאים, הכמות והמקור שבחרת';
   form.append(go);
   view.append(form);
 
@@ -3828,6 +3869,7 @@ async function renderPractice(courseId, seedTopic = null) {
   const resetRow = el('p');
   resetRow.style.cssText = 'text-align:center; font-size:13px; color:var(--dim);';
   const resetLink = el('button', 'btn ghost', 'איפוס — התחל את המקצוע מחדש');
+  resetLink.title = 'איפוס סימון „נצפתה” לכל שאלות המקצוע — הציונים במבחנים נשארים';
   resetLink.style.fontSize = '13px';
   resetLink.onclick = () => {
     if (!confirm(`לאפס את הסימון של כל השאלות שראית ב${c.name}?\nהציונים במבחנים עצמם יישארו.`)) return;
@@ -4049,9 +4091,11 @@ async function renderSimExam(courseId) {
   const row = el('div', 'btn-row');
   if (unfinished) {
     const cont = el('button', 'btn primary', '⏵ המשך את הסימולציה שהתחלת');
+    cont.title = 'המשך בדיוק מאיפה שעצרת — השאלות והשעון נשמרו';
     cont.onclick = () => start(savedQs, meta.startedAt);
     row.append(cont);
     const fresh = el('button', 'btn ghost', '🎲 סימולציה חדשה (מוחק את הנוכחית)');
+    fresh.title = 'הגרלת סט שאלות חדש — התשובות מהסימולציה הנוכחית יימחקו';
     fresh.onclick = () => {
       if (!confirm('להתחיל סימולציה חדשה? התשובות מהסימולציה הנוכחית יימחקו.')) return;
       store.reset(KEY);
@@ -4062,6 +4106,7 @@ async function renderSimExam(courseId) {
     row.append(fresh);
   } else {
     const go = el('button', 'btn primary', '▶ התחל סימולציה');
+    go.title = 'הגרלת שאלות והפעלת השעון — אפשר לצאת ולחזור בלי לאבד כלום';
     go.onclick = () => {
       store.reset(KEY);
       const qs = sample();
@@ -4417,7 +4462,8 @@ async function renderTonight(courseId) {
   let minutes = 60;
   const chips = el('div', 'chips');
   [[30, '30 דקות'], [60, 'שעה'], [90, 'שעה וחצי'], [150, 'שעתיים וחצי']].forEach(([mn, lbl]) => {
-    const ch = chipEl('chip' + (mn === minutes ? ' on' : ''), lbl);
+    const ch = chipEl('chip' + (mn === minutes ? ' on' : ''), lbl,
+      'כמה זמן יש לך הערב — המסלול ייבנה בהתאם');
     ch.onclick = () => {
       minutes = mn;
       chips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -4434,6 +4480,7 @@ async function renderTonight(courseId) {
 
   const row = el('div', 'btn-row');
   const go = el('button', 'btn primary', '🌙 התחל את המסלול');
+  go.title = 'בניית מסלול חזרה מותאם לזמן שבחרת — והתחלה';
   row.append(go);
   view.append(row);
 
@@ -4646,9 +4693,11 @@ async function renderTraps(courseId) {
     card.append(el('div', 'trapcard-point', r.p.point));
     const acts = el('div', 'trapcard-acts');
     const gA = el('a', 'btn ghost', '📚 איפה ללמוד');
+    gA.title = 'פתיחת הנושא במפת החומרים — סרטונים, סיכום ומקורות';
     gA.href = `#/guide/${courseId}/${encodeURIComponent(r.u.topic)}`;
     acts.append(gA);
     const pA = el('a', 'btn ghost', '🏋️ תרגל את הנושא');
+    pA.title = 'תרגול שאלות אמת בנושא הזה בלבד';
     pA.href = `#/practice/${courseId}/${encodeURIComponent(r.u.topic)}`;
     acts.append(pA);
     card.append(acts);
@@ -4678,6 +4727,7 @@ function renderAbout() {
   tt.append(el('span', null, 'סיור קצר שמצביע על כל דבר במקום שבו הוא נמצא.'));
   tourCta.append(tt);
   const tb = el('button', 'btn primary', 'התחל סיור');
+  tb.title = 'סיור מודרך קצר שמצביע על כל דבר במקום שבו הוא נמצא';
   tb.onclick = () => startTour();
   tourCta.append(tb);
   view.append(tourCta);
@@ -4745,6 +4795,7 @@ function renderAbout() {
   const row = el('div', 'btn-row');
   row.style.justifyContent = 'center';
   const go = el('a', 'btn primary', 'למקצועות');
+  go.title = 'מעבר למסך הבית — בחירת מקצוע';
   go.href = '#/';
   row.append(go);
   cta.append(row);
@@ -4780,6 +4831,7 @@ function shinunHomePush() {
   b.append(txt);
   const x = el('button', 'intro-x', '✕');
   x.type = 'button';
+  x.title = 'סגירה — ההודעה לא תופיע שוב';
   x.setAttribute('aria-label', 'סגירה');
   x.onclick = (e) => { e.preventDefault(); e.stopPropagation(); try { localStorage.setItem('shichzurim.shinunHomePush', '1'); } catch {} b.remove(); };
   b.append(x);
@@ -4846,14 +4898,17 @@ function whatsNewBanner() {
 
   const acts = el('div', 'btn-row');
   const go = el('a', 'btn primary', '📖 לפתוח את הסיכום');
+  go.title = 'הסיכום המלא לפיזיקה — נפתח בלשונית חדשה';
   go.href = 'guides/physics-full.html';
   go.target = '_blank';
   go.rel = 'noopener';
   acts.append(go);
   const sim = el('a', 'btn', '🎓 לסימולציה');
+  sim.title = 'סימולציית מבחן מלאה — 50 שאלות בשלוש שעות, בתנאי אמת';
   sim.href = '#/simexam/physics';
   acts.append(sim);
   const ok = el('button', 'btn ghost', 'הבנתי, תודה 👍');
+  ok.title = 'סגירת ההודעה — לא תופיע שוב';
   ok.onclick = () => {
     try { localStorage.setItem(ANNOUNCE_V7_KEY, '1'); } catch {}
     b.remove();
@@ -4874,9 +4929,11 @@ function introBanner() {
 
   const acts = el('div', 'btn-row');
   const read = el('button', 'btn primary', 'קחו אותי לסיור');
+  read.title = 'סיור מודרך של דקה על כל מה שיש באתר';
   read.onclick = () => startTour();
   acts.append(read);
   const skip = el('button', 'btn ghost', 'תודה, אני מסתדר');
+  skip.title = 'סגירה — אפשר לחזור לסיור בכל רגע מעמוד „אודות”';
   skip.onclick = () => { localStorage.setItem(SEEN_KEY, '1'); b.remove(); };
   acts.append(skip);
   b.append(acts);
@@ -4890,6 +4947,7 @@ function introBanner() {
 /* כפתור G של גוגל — הצבעים הרשמיים, על כפתור לבן. */
 function googleLoginBtn(label) {
   const btn = el('button', 'btn btn-google');
+  btn.title = 'התחברות עם חשבון Google — ההתקדמות נשמרת וממשיכה מכל מכשיר';
   btn.innerHTML =
     '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">' +
     '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
@@ -4958,6 +5016,7 @@ function renderAccount() {
   nameInp.value = C.user.firstName || '';
   nameInp.maxLength = 40;
   const nameSave = el('button', 'btn ghost', 'שמור');
+  nameSave.title = 'שמירת השם — ככה האתר יפנה אליך';
   const saveName = async () => {
     const v = nameInp.value.trim();
     if (!v) return;
@@ -4985,6 +5044,7 @@ function renderAccount() {
 
   const acts = el('div', 'btn-row');
   const exp = el('button', 'btn ghost', 'העתקת גיבוי התקדמות');
+  exp.title = 'העתקת גיבוי מלא של כל ההתקדמות ללוח — לשמירה בצד';
   exp.onclick = async () => {
     const dump = {};
     /* כל מפתח שנושא התקדמות אמיתית. השינון נשכח כאן כשהוא נוסף, והגיבוי
@@ -4998,6 +5058,7 @@ function renderAccount() {
   };
   acts.append(exp);
   const out = el('button', 'btn ghost logout', 'התנתקות');
+  out.title = 'התנתקות מהחשבון — ההתקדמות לא נמחקת';
   out.onclick = async () => {
     out.disabled = true;
     await C.logout();
@@ -5016,6 +5077,7 @@ function renderAccount() {
   /* כניסה ללוח הבקרה — מוצג רק למנהל, ולא בתפריט הציבורי. */
   if (C.isAdmin) {
     const a = el('a', 'btn ghost admin-link', '📊 לוח הבקרה');
+    a.title = 'סטטיסטיקות שימוש ובריאות האתר — נראה למנהל בלבד';
     a.href = '#/admin';
     a.style.marginTop = '14px';
     view.append(a);
@@ -5271,6 +5333,7 @@ async function renderAdmin() {
 
   /* ── 1. מצב הקהילה — חלונות קבועים, מוצהרים בתווית ─────────────── */
   const refreshBtn = el('button', 'adm-chip', '🔄 רענון');
+  refreshBtn.title = 'טעינה מחדש של כל נתוני הלוח';
   refreshBtn.onclick = () => renderAdmin();
   const s1 = admSection('👥 מצב הקהילה', refreshBtn);
   const kpis = el('div', 'adm-kpis');
@@ -5351,6 +5414,7 @@ async function renderAdmin() {
     chipRow.innerHTML = '';
     [[7, '7 ימים'], [30, '30 יום'], [90, '90 יום']].forEach(([d, l]) => {
       const b = el('button', 'adm-chip' + (d === days ? ' on' : ''), l);
+      b.title = 'הצגת הגרפים על טווח של ' + l;
       b.onclick = () => { if (days === d) return; days = d; drawChips(); loadCharts(); };
       chipRow.append(b);
     });
@@ -5650,6 +5714,7 @@ function loginBanner() {
   const acts = el('div', 'btn-row');
   acts.append(googleLoginBtn('התחברות עם Google'));
   const later = el('button', 'btn ghost', 'אולי אחר כך');
+  later.title = 'סגירת התזכורת — לא תופיע שוב';
   later.onclick = () => { localStorage.setItem(LOGIN_NUDGE_KEY, '1'); b.remove(); };
   acts.append(later);
   b.append(acts);
@@ -5678,6 +5743,7 @@ function namePrompt() {
   input.setAttribute('aria-label', 'השם שלך');
   acts.append(input);
   const save = el('button', 'btn primary', 'שמור');
+  save.title = 'שמירת השם בחשבון — אפשר לשנות בעמוד החשבון';
   const done = () => {
     const v = input.value.trim();
     localStorage.setItem(NAME_ASKED_KEY, '1');
@@ -5743,6 +5809,7 @@ function themeAnnounce() {
   const row = el('div', 'tour-acts');
   row.style.justifyContent = 'flex-end';
   const ok = el('button', 'btn primary', 'סבבה, יאללה 👍');
+  ok.title = 'סגירת ההודעה';
   ok.onclick = close;
   row.append(ok);
   pop.append(row);
@@ -6066,12 +6133,14 @@ async function startTour() {
 
     const row = el('div', 'tour-acts');
     const skip = el('button', 'tour-skip', 'דלג');
+    skip.title = 'יציאה מהסיור — אפשר לחזור אליו מעמוד „אודות”';
     skip.onclick = end;
     row.append(skip);
 
     const right = el('div', 'tour-nav');
-    if (i > 0) { const b = el('button', 'btn ghost', 'הקודם'); b.onclick = () => go(i - 1); right.append(b); }
+    if (i > 0) { const b = el('button', 'btn ghost', 'הקודם'); b.title = 'חזרה לצעד הקודם'; b.onclick = () => go(i - 1); right.append(b); }
     const nx = el('button', 'btn primary', i === steps.length - 1 ? 'סיימנו' : 'הבא');
+    nx.title = i === steps.length - 1 ? 'סגירת הסיור' : 'הצעד הבא בסיור';
     nx.onclick = () => go(i + 1);
     right.append(nx);
     row.append(right);
@@ -6675,10 +6744,10 @@ const SIMS = [
     ],
     init: () => ({ trials: [] }),
     buttons: (st, p, refresh) => [
-      { label: 'גירוי בודד', cls: 'primary', run: () => { quantalDraw(st, p, 1); refresh(); } },
-      { label: '×50', cls: '', run: () => { quantalDraw(st, p, 50); refresh(); } },
-      { label: '×200', cls: '', run: () => { quantalDraw(st, p, 200); refresh(); } },
-      { label: 'אפס', cls: 'ghost', run: () => { st.trials = []; refresh(); } },
+      { label: 'גירוי בודד', cls: 'primary', tip: 'הגרלת גירוי אחד והוספתו להיסטוגרמה', run: () => { quantalDraw(st, p, 1); refresh(); } },
+      { label: '×50', cls: '', tip: 'הגרלת 50 גירויים בבת אחת', run: () => { quantalDraw(st, p, 50); refresh(); } },
+      { label: '×200', cls: '', tip: 'הגרלת 200 גירויים בבת אחת', run: () => { quantalDraw(st, p, 200); refresh(); } },
+      { label: 'אפס', cls: 'ghost', tip: 'מחיקת כל הגירויים שנצברו', run: () => { st.trials = []; refresh(); } },
     ],
     readouts: (p, r, st) => {
       const pr = quantalP(p.Ca);
@@ -6953,6 +7022,7 @@ function renderSim(id) {
     const chips = el('div', 'chips');
     s.toggles.forEach((t) => {
       const b = el('button', 'chip', t.label);
+      b.title = 'הפעלה או כיבוי של הגורם הזה בסימולציה';
       b.onclick = () => {
         p[t.k] = !p[t.k];
         b.classList.toggle('on', p[t.k]);
@@ -6969,6 +7039,7 @@ function renderSim(id) {
   /* --- ריסט --- */
   const resetBtn = el('button', 'btn ghost sim-reset');
   resetBtn.type = 'button';
+  resetBtn.title = 'החזרת כל הסליידרים והמתגים לערכי ההתחלה';
   resetBtn.append(el('span', 'sim-reset-ico', '↺'));
   resetBtn.append(el('span', null, 'אפס לערכי ההתחלה'));
   resetBtn.onclick = () => {
@@ -7000,6 +7071,7 @@ function renderSim(id) {
     const row = el('div', 'btn-row sim-btns');
     s.buttons(st, p, () => refresh()).forEach((b) => {
       const n = el('button', 'btn ' + (b.cls || ''), b.label);
+      if (b.tip) n.title = b.tip;
       n.onclick = b.run;
       row.append(n);
     });
@@ -7031,6 +7103,7 @@ function renderSim(id) {
     const row = el('div', 'btn-row');
     s.topics.forEach((t) => {
       const a = el('a', 'btn primary', `תרגלו את "${t}"`);
+      a.title = 'שאלות אמת מהמאגר על הנושא הזה';
       a.href = `#/practice/${s.course}/${encodeURIComponent(t)}`;
       row.append(a);
     });
@@ -7039,6 +7112,7 @@ function renderSim(id) {
     const drill = s.topics.map((t) => DRILL_BY_TOPIC[t]).find(Boolean);
     if (drill) {
       const da = el('a', 'btn', `🧮 תרגל חישוב — ${drill.title}`);
+      da.title = 'תרגיל חישוב עם מספרים מתחלפים ובדיקה מיידית';
       da.href = '#/drill/' + drill.id;
       row.append(da);
     }
@@ -7145,10 +7219,12 @@ function drillsHero(courseId) {
   const row = el('div', 'btn-row');
   row.style.marginTop = '12px';
   const fa = el('a', 'btn', '📖 כרטיס הנוסחאות');
+  fa.title = 'כל הנוסחאות של המקצוע עם הסבר מה כל גודל אומר';
   fa.href = '#/formulas/' + courseId;
   row.append(fa);
   if (sheetOf(courseId)) {
     const sa = el('a', 'btn', '📄 דף הנוסחאות של המבחן');
+    sa.title = 'הדף הרשמי שמחולק במבחן — כדאי להתאמן למצוא בו דברים';
     sa.href = '#/sheet/' + courseId;
     row.append(sa);
   }
@@ -7353,6 +7429,7 @@ function renderDrills(courseId) {
   const row = el('div', 'btn-row');
   row.style.marginTop = '18px';
   const fa = el('a', 'btn', '📖 כרטיס הנוסחאות');
+  fa.title = 'כל הנוסחאות של המקצוע עם הסבר מה כל גודל אומר';
   fa.href = '#/formulas/' + courseId;
   row.append(fa);
   view.append(row);
@@ -7399,6 +7476,7 @@ function renderDrill(id) {
   const unit = el('span', 'drill-unit', d.unit);
   const checkBtn = el('button', 'btn primary', 'בדוק');
   checkBtn.type = 'button';
+  checkBtn.title = 'בדיקת התשובה שהקלדת';
   answerRow.append(input, unit, checkBtn);
   card.append(answerRow);
 
@@ -7409,17 +7487,21 @@ function renderDrill(id) {
   const acts = el('div', 'btn-row');
   const again = el('button', 'btn', '🎲 תרגיל נוסף');
   again.type = 'button';
+  again.title = 'הגרלת תרגיל חדש עם מספרים אחרים';
   acts.append(again);
   const fa = el('a', 'btn ghost', '📖 הנוסחה');
+  fa.title = 'כרטיס הנוסחה — ההסבר המלא ודרך השימוש';
   fa.href = `#/formulas/${d.course}/${d.formula || d.id}`;
   acts.append(fa);
   const sim = SIM_BY_TOPIC[d.topic];
   if (sim) {
     const sa = el('a', 'btn ghost', `${sim.icon} סימולציה`);
+    sa.title = 'סימולציה אינטראקטיבית של הנושא — לשחק עם המשוואה';
     sa.href = '#/sim/' + sim.id;
     acts.append(sa);
   }
   const pa = el('a', 'btn ghost', '🎯 שאלות אמת בנושא');
+  pa.title = 'שאלות מהמאגר על הנושא הזה';
   pa.href = `#/practice/${d.course}/${encodeURIComponent(d.topic)}`;
   acts.append(pa);
   view.append(acts);
@@ -7862,6 +7944,7 @@ function videoCard(v) {
   const d = el('div', 'g-vid' + (v.verified === 'partial' ? ' g-vid-part' : ''));
   const thumb = el('button', 'g-vid-thumb');
   thumb.type = 'button';
+  thumb.title = 'ניגון הסרטון כאן בעמוד';
   thumb.style.backgroundImage = `url(https://i.ytimg.com/vi/${v.id}/mqdefault.jpg)`;
   thumb.append(el('span', 'g-vid-play', '▶'));
   thumb.setAttribute('aria-label', 'נגן: ' + v.title);
@@ -8052,6 +8135,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
      כדי שהמפה תהיה רשימת כותרות קומפקטית ולא גלילה אחת אינסופית. */
   if (collapsible) {
     head.append(el('span', 'g-unit-chev', '⌄'));
+    head.title = 'פתיחה או סגירה של פרטי הנושא';
     head.setAttribute('role', 'button');
     head.setAttribute('tabindex', '0');
     const toggle = () => sec.classList.toggle('is-open');
@@ -8106,6 +8190,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
   const p = el('a', 'btn btn-sm');
   p.href = `#/practice/${courseId}/${encodeURIComponent(u.topic)}`;
   p.textContent = `🏋️ תרגל ${u.topic}`;
+  p.title = 'תרגול שאלות אמת בנושא הזה בלבד';
   acts.append(p);
   /* ליחידה ולסימולציה יש בדיוק אותו עוגן — הנושא הקנוני — ולכן החיבור בחינם,
      בדיוק כמו הכפתור ההפוך שכבר קיים במשוב. "קרא את זה" ו"שחק עם זה" הם שתי
@@ -8125,6 +8210,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
     const da = el('a', 'btn btn-sm g-study');
     da.href = sd.href + '#top-' + encodeURIComponent(u.topic);
     da.textContent = '📖 קרא בסיכום המלא';
+    da.title = 'קפיצה ישירה לפרק של הנושא בסיכום המלא';
     acts.append(da);
   }
   const prog = el('span', 'g-prog');
@@ -8220,6 +8306,7 @@ async function renderGuide(courseId, focusTopic = null) {
       const on = bl.key === activeKey;
       const tab = el('button', 'g-blocktab' + (on ? ' is-active' : ''));
       tab.type = 'button';
+      tab.title = 'הצגת הנושאים של הבלוק: ' + bl.title;
       tab.dataset.block = bl.key;
       tab.innerHTML = `<span class="g-blocktab-ic">${bl.icon || ''}</span><span>${bl.title}</span><span class="g-blocktab-n">${units.length}</span>`;
       tabs.append(tab);
@@ -8254,7 +8341,9 @@ async function renderGuide(courseId, focusTopic = null) {
       const sortNav = el('div', 'g-sortnav');
       const mk = (id, label) => { const b = el('button', 'g-sortchip'); b.type = 'button'; b.dataset.sort = id; b.textContent = label; return b; };
       const cStudy = mk('study', '📚 לפי סדר הלימוד');
+      cStudy.title = 'סידור הנושאים לפי הסדר שבו נלמד החומר בקורס';
       const cVol = mk('volume', '🏋️ לפי נפח במבחן');
+      cVol.title = 'סידור הנושאים לפי כמות השאלות במבחן — הכבד קודם';
       const setSort = (m) => {
         studyView.style.display = m === 'study' ? '' : 'none';
         volView.style.display = m === 'volume' ? '' : 'none';

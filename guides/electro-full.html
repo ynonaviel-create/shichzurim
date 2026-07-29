@@ -423,17 +423,17 @@ ol.wk-o li.reveal-ok::before{background:var(--good);color:#fff}
 <div class="site-bar">
 <a class="site-brand" href="../index.html#/course/electro">🧬 <b>ארכיון השחזורים</b> <span>· אלקטרו</span></a>
 <div class="site-bar-r">
-<span class="ed-navwrap"><button id="ed-navbtn" type="button" class="site-btn">📑 פרקים</button><div id="ed-nav"></div></span>
-<a class="site-btn" href="../index.html#/shinun/electro">🧠 שננת</a>
-<button id="revealAll" type="button" class="site-btn">👁️ גלה הכל</button>
-<button id="themeToggle" type="button" class="site-btn" aria-label="ערכת נושא">🌓 <span class="wide-only">ערכה</span></button>
-<a class="site-btn" href="../index.html#/course/electro">→ חזרה לאלקטרו</a>
+<span class="ed-navwrap"><button id="ed-navbtn" type="button" class="site-btn" title="תוכן העניינים — קפיצה לכל פרק">📑 פרקים</button><div id="ed-nav"></div></span>
+<a class="site-btn" href="../index.html#/shinun/electro" title="שינון בעל־פה — כרטיסי היפוך, כסה־וגלה ומבחן קצר">🧠 שננת</a>
+<button id="revealAll" type="button" class="site-btn" title="חשיפה או הסתרה של כל התשובות המוסתרות בעמוד">👁️ גלה הכל</button>
+<button id="themeToggle" type="button" class="site-btn" aria-label="ערכת נושא" title="החלפת ערכת נושא — בהיר או כהה">🌓 <span class="wide-only">ערכה</span></button>
+<a class="site-btn" href="../index.html#/course/electro" title="חזרה לעמוד המקצוע בארכיון">→ חזרה לאלקטרו</a>
 </div>
 </div>
-<button id="ed-top" type="button" aria-label="חזרה למעלה">↑</button><svg width="0" height="0" style="position:absolute"><defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs></svg><div class="sizer" role="group" aria-label="גודל טקסט">
-<button type="button" data-s="-1" aria-label="הקטן טקסט">A&#8722;</button>
+<button id="ed-top" type="button" aria-label="חזרה למעלה" title="חזרה לראש העמוד">↑</button><svg width="0" height="0" style="position:absolute"><defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs></svg><div class="sizer" role="group" aria-label="גודל טקסט">
+<button type="button" data-s="-1" aria-label="הקטן טקסט" title="הקטנת גודל הטקסט">A&#8722;</button>
 <span id="szv">100%</span>
-<button type="button" data-s="1" aria-label="הגדל טקסט">A+</button></div>
+<button type="button" data-s="1" aria-label="הגדל טקסט" title="הגדלת גודל הטקסט">A+</button></div>
 <script>(function(){
 var steps=[17,18.5,20,22,24,26,28],i=2;
 try{var v=localStorage.getItem('electro-size');if(v!==null)i=Math.min(steps.length-1,Math.max(0,+v));}catch(e){}
@@ -760,6 +760,7 @@ apply();})();</script><section class="cover">
     var b=document.createElement('button');
     b.type='button'; b.className='site-btn ed-read'+(read[c.topic]?' on':'');
     b.textContent=read[c.topic]?'✓ נקרא':'סמן כנקרא';
+    b.title='סימון הפרק כנקרא — מתעדכן בתוכן העניינים ובסרגל הצדדי';
     b.addEventListener('click',function(){
       if(read[c.topic]) delete read[c.topic]; else read[c.topic]=1;
       save(LS.read,read);
@@ -782,6 +783,7 @@ apply();})();</script><section class="cover">
     b.className='ed-seg'+(read[c.topic]?' done':'');
     b.dataset.id=c.id;
     b.setAttribute('aria-label',c.topic);
+    b.title='קפיצה אל הפרק: '+c.topic;
     b.innerHTML='<span>'+esc(c.topic)+(c.pct?' · '+esc(c.pct):'')+'</span><i></i>';
     b.addEventListener('click',function(){
       var t=document.getElementById(c.id);
