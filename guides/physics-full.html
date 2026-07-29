@@ -157,35 +157,49 @@ a{color:var(--brand)}
 .vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:9px;margin-top:.6rem}
 
 
-/* ── אשכול הבקרות ──
-   יושב בפינה ולא בסרגל העליון: שם הוא נאלץ להתחרות על רוחב עם קישורי
-   הבלוקים, ובחלון צר הוא נחתך. כאן יש לו מקום, והוא ליד היד. */
+/* ── הגדרות הקריאה ──
+   כפתור אחד קטן בפינה, ובלחיצה נפתח פאנל עם מהירות ההקראה וגודל הטקסט.
+   מכווץ בכוונה: אלה בקרות שנוגעים בהן פעם אחת ולא כל הזמן, ולכן הן לא
+   צריכות לתפוס שטח קבוע ליד הטקסט. */
 .tools{position:fixed;bottom:1.1rem;inset-inline-start:1.1rem;z-index:60;
   display:flex;flex-direction:column;gap:.4rem;align-items:flex-start}
-.tools-row{display:flex;align-items:center;gap:.15rem;padding:.22rem;
-  background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(8px);
-  border:1px solid var(--line);border-radius:11px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
-.tools-row .sep{width:1px;height:1rem;background:var(--line);margin:0 .18rem}
-.tools button{font:inherit;font-family:'Heebo';font-weight:800;cursor:pointer;border:0;
-  background:none;color:var(--faint);border-radius:8px;line-height:1;transition:.14s;
+.tools-btn,.totop{width:2.1rem;height:2.1rem;border-radius:50%;
+  border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(8px);color:var(--faint);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font:inherit;font-family:'Heebo';font-weight:800;font-size:.72rem;
+  opacity:.5;transition:.16s}
+.tools-btn:hover,.totop:hover{opacity:1;color:var(--brand);border-color:var(--brand)}
+.tools-btn.on{opacity:1;color:var(--brand);border-color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 12%,transparent)}
+.totop{display:none;font-size:.95rem}
+.totop.show{display:flex}
+
+/* נפתח כלפי מעלה ולא לצד: בצד הוא נכנס לתוך עמודת הטקסט, ולמעלה הוא
+   נשאר בפינה ומכסה כמעט כלום. */
+.tools-pop{position:absolute;bottom:2.6rem;inset-inline-start:0;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:.6rem .7rem;box-shadow:0 6px 22px rgba(0,0,0,.16);
+  display:none;flex-direction:column;gap:.5rem;white-space:nowrap}
+.tools-pop.open{display:flex}
+.tools-grp{display:flex;align-items:center;gap:.3rem}
+.tools-grp > .lbl{font-size:.62rem;font-family:'Heebo';font-weight:800;
+  color:var(--faint);min-width:2.2rem}
+.tools-pop button{font:inherit;font-family:'Heebo';font-weight:800;cursor:pointer;
+  border:1px solid var(--line);background:var(--bg);color:var(--dim);
+  border-radius:8px;line-height:1;transition:.14s;
   display:flex;align-items:center;justify-content:center}
-.tools button:hover:not(:disabled){color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
-.tools button:disabled{opacity:.3;cursor:default}
-.fontctl button{width:1.6rem;height:1.6rem}
-.fontctl .a-sm{font-size:.62rem} .fontctl .a-lg{font-size:.9rem}
+.tools-pop button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.tools-pop button:disabled{opacity:.32;cursor:default}
+.fontctl{display:flex;align-items:center;gap:.2rem}
+.fontctl button{width:1.5rem;height:1.5rem}
+.fontctl .a-sm{font-size:.6rem} .fontctl .a-lg{font-size:.86rem}
 .fontctl .lvl{font-size:.6rem;color:var(--faint);min-width:2.2rem;text-align:center;
   font-family:'Heebo';font-weight:700}
-.rate-ctl button{font-size:.63rem;padding:.24rem .42rem;height:1.6rem}
-.rate-ctl button.on{background:var(--brand);color:#fff}
+.rate-ctl{display:flex;gap:.2rem}
+.rate-ctl button{font-size:.62rem;padding:.26rem .44rem;height:1.5rem}
+.rate-ctl button.on{background:var(--brand);border-color:var(--brand);color:#fff}
 :root[data-theme="dark"] .rate-ctl button.on{color:#0f151c}
-.tools .lbl{font-size:.58rem;font-family:'Heebo';font-weight:800;color:var(--faint);
-  padding:0 .3rem;letter-spacing:.03em}
-.totop{width:2.3rem;height:2.3rem;border-radius:50%;border:1px solid var(--line);
-  background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(8px);
-  color:var(--brand);font-size:1rem;cursor:pointer;display:none;
-  box-shadow:0 2px 12px rgba(0,0,0,.12);align-items:center;justify-content:center}
-.totop.show{display:flex}
-@media (max-width:640px){ .tools .rate-ctl,.tools .lbl{display:none} }
 
 /* ── ריל הניווט ──
    פסים אנכיים דקים, אחד לכל נושא, ושם הנושא מופיע בריחוף. אין פאנל ואין
@@ -289,17 +303,26 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </nav>
 <nav class="rail" aria-label="ניווט לפי נושא"></nav>
 <div class="tools">
-  <div class="tools-row rate-ctl" role="group" aria-label="מהירות הקראה">
-    <span class="lbl">קריאה</span>
-    <button type="button" data-rate="0.85" title="הקראה איטית">0.85×</button>
-    <button type="button" data-rate="1" title="מהירות רגילה">1×</button>
-    <button type="button" data-rate="1.25" title="הקראה מהירה">1.25×</button>
+  <div class="tools-pop" role="group" aria-label="הגדרות קריאה">
+    <div class="tools-grp">
+      <span class="lbl" title="מהירות ההקראה">הקראה</span>
+      <div class="rate-ctl">
+        <button type="button" data-rate="0.85" title="איטי">0.85×</button>
+        <button type="button" data-rate="1" title="רגיל">1×</button>
+        <button type="button" data-rate="1.25" title="מהיר">1.25×</button>
+      </div>
+    </div>
+    <div class="tools-grp">
+      <span class="lbl" title="גודל הטקסט">טקסט</span>
+      <div class="fontctl">
+        <button class="a-sm" type="button" data-font="-" title="הקטנה" aria-label="הקטנת הטקסט">א</button>
+        <span class="lvl">100%</span>
+        <button class="a-lg" type="button" data-font="+" title="הגדלה" aria-label="הגדלת הטקסט">א</button>
+      </div>
+    </div>
   </div>
-  <div class="tools-row fontctl" role="group" aria-label="גודל טקסט">
-    <button class="a-sm" type="button" data-font="-" title="הקטנת הטקסט" aria-label="הקטנת הטקסט">א</button>
-    <span class="lvl">100%</span>
-    <button class="a-lg" type="button" data-font="+" title="הגדלת הטקסט" aria-label="הגדלת הטקסט">א</button>
-  </div>
+  <button class="tools-btn" type="button" title="הגדרות קריאה — גודל טקסט ומהירות הקראה"
+          aria-label="הגדרות קריאה" aria-expanded="false">Aa</button>
   <button class="totop" title="לראש העמוד" aria-label="לראש העמוד">↑</button>
 </div>
 
@@ -326,7 +349,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — אפשר להשהות ולהמשיך, לשנות מהירות, והפסקה שנקראת מסומנת בטקסט.</span></div>
   <div><b>🎬 סרטונים</b><span>לחיצה על סרטון פותחת אותו כאן, בתוך הדף. יש מסלול צפייה מסודר למטה — לא צריך לראות את כולם.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא יש קישור ישיר לשאלות התרגול שלו בארכיון. לקרוא ואז מיד לתרגל.</span></div>
-  <div><b>🧭 ניווט</b><span>פסי הניווט בצד — ריחוף מראה את שם הנושא, לחיצה קופצת אליו. בפינה: מהירות הקראה וגודל טקסט.</span></div>
+  <div><b>🧭 ניווט</b><span>פסי הניווט בצד — ריחוף מראה את שם הנושא, לחיצה קופצת אליו. כפתור Aa בפינה פותח מהירות הקראה וגודל טקסט.</span></div>
 </div>
 <div class="tts-hint" hidden>
 <b>🎧 הקול בהקראה נשמע דחוס?</b> במכשיר שלכם מותקנת כנראה רק הגרסה הבסיסית של הקול העברי.
@@ -1911,6 +1934,30 @@ document.querySelectorAll('.vq').forEach(function(q){
     });
   });
   apply();
+})();
+
+/* ── פאנל הגדרות הקריאה ──
+   נסגר בלחיצה בחוץ ובאסקייפ, כמו כל פופ-אובר — אחרת הוא נשאר תלוי על
+   הטקסט אחרי שסיימו איתו. */
+(function(){
+  var btn = document.querySelector('.tools-btn');
+  var pop = document.querySelector('.tools-pop');
+  if (!btn || !pop) return;
+
+  function close(){
+    pop.classList.remove('open');
+    btn.classList.remove('on');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = pop.classList.toggle('open');
+    btn.classList.toggle('on', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  pop.addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', close);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
 })();
 
 /* ── ניווט ──
