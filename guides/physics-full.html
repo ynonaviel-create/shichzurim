@@ -32,6 +32,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:19px;font-family:'Assistant',sans-serif;scroll-behavior:smooth;scroll-padding-top:64px}
+@media (max-width:700px){html{scroll-padding-top:58px}}
 body{direction:rtl;line-height:1.85;color:var(--ink);background:var(--bg);
   max-width:50rem;margin:0 auto;padding:0 1.6rem 6rem}
 h1,h2,h3,h4,b,strong{font-family:'Heebo',sans-serif;line-height:1.3;font-weight:800}
@@ -39,13 +40,13 @@ p{margin-bottom:.75rem}
 a{color:var(--brand)}
 
 /* ── סרגל ניווט צף ── */
-.navbar{position:sticky;top:0;z-index:50;margin:0 -1.6rem 0;padding:.5rem 1.6rem;
+.navbar{position:sticky;top:0;z-index:50;margin:0 -1.6rem 0;padding:.45rem 1.1rem;
   background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line);display:flex;gap:.4rem;overflow-x:auto;
-  scrollbar-width:none}
+  border-bottom:1px solid var(--line);display:flex;gap:.28rem;align-items:center;
+  overflow-x:auto;scrollbar-width:none}
 .navbar::-webkit-scrollbar{display:none}
-.navbar a{flex:none;font-size:.8rem;font-weight:800;font-family:'Heebo';text-decoration:none;
-  color:var(--dim);padding:.3rem .7rem;border-radius:99px;border:1px solid transparent;transition:.15s}
+.navbar a{flex:none;font-size:.76rem;font-weight:800;font-family:'Heebo';text-decoration:none;
+  color:var(--dim);padding:.28rem .55rem;border-radius:99px;border:1px solid transparent;transition:.15s}
 .navbar a:hover{color:var(--brand);border-color:var(--line)}
 .navbar a.on{background:var(--brand);color:#fff}
 :root[data-theme="dark"] .navbar a.on{color:#0f151c}
@@ -110,13 +111,24 @@ a{color:var(--brand)}
 .lead{font-size:1.04rem;color:var(--ink);background:color-mix(in srgb,var(--brand) 6%,transparent);
   border-inline-start:3px solid var(--brand-lt);padding:.75rem 1rem;border-radius:0 10px 10px 0}
 
-/* כפתור הקראה */
-.speak{font:inherit;font-family:'Heebo';font-size:.76rem;font-weight:800;cursor:pointer;
+/* כפתורי הקראה */
+.speak-wrap{display:inline-flex;gap:.25rem;flex:none}
+.speak,.speak-stop{font:inherit;font-family:'Heebo';font-size:.76rem;font-weight:800;cursor:pointer;
   border:1px solid var(--line);background:var(--panel);color:var(--dim);
   border-radius:99px;padding:.2rem .7rem;white-space:nowrap;transition:.15s}
-.speak:hover{border-color:var(--brand);color:var(--brand)}
+.speak:hover,.speak-stop:hover{border-color:var(--brand);color:var(--brand)}
 .speak.on{background:var(--brand);border-color:var(--brand);color:#fff}
 :root[data-theme="dark"] .speak.on{color:#0f151c}
+.speak-stop[hidden]{display:none}
+
+/* הפסקה שמוקראת ברגע זה — סימון עדין שמלווה את האוזן בעין, בלי לצעוק. */
+.reading-now{
+  background:color-mix(in srgb,var(--brand) 13%,transparent);
+  box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
+  border-radius:5px;transition:background .25s,box-shadow .25s}
+.lead.reading-now,.traps .reading-now{box-shadow:none;
+  background:color-mix(in srgb,var(--brand) 17%,transparent)}
+@media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
 /* קישור לתרגול */
 .drill{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.2rem;
@@ -147,6 +159,71 @@ a{color:var(--brand)}
 .vid span{font-size:.87rem;color:var(--dim)}
 .vid.open{border-color:var(--brand)}
 .vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:9px;margin-top:.6rem}
+
+
+/* ── בקרת גודל טקסט ──
+   משנה את font-size של השורש, וכל המסמך בנוי ב-rem — אז הכול גדל יחד. */
+.fontctl{display:inline-flex;align-items:center;gap:2px;flex:none;
+  position:sticky;left:0;background:var(--bg);padding-inline-end:.15rem}
+.rate-ctl{display:inline-flex;gap:2px;margin-inline-start:auto;flex:none;
+  position:sticky;inset-inline-end:auto;left:0;
+  border:1px solid var(--line);border-radius:9px;padding:1px;background:var(--panel)}
+.rate-ctl button{font:inherit;font-family:'Heebo';font-weight:800;font-size:.62rem;cursor:pointer;
+  border:0;background:none;color:var(--faint);padding:.16rem .38rem;border-radius:7px;
+  line-height:1;transition:.14s}
+.rate-ctl button:hover{color:var(--brand)}
+.rate-ctl button.on{background:var(--brand);color:#fff}
+:root[data-theme="dark"] .rate-ctl button.on{color:#0f151c}
+@media (max-width:700px){ .rate-ctl{display:none} }
+.fontctl button{
+  font:inherit;font-family:'Heebo';font-weight:800;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--dim);
+  width:1.65rem;height:1.65rem;border-radius:8px;line-height:1;padding:0;transition:.15s;
+  display:flex;align-items:center;justify-content:center}
+.fontctl button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.fontctl button:disabled{opacity:.35;cursor:default}
+.fontctl .a-sm{font-size:.62rem} .fontctl .a-lg{font-size:.86rem}
+.fontctl .lvl{font-size:.62rem;color:var(--faint);min-width:2.1rem;text-align:center;
+  font-family:'Heebo';font-weight:700}
+
+/* ── תוכן עניינים צדדי ──
+   קבוע בצד השמאלי (הצד ה"ריק" ב-RTL), מסמן איפה נמצאים, ונעלם לגמרי
+   במסכים צרים — שם סרגל הבלוקים שלמעלה כבר עושה את העבודה. */
+.sidetoc{
+  position:fixed;top:4.6rem;inset-inline-end:auto;left:1.1rem;width:13.5rem;z-index:40;
+  max-height:calc(100vh - 6.5rem);display:flex;flex-direction:column;
+  background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(8px);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  transition:transform .22s cubic-bezier(.4,0,.2,1),opacity .22s}
+.sidetoc-head{display:flex;align-items:center;gap:.4rem;padding:.5rem .7rem;
+  border-bottom:1px solid var(--line);flex:none}
+.sidetoc-head b{font-size:.72rem;font-family:'Heebo';color:var(--faint);letter-spacing:.05em;flex:1}
+.sidetoc-tog{font:inherit;cursor:pointer;border:0;background:none;color:var(--dim);
+  font-size:.85rem;padding:0 .2rem;line-height:1;transition:.15s}
+.sidetoc-tog:hover{color:var(--brand)}
+.sidetoc-body{overflow-y:auto;padding:.45rem 0 .6rem;scrollbar-width:thin}
+.sidetoc-body::-webkit-scrollbar{width:5px}
+.sidetoc-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
+.stoc-blk{font-size:.68rem;font-family:'Heebo';font-weight:800;color:var(--brand);
+  padding:.5rem .8rem .18rem;letter-spacing:.02em}
+.stoc-blk:first-child{padding-top:.1rem}
+.sidetoc a{display:block;font-size:.72rem;line-height:1.45;text-decoration:none;
+  color:var(--dim);padding:.24rem .8rem .24rem 1.1rem;position:relative;transition:.13s;
+  border-inline-start:2px solid transparent}
+.sidetoc a:hover{color:var(--ink);background:color-mix(in srgb,var(--brand) 7%,transparent)}
+.sidetoc a.on{color:var(--brand);font-weight:800;border-inline-start-color:var(--brand);
+  background:color-mix(in srgb,var(--brand) 10%,transparent)}
+/* מקופל — נשארת רק לשונית דקה שאפשר להחזיר ממנה */
+.sidetoc.folded{transform:translateX(calc(-100% + 2.1rem))}
+.sidetoc.folded .sidetoc-body{opacity:0;pointer-events:none}
+.sidetoc.folded .sidetoc-head b{opacity:0}
+@media (max-width:1180px){ .sidetoc{display:none} }
+@media print{ .sidetoc,.fontctl{display:none} }
+
+.tts-hint{margin-top:1rem;padding:.75rem 1rem;border-radius:10px;font-size:.88rem;line-height:1.7;
+  background:var(--warn-bg);border:1px solid var(--warn-ln);color:var(--ink)}
+.tts-hint[hidden]{display:none}
+.tts-hint b{color:var(--warn)}
 
 /* ── איורים ── */
 figure{margin:1.5rem 0;background:var(--panel);border:1px solid var(--line);
@@ -201,7 +278,24 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   <a href="#b-fluids">💧 נוזלים</a>
   <a href="#b-imaging">🩻 דימות</a>
   <a href="#last">⏱️ הרגע האחרון</a>
+  <div class="rate-ctl" role="group" aria-label="מהירות הקראה" title="מהירות ההקראה">
+    <button type="button" data-rate="0.85">0.85×</button>
+    <button type="button" data-rate="1">1×</button>
+    <button type="button" data-rate="1.25">1.25×</button>
+  </div>
+  <div class="fontctl" role="group" aria-label="גודל טקסט">
+    <button class="a-sm" type="button" data-font="-" title="הקטנת הטקסט" aria-label="הקטנת הטקסט">א</button>
+    <span class="lvl">100%</span>
+    <button class="a-lg" type="button" data-font="+" title="הגדלת הטקסט" aria-label="הגדלת הטקסט">א</button>
+  </div>
 </nav>
+<aside class="sidetoc" aria-label="תוכן עניינים">
+  <div class="sidetoc-head">
+    <b>תוכן העניינים</b>
+    <button class="sidetoc-tog" type="button" title="קיפול" aria-label="קיפול תוכן העניינים">⟨</button>
+  </div>
+  <div class="sidetoc-body"></div>
+</aside>
 <button class="totop" title="לראש העמוד" aria-label="לראש העמוד">↑</button>
 
 <div class="cover">
@@ -224,10 +318,17 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>🔊 האזנה</b><span>לכל נושא יש כפתור הקראה. אפשר להאזין בדרך, תוך כדי כתיבה, או כשהעיניים כבר עייפות.</span></div>
+  <div><b>🔊 האזנה</b><span>הקראה לכל נושא — אפשר להשהות ולהמשיך, לשנות מהירות, והפסקה שנקראת מסומנת בטקסט.</span></div>
   <div><b>🎬 סרטונים</b><span>לחיצה על סרטון פותחת אותו כאן, בתוך הדף. יש מסלול צפייה מסודר למטה — לא צריך לראות את כולם.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא יש קישור ישיר לשאלות התרגול שלו בארכיון. לקרוא ואז מיד לתרגל.</span></div>
-  <div><b>🧭 ניווט</b><span>הסרגל שלמעלה מקפיץ לכל בלוק, והכפתור בפינה מחזיר לראש העמוד.</span></div>
+  <div><b>🧭 ניווט</b><span>תוכן עניינים בצד שמסמן איפה אתם (אפשר לקפל), סרגל בלוקים למעלה, ושליטה בגודל הטקסט.</span></div>
+</div>
+<div class="tts-hint" hidden>
+<b>🎧 הקול בהקראה נשמע דחוס?</b> במכשיר שלכם מותקנת כנראה רק הגרסה הבסיסית של הקול העברי.
+יש גרסה משופרת שנשמעת טוב בהרבה, וההורדה חד-פעמית וחינם:
+<br><b>אייפון/אייפד:</b> הגדרות ← נגישות ← תוכן מדובר ← קולות ← עברית ← כרמית (משופר).
+<br><b>מק:</b> הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות ← עברית.
+<br><b>אנדרואיד:</b> הגדרות ← נגישות ← פלט טקסט־לדיבור ← התקנת נתוני קול ← עברית.
 </div>
 </div>
 
@@ -309,7 +410,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h2>⚡ חשמל</h2>
 <p class="bsub">שבעה נושאים — מהמטען הבודד ועד לאקסון כמוליך.</p>
 <section class="unit" id="u-charge-field-potential">
-<h3>מטען, שדה ופוטנציאל חשמלי<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>מטען, שדה ופוטנציאל חשמלי<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כל מה שקורה בבלוק החשמל מתחיל בשלושה מושגים שקל להתבלבל ביניהם: המטען הוא המקור, השדה הוא מה שהמטען עושה למרחב סביבו, והפוטנציאל הוא ה"גובה" האנרגטי שהמרחב הזה מקנה לכל מטען שיוצב בו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -372,7 +473,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/מטען, שדה ופוטנציאל חשמלי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-gauss">
-<h3>חוק גאוס ויישומיו<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>חוק גאוס ויישומיו<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">חוק גאוס אומר משהו אחד פשוט: כמות קווי השדה שיוצאת ממעטפת סגורה נקבעת אך ורק על ידי המטען הכלוא בתוכה. מכאן נובעות שתי תוצאות שהמבחן אוהב — שדה של לוח אינסופי שאינו דועך, ומוליך שבתוכו השדה אפס.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -417,7 +518,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/חוק גאוס ויישומיו" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-capacitors">
-<h3>קבלים — חיבור ואנרגיה<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>קבלים — חיבור ואנרגיה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">קבל הוא מכשיר שאוגר אנרגיה חשמלית לאט ומשחרר אותה מהר. שני הדברים שחייבים להיצמד אליהם: הקיבול הוא תכונה גאומטרית ולא תלוי בסוללה, וכללי החיבור בטור ובמקביל הם בדיוק <b>הפוכים</b> מאלה של נגדים.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -478,7 +579,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/קבלים — חיבור ואנרגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-current-resistance">
-<h3>זרם, התנגדות וחוק אוהם<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>זרם, התנגדות וחוק אוהם<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">זרם הוא <b>קצב</b> ולא כמות, והתנגדות היא מה שמתרגם הפרש מתח לזרם. ההבחנה שהיחידה הזאת עומדת עליה: בין ρ, שהיא תכונת החומר בלבד, לבין R, שתלויה גם בגאומטריה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -529,7 +630,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/זרם, התנגדות וחוק אוהם" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-circuits-kirchhoff">
-<h3>מעגלים וחוקי קירכהוף<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>מעגלים וחוקי קירכהוף<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">שני חוקי קירכהוף אינם שני טריקים לפתרון מעגלים אלא שני חוקי שימור בתחפושת: הצומת הוא שימור המטען, והלולאה היא שימור האנרגיה. אם זוכרים את זה, אי אפשר להתבלבל ביניהם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -582,7 +683,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/מעגלים וחוקי קירכהוף" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-rc">
-<h3>מעגל RC<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>מעגל RC<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">מעגל RC הוא הנושא שבגללו נבנה כל הבלוק, והרעיון היחיד שמאחוריו הוא שהקבל אינו יכול לשנות את מתחו מיידית. מכאן נובעים שני מצבי הקיצון וכל הדינמיקה שביניהם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -640,7 +741,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/מעגל RC" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-axon-cable">
-<h3>האקסון כמוליך — תיאוריית הכבל<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>האקסון כמוליך — תיאוריית הכבל<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">היחידה הזאת היא הפואנטה של כל הבלוק: כל מה שנלמד על התנגדות ובידוד מוחל על האקסון, שמתנהג כמו כבל חשמלי לא-אידיאלי. שתי התנגדויות שונות קובעות את מהירות ההולכה, וכל הביולוגיה נגזרת מהן.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -698,7 +799,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h2>🧲 מגנטיות</h2>
 <p class="bsub">שלושה נושאים — הכוח שלא מבצע עבודה, מי יוצר שדה, ומה מייצר מתח.</p>
 <section class="unit" id="u-magnetic-field-lorentz">
-<h3>שדה מגנטי וכוח לורנץ<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>שדה מגנטי וכוח לורנץ<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">שדה מגנטי הוא תכונה של המרחב שמתארת את הכוח הפועל על מטענים חשמליים <b>הנעים</b> בו. זהו ההבדל המהותי מהשדה החשמלי: החשמלי "מרגיש" כל מטען, גם נייח; המגנטי מרגיש רק תנועה — ובכיוון מאונך לה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -763,7 +864,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/שדה מגנטי וכוח לורנץ" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-wire-force-ampere">
-<h3>כוח מגנטי על תיל, ביו-סבאר ואמפר<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>כוח מגנטי על תיל, ביו-סבאר ואמפר<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">היחידה הזאת עונה על שתי שאלות הפוכות שקל לבלבל ביניהן: מה הכוח שפועל על תיל שכבר נמצא בתוך שדה קיים, ואיזה שדה תיל נושא זרם <b>מייצר</b> סביבו. שתיהן משתמשות בכלל יד ימין — אבל בתפקידים הפוכים.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -829,7 +930,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/כוח מגנטי על תיל, ביו-סבאר ואמפר" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-induction-faraday-lenz">
-<h3>אינדוקציה — פאראדיי-לנץ<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>אינדוקציה — פאראדיי-לנץ<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">עד כה ראינו שזרם מייצר שדה מגנטי. עכשיו סוגרים את המעגל בכיוון ההפוך: שדה מגנטי מייצר זרם — אבל <b>רק אם הוא משתנה</b>. שדה קבוע, חזק ככל שיהיה, לא ייצר שום דבר.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -892,7 +993,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h2>〰️ גלים ותנודות</h2>
 <p class="bsub">שלושה נושאים — מתנודה בודדת, דרך קול ואולטרסאונד, ועד לגל שלא צריך תווך.</p>
 <section class="unit" id="u-shm">
-<h3>תנועה הרמונית פשוטה<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>תנועה הרמונית פשוטה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כל תנודה בטבע — מיתר גיטרה, מטוטלת שעון, מסה על קפיץ — נולדת מאותו מנגנון יחיד: כוח שמושך את הגוף בחזרה לנקודת שיווי המשקל, וחזק יותר ככל שהגוף רחוק ממנה. מהתנאי הפשוט הזה נובעת כל ההתנהגות של תנועה הרמונית, וגם התשובה לשאלה שנשאלת במבחן שוב ושוב: מה קובע את התדירות ומה לא.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -944,7 +1045,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/תנועה הרמונית פשוטה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-waves-sound-doppler">
-<h3>גלים, קול ואפקט דופלר<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>גלים, קול ואפקט דופלר<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">גל הוא הפרעה שמתקדמת במרחב ובזמן ומעבירה <b>אנרגיה בלי להסיע חומר</b>. ברגע שמבינים את חלוקת התפקידים — התווך קובע את המהירות, המקור קובע את התדירות, ואורך הגל הוא רק התוצאה — כל שאר הבלוק (מעבר בין תווכים, שבירה, אולטרסאונד, דופלר) נגזר מעצמו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1020,7 +1121,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/גלים, קול ואפקט דופלר" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-em-waves">
-<h3>גלים אלקטרומגנטיים<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>גלים אלקטרומגנטיים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">גל אלקטרומגנטי הוא היוצא מן הכלל בעולם הגלים: הוא היחיד שאינו זקוק לתווך. הסיבה לכך היא שהוא אינו תנודה של חומר אלא של שדות — ומכאן נובעים גם המהירות האחידה שלו וגם הסולם העצום של הספקטרום, מרדיו לא-מזיק ועד גמא הרסני.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1081,7 +1182,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h2>💧 נוזלים ולחץ</h2>
 <p class="bsub">ארבעה נושאים — נוזל במנוחה, בציפה, בקרום המתוח, ובזרימה.</p>
 <section class="unit" id="u-pressure-density">
-<h3>לחץ וצפיפות<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>לחץ וצפיפות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כשעוברים ממכניקה של גופים קשיחים אל זורמים, המושג המרכזי מתחלף: לא הכוח קובע, אלא הלחץ — הכוח המחולק על השטח שעליו הוא פועל. וברגע שמבינים שמקור הלחץ בנוזל הוא משקל עמוד הנוזל שמעל הנקודה, מתבררת המסקנה שנבחנת שוב ושוב: הלחץ ההידרוסטטי תלוי רק בצפיפות ובעומק, ולא בכמות הנוזל או בצורת הכלי.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1135,7 +1236,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/לחץ וצפיפות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-archimedes">
-<h3>עקרון ארכימדס והציפה<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>עקרון ארכימדס והציפה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">ארכימדס עונה על שאלה אחת: מה קורה כשגוף מכריח נוזל לפנות לו מקום. התשובה — הנוזל דוחף בחזרה בכוח השווה למשקל הנוזל שנדחק — היא הסיבה שספינת פלדה צפה ואבן קטנה שוקעת, ושהמפתח לציפה הוא הצפיפות, לא המסה.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1191,7 +1292,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/עקרון ארכימדס והציפה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-surface-tension">
-<h3>מתח פנים וחוק לפלס<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>מתח פנים וחוק לפלס<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">שטח הפנים של נוזל מתנהג כמו קרום מתוח, כי המולקולות שעליו חסרות שכנים מלמעלה. מהמאמץ הזה לכווץ את שטח הפנים נובע חוק לפלס — ומתוכו התובנה הרפואית החשובה ביותר בבלוק: רדיוס קטן דורש לחץ גדול, ולכן בלי סורפקטנט הנאדיות הקטנות היו קורסות.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1242,7 +1343,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/מתח פנים וחוק לפלס" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-bernoulli">
-<h3>משוואת ברנולי וספיקה<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>משוואת ברנולי וספיקה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כשהנוזל זז, שני חוקי שימור מנהלים את התמונה: שימור החומר נותן את שימור הספיקה (חתך צר = מהירות גבוהה), ושימור האנרגיה נותן את ברנולי (מהירות גבוהה = לחץ נמוך). שניהם נכונים לנוזל אידיאלי — והמעבר לדם אמיתי, עם צמיגות, הוא בדיוק המקום שבו נכנסים פואזיי וריינולדס.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1306,7 +1407,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h2>🩻 דימות רפואי</h2>
 <p class="bsub">ארבעה נושאים — הפיזיקה שמאחורי כל מכשיר, ומה המחיר של כל אחד.</p>
 <section class="unit" id="u-photoelectric">
-<h3>הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כל בלוק הדימות עומד על רעיון אחד: קרינה אלקטרומגנטית אינה "זרם אנרגיה רציף" אלא חבילות בדידות — פוטונים — ואנרגיית הפוטון הבודד נקבעת אך ורק על ידי התדירות. מהרעיון הזה נגזרות שלוש האינטראקציות של קרינה עם רקמה, ומהן נגזרת כל תמונה רפואית שתראו.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1367,7 +1468,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/הספקטרום האלקטרומגנטי והאפקט הפוטואלקטרי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-xray-ct">
-<h3>רנטגן ו-CT<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>רנטגן ו-CT<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">צילום רנטגן אינו "צילום" במובן הרגיל: לא אוספים אור שהוחזר מהעצם, אלא מירים קרינה <i>דרך</i> הגוף ומודדים כמה ממנה שרדה. התמונה היא מפה של הנחתה, ו-CT אינו סוג קרינה חדש אלא אלגוריתם שמרכיב מפות כאלה מזוויות רבות לכדי חתך.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1432,7 +1533,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/רנטגן ו-CT" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-nuclear-pet">
-<h3>רפואה גרעינית ו-PET<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>רפואה גרעינית ו-PET<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">כאן מתהפכת הארכיטקטורה של הדימות: מקור הקרינה אינו מכשיר חיצוני אלא <b>המטופל עצמו</b>. מזריקים סמן רדיואקטיבי, והמערכת אוספת באופן פסיבי את קרינת הגמא הבוקעת מן הגוף — ולכן התמונה מתארת לא אנטומיה אלא <b>תפקוד</b>.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1485,7 +1586,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <a class="drill" href="../index.html#/practice/physics/רפואה גרעינית ו-PET" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a></section>
 
 <section class="unit" id="u-mri">
-<h3>MRI<button class="speak" type="button">🔊 הקראה</button></h3>
+<h3>MRI<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">MRI הוא היחיד בבלוק שאינו משתמש בפוטונים אנרגטיים כלל. הוא מנצל את <b>הספין המגנטי של הפרוטונים באטומי המימן שבמים שבגוף</b>, ואת האות הוא מפיק בדיוק כפי שגנרטור מפיק חשמל: שדה מגנטי מסתובב ליד סליל <b>משרה</b> בו זרם.</p>
 
 <h4>הרעיון לעומק</h4>
@@ -1613,61 +1714,240 @@ document.querySelectorAll('.vid').forEach(function(v){
 });
 
 /* ── הקראה ──
-   קורא את גוף הנושא בקול. השמעה אחת בכל רגע: לחיצה על נושא אחר עוצרת
-   את הקודם, אחרת שני קולות מדברים זה על זה. הכפתורים והאיורים מוחרגים —
-   אין טעם להקריא "הקראה" או תוויות שיושבות על גרף. */
+   נבנית מ*אלמנטים* ולא ממקטע טקסט אחד, ומשלוש סיבות: כרום קוטע utterance
+   ארוך אחרי כ-15 שניות, פיצול נותן נקודת עצירה מדויקת להשהיה, ובעיקר —
+   כך אפשר לסמן בדיוק את הפסקה שנקראת ברגע זה.
+
+   שלושה מצבים: מנגן → השהיה → המשך. עצירה מלאה היא הכפתור השני.
+   מעבר לנושא אחר עוצר את הקודם — שני קולות במקביל אינם מובנים. */
 (function(){
   var synth = window.speechSynthesis;
-  if (!synth) { document.querySelectorAll('.speak').forEach(function(b){ b.remove(); }); return; }
-  var current = null;
+  if (!synth) { document.querySelectorAll('.speak-wrap').forEach(function(b){ b.remove(); }); return; }
 
-  function textOf(unit){
-    var clone = unit.cloneNode(true);
-    clone.querySelectorAll('.speak, .drill, .vids, figure svg').forEach(function(n){ n.remove(); });
-    /* נקודה בסוף כל מלכודת — בלעדיה כל המלכודות נשמעות כמשפט אחד ארוך. */
-    clone.querySelectorAll('.trap').forEach(function(t){ t.textContent = t.textContent + '.'; });
-    return clone.textContent.replace(/\s+/g, ' ').trim();
+  var cur = null;        // {play, stopBtn, unit}
+  var queue = [], qi = 0, paused = false, voice = null, litEl = null;
+  var hasHe = false, isEnhanced = false;
+  var RKEY = 'shichzurim.physRate';
+  var rate = 1;
+  try { var rv = parseFloat(localStorage.getItem(RKEY)); if (rv >= 0.7 && rv <= 1.4) rate = rv; } catch (e) {}
+
+  /* בחירת הקול — לא "הראשון שנמצא". במכשירים רבים מותקנות שתי גרסאות של
+     אותו קול עברי: דחוסה (איכות נמוכה) ומשופרת. הסדר שבו הדפדפן מחזיר
+     אותן אינו מובטח, אז בוחרים במפורש את המשופרת. */
+  function pickVoice(){
+    var he = (synth.getVoices() || []).filter(function(v){ return /^he/i.test(v.lang); });
+    if (!he.length) { voice = null; hasHe = false; return; }
+    hasHe = true;
+    var good = /משופר|enhanced|premium|siri|neural/i;
+    voice = he.filter(function(v){ return good.test(v.name); })[0] || he[0];
+    isEnhanced = good.test(voice.name);
   }
+  pickVoice();
+  if (typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = pickVoice;
 
-  function stop(){
-    synth.cancel();
-    if (current) { current.classList.remove('on'); current.textContent = '🔊 הקראה'; current = null; }
-  }
-
-  document.querySelectorAll('.speak').forEach(function(btn){
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      var wasThis = (current === btn);
-      stop();
-      if (wasThis) return;
-      var u = new SpeechSynthesisUtterance(textOf(btn.closest('.unit')));
-      u.lang = 'he-IL';
-      u.rate = 1.0;
-      /* קול עברי אם המערכת מציעה אחד; אחרת ברירת המחדל, שעדיין מובנת. */
-      var he = (synth.getVoices() || []).filter(function(v){ return /^he/i.test(v.lang); })[0];
-      if (he) u.voice = he;
-      u.onend = stop;
-      u.onerror = stop;
-      current = btn; btn.classList.add('on'); btn.textContent = '⏹ עצור';
-      synth.speak(u);
+  /* פיצול למשפטים, ואיחוד קטעים קצרצרים כדי שלא יישמעו קטועים. */
+  function sentences(text){
+    var parts = text.split(/(?<=[.!?:])\s+/), out = [], buf = '';
+    parts.forEach(function(p){
+      if ((buf + ' ' + p).length < 170) buf = buf ? buf + ' ' + p : p;
+      else { if (buf) out.push(buf); buf = p; }
     });
+    if (buf) out.push(buf);
+    return out.filter(Boolean);
+  }
+
+  /* האלמנטים שמוקראים, לפי סדר הופעתם. h3 בלי כפתורי ההקראה שבתוכו. */
+  function itemsOf(unit){
+    var items = [];
+    var title = unit.querySelector('h3');
+    if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
+    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+      if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
+      var t = el.textContent.replace(/\s+/g,' ').trim();
+      if (!t) return;
+      sentences(t).forEach(function(s){ items.push({ el: el, text: s }); });
+    });
+    return items;
+  }
+
+  function light(el){
+    if (litEl === el) return;
+    if (litEl) litEl.classList.remove('reading-now');
+    litEl = el || null;
+    if (!litEl) return;
+    litEl.classList.add('reading-now');
+    /* גלילה עדינה רק כשהפסקה יצאה מהמסך — לא מזיזים את הדף מתחת לאצבע. */
+    var r = litEl.getBoundingClientRect();
+    if (r.top < 80 || r.bottom > window.innerHeight - 40) {
+      window.scrollTo({ top: window.scrollY + r.top - window.innerHeight * 0.34, behavior: 'smooth' });
+    }
+  }
+
+  function paint(state){
+    if (!cur) return;
+    cur.play.textContent = state === 'playing' ? '⏸ השהה' : state === 'paused' ? '▶ המשך' : '🔊 הקראה';
+    cur.play.classList.toggle('on', state !== 'idle');
+    cur.stopBtn.hidden = (state === 'idle');
+  }
+
+  function reset(){
+    if (cur) paint('idle');
+    light(null);
+    synth.cancel();
+    cur = null; queue = []; qi = 0; paused = false;
+  }
+
+  function next(){
+    if (!cur || qi >= queue.length) { reset(); return; }
+    var item = queue[qi];
+    light(item.el);
+    var u = new SpeechSynthesisUtterance(item.text);
+    u.lang = 'he-IL';
+    u.rate = rate;
+    if (voice) u.voice = voice;
+    u.onend = function(){ if (!paused) { qi++; next(); } };
+    u.onerror = function(e){ if (e && e.error === 'interrupted') return; reset(); };
+    synth.speak(u);
+  }
+
+  document.querySelectorAll('.speak-wrap').forEach(function(wrap){
+    var play = wrap.querySelector('.speak');
+    var stopBtn = wrap.querySelector('.speak-stop');
+    var unit = wrap.closest('.unit');
+    stopBtn.hidden = true;
+
+    play.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (cur && cur.unit === unit) {           // אותו נושא — השהיה/המשך
+        if (paused) {
+          paused = false; synth.resume(); paint('playing');
+          /* בחלק מהדפדפנים resume אינו ממשיך מעצמו אחרי onend שנבלע. */
+          if (!synth.speaking) next();
+        } else { paused = true; synth.pause(); paint('paused'); }
+        return;
+      }
+      reset();                                  // נושא אחר — עוצרים את הקודם
+      cur = { play: play, stopBtn: stopBtn, unit: unit };
+      queue = itemsOf(unit); qi = 0; paused = false;
+      paint('playing');
+      next();
+    });
+
+    stopBtn.addEventListener('click', function(e){ e.stopPropagation(); reset(); });
   });
-  /* יציאה מהעמוד באמצע הקראה משאירה בחלק מהדפדפנים קול שממשיך ברקע. */
+
+  /* בורר מהירות — הדבר היחיד שבאמת משפר מובנוּת בקול מובנה בינוני.
+     0.85 מוסיף שהות בין ההברות, 1.25 למי שכבר רגיל לקצב. */
+  var rateBox = document.querySelector('.rate-ctl');
+  if (rateBox) {
+    rateBox.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', parseFloat(b.dataset.rate) === rate);
+      b.addEventListener('click', function(){
+        rate = parseFloat(b.dataset.rate);
+        rateBox.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        try { localStorage.setItem(RKEY, rate); } catch (e) {}
+        /* משנים באמצע? מפעילים מחדש מהמשפט הנוכחי, אחרת השינוי לא נשמע. */
+        if (cur && !paused) { synth.cancel(); next(); }
+      });
+    });
+  }
+
+  /* הערת איכות — מוצגת רק למי שבאמת אין לו קול עברי משופר, כי אצלו
+     ההבדל דרמטי והפתרון הוא הורדה חד-פעמית. */
+  function qualityHint(){
+    var note = document.querySelector('.tts-hint');
+    if (!note) return;
+    note.hidden = (!hasHe || isEnhanced);
+  }
+  setTimeout(function(){ pickVoice(); qualityHint(); }, 400);
+
   window.addEventListener('beforeunload', function(){ synth.cancel(); });
 })();
 
-/* ── ניווט: סימון הבלוק שנמצאים בו, וכפתור חזרה לראש ── */
+/* ── בקרת גודל טקסט ──
+   חמש דרגות סביב 19px. נשמר, כי מי שהגדיל פעם רוצה את זה גם בכניסה הבאה. */
+(function(){
+  var SIZES = [16, 17.5, 19, 21, 23.5], KEY = 'shichzurim.physFont';
+  var i = 2;
+  try { var v = parseInt(localStorage.getItem(KEY), 10); if (v >= 0 && v < SIZES.length) i = v; } catch (e) {}
+  var lvl = document.querySelector('.fontctl .lvl');
+  var btns = [].slice.call(document.querySelectorAll('.fontctl button'));
+
+  function apply(){
+    document.documentElement.style.fontSize = SIZES[i] + 'px';
+    if (lvl) lvl.textContent = Math.round(SIZES[i] / 19 * 100) + '%';
+    btns.forEach(function(b){
+      b.disabled = (b.dataset.font === '-' && i === 0) || (b.dataset.font === '+' && i === SIZES.length - 1);
+    });
+    try { localStorage.setItem(KEY, i); } catch (e) {}
+  }
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      i = Math.min(SIZES.length - 1, Math.max(0, i + (b.dataset.font === '+' ? 1 : -1)));
+      apply();
+    });
+  });
+  apply();
+})();
+
+/* ── ניווט: סרגל עליון, תוכן עניינים צדדי, וכפתור חזרה לראש ── */
 (function(){
   var links = [].slice.call(document.querySelectorAll('.navbar a'));
   var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
   var top = document.querySelector('.totop');
   top.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
 
+  /* התוכן נבנה מה-DOM ולא נכתב ידנית — כך הוא לא יכול להיפרד מהמסמך. */
+  var body = document.querySelector('.sidetoc-body');
+  var stocLinks = [], stocUnits = [];
+  document.querySelectorAll('.block').forEach(function(blk){
+    var units = blk.querySelectorAll('.unit');
+    if (!units.length) return;
+    var h = document.createElement('div');
+    h.className = 'stoc-blk';
+    h.textContent = blk.querySelector('h2').textContent.trim();
+    body.append(h);
+    units.forEach(function(u){
+      var a = document.createElement('a');
+      a.href = '#' + u.id;
+      /* בלי כפתורי ההקראה שיושבים בתוך ה-h3 */
+      a.textContent = u.querySelector('h3').childNodes[0].textContent.trim();
+      body.append(a);
+      stocLinks.push(a); stocUnits.push(u);
+    });
+  });
+
+  var toc = document.querySelector('.sidetoc');
+  var tog = toc.querySelector('.sidetoc-tog');
+  var FKEY = 'shichzurim.physToc';
+  try { if (localStorage.getItem(FKEY) === '1') { toc.classList.add('folded'); tog.textContent = '⟩'; } } catch (e) {}
+  tog.addEventListener('click', function(){
+    var folded = toc.classList.toggle('folded');
+    tog.textContent = folded ? '⟩' : '⟨';
+    tog.title = folded ? 'פתיחה' : 'קיפול';
+    try { localStorage.setItem(FKEY, folded ? '1' : '0'); } catch (e) {}
+  });
+
+  var lastOn = -1;
   function paint(){
     top.classList.toggle('show', window.scrollY > 700);
     var y = window.scrollY + 90, on = -1;
     targets.forEach(function(t,i){ if (t && t.offsetTop <= y) on = i; });
     links.forEach(function(a,i){ a.classList.toggle('on', i === on); });
+
+    var uOn = -1;
+    stocUnits.forEach(function(u,i){ if (u.offsetTop <= y + 40) uOn = i; });
+    if (uOn !== lastOn) {
+      stocLinks.forEach(function(a,i){ a.classList.toggle('on', i === uOn); });
+      /* גלילת התוכן עצמו, כדי שהנושא הפעיל לא ייצא מהמסגרת */
+      if (uOn >= 0 && !toc.classList.contains('folded')) {
+        var a = stocLinks[uOn], box = body.getBoundingClientRect(), r = a.getBoundingClientRect();
+        if (r.top < box.top + 8 || r.bottom > box.bottom - 8) {
+          body.scrollTop += (r.top - box.top) - box.height / 2 + r.height;
+        }
+      }
+      lastOn = uOn;
+    }
   }
   var tick = false;
   window.addEventListener('scroll', function(){
