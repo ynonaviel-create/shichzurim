@@ -33,9 +33,7 @@
     caseProg:   'shichzurim.caseProg',
     shinunProg: 'shichzurim.shinunProg',
     seenH:      'shichzurim.seenH',
-    /* מרחב חדש. עד שמיגרציה 0004 תרוץ ה-check ידחה אותו — וזה בטוח: flush
-       מזהה דחייה קבועה וזורק את הפעולה במקום לחסום את התור (ראו 0003). */
-    flag:       'shichzurim.flag',
+    flag:       'shichzurim.flag',   // הותר במיגרציה 0004
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 
@@ -50,7 +48,8 @@
       enabled: false, user: null, isAdmin: false,
       init: async () => {}, login: () => {}, logout: async () => {}, setName: async () => {},
       queue: () => {}, queueDelete: () => {}, queueClear: () => {}, queueClearPrefix: () => {},
-      track: () => {}, report: async () => ({ ok: false, reason: 'disabled' }), admin: {},
+      track: () => {}, report: async () => ({ ok: false, reason: 'disabled' }),
+      survey: async () => ({ ok: false, reason: 'disabled' }), admin: {},
       status: () => ({ pending: 0, lastSync: 0, syncing: false }),
     };
     return;
@@ -406,6 +405,21 @@
       } catch { return { ok: false, reason: 'net' }; }
     },
 
+    /* שליחת סקר המשוב (0007). כמו report — לא דרך ה-outbox, מחכים לתשובה.
+       answers הוא מסמך אחד עם כל התשובות; version מזהה את סבב הסקר. */
+    async survey(answers, version) {
+      if (!state.session) return { ok: false, reason: 'login' };
+      try {
+        const { error } = await sb.from('survey_responses').insert({
+          user_id: state.session.user.id,
+          version: version || 1,
+          answers,
+        });
+        if (error) return { ok: false, reason: error.message && error.message.includes('rate limit') ? 'rate' : 'server' };
+        return { ok: true };
+      } catch { return { ok: false, reason: 'net' }; }
+    },
+
     /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת).
        הפונקציות הישנות (0002) נשארות לקליינטים שמורים במטמון; הלוח הנוכחי
        קורא ל-v2 (0005): יום לפי שעון ישראל, ותובנות מ-user_kv. */
@@ -429,6 +443,9 @@
       /* דיווחי טעויות (0006) */
       reports:         (st, l)  => sb.rpc('admin_question_reports', { st: st ?? 'open', lim: l ?? 100 }),
       setReportStatus: (id, st) => sb.rpc('admin_set_report_status', { rid: id, new_status: st }),
+
+      /* תוצאות סקר המשוב (0007) — התשובה האחרונה של כל משתמש */
+      surveyResults:   (v)      => sb.rpc('admin_survey_results', { ver: v ?? 1 }),
     },
 
     status: () => ({ pending: outbox.length, lastSync: state.lastSync, syncing: state.syncing }),

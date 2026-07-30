@@ -2189,3 +2189,112 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .adm-rep-d{font-size:13.5px; color:var(--muted); line-height:1.6; margin:6px 0 0;}
 .adm-rep-acts{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;}
 a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
+
+/* ═══════════════ סקר המשוב — #/survey ═══════════════
+   אשף בן חמישה חלקים. אותם טוקנים כמו טופס הדיווח, כדי ששני המצבים
+   (בהיר/כהה) מכוסים מעצמם. הצ׳יפים יורשים את שפת .report-reason. */
+.survey{max-width:680px;}
+.sv-progress{
+  height:6px; border-radius:999px; background:var(--surface-2);
+  border:1px solid var(--line); overflow:hidden; margin-bottom:6px;
+}
+.sv-progress-bar{height:100%; background:var(--accent); border-radius:999px; transition:width .35s;}
+.sv-progress-label{font-size:12.5px; color:var(--muted); font-weight:700; margin-bottom:14px;}
+.sv-card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:22px 24px; box-shadow:var(--shadow);
+}
+.sv-step-head{display:flex; gap:12px; align-items:flex-start; margin-bottom:6px;}
+.sv-step-ico{font-size:26px; line-height:1.3;}
+.sv-step-head h2{margin:0; font-size:19px;}
+.sv-step-head p{margin:3px 0 0; font-size:13.5px; color:var(--muted); line-height:1.6;}
+.sv-q{margin:22px 0 0; padding-top:18px; border-top:1px dashed var(--line);}
+.sv-q-label{font-size:15px; font-weight:800; line-height:1.5;}
+.sv-req{color:var(--accent);}
+.sv-q-hint{font-size:12.5px; color:var(--muted); margin-top:3px;}
+.sv-note{
+  margin:22px 0 0; padding:13px 15px; font-size:13.5px; line-height:1.7;
+  background:var(--surface-2); border:1px solid var(--line);
+  border-inline-start:4px solid var(--accent); border-radius:10px; color:var(--text);
+}
+.sv-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.sv-chip{
+  border:1px solid var(--line); background:var(--surface-2); color:var(--text);
+  font-family:var(--font); font-size:13.5px; font-weight:700;
+  border-radius:999px; padding:7px 13px; cursor:pointer; transition:.15s;
+}
+.sv-chip:hover{border-color:var(--accent); color:var(--accent);}
+.sv-chip.on{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
+.sv-num{min-width:36px; padding:7px 0; text-align:center;}
+.sv-skip{color:var(--muted); font-weight:600;}
+.sv-scale{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:10px;}
+.sv-scale-edge{font-size:12px; color:var(--muted); font-weight:700; padding:0 2px;}
+.sv-grid{display:grid; gap:10px; margin-top:12px;}
+.sv-grid-row{
+  display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;
+  justify-content:space-between;
+}
+.sv-grid-name{font-size:13.5px; font-weight:700; flex:1 1 180px;}
+.sv-grid-cells{display:flex; gap:5px;}
+.sv-grid-cells .sv-num{min-width:32px; font-size:12.5px;}
+.sv-ta{
+  width:100%; resize:vertical; margin-top:10px;
+  padding:9px 13px; border-radius:var(--radius-sm);
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  font-family:var(--font); font-size:14px; line-height:1.6;
+}
+.sv-ta:focus{outline:none; border-color:var(--accent);}
+.sv-foot{
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  margin-top:24px; padding-top:16px; border-top:1px solid var(--line);
+}
+.sv-foot .btn[disabled]{opacity:.45; cursor:not-allowed;}
+.sv-msg{font-size:13px; font-weight:700; color:var(--muted);}
+.sv-msg.bad{color:var(--bad);}
+.survey-thanks{
+  text-align:center; padding:44px 20px; max-width:560px; margin:0 auto;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.survey-thanks-ico{font-size:52px;}
+.survey-thanks h2{margin:0; font-size:22px;}
+.survey-thanks p{margin:0 0 12px; font-size:14.5px; color:var(--muted); line-height:1.7;}
+
+/* תוצאות הסקר בלוח הבקרה */
+.adm-sv-dist{display:grid; gap:6px; margin-top:10px;}
+.adm-sv-row{display:flex; gap:10px; align-items:center; font-size:13px;}
+.adm-sv-name{flex:0 0 210px; font-weight:700; line-height:1.4;}
+.adm-sv-bar{flex:1; height:14px; background:var(--surface-2); border-radius:7px; overflow:hidden;}
+.adm-sv-fill{height:100%; background:var(--accent); border-radius:7px;}
+.adm-sv-n{flex:0 0 auto; color:var(--muted); font-weight:700; min-width:52px;}
+.adm-sv-txt{
+  font-size:13.5px; line-height:1.7; margin:8px 0 0; padding:9px 13px;
+  background:var(--surface-2); border-radius:10px; border:1px solid var(--line);
+}
+.adm-sv-txt small{display:block; color:var(--muted); font-size:11.5px; margin-top:3px;}
+@media (max-width:560px){
+  .adm-sv-name{flex-basis:120px;}
+  .sv-grid-cells{width:100%; justify-content:flex-start;}
+}
+
+/* באנר הסקר בעמוד הבית — גדול ובולט בכוונה, יורד רק בקוד */
+.survey-hero{
+  text-align:center; margin:0 0 26px; padding:34px 26px 22px;
+  background:linear-gradient(160deg, var(--accent-bg, var(--surface-2)), var(--surface));
+  border:2px solid var(--accent); border-radius:var(--radius);
+  box-shadow:var(--shadow-lg); position:relative; overflow:hidden;
+}
+.survey-hero-ico{font-size:46px; line-height:1; margin-bottom:8px;}
+.survey-hero h2{margin:0 0 8px; font-size:26px; letter-spacing:-.3px;}
+.survey-hero-sub{
+  margin:0 auto 18px; max-width:60ch; font-size:15px; line-height:1.8; color:var(--text);
+}
+.survey-hero-acts{justify-content:center;}
+.survey-hero-cta{font-size:16px; padding:12px 28px;}
+.survey-hero-mail{
+  margin:18px auto 0; padding-top:14px; border-top:1px dashed var(--line);
+  max-width:64ch; font-size:12.5px; line-height:1.7; color:var(--muted);
+}
+@media (max-width:560px){
+  .survey-hero{padding:26px 16px 18px;}
+  .survey-hero h2{font-size:22px;}
+}

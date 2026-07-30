@@ -854,11 +854,12 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet','simexam'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet','simexam','survey'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   if (route === 'admin') return renderAdmin();
   if (route === 'account') return renderAccount();
+  if (route === 'survey') return renderSurvey();
   if (route === 'course' && param) return renderCourse(param);
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
@@ -909,6 +910,10 @@ function renderHome() {
   head.append(el('p', null, 'בחר מקצוע. בתוכו — ללמוד, לתרגל, להיבחן, ולחזור על הטעויות.'));
   view.append(head);
 
+  /* באנר הסקר — ראשון ובולט, לפני כל השאר, עד שיירד בקוד. */
+  const wn = whatsNewBanner();
+  if (wn) view.append(wn);
+
   const namePr = namePrompt();
   if (namePr) view.append(namePr);
 
@@ -925,11 +930,6 @@ function renderHome() {
 
   const nextup = nextExamBanner();
   if (nextup) view.append(nextup);
-
-  /* מה חדש — מעל הפוש של השינון, כי הוא מכסה גם אותו (תיקון הסנכרון).
-     מתחת לספירה לאחור: המבחן הקרוב גובר על כל הודעה. */
-  const wn = whatsNewBanner();
-  if (wn) view.append(wn);
 
   const push = shinunHomePush();
   if (push) view.append(push);
@@ -3904,6 +3904,350 @@ function openReport({ courseId, item, chosen }) {
   document.body.append(overlay);
 }
 
+/* ================= סקר המשוב — סוף סמסטר ב׳ =================
+
+   עמוד #/survey. אחרי המבחנים המשתמשים נעלמים עד דצמבר, וזה החלון היחיד
+   לשמוע מהם מה עבד ומה לבנות. אשף בן חמישה חלקים, רובו לחיצות — 5–10 דקות.
+   טיוטה נשמרת מקומית בכל שינוי, כך שרענון או יציאה לא מוחקים כלום; השליחה
+   היא INSERT יחיד דרך Cloud.survey — מסמך jsonb אחד, כי הנוסח ישתנה בין
+   סבבים ואין טעם לטור-לכל-שאלה. */
+
+const SURVEY_VERSION   = 1;
+const SURVEY_DRAFT_KEY = 'shichzurim.surveyDraft.v1';
+const SURVEY_DONE_KEY  = 'shichzurim.surveyDone.v1';
+
+const SURVEY_FEATURES = [
+  ['exams',    '📝 שחזורים ותרגול שאלות'],
+  ['simexam',  '🎓 סימולציית מבחן מלאה'],
+  ['review',   '🔁 חזרה על טעויות'],
+  ['shinun',   '🧠 שינון — i❤️Shinun'],
+  ['guides',   '📖 הסיכומים המלאים'],
+  ['formulas', '📄 דף הנוסחאות'],
+];
+
+/* השאלות, חלק-חלק. required חוסם את "המשך" — רק על שאלות לחיצה: טקסט חופשי
+   לעולם לא חובה, כדי שהסקר ירגיש קל ולא כמו טופס ביורוקרטי. */
+function surveySteps() {
+  return [
+    { icon: '👋', title: 'קצת עליך', sub: 'חצי דקה של רקע — כדי שנדע לקרוא את שאר התשובות נכון.', qs: [
+      { k: 'courses', type: 'multi', required: true,
+        label: 'עם אילו מקצועות למדת כאן?', hint: 'אפשר לסמן כמה',
+        opts: COURSES.map((c) => [c.id, c.name]) },
+      { k: 'usage', type: 'single', required: true,
+        label: 'באיזו תדירות השתמשת באתר בתקופת המבחנים?',
+        opts: [['daily', 'כמעט כל יום'], ['weekly', 'כמה פעמים בשבוע'],
+               ['before', 'בעיקר בימים שלפני כל מבחן'], ['rare', 'פעמים בודדות']] },
+      { k: 'device', type: 'multi', required: true,
+        label: 'מאיפה בעיקר נכנסת?', hint: 'אפשר לסמן כמה',
+        opts: [['phone', '📱 טלפון'], ['computer', '💻 מחשב'], ['tablet', 'טאבלט']] },
+      { k: 'heard', type: 'single', required: true,
+        label: 'איך הגעת לאתר בפעם הראשונה?',
+        opts: [['friend', 'חבר/ה שלחו לי'], ['group', 'קבוצת הווטסאפ של השנתון'],
+               ['class', 'שמעתי בכיתה'], ['other', 'אחר / לא זוכר/ת']] },
+    ]},
+    { icon: '⭐', title: 'מה עבד', sub: 'דירוג כן עוזר: ככה נדע במה להשקיע ומה לחשוב עליו מחדש.', qs: [
+      { k: 'ratings', type: 'grid', required: true,
+        label: 'איך היית מדרג/ת כל חלק באתר?',
+        hint: '1 = לא עזר · 5 = הציל אותי. לא הכרתם? סמנו „לא השתמשתי”.',
+        opts: SURVEY_FEATURES },
+      { k: 'topFeature', type: 'single', required: true,
+        label: 'ואם חייבים לבחור אחד — מה הדבר שהכי עזר לך?',
+        opts: SURVEY_FEATURES },
+      { k: 'moment', type: 'text',
+        label: 'היה רגע שבו האתר ממש הציל אותך? נשמח לשמוע 🙂',
+        ph: 'לא חובה — למשל: „ערב לפני אלקטרו עברתי על כל הטעויות שלי ו…”' },
+    ]},
+    { icon: '🧩', title: 'מה חסר', sub: 'כאן אנחנו הכי צריכים אתכם — ביקורת אמיתית שווה יותר ממחמאה.', qs: [
+      { k: 'friction', type: 'multi', required: true,
+        label: 'מה הפריע או תסכל בשימוש?', hint: 'אפשר לסמן כמה',
+        opts: [['mistakes', 'טעויות בשאלות או בתשובות'], ['coverage', 'חסרו שאלות בנושאים מסוימים'],
+               ['explain', 'הסברים לא מספיק ברורים'], ['ui', 'הממשק — ניווט, עיצוב, נוחות'],
+               ['bugs', 'באגים ותקלות טכניות'], ['none', 'כלום — היה מצוין']] },
+      { k: 'frictionDetail', type: 'text',
+        label: 'אם משהו הפריע — איפה בדיוק?',
+        ph: 'לא חובה, אבל ככל שתפרטו כך נתקן טוב יותר — קורס, עמוד, דוגמה…' },
+      { k: 'missing', type: 'text',
+        label: 'מה הכי חשוב שיהיה כאן במבחני דצמבר?',
+        ph: 'קורסים, סוגי חומרים, פיצ׳רים — מה שהיה חסר לכם הסמסטר' },
+      { k: 'oneChange', type: 'text',
+        label: 'אם היית משנה דבר אחד באתר — מה?',
+        ph: 'לא חובה' },
+    ]},
+    { icon: '💎', title: 'כמה זה שווה', sub: 'שאלה כנה, בלי התחייבות משום צד.', qs: [
+      { k: 'impact', type: 'scale', required: true,
+        label: 'כמה האתר תרם להצלחה שלך במבחנים?',
+        lo: 'בקושי', hi: 'תרומה מכרעת' },
+      { k: 'nps', type: 'nps', required: true,
+        label: 'באיזו סבירות תמליץ/י על האתר לחבר/ה מהשנתון?',
+        lo: 'ממש לא', hi: 'בטוח' },
+      { k: '_payNote', type: 'note',
+        label: 'האתר חינמי, וכל מה שקיים בו יישאר פתוח. כדי שנוכל להמשיך לפתח ברצינות ' +
+               '(שרתים, כלים, המון שעות), אנחנו בודקים אפשרות שחלק מהתוספות העתידיות יהיו ' +
+               'בתשלום סמלי. שום דבר לא הוחלט — קודם שואלים אתכם.' },
+      { k: 'price', type: 'single', required: true,
+        label: 'אם חלק מהתוספות העתידיות יהיו בתשלום — איזה מחיר לסמסטר היה מרגיש לך הוגן?',
+        opts: [['0', 'הייתי נשאר/ת רק עם החלק החינמי'], ['10', 'עד 10 ₪'],
+               ['25', '10–25 ₪'], ['50', '25–50 ₪'],
+               ['more', 'גם יותר — אם זה שווה את זה']] },
+      { k: 'payFor', type: 'multi', required: true,
+        label: 'ועל מה היה שווה בעיניך לשלם?', hint: 'אפשר לסמן כמה',
+        opts: [['exams', 'עוד שחזורים ותרגול'], ['guides', 'סיכומים מלאים לכל קורס'],
+               ['sim', 'סימולציות מבחן'], ['shinun', 'חבילות שינון'],
+               ['anki', 'חפיסות אנקי מוכנות'], ['personal', 'מעקב אישי — מה לתרגל ומתי'],
+               ['nothing', 'שום דבר — רק חינמי']] },
+    ]},
+    { icon: '💜', title: 'מילה אחרונה', sub: 'זהו, כמעט סיימנו.', qs: [
+      { k: 'freeText', type: 'text', tall: true,
+        label: 'במה עוד בא לך לשתף?',
+        ph: 'ביקורת, רעיון, בקשה, מילה טובה — הכול מתקבל באהבה' },
+    ]},
+  ];
+}
+
+function surveyThanks(already) {
+  const w = el('div', 'survey-thanks');
+  w.append(el('div', 'survey-thanks-ico', '💜'));
+  w.append(el('h2', null, already ? 'כבר קיבלנו ממך תשובה — תודה!' : 'זהו! תודה ענקית 🙏'));
+  w.append(el('p', null,
+    'המשוב הזה הוא בדיוק מה שיקבע מה נבנה לקראת מבחני דצמבר. ' +
+    'חופשה נעימה — ונתראה בסמסטר הבא.'));
+  const again = el('button', 'btn ghost', 'למלא שוב');
+  again.title = 'מילוי חוזר — התשובה החדשה מחליפה את הקודמת (פעם ביום)';
+  again.onclick = () => {
+    try { localStorage.removeItem(SURVEY_DONE_KEY); } catch { /* ממשיכים */ }
+    renderSurvey();
+  };
+  w.append(again);
+  const home = el('a', 'btn', 'חזרה לארכיון');
+  home.title = 'חזרה למסך הבית';
+  home.href = '#/';
+  w.append(home);
+  return w;
+}
+
+function renderSurvey() {
+  setNav('home');
+  view.innerHTML = '';
+  const C = window.Cloud;
+  /* בלי חשבון אין למי לשייך את התשובה (וזה גם רסן הספאם) — כמו הדיווחים. */
+  if (C && C.enabled && !C.user) return renderLogin();
+
+  view.append(crumb('לארכיון', '#/'));
+
+  let alreadyDone = false;
+  try { alreadyDone = !!localStorage.getItem(SURVEY_DONE_KEY); } catch { /* ממשיכים */ }
+  if (alreadyDone) { view.append(surveyThanks(true)); toTop(); return; }
+
+  const steps = surveySteps();
+  let draft = {};
+  try { draft = JSON.parse(localStorage.getItem(SURVEY_DRAFT_KEY)) || {}; } catch { /* טיוטה חדשה */ }
+  if (!draft.startedAt) draft.startedAt = Date.now();
+  if (typeof draft.step !== 'number' || draft.step < 0 || draft.step >= steps.length) draft.step = 0;
+  const a = draft.answers = draft.answers || {};
+  const save = () => { try { localStorage.setItem(SURVEY_DRAFT_KEY, JSON.stringify(draft)); } catch { /* בלי טיוטה */ } };
+  save();
+
+  const head = el('div', 'page-head');
+  const nm = C?.user?.firstName;
+  head.append(el('h1', null, nm ? `${nm}, יש לנו בקשה קטנה 💜` : 'יש לנו בקשה קטנה 💜'));
+  head.append(el('p', null,
+    'סמסטר שלם למדנו יחד — עכשיו תורנו להקשיב. 5–10 דקות, רובן לחיצות, ' +
+    'והתשובות שלך יקבעו מה ייבנה כאן עד דצמבר. הטיוטה נשמרת — אפשר לצאת ולחזור.'));
+  view.append(head);
+
+  const wrap = el('div', 'survey');
+  view.append(wrap);
+
+  function answered(q) {
+    if (q.type === 'multi')  return Array.isArray(a[q.k]) && a[q.k].length > 0;
+    if (q.type === 'single') return a[q.k] != null;
+    if (q.type === 'scale' || q.type === 'nps') return typeof a[q.k] === 'number';
+    if (q.type === 'grid')   return q.opts.every(([fk]) => a[q.k] && a[q.k][fk] != null);
+    return true;   // text/note — לעולם לא חוסמים
+  }
+
+  function drawStep() {
+    wrap.innerHTML = '';
+    const si = draft.step;
+    const step = steps[si];
+    const paints = [];   // כל שאלה רושמת כאן צביעה-מחדש; שינוי קורא לכולן
+    const repaint = () => { paints.forEach((f) => f()); syncFoot(); };
+
+    /* פס התקדמות */
+    const prog = el('div', 'sv-progress');
+    const bar = el('div', 'sv-progress-bar');
+    bar.style.width = Math.round(((si + 1) / steps.length) * 100) + '%';
+    prog.append(bar);
+    wrap.append(prog);
+    wrap.append(el('div', 'sv-progress-label', `חלק ${si + 1} מתוך ${steps.length}`));
+
+    const card = el('div', 'sv-card');
+    const sh = el('div', 'sv-step-head');
+    sh.append(el('span', 'sv-step-ico', step.icon));
+    const sht = el('div');
+    sht.append(el('h2', null, step.title));
+    sht.append(el('p', null, step.sub));
+    sh.append(sht);
+    card.append(sh);
+
+    step.qs.forEach((q) => {
+      if (q.type === 'note') {
+        card.append(el('p', 'sv-note', q.label));
+        return;
+      }
+      const box = el('div', 'sv-q');
+      const lab = el('div', 'sv-q-label', q.label);
+      if (q.required) lab.append(el('span', 'sv-req', ' *'));
+      box.append(lab);
+      if (q.hint) box.append(el('div', 'sv-q-hint', q.hint));
+
+      if (q.type === 'single' || q.type === 'multi') {
+        const g = el('div', 'sv-chips');
+        q.opts.forEach(([val, label]) => {
+          const b = el('button', 'sv-chip', label);
+          b.type = 'button';
+          b.title = q.type === 'multi' ? 'אפשר לסמן כמה תשובות' : 'בחירת תשובה';
+          const isOn = () => (q.type === 'multi' ? (a[q.k] || []).includes(val) : a[q.k] === val);
+          paints.push(() => b.classList.toggle('on', isOn()));
+          b.onclick = () => {
+            if (q.type === 'multi') {
+              const cur = a[q.k] || [];
+              a[q.k] = isOn() ? cur.filter((x) => x !== val) : [...cur, val];
+            } else {
+              a[q.k] = a[q.k] === val ? null : val;
+            }
+            save(); repaint();
+          };
+          g.append(b);
+        });
+        box.append(g);
+      }
+
+      if (q.type === 'scale' || q.type === 'nps') {
+        const g = el('div', 'sv-scale');
+        g.append(el('span', 'sv-scale-edge', q.lo));
+        const nums = q.type === 'nps'
+          ? Array.from({ length: 11 }, (_, i) => i)
+          : [1, 2, 3, 4, 5];
+        nums.forEach((n) => {
+          const b = el('button', 'sv-chip sv-num', String(n));
+          b.type = 'button';
+          b.title = 'בחירת ' + n;
+          paints.push(() => b.classList.toggle('on', a[q.k] === n));
+          b.onclick = () => { a[q.k] = a[q.k] === n ? null : n; save(); repaint(); };
+          g.append(b);
+        });
+        g.append(el('span', 'sv-scale-edge', q.hi));
+        box.append(g);
+      }
+
+      if (q.type === 'grid') {
+        const g = el('div', 'sv-grid');
+        q.opts.forEach(([fk, flabel]) => {
+          const row = el('div', 'sv-grid-row');
+          row.append(el('span', 'sv-grid-name', flabel));
+          const cells = el('div', 'sv-grid-cells');
+          const vals = [[0, '✕'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']];
+          vals.forEach(([v, t]) => {
+            const b = el('button', 'sv-chip sv-num' + (v === 0 ? ' sv-skip' : ''), t);
+            b.type = 'button';
+            b.title = v === 0 ? 'לא השתמשתי בזה' : 'דירוג ' + v + ' מתוך 5';
+            paints.push(() => b.classList.toggle('on', a[q.k] && a[q.k][fk] === v));
+            b.onclick = () => {
+              a[q.k] = a[q.k] || {};
+              a[q.k][fk] = a[q.k][fk] === v ? null : v;
+              if (a[q.k][fk] == null) delete a[q.k][fk];
+              save(); repaint();
+            };
+            cells.append(b);
+          });
+          row.append(cells);
+          g.append(row);
+        });
+        box.append(g);
+      }
+
+      if (q.type === 'text') {
+        const ta = el('textarea', 'sv-ta');
+        ta.rows = q.tall ? 4 : 2;
+        ta.maxLength = 2000;
+        ta.placeholder = q.ph || '';
+        ta.value = a[q.k] || '';
+        ta.addEventListener('input', () => { a[q.k] = ta.value; save(); });
+        box.append(ta);
+      }
+
+      card.append(box);
+    });
+
+    /* ניווט בין החלקים */
+    const foot = el('div', 'sv-foot');
+    const back = el('button', 'btn ghost', '→ חזרה');
+    back.type = 'button';
+    back.title = 'חזרה לחלק הקודם — התשובות נשמרות';
+    back.style.visibility = si === 0 ? 'hidden' : 'visible';
+    back.onclick = () => { draft.step = si - 1; save(); drawStep(); toTop(); };
+    const last = si === steps.length - 1;
+    const next = el('button', 'btn primary', last ? '💜 שליחת המשוב' : 'המשך ←');
+    next.type = 'button';
+    next.title = last ? 'שליחת כל התשובות' : 'לחלק הבא';
+    const msg = el('span', 'sv-msg');
+    const missing = () => step.qs.filter((q) => q.required && !answered(q));
+
+    function syncFoot() {
+      const m = missing();
+      next.disabled = m.length > 0;
+      msg.textContent = m.length ? `נשאר לענות על ${m.length === 1 ? 'שאלה אחת' : m.length + ' שאלות'} בחלק הזה` : '';
+      msg.className = 'sv-msg';
+    }
+
+    next.onclick = async () => {
+      if (next.disabled) return;
+      if (!last) { draft.step = si + 1; save(); drawStep(); toTop(); return; }
+
+      next.disabled = true;
+      msg.textContent = 'שולח…';
+      const answers = {
+        ...a,
+        meta: {
+          tookSec: Math.round((Date.now() - draft.startedAt) / 1000),
+          build: BUILD || null,
+        },
+      };
+      const r = C && C.enabled
+        ? await C.survey(answers, SURVEY_VERSION)
+        : { ok: false, reason: 'disabled' };
+      if (r.ok || r.reason === 'rate') {
+        /* rate = כבר נקלטה תשובה היום — מבחינת המשתמש זה "נשלח". */
+        try {
+          localStorage.setItem(SURVEY_DONE_KEY, '1');
+          localStorage.removeItem(SURVEY_DRAFT_KEY);
+        } catch { /* ממשיכים */ }
+        head.remove();
+        wrap.innerHTML = '';
+        wrap.append(surveyThanks(false));
+        celebrate({ line: 'תודה ענקית! 💜', sub: 'המשוב נשלח — הוא באמת ישפיע', tier: 'high', confetti: 32, sound: 'big' });
+        toTop();
+      } else {
+        msg.textContent = r.reason === 'net'
+          ? '✗ אין חיבור — התשובות שמורות אצלך, נסו שוב עוד רגע.'
+          : '✗ השליחה נכשלה — התשובות שמורות אצלך, נסו שוב מאוחר יותר.';
+        msg.classList.add('bad');
+        next.disabled = false;
+      }
+    };
+
+    foot.append(back, next, msg);
+    card.append(foot);
+    wrap.append(card);
+    repaint();
+  }
+
+  drawStep();
+  toTop();
+  updateFooter();
+}
+
 /* השבב במשוב: לא "הנה דף הנוסחאות" אלא "זה היה בעמוד 2, סעיף קבוע הזמן". */
 function sheetButton(courseId, sec, label) {
   if (!sec) return null;
@@ -5211,75 +5555,38 @@ function shinunHomePush() {
    ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
    כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
    לשמוע על פיצ׳ר ב׳. */
-const ANNOUNCE_V7_KEY = 'shichzurim.announce.v7';
+/* באנר הסקר — גדול ובולט בראש עמוד הבית, בכוונה בלי כפתור סגירה קבוע:
+   הוא יורד לכולם רק כשנוריד אותו בקוד, ולמי שכבר מילא — מיד. "אחר כך"
+   מסתיר עד הביקור הבא (sessionStorage), לא לתמיד. */
 function whatsNewBanner() {
-  try { if (localStorage.getItem(ANNOUNCE_V7_KEY)) return null; } catch { return null; }
+  try { if (localStorage.getItem(SURVEY_DONE_KEY)) return null; } catch { return null; }
+  try { if (sessionStorage.getItem('shichzurim.surveyHeroHide')) return null; } catch { /* מציגים */ }
 
-  const b = el('div', 'intro whatsnew');
-  const txt = el('div');
-  txt.append(el('b', null, '☀️ בוקר טוב — עכשיו פיזיקה'));
-  txt.append(el('span', null,
-    'מקווים שהתאוששתם מאלקטרו. עכשיו הזמן לתת פוש אחרון לפיזיקה ולסיים את השנה כמו שצריך. ' +
-    'בנינו בשבילכם ארבעה דברים חדשים, וכולם כבר באתר:'));
+  const b = el('div', 'survey-hero');
+  b.append(el('div', 'survey-hero-ico', '🎉'));
+  b.append(el('h2', null, 'דקה לפני קו הסיום של שנה א׳'));
+  b.append(el('p', 'survey-hero-sub',
+    'כל הכבוד על השנה הזאת 💪 ולפני שכולם מתפזרים לחופשה — יש לנו בקשה אחת קטנה: ' +
+    '5–10 דקות של משוב. מה עזר, מה חסר, ומה לבנות לכם עד מבחני דצמבר. ' +
+    'זה הזמן היחיד בשנה לשמוע אתכם — והתשובות באמת קובעות מה יהיה כאן.'));
 
-  const list = el('ul', 'whatsnew-list');
-  [
-    ['📖', 'הסיכום המלא לפיזיקה — 21 הנושאים לעומק',
-     'כל נושא: הרעיון, איור שמסביר אותו, החיבור הרפואי, והמלכודות שנבחנות (101 מלכודות בסך הכול). ' +
-     'יש בו גם כפתור הקראה לכל פרק — נוח להאזין בדרך — וקישור ישיר מכל נושא לשאלות התרגול שלו. ' +
-     'נכתב מהקלטות ההרצאות, ממצגות הקורס ומהתרגולים.'],
-    ['🎓', 'סימולציית מבחן: 50 שאלות, 3 שעות',
-     'המבחן הוא 50 שאלות בשלוש שעות, ועכשיו אפשר להתאמן בדיוק על זה — פיזור נושאים ריאלי, טיימר, ' +
-     'ומשוב שנחשף רק בהגשה. בסוף הזמן לא קורה כלום חוץ מהודעה: המטרה כאן ללמוד, לא להיפסל. ' +
-     'אפשר לצאת ולחזור, השאלות והשעון נשמרים.'],
-    ['📄', 'דף הנוסחאות הרשמי — עכשיו גם בפיזיקה',
-     'הדף שמחולק במבחן זמין בתוך התרגול, ולכל סעיף בו יש הסבר קצר: מה הרעיון מאחורי הנוסחה, לא רק ' +
-     'איך להציב. כדאי להתאמן למצוא דברים בדף — במבחן הבנתי זה שווה יותר משינון.'],
-    ['✍️', 'מאגר השאלות גדל ל-305',
-     'הוספנו 88 שאלות חדשות בדיוק בנושאים שהיו הכי דלים: מגנטיות (49), גלים (51) ודימות (56). ' +
-     'כל שאלה אומתה פיזיקלית אחת-אחת, ולכל אחת הסבר מלא — כולל למה כל מסיח שגוי.'],
-  ].forEach(([ico, title, body]) => {
-    const li = el('li');
-    li.append(el('span', 'whatsnew-ico', ico));
-    const d = el('div');
-    d.append(el('b', null, title));
-    d.append(el('span', null, body));
-    li.append(d);
-    list.append(li);
-  });
-  txt.append(list);
-
-  /* ההמלצה עצמה — בלי זה זו רשימת פיצ׳רים, ולא עצה מה לעשות איתם. */
-  const tip = el('div', 'whatsnew-tip');
-  tip.append(el('b', null, '🧭 ואיך ללמוד עם זה בימים שנשארו'));
-  tip.append(el('span', null,
-    'המבחן בודק הבנה, כמעט בלי חישוב — ולכן שינון נוסחאות הוא הדבר הכי פחות משתלם. ' +
-    'הסדר שאנחנו ממליצים עליו: (1) לקרוא נושא בסיכום ומיד לתרגל אותו, במקום לקרוא הכול ואז לתרגל הכול; ' +
-    '(2) לתת דגש למלכודות — שם נופלים; (3) מי שנושא לא יושב לו, לפתוח את הסרטון של אותו נושא — ' +
-    'יש מסלול צפייה מסודר בראש הסיכום שאומר מה לראות ומה אפשר לדלג עליו; ' +
-    '(4) ערב לפני — סימולציה אחת מלאה, ובבוקר המבחן רק את פרק „הרגע האחרון” שבסוף הסיכום.'));
-  txt.append(tip);
-  b.append(txt);
-
-  const acts = el('div', 'btn-row');
-  const go = el('a', 'btn primary', '📖 לפתוח את הסיכום');
-  go.title = 'הסיכום המלא לפיזיקה — נפתח בלשונית חדשה';
-  go.href = 'guides/physics-full.html';
-  go.target = '_blank';
-  go.rel = 'noopener';
+  const acts = el('div', 'btn-row survey-hero-acts');
+  const go = el('a', 'btn primary survey-hero-cta', '💜 למילוי הסקר');
+  go.title = 'סקר המשוב — 5–10 דקות שקובעות את הגרסה הבאה';
+  go.href = '#/survey';
   acts.append(go);
-  const sim = el('a', 'btn', '🎓 לסימולציה');
-  sim.title = 'סימולציית מבחן מלאה — 50 שאלות בשלוש שעות, בתנאי אמת';
-  sim.href = '#/simexam/physics';
-  acts.append(sim);
-  const ok = el('button', 'btn ghost', 'הבנתי, תודה 👍');
-  ok.title = 'סגירת ההודעה — לא תופיע שוב';
-  ok.onclick = () => {
-    try { localStorage.setItem(ANNOUNCE_V7_KEY, '1'); } catch {}
+  const later = el('button', 'btn ghost', 'אחר כך');
+  later.title = 'הסתרה לביקור הזה — הבאנר יחזור בפעם הבאה, והסקר תמיד זמין';
+  later.onclick = () => {
+    try { sessionStorage.setItem('shichzurim.surveyHeroHide', '1'); } catch { /* מסתירים */ }
     b.remove();
   };
-  acts.append(ok);
+  acts.append(later);
   b.append(acts);
+
+  b.append(el('p', 'survey-hero-mail',
+    '📮 דרך אגב: הכתובת שאיתה נכנסת (מגוגל) שמורה אצלנו, ונשתמש בה מדי פעם לעדכונים חשובים — ' +
+    'חומרים חדשים ומבחנים קרבים. בלי ספאם. מעדיפים בלי? כתבו לנו ל-shichzurim52@gmail.com ונסיר מיד.'));
   return b;
 }
 
@@ -5414,7 +5721,7 @@ function renderAccount() {
     const dump = {};
     /* כל מפתח שנושא התקדמות אמיתית. השינון נשכח כאן כשהוא נוסף, והגיבוי
        הבטיח יותר ממה שנתן — מי ששחזר ממנו קיבל חזרה מבחנים בלי הקופסאות. */
-    [KEY, SEEN_Q_KEY, SEENH_KEY, CARDS_READ_KEY, CASE_KEY, SHINUN_KEY, SHINUN_CELEB_KEY]
+    [KEY, SEEN_Q_KEY, SEENH_KEY, CARDS_READ_KEY, CASE_KEY, SHINUN_KEY, SHINUN_CELEB_KEY, FLAG_KEY]
       .forEach((k) => { dump[k] = localStorage.getItem(k); });
     try {
       await navigator.clipboard.writeText(JSON.stringify(dump));
@@ -5751,7 +6058,7 @@ async function renderAdmin() {
     }
 
     /* כותבים לפי namespace בשבוע. מרחב מוכר שצנח לאפס = דגל אדום. */
-    const KNOWN_NS = ['progress', 'seen', 'seenH', 'shinunProg', 'cardsRead', 'caseProg'];
+    const KNOWN_NS = ['progress', 'seen', 'seenH', 'shinunProg', 'cardsRead', 'caseProg', 'flag'];
     const got = {};
     (o.ns_7d || []).forEach((r) => { got[r.ns] = r; });
     const nsWrap = el('div', 'adm-ns');
@@ -5814,6 +6121,147 @@ async function renderAdmin() {
       card.append(acts);
       box.append(card);
     });
+  });
+
+  /* ── 2.7 סקר המשוב — התשובה האחרונה של כל משיב, אגרגטים + טקסטים ── */
+  const sSv = admSection('📋 סקר המשוב');
+  const svBox = el('div');
+  sSv.append(svBox);
+  view.append(sSv);
+
+  section(svBox, async (box) => {
+    const rows = await rpc(C.admin.surveyResults(1));
+    if (!rows || !rows.length) {
+      box.append(el('p', 'adm-empty', 'עוד אין תשובות לסקר.'));
+      return;
+    }
+    const answers = rows.map((r) => r.answers || {});
+    const n = answers.length;
+
+    /* תוויות התשובות — מאותה הגדרה של הסקר עצמו, כדי שאין שתי אמיתות. */
+    const labelOf = {};
+    surveySteps().forEach((st) => st.qs.forEach((q) => {
+      if (q.opts) { labelOf[q.k] = {}; q.opts.forEach(([v, l]) => { labelOf[q.k][v] = l; }); }
+    }));
+
+    /* פס התפלגות אחד: שם, פס יחסי למקסימום, ומונה. */
+    const dist = (title, counts, denom) => {
+      const entries = Object.entries(counts).sort((x, y) => y[1] - x[1]);
+      if (!entries.length) return null;
+      const max = entries[0][1];
+      const card = admCard(title);
+      const wrapD = el('div', 'adm-sv-dist');
+      entries.forEach(([name, cnt]) => {
+        const row = el('div', 'adm-sv-row');
+        row.append(el('span', 'adm-sv-name', name));
+        const bar = el('div', 'adm-sv-bar');
+        const fill = el('div', 'adm-sv-fill');
+        fill.style.width = Math.round((cnt / max) * 100) + '%';
+        bar.append(fill);
+        row.append(bar);
+        row.append(el('span', 'adm-sv-n', `${cnt} · ${Math.round((cnt / (denom || n)) * 100)}%`));
+        wrapD.append(row);
+      });
+      card.append(wrapD);
+      return card;
+    };
+    const countBy = (k, multi) => {
+      const c = {};
+      answers.forEach((ans) => {
+        const v = ans[k];
+        (multi ? (Array.isArray(v) ? v : []) : (v == null ? [] : [v])).forEach((x) => {
+          const l = (labelOf[k] && labelOf[k][x]) || String(x);
+          c[l] = (c[l] || 0) + 1;
+        });
+      });
+      return c;
+    };
+
+    /* KPI: משיבים, תרומה ממוצעת, NPS, זמן מילוי חציוני */
+    const kpisSv = el('div', 'adm-kpis');
+    kpisSv.append(kpiCard(n, 'משיבים', '🗳️', 'accent'));
+    const impacts = answers.map((x) => x.impact).filter((x) => typeof x === 'number');
+    if (impacts.length) {
+      kpisSv.append(kpiCard((impacts.reduce((s, x) => s + x, 0) / impacts.length).toFixed(1) + '/5',
+        'תרומה להצלחה', '📈', 'good'));
+    }
+    const npsV = answers.map((x) => x.nps).filter((x) => typeof x === 'number');
+    if (npsV.length) {
+      /* NPS קלאסי: אחוז ממליצים (9–10) פחות אחוז מסתייגים (0–6). */
+      const promo = npsV.filter((x) => x >= 9).length, detr = npsV.filter((x) => x <= 6).length;
+      kpisSv.append(kpiCard(Math.round(((promo - detr) / npsV.length) * 100), 'NPS', '💜'));
+    }
+    const times = answers.map((x) => x.meta && x.meta.tookSec).filter((x) => typeof x === 'number').sort((a2, b2) => a2 - b2);
+    if (times.length) kpisSv.append(kpiCard(Math.round(times[Math.floor(times.length / 2)] / 60) + ' דק׳', 'זמן מילוי חציוני', '⏱️'));
+    box.append(kpisSv);
+
+    /* דירוגי הפיצ׳רים: ממוצע בקרב מי שהשתמש + כמה השתמשו. */
+    const rCard = admCard('⭐ דירוג לפי פיצ׳ר', 'ממוצע 1–5 בקרב מי שהשתמש · ✕ = לא השתמשו');
+    const rWrap = el('div', 'adm-sv-dist');
+    SURVEY_FEATURES.forEach(([fk, fl]) => {
+      const vals = answers.map((x) => x.ratings && x.ratings[fk]).filter((x) => typeof x === 'number');
+      const used = vals.filter((x) => x > 0);
+      const avg = used.length ? used.reduce((s, x) => s + x, 0) / used.length : 0;
+      const row = el('div', 'adm-sv-row');
+      row.append(el('span', 'adm-sv-name', fl));
+      const bar = el('div', 'adm-sv-bar');
+      const fill = el('div', 'adm-sv-fill');
+      fill.style.width = Math.round((avg / 5) * 100) + '%';
+      bar.append(fill);
+      row.append(bar);
+      row.append(el('span', 'adm-sv-n', used.length ? `${avg.toFixed(1)} · ${used.length}👤` : '—'));
+      row.title = `${used.length} השתמשו מתוך ${vals.length} שענו`;
+      rWrap.append(row);
+    });
+    rCard.append(rWrap);
+    box.append(rCard);
+
+    [
+      dist('🏆 הדבר האחד שהכי עזר', countBy('topFeature')),
+      dist('📚 עם אילו מקצועות למדו', countBy('courses', true)),
+      dist('🕐 תדירות שימוש', countBy('usage')),
+      dist('🧩 מה הפריע', countBy('friction', true)),
+      dist('💰 מחיר הוגן לסמסטר', countBy('price')),
+      dist('🛒 על מה שווה לשלם', countBy('payFor', true)),
+      dist('📱 מכשירים', countBy('device', true)),
+      dist('📣 איך שמעו עלינו', countBy('heard')),
+    ].forEach((c2) => { if (c2) box.append(c2); });
+
+    /* הטקסטים החופשיים — הזהב האמיתי. כל תשובה עם הקשר קצר. */
+    const TEXT_QS = [
+      ['moment', '🙂 רגע שהאתר הציל'],
+      ['frictionDetail', '🔧 מה הפריע — פירוט'],
+      ['missing', '🎯 מה חשוב לדצמבר'],
+      ['oneChange', '🪄 הדבר האחד לשינוי'],
+      ['freeText', '💬 מילים אחרונות'],
+    ];
+    TEXT_QS.forEach(([k, title]) => {
+      const items = answers
+        .map((ans) => ({ t: (ans[k] || '').trim(), who: (ans.courses || []).map((cid) => (labelOf.courses && labelOf.courses[cid]) || cid).join(', ') }))
+        .filter((x) => x.t);
+      if (!items.length) return;
+      const card = admCard(`${title} · ${items.length}`);
+      items.forEach(({ t, who }) => {
+        const p = el('div', 'adm-sv-txt');
+        p.textContent = t;
+        if (who) p.append(el('small', null, who));
+        card.append(p);
+      });
+      box.append(card);
+    });
+
+    /* ייצוא גולמי — הצינור לניתוח עומק מחוץ ללוח. */
+    const expRow = el('div', 'adm-rep-acts');
+    const expBtn = el('button', 'adm-chip', '📋 העתקת כל התשובות (JSON)');
+    expBtn.title = 'העתקה ללוח של כל התשובות הגולמיות — לניתוח מעמיק';
+    expBtn.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(rows, null, 1));
+        expBtn.textContent = '✓ הועתק ללוח';
+      } catch { expBtn.textContent = 'ההעתקה נחסמה'; }
+    };
+    expRow.append(expBtn);
+    box.append(expRow);
   });
 
   /* ── 3. מגמות שימוש — הצ׳יפים חלים על הסקשן הזה בלבד ─────────────── */
