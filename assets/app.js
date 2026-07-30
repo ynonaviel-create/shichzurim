@@ -1293,6 +1293,8 @@ function renderCourse(courseId) {
   };
   const lg = el('div', 'learn-grid');
   if (c.studyDoc) lg.append(learnCard('📖', 'הסיכום המלא', c.studyDoc.meta || 'קריאה לעומק', c.studyDoc.href));
+  /* מסמכים נוספים לצד הסיכום — מוגדרים כולם בדאטה (courses.json), אפס ידע במנוע. */
+  (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
   if (hasGuide) {
     const gcard = learnCard('🗺️', 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId);
     gcard.dataset.tour = 'guide';   // עוגן לסיור

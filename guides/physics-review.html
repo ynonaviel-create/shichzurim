@@ -1,0 +1,205 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<title>פיזיקה ב׳ — סיכום שיעור החזרה</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#185FA5">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127891;</text></svg>">
+<script>
+  (function(){try{
+    var s=localStorage.getItem('shichzurim.theme');
+    var mode=(s==='light'||s==='dark'||s==='auto')?s:'auto';
+    var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme',mode==='auto'?(dark?'dark':'light'):mode);
+    document.documentElement.setAttribute('data-theme-mode',mode);
+  }catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a222c; --dim:#5a6773; --faint:#7a8a99;
+  --bg:#fff; --panel:#f4f7fa; --line:#e2e9f0;
+  --brand:#185FA5; --brand-dp:#0d3f74; --brand-lt:#7fc4ff;
+  --warn:#a35a08; --warn-bg:#fff8f1; --warn-ln:#f5ddc4;
+  --ok:#1a7a4a;
+}
+:root[data-theme="dark"]{
+  --ink:#dde5ec; --dim:#a7b4c0; --faint:#8494a2;
+  --bg:#0f151c; --panel:#151d26; --line:#26313d;
+  --brand:#7fc4ff; --brand-dp:#a8d8ff; --brand-lt:#7fc4ff;
+  --warn:#e5a95f; --warn-bg:#1e1810; --warn-ln:#3d3020;
+  --ok:#5fd39b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:19px;font-family:'Assistant',sans-serif;scroll-behavior:smooth}
+body{direction:rtl;line-height:1.85;color:var(--ink);background:var(--bg);
+  max-width:50rem;margin:0 auto;padding:0 1.6rem 6rem}
+h1,h2,h3,b,strong{font-family:'Heebo',sans-serif;line-height:1.3;font-weight:800}
+p{margin-bottom:.75rem}
+a{color:var(--brand)}
+
+.cover{margin:0 -1.6rem 2.2rem;padding:3rem 1.9rem 2.4rem;color:#fff;
+  background:linear-gradient(155deg,#0d3f74 0%,#185FA5 55%,#0a2036 100%)}
+.cover .eyebrow{font-size:.78rem;letter-spacing:.1em;opacity:.72}
+.cover h1{font-size:2.3rem;letter-spacing:-.02em;margin:.7rem 0 0}
+.cover .sub{font-size:1.04rem;font-weight:400;opacity:.93;margin-top:.7rem;
+  border-right:3px solid var(--brand-lt);padding-right:.9rem}
+.cover .st{display:flex;flex-wrap:wrap;gap:1.6rem;margin-top:1.6rem}
+.cover .st b{display:block;font-size:1.6rem;color:#9fd4ff;line-height:1.1}
+.cover .st span{font-size:.8rem;opacity:.75}
+.cover .rec{display:inline-flex;align-items:center;gap:.45rem;margin-top:1.5rem;
+  font-family:'Heebo';font-size:.9rem;font-weight:800;text-decoration:none;color:#fff;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);
+  border-radius:99px;padding:.45rem 1.1rem;transition:.15s}
+.cover .rec:hover{background:rgba(255,255,255,.26)}
+
+section{margin-top:2.6rem}
+section>h2{font-size:1.55rem;color:var(--brand);margin-bottom:.7rem}
+.lead{font-size:1.02rem;background:color-mix(in srgb,var(--brand) 6%,transparent);
+  border-inline-start:3px solid var(--brand-lt);padding:.75rem 1rem;border-radius:0 10px 10px 0;margin-bottom:1rem}
+
+.sig{border:1px solid var(--line);border-radius:12px;background:var(--panel);
+  padding:.85rem 1.1rem;margin-bottom:.65rem}
+.sig b{color:var(--brand-dp)}
+:root[data-theme="dark"] .sig b{color:var(--brand)}
+.sig.hot{background:var(--warn-bg);border-color:var(--warn-ln)}
+.sig.hot b{color:var(--warn)}
+.sig p{margin:0;font-size:.97rem}
+.sig .say{display:block;font-size:.85rem;color:var(--faint);margin-top:.25rem;font-style:italic}
+
+.qa{border:1px solid var(--line);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:.75rem}
+.qa h3{font-size:1.05rem;color:var(--brand-dp);margin-bottom:.3rem}
+:root[data-theme="dark"] .qa h3{color:var(--brand)}
+.qa p{font-size:.95rem;margin-bottom:.4rem}
+.qa .why{font-size:.86rem;color:var(--dim)}
+.drill{display:inline-flex;align-items:center;gap:.4rem;margin-top:.35rem;
+  font-family:'Heebo';font-size:.82rem;font-weight:800;text-decoration:none;
+  background:color-mix(in srgb,var(--brand) 10%,transparent);color:var(--brand);
+  border:1px solid color-mix(in srgb,var(--brand) 30%,transparent);
+  border-radius:99px;padding:.3rem .9rem;transition:.15s;margin-inline-end:.35rem}
+.drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+:root[data-theme="dark"] .drill:hover{color:#0f151c}
+
+.tips{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.3rem}
+.tips li{margin-inline-start:1.1rem;margin-bottom:.35rem;font-size:.97rem}
+
+.back{display:inline-flex;margin-top:2.6rem;font-family:'Heebo';font-weight:800;text-decoration:none}
+</style>
+</head><body>
+
+<div class="cover">
+  <div class="eyebrow">🎓 פיסיקה לרפואנים ב׳ · פרופ׳ נצח פרביאש</div>
+  <h1>שיעור החזרה — מה חשוב לקחת ממנו</h1>
+  <p class="sub">התקיים ב-30/07/2026, יום לפני מועד א׳. נצח ענה לשאלות הכיתה — וזרק כמה רמזים ברורים על המבחן. זה הסיכום, עם קישור ישיר לתרגול של כל נושא שעלה.</p>
+  <div class="st">
+    <div><b>~20%</b><span>מהמבחן — שאלות שהכיתה כתבה</span></div>
+    <div><b>0</b><span>חישובים מסובכים</span></div>
+    <div><b>7</b><span>נושאים שהכיתה שאלה עליהם</span></div>
+  </div>
+  <a class="rec" href="https://youtu.be/EbusOML1FJ0" target="_blank" rel="noopener" title="ההקלטה המלאה של שיעור החזרה ביוטיוב">▶️ להקלטה המלאה (47 דק׳)</a>
+</div>
+
+<section id="signals">
+  <h2>🎯 מה נצח אמר על המבחן עצמו</h2>
+  <p class="lead">אלה האמירות הישירות — לא פרשנות. כל אחת מהן מכוונת איפה לשים את שעות החזרה האחרונות.</p>
+
+  <div class="sig hot">
+    <p><b>~20% מהמבחן = השאלות שהכיתה כתבה.</b> "20% מהשאלות האלה, שאלות שאתם בעצמכם חיברתם… אתם אמורים להכיר." שני הבנקים האלה הם החזרה הכי משתלמת שיש:</p>
+    <p style="margin-top:.45rem">
+      <a class="drill" href="../index.html#/exam/physics-class" target="_blank" rel="noopener" title="40 השאלות שהכיתה כתבה">✍️ שאלות הכיתה (40)</a>
+      <a class="drill" href="../index.html#/exam/physics-submitted" target="_blank" rel="noopener" title="7 השאלות עם האיורים שהוגשו לנצח">📐 הוגשו למרצה (7)</a>
+    </p>
+  </div>
+
+  <div class="sig">
+    <p><b>מבחן הבנתי, כמעט בלי חישוב.</b> "החישובים יהיו די מינימליסטיים… זה לא מבחן עם שאלות נורא מורכבות חישוביות" — ודומה מאוד בסגנון לסמסטר א׳. הובטח במפורש שלא יהיו חישובי ביו-סבר וקטוריים מורכבים.</p>
+  </div>
+
+  <div class="sig">
+    <p><b>חומר סמסטר א׳ (קולון, גאוס) לא מנותק.</b> הוא לא יופיע "כחומר נפרד", אבל "אתה לא יכול להבין שדה מגנטי בלי שאתה מבין מה זה מטען חשמלי ומה זה שדה". צריך להיות שלמים עם היסודות.</p>
+  </div>
+
+  <div class="sig">
+    <p><b>כל הנגדים במבחן אוהמיים.</b> נגדים שמתחממים ולא מצייתים לחוק אוהם — "לא ניגע בזה". אין מלכודת כזו.</p>
+  </div>
+
+  <div class="sig">
+    <p><b>דף הנוסחאות מכיל הרבה מעבר לנדרש.</b> "אל תסתכלו על דף הנוסחאות ותגידו אוי ואבוי" — הוא הורחב כי הכיתה ביקשה, לא כי הכול נחוץ. שום נוסחה לא חסרה (כולל בגלים).
+    <span class="say">שווה לעבור עליו עם ההסברים: <a href="../index.html#/sheet/physics" target="_blank" rel="noopener">דף הנוסחאות המוער בארכיון</a></span></p>
+  </div>
+
+  <div class="sig">
+    <p><b>שדה כדור הארץ — בלי דקויות.</b> לרמת הקורס: הקוטב המגנטי הצפוני ≈ הצפון הגאוגרפי. העובדה שהצפון הגאוגרפי הוא "בעצם קוטב מגנטי דרומי" — "שוליים איזוטריים", לא במבחן.</p>
+  </div>
+</section>
+
+<section id="questions">
+  <h2>🧭 מה הכיתה שאלה — ואיך לסגור כל פער</h2>
+  <p class="lead">הנושאים שסטודנטים ביקשו חיזוק עליהם יום לפני המבחן הם בדיוק הנושאים שכולם מגיעים אליהם הכי פחות בטוחים. אם משהו מהרשימה מרגיש רופף — יש כפתור.</p>
+
+  <div class="qa">
+    <h3>מגנטיות — כלל יד ימין ותילים מקבילים</h3>
+    <p>המסר של נצח: להפסיק לשנן תנועות יד ולהבין <b>מי יוצר את השדה, מי מושפע ממנו, ומה הכיוון</b>. תיל נושא זרם: אגודל = זרם, אצבעות = השדה. תילים מקבילים: מניחים תיל, רואים איזה שדה הוא יוצר אצל השכן, ומפעילים F=IL×B — זרמים באותו כיוון נמשכים. "אין בקורס הזה צורות נורא מוזרות".</p>
+    <p class="why">כוח לורנץ לא מבצע עבודה (מאונך למהירות), ותיל = אוסף מטענים בתנועה — אפשר תמיד לחזור לבסיס.</p>
+    <a class="drill" href="../index.html#/practice/physics/שדה מגנטי וכוח לורנץ" target="_blank" rel="noopener">🏋️ שדה מגנטי וכוח לורנץ</a>
+    <a class="drill" href="../index.html#/practice/physics/כוח מגנטי על תיל, ביו-סבאר ואמפר" target="_blank" rel="noopener">🏋️ כוח על תיל ואמפר</a>
+  </div>
+
+  <div class="qa">
+    <h3>שלושת השדות — המסגרת שנצח הכי אוהב</h3>
+    <p>כבידה: מסות יוצרות, מסות מושפעות. שדה חשמלי: מטענים יוצרים, מטענים מושפעים. שדה מגנטי: <b>לולאות זרם יוצרות, ורק מטענים בתנועה מושפעים</b>. מטען נייח בשדה מגנטי — לא קורה לו כלום; חלקיק נייטרלי בשדה חשמלי — שקוף עבורו. (הדוגמה שלו: לשביט שני זנבות, כי רק החלקיקים הטעונים מוסטים.)</p>
+    <p class="why">"זאת הדרך הכי נכונה וקלה לזכור" — במילים שלו. מסגרת מצוינת לשאלות השוואה.</p>
+  </div>
+
+  <div class="qa">
+    <h3>גאוס מול אמפר, ומה זה שטף</h3>
+    <p>גאוס: מעטפת סגורה (קליפת תפוח אדמה) קושרת בין <b>המטען הכלוא בפנים</b> לשטף החשמלי דרך הקליפה — מטענים חיצוניים תורמים אפס (הקוץ נכנס ויוצא). אמפר: אותו רעיון לזרמים — לולאה שנותנת את גודל השדה סביב תיל. השטף הוא כלי חישוב, לא ישות נפרדת.</p>
+    <a class="drill" href="../index.html#/practice/physics/חוק גאוס ויישומיו" target="_blank" rel="noopener">🏋️ חוק גאוס</a>
+  </div>
+
+  <div class="qa">
+    <h3>שטף מגנטי — ה-sin בדף הנוסחאות אינו טעות</h3>
+    <p>הדף הרשמי כותב Φ=B·A⊥ עם <b>sinα כשהזווית נמדדת למישור הלולאה</b>; המכפלה הסקלרית היא cos לזווית מהנורמל. אותו דבר בדיוק (sin של זווית = cos של המשלימה). נצח: "לא צריכה להיות לכם בעיה עם זה… זה לא ישפיע על אף שאלה".</p>
+    <a class="drill" href="../index.html#/practice/physics/אינדוקציה — פאראדיי-לנץ" target="_blank" rel="noopener">🏋️ אינדוקציה — פאראדיי-לנץ</a>
+  </div>
+
+  <div class="qa">
+    <h3>גלים עומדים — למה רק אורכי גל מסוימים</h3>
+    <p>גל עומד אינו גל ש"עומד": פריטה יוצרת גלים נוסעים, הם פוגשים את תנאי השפה (קצוות קשורים), חוזרים — <b>ובאורך מתאים ההתאבכות של הנוסע והחוזר בונה תבנית עומדת</b>. לכן כלי נגינה מתוכננים מראש: אורך, מסה ליחידת אורך ומתיחות קובעים את התדירויות.</p>
+    <a class="drill" href="../index.html#/practice/physics/גלים, קול ואפקט דופלר" target="_blank" rel="noopener">🏋️ גלים וקול</a>
+  </div>
+
+  <div class="qa">
+    <h3>ברנולי — התנאי שכולם שוכחים</h3>
+    <p>ברנולי הוא <b>שימור אנרגיה עם ממד של לחץ</b> — ולכן תקף רק כשהאנרגיה נשמרת. "אם יש לי לב שדוחף — האנרגיה לא נשמרת"; משאבה, עבודה חיצונית, איבוד לחיכוך — ברנולי לא חל. זה נשמע כמו מסיח מוכן לשאלה.</p>
+    <a class="drill" href="../index.html#/practice/physics/משוואת ברנולי וספיקה" target="_blank" rel="noopener">🏋️ ברנולי וספיקה</a>
+  </div>
+
+  <div class="qa">
+    <h3>קירכהוף — צומת ועניבה בשתי שורות</h3>
+    <p>צומת: מה שנכנס יוצא — הצומת לא מייצר ולא מעלים זרם (שימור מטען). עניבה: יוצאים מצומת וחוזרים אליו דרך מעגל סגור — <b>סך האפסילונים = סך ה-IR</b> (שימור אנרגיה), עם סימנים לפי כיוון ההליכה מול כיוון הזרם.</p>
+    <a class="drill" href="../index.html#/practice/physics/מעגלים וחוקי קירכהוף" target="_blank" rel="noopener">🏋️ מעגלים וקירכהוף</a>
+  </div>
+
+  <div class="qa">
+    <h3>ציפה — הבנה, לא פיתוח</h3>
+    <p>נשאל אם צריך להכיר את הפיתוח מכוח הציפה ליחס הצפיפויות: "אם את מבינה את החומר ויודעת לפתור שאלה בסיסית בציפה — את תהיי בסדר." הנוסחה הסופית + הבנה מספיקות.</p>
+    <a class="drill" href="../index.html#/practice/physics/עקרון ארכימדס והציפה" target="_blank" rel="noopener">🏋️ ארכימדס וציפה</a>
+  </div>
+</section>
+
+<section id="tips">
+  <h2>📋 העצות שלו ליום המבחן</h2>
+  <div class="tips">
+    <ul>
+      <li><b>לעבור קודם על כל השאלות</b> — "יש מלא זמן, לא להילחץ".</li>
+      <li><b>להתחיל ממה שבטוחים בו</b>, ורק אז לחזור לקשות.</li>
+      <li><b>לקרוא את כל המסיחים</b> לפני שעונים — בדיוק כמו בסמסטר א׳.</li>
+      <li><b>להביא מים</b> — "הולך להיות מחר יום מאוד מאוד חם, שלא תתייבשו". 🥤</li>
+    </ul>
+  </div>
+</section>
+
+<a class="back" href="../index.html#/course/physics">→ חזרה לעמוד הקורס</a>
+
+</body></html>
