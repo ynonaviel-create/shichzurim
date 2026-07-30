@@ -764,4 +764,6 @@ if (process.argv.includes('--review')) {
   if (!clashes.length && !report.pending.length) console.log('\n✅ אין מה להכריע. הכול סגור.\n');
 }
 
-module.exports = { report };
+/* COURSES נחשף כדי ש-sync.js יוכל להזהיר על מקצוע עם כמה מחזורי שחזור שאין לו
+   הגדרה כאן — עד היום הוא פשוט לא קיבל זיהוי חזרות ומבחן High Yield, בשקט. */
+module.exports = { report, COURSES };

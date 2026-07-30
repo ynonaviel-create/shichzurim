@@ -47,6 +47,41 @@ try {
 }
 const courseIds = new Set(courses.map((c) => c.id));
 
+/* שדות החובה של מקצוע. עד היום courses.json לא נבדק בכלל, ולכן מקצוע חדש
+   שנוסף בלי accent קיבל צבע ברירת מחדל בשקט, ובלי dates איבד את הספירה
+   לאחור ואת דירוג העדיפויות. ראו NEW-COURSE.md. */
+const COURSE_REQUIRED = ['id', 'name', 'icon', 'blurb', 'order', 'year', 'semester', 'status', 'accent'];
+const COURSE_STATUS = ['active', 'done', 'soon'];
+/* about (הסבר הקורס והמבחן בעמוד המקצוע) קיים רק בקליני ובפיזיקה. הוא שווה
+   מאוד ולכן מדווח — אבל **אזהרה ולא שגיאה**, כדי לא לחסום את הארכיון הקיים
+   על חוב תוכן ישן. בקורס חדש הוא כן חובה, ראו NEW-COURSE.md. */
+const courseNotes = [];
+courses.forEach((c, i) => {
+  const at = `courses.json · מקצוע ${c.id || i + 1}`;
+  COURSE_REQUIRED.forEach((f) => {
+    if (c[f] == null || c[f] === '') problems.push(`${at}: אין "${f}"`);
+  });
+  if (!c.about) courseNotes.push(`${at}: אין "about" — עמוד המקצוע נפתח בלי הסבר מה הקורס ואיך נראה המבחן`);
+  if (c.status && !COURSE_STATUS.includes(c.status))
+    problems.push(`${at}: status="${c.status}" לא חוקי (מותר: ${COURSE_STATUS.join(' / ')})`);
+  /* accent = שלושה צבעים לכל ערכה: ראשי, כהה, ורקע רך. חסר אחד → הצבע
+     נשבר במצב אחד בלבד, וזה בדיוק סוג הבאג שלא רואים. */
+  ['light', 'dark'].forEach((mode) => {
+    const v = c.accent && c.accent[mode];
+    if (!Array.isArray(v) || v.length !== 3)
+      problems.push(`${at}: accent.${mode} חייב להיות שלושה צבעים (ראשי, כהה, רקע רך)`);
+  });
+  /* בלי dates אין ספירה לאחור, אין "המבחן הבא", ואין דירוג עדיפויות.
+     מקצוע שנגמר (status:done) לא חייב מועד עתידי. */
+  if (c.status === 'active' && !(Array.isArray(c.dates) && c.dates.length))
+    problems.push(`${at}: מקצוע פעיל בלי dates — אין ממה לבנות ספירה לאחור ו"המבחן הבא"`);
+  (c.dates || []).forEach((d, k) => {
+    if (!d.moed || !d.at) problems.push(`${at}: dates[${k}] חסר moed או at`);
+    else if (Number.isNaN(Date.parse(d.at)))
+      problems.push(`${at}: dates[${k}].at="${d.at}" אינו תאריך תקין (YYYY-MM-DDTHH:mm)`);
+  });
+});
+
 /* --- מבחנים --- */
 const files = fs
   .readdirSync(EXAMS)
@@ -56,6 +91,7 @@ const files = fs
 const exams = [];
 const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
 const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
+const topicsUsed = {};              // course → Map(נושא → הקובץ הראשון שכתב אותו)
 const qidTopic = {};                // course → Map(qid → topic). מאמת את ה-points שבמפה
 
 for (const file of files) {
@@ -196,6 +232,21 @@ for (const file of files) {
   /* הנושאים שבפועל בשאלות — מהם נבנית הטקסונומיה שמולה נבדקת המפה.
      רק ממה שנכנס לבריכת התרגול: כרטיסיות מוחרגות מ-quizzesOf, ולכן נושא
      שקיים רק בהן עדיין יוביל את הצ׳יפ לרשימה ריקה. */
+  /* כל נושא שנכתב באיזה קובץ שיהיה, כולל שינון וכרטיסיות — לבדיקה מול הרשימה
+     הרשמית של המקצוע. זה נאסף בנפרד מ-topicsByCourse בכוונה: שם נכנס רק מה
+     שבריכת התרגול מכירה, וכאן רוצים דווקא לתפוס את מי שכתב שם שאף שאלה לא
+     נושאת — כמו חפיסת שינון עם "פוטנציאל פעולה" מול "פוטנציאל הפעולה". */
+  {
+    const all = (topicsUsed[data.course] ??= new Map());
+    const note = (t) => { if (t && !all.has(t)) all.set(t, file); };
+    items.forEach((it) => note(it && it.topic));
+    (data.groups || []).forEach((g) => (g.items || []).forEach((it) => note(it && it.topic)));
+    (data.cases || []).forEach((cs) => {
+      note(cs && cs.topic);
+      (cs.stages || []).forEach((s) => note(s && s.topic));
+    });
+  }
+
   if (!isGuide && !isCards && !isCase && !isShinun) {
     const set = (topicsByCourse[data.course] ??= new Set());
     items.forEach((q) => q.topic && set.add(q.topic));
@@ -238,7 +289,7 @@ for (const file of files) {
   /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
      exams נכתב כמו שהוא ל-manifest.json. */
   if (!isGuide && !isCards && !isCase && !isShinun)
-    quizFiles.push({ file, items, kind: data.kind, official: data.official ?? null, generated: data.generated ?? null });
+    quizFiles.push({ file, items, course: data.course, kind: data.kind, official: data.official ?? null, generated: data.generated ?? null });
 }
 
 /* יחידה במפה נתלית על נושא קנוני, ומשם מגיע הקישור לתרגול ולשאלות. נושא שלא
@@ -357,6 +408,43 @@ quizFiles.forEach((e) => {
       explainNotes.push(`${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
         `"המסיח השני" = התשובה השנייה בשאלה, כולל הנכונה`);
   });
+});
+
+/* --- הרשימה הרשמית של הנושאים --- ראו NEW-COURSE.md
+   `topics` בכרטיס המקצוע היא הרשימה הסגורה. תגית הנושא מפעילה את הסינון
+   בתרגול, את הפילוח בסוף המבחן, את "איפה ללמוד" ואת החיבור למפה — ולכן שם
+   שנכתב אחרת ("פוטנציאל פעולה" מול "פוטנציאל הפעולה") מייצר נושא שני שהצ׳יפ
+   שלו מוביל לרשימה ריקה. הרשימה אופציונלית: מקצוע בלי `topics` לא נבדק, וכך
+   הארכיון הקיים לא מוצף. בקורס חדש היא חובה.
+   **אזהרה ולא שגיאה** — לפי החלטת ינון, 30/07/2026. */
+const topicNotes = [];
+courses.forEach((c) => {
+  if (!Array.isArray(c.topics) || !c.topics.length) return;
+  const official = new Set(c.topics);
+  const used = topicsUsed[c.id] || new Map();
+  used.forEach((file, t) => {
+    if (!official.has(t)) topicNotes.push(`${file}: "${t}" אינו ברשימת הנושאים של ${c.id}`);
+  });
+  /* גם הכיוון ההפוך: נושא רשמי שאין לו אף שאלה הוא או פער כיסוי אמיתי, או
+     שם שהשתנה בלי לעדכן את הרשימה. שניהם שווים לדעת. */
+  const have = topicsByCourse[c.id] || new Set();
+  c.topics.forEach((t) => {
+    if (!have.has(t)) topicNotes.push(`${c.id}: לנושא "${t}" אין אף שאלה`);
+  });
+});
+
+/* --- מקצוע עם כמה מחזורים ואין לו זיהוי חזרות ---
+   repeats.js מכיר את ציר הזמן של כל מקצוע (שנה מול מחזור) מתוך טבלה בקוד.
+   מקצוע שלא רשום שם פשוט לא מקבל זיהוי שאלות חוזרות ולא מבחן High Yield —
+   וזה קרה בשקט. */
+const repeatCfg = require('./repeats.js').COURSES || {};
+const shichzurCount = {};
+quizFiles.forEach((e) => {
+  if (e.kind === 'shichzur') shichzurCount[e.course] = (shichzurCount[e.course] || 0) + 1;
+});
+Object.entries(shichzurCount).forEach(([cid, n]) => {
+  if (n >= 2 && !repeatCfg[cid])
+    courseNotes.push(`${cid}: ${n} שחזורים ואין לו הגדרה ב-repeats.js — אין זיהוי שאלות חוזרות ואין High Yield`);
 });
 
 /* --- דו״ח הטיה --- ראו QUESTION-STANDARD.md
@@ -483,6 +571,17 @@ fs.writeFileSync(indexPath, html, 'utf8');
 if (coverage.length) {
   console.log('\n⚠️  כיסוי "מה באמת נשאל" — מה שנשאר למפות:');
   coverage.forEach((c) => console.log('   • ' + c));
+}
+
+if (courseNotes.length) {
+  console.log('\n⚠️  מקצועות — מה שחסר בכרטיס עצמו (NEW-COURSE.md):');
+  courseNotes.forEach((c) => console.log('   • ' + c));
+}
+
+if (topicNotes.length) {
+  console.log('\n⚠️  נושאים שאינם ברשימה הרשמית של המקצוע (NEW-COURSE.md):');
+  topicNotes.slice(0, 15).forEach((c) => console.log('   • ' + c));
+  if (topicNotes.length > 15) console.log(`   … ועוד ${topicNotes.length - 15}`);
 }
 
 if (bias.length) {
