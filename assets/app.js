@@ -6227,6 +6227,20 @@ async function renderAdmin() {
     if (times.length) kpisSv.append(kpiCard(Math.round(times[Math.floor(times.length / 2)] / 60) + ' דק׳', 'זמן מילוי חציוני', '⏱️'));
     box.append(kpisSv);
 
+    /* מי ענה — שם ומייל (0008). נראה למנהל בלבד, כמו כל הלוח. */
+    const svWho = (r) => {
+      const nm = (r.display_name || '').trim();
+      return nm ? `${nm} · ${r.email || ''}` : (r.email || r.user_id);
+    };
+    const whoCard = admCard(`🗳️ מי ענה · ${n}`, 'התשובה האחרונה של כל משיב');
+    rows.forEach((r) => {
+      const p = el('div', 'adm-sv-txt adm-sv-who');
+      p.textContent = svWho(r);
+      p.append(el('small', null, admAgo(r.created_at)));
+      whoCard.append(p);
+    });
+    box.append(whoCard);
+
     /* דירוגי הפיצ׳רים: ממוצע בקרב מי שהשתמש + כמה השתמשו. */
     const rCard = admCard('⭐ דירוג לפי פיצ׳ר', 'ממוצע 1–5 בקרב מי שהשתמש · ✕ = לא השתמשו');
     const rWrap = el('div', 'adm-sv-dist');
@@ -6269,8 +6283,8 @@ async function renderAdmin() {
       ['freeText', '💬 מילים אחרונות'],
     ];
     TEXT_QS.forEach(([k, title]) => {
-      const items = answers
-        .map((ans) => ({ t: (ans[k] || '').trim(), who: (ans.courses || []).map((cid) => (labelOf.courses && labelOf.courses[cid]) || cid).join(', ') }))
+      const items = rows
+        .map((r) => ({ t: (((r.answers || {})[k]) || '').trim(), who: svWho(r) }))
         .filter((x) => x.t);
       if (!items.length) return;
       const card = admCard(`${title} · ${items.length}`);

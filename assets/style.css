@@ -2303,3 +2303,4 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 .sv-meme{text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px;}
 .sv-meme h2{margin:0; font-size:20px;}
 .sv-meme-img{max-width:min(360px, 100%); border-radius:14px; box-shadow:var(--shadow);}
+.adm-sv-who{display:flex; justify-content:space-between; gap:10px; align-items:center; font-weight:600;}
