@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-29",
-  "version": "8e888698",
+  "updated": "2026-07-30",
+  "version": "d5a81dad",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
-    "css": "ae5b052d",
-    "js": "0deab8c9",
+    "css": "e2259f74",
+    "js": "a7ba2b1f",
     "cloud": "1153c3de"
   },
   "courses": [
@@ -871,7 +871,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-29",
+      "added": "2026-07-30",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -1015,7 +1015,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-07-29",
+      "added": "2026-07-30",
       "official": null,
       "trust": null,
       "spotlight": null,

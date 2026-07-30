@@ -30,6 +30,7 @@ const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e)
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
+const quizFiles = [];   // {file, items} לכל קובץ שאלות — לבדיקת תבנית ה-explain
 
 /* מזהה שאלות שחוזרות בין מחזורים, מסמן אותן בקבצי השחזור, ובונה את מבחן
    ה-High Yield. רץ *לפני* הסריקה, כי הוא כותב לקבצים שאנחנו עומדים לקרוא.
@@ -234,6 +235,9 @@ for (const file of files) {
     heroEyebrow: data.heroEyebrow ?? null,   // כרטיסיות: מי מסר את החומר — מרצה או מתרגלים
     count: items.length,
   });
+  /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
+     exams נכתב כמו שהוא ל-manifest.json. */
+  if (!isGuide && !isCards && !isCase && !isShinun) quizFiles.push({ file, items });
 }
 
 /* יחידה במפה נתלית על נושא קנוני, ומשם מגיע הקישור לתרגול ולשאלות. נושא שלא
@@ -298,6 +302,59 @@ guides.forEach((g) => {
     qmap.forEach((t) => { if (t === u.topic) total++; });
     const miss = total - [...mapped].filter((q) => qmap.get(q) === u.topic).length;
     if (miss > 0) coverage.push(`${g.file} · ${u.topic}: ${miss} מתוך ${total} השאלות לא ממופות לאף נקודה`);
+  });
+});
+
+/* --- תבנית ה-explain --- ראו sources/explain-standard.md
+   הסבר שנכתב כתבנית (הסבר + פסילה למסיח) מוצג באתר עם מספר המסיח על כל בולט,
+   והמנוע קובע את המספר רק כשהוא חד-משמעי. כאן בודקים מה שהמנוע יבדוק בהמשך,
+   כדי שמי שכותב הסבר חדש יידע מיד שהמספור שלו לא ייקלט — **אזהרה ולא שגיאה**,
+   כי הסבר חופשי הוא מצב לגיטימי, והארכיון הישן מלא בו.
+   ⚠️ עברית ורג׳קס: אסור `מסיחים?` — ה-? נדבק ל-ם. תמיד (?:ים)? בקבוצה. */
+const EXPL_ORD = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
+const EXPL_ORD_F = ['ראשונה', 'שנייה', 'שלישית', 'רביעית', 'חמישית'];
+const EXPL_WEND = '(?![א-ת])';
+const EXPL_MAS = '(?:ה)?(?:מסיח|מסיחים)';
+const EXPL_START = new RegExp('^' + EXPL_MAS + EXPL_WEND);
+const EXPL_ORD_RE = new RegExp('^' + EXPL_MAS + '\\s+ה(' + EXPL_ORD.concat(EXPL_ORD_F).join('|') + ')' + EXPL_WEND);
+/* "המסיח הראשון והשני שגויים כי…" — פסילה אחת לשני מסיחים. אין למי לתלות מספר. */
+const EXPL_PAIR = new RegExp('^' + EXPL_MAS + '\\s+ה(?:' + EXPL_ORD.concat(EXPL_ORD_F).join('|') + ')' + EXPL_WEND +
+  '\\s+ו(?:' + EXPL_MAS + '\\s+)?(?:ה)?(?:' + EXPL_ORD.concat(EXPL_ORD_F, ['אחרון', 'אחרונה']).join('|') + ')' + EXPL_WEND);
+const explainNotes = [];
+
+quizFiles.forEach((e) => {
+  (e.items || []).forEach((q, i) => {
+    if (!q || !q.explain || !Array.isArray(q.opts)) return;
+    const sents = String(q.explain).split(/(?<=\.)\s+(?=\S)/).filter((s) => EXPL_START.test(s));
+    if (!sents.length) return;
+    const at = `${e.file} · שאלה ${i + 1}`;
+    if (sents.some((s) => EXPL_PAIR.test(s))) {
+      explainNotes.push(`${at}: פסילה אחת מדברת על שני מסיחים ("המסיח הראשון והשני…") — פצל למשפט לכל מסיח`);
+      return;
+    }
+    const ords = sents.map((s) => {
+      const m = s.match(EXPL_ORD_RE);
+      if (!m) return null;
+      const k = EXPL_ORD.indexOf(m[1]);
+      return (k >= 0 ? k : EXPL_ORD_F.indexOf(m[1])) + 1;
+    }).filter((n) => n != null);
+    if (!ords.length) return;                       // פסילות בלי מספור — לגיטימי
+    /* שתי האמנות שבארכיון: מקום התשובה בשאלה, או מקום בין המסיחים בלבד.
+       הסטנדרט מחייב את הראשונה; השנייה עדיין מזוהה כדי לא להציף על תוכן ישן. */
+    const dis = q.opts.map((_, k) => k).filter((k) => k !== q.a);
+    const fits = (arr) => {
+      const s = new Set();
+      for (const v of arr) {
+        if (v == null || !(v >= 0 && v < q.opts.length) || v === q.a || s.has(v)) return false;
+        s.add(v);
+      }
+      return true;
+    };
+    const byPos = ords.map((n) => n - 1);
+    const byDis = ords.map((n) => (dis[n - 1] ?? null));
+    if (!fits(byPos) && !fits(byDis))
+      explainNotes.push(`${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
+        `"המסיח השני" = התשובה השנייה בשאלה, כולל הנכונה`);
   });
 });
 
@@ -378,6 +435,12 @@ fs.writeFileSync(indexPath, html, 'utf8');
 if (coverage.length) {
   console.log('\n⚠️  כיסוי "מה באמת נשאל" — מה שנשאר למפות:');
   coverage.forEach((c) => console.log('   • ' + c));
+}
+
+if (explainNotes.length) {
+  console.log(`\n⚠️  תבנית ה-explain — ${explainNotes.length} הסברים שהמספור בהם לא ייקלט (sources/explain-standard.md):`);
+  explainNotes.slice(0, 12).forEach((c) => console.log('   • ' + c));
+  if (explainNotes.length > 12) console.log(`   … ועוד ${explainNotes.length - 12}`);
 }
 
 console.log('\n✅ manifest.json עודכן');
