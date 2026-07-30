@@ -237,7 +237,8 @@ for (const file of files) {
   });
   /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
      exams נכתב כמו שהוא ל-manifest.json. */
-  if (!isGuide && !isCards && !isCase && !isShinun) quizFiles.push({ file, items });
+  if (!isGuide && !isCards && !isCase && !isShinun)
+    quizFiles.push({ file, items, kind: data.kind, official: data.official ?? null, generated: data.generated ?? null });
 }
 
 /* יחידה במפה נתלית על נושא קנוני, ומשם מגיע הקישור לתרגול ולשאלות. נושא שלא
@@ -305,7 +306,7 @@ guides.forEach((g) => {
   });
 });
 
-/* --- תבנית ה-explain --- ראו sources/explain-standard.md
+/* --- תבנית ה-explain --- ראו QUESTION-STANDARD.md
    הסבר שנכתב כתבנית (הסבר + פסילה למסיח) מוצג באתר עם מספר המסיח על כל בולט,
    והמנוע קובע את המספר רק כשהוא חד-משמעי. כאן בודקים מה שהמנוע יבדוק בהמשך,
    כדי שמי שכותב הסבר חדש יידע מיד שהמספור שלו לא ייקלט — **אזהרה ולא שגיאה**,
@@ -356,6 +357,53 @@ quizFiles.forEach((e) => {
       explainNotes.push(`${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
         `"המסיח השני" = התשובה השנייה בשאלה, כולל הנכונה`);
   });
+});
+
+/* --- דו״ח הטיה --- ראו QUESTION-STANDARD.md
+   שאלה שאפשר לענות עליה בלי לדעת כלום היא שאלה מבוזבזת, ושלושת הרמזים שמאפשרים
+   את זה נמדדים: התשובה הנכונה היא הארוכה, היא היחידה עם סוגריים של הסבר, או
+   שהיא תמיד באותו מקום. נמדד רק על מה שנכתב כאן — **בשחזור אמיתי נאמנות למקור
+   גוברת**, ואזהרה שם הייתה מזמינה לתקן את הארכיון במקום לשקף אותו. */
+const bias = [];
+quizFiles.forEach((e) => {
+  const writtenHere = (e.kind === 'practice' && !e.official) || (e.kind === 'highyield' && !e.generated);
+  if (!writtenHere) return;
+  const qs = (e.items || []).filter((q) =>
+    q && Array.isArray(q.opts) && q.opts.length >= 3 && typeof q.a === 'number' && q.opts[q.a] != null);
+  if (qs.length < 10) return;                       // בנק קטן מדי מכדי שהסטטיסטיקה תאמר משהו
+  const n = qs.length;
+  let longest = 0, parenA = 0, parenD = 0, dCount = 0;
+  const spreads = [], pos = new Map();
+  const sizes = new Set();
+  qs.forEach((q) => {
+    const L = q.opts.map((o) => String(o).length);
+    const mx = Math.max(...L);
+    if (L.indexOf(mx) === q.a && L.filter((x) => x === mx).length === 1) longest++;
+    spreads.push(mx / Math.max(1, Math.min(...L)));
+    pos.set(q.a, (pos.get(q.a) || 0) + 1);
+    sizes.add(q.opts.length);
+    if (String(q.opts[q.a]).includes('(')) parenA++;
+    q.opts.forEach((o, k) => { if (k !== q.a) { dCount++; if (String(o).includes('(')) parenD++; } });
+  });
+  spreads.sort((x, y) => x - y);
+  const med = spreads[Math.floor(spreads.length / 2)];
+  const pctLong = Math.round((100 * longest) / n);
+  const rateA = parenA / n, rateD = dCount ? parenD / dCount : 0;
+  const notes = [];
+  if (pctLong > 40) notes.push(`הנכונה היא הארוכה ב-${pctLong}% מהשאלות (מקריות ≈25%)`);
+  if (med > 1.7) notes.push(`פער אורך חציוני ×${med.toFixed(1)} בין הארוכה לקצרה`);
+  if (rateA > 0.3 && rateA > 1.5 * rateD)
+    notes.push(`סוגריים של הסבר ב-${Math.round(100 * rateA)}% מהתשובות הנכונות מול ${Math.round(100 * rateD)}% מהמסיחים`);
+  /* התפלגות המקום נבדקת רק כשלכל השאלות אותו מספר תשובות — אחרת "מקום חמישי
+     ריק" הוא סתם שאלות בעלות ארבע תשובות, ולא הטיה. */
+  if (sizes.size === 1) {
+    const k = [...sizes][0];
+    const counts = Array.from({ length: k }, (_, i) => pos.get(i) || 0);
+    const worst = Math.max(...counts) / n;
+    if (worst > 0.45 || (n >= 20 && counts.some((c) => c === 0)))
+      notes.push(`מקום התשובה הנכונה מוטה — ${counts.join('/')} (מצופה ~${Math.round(n / k)} בכל מקום)`);
+  }
+  if (notes.length) bias.push(`${e.file} (${n} שאלות): ` + notes.join(' · '));
 });
 
 const seen = {};
@@ -437,8 +485,13 @@ if (coverage.length) {
   coverage.forEach((c) => console.log('   • ' + c));
 }
 
+if (bias.length) {
+  console.log(`\n⚠️  דו״ח הטיה — בנקים שנכתבו כאן ואפשר לנחש בהם בלי לדעת (QUESTION-STANDARD.md):`);
+  bias.forEach((c) => console.log('   • ' + c));
+}
+
 if (explainNotes.length) {
-  console.log(`\n⚠️  תבנית ה-explain — ${explainNotes.length} הסברים שהמספור בהם לא ייקלט (sources/explain-standard.md):`);
+  console.log(`\n⚠️  תבנית ה-explain — ${explainNotes.length} הסברים שהמספור בהם לא ייקלט (QUESTION-STANDARD.md):`);
   explainNotes.slice(0, 12).forEach((c) => console.log('   • ' + c));
   if (explainNotes.length > 12) console.log(`   … ועוד ${explainNotes.length - 12}`);
 }
