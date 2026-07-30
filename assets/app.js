@@ -1466,6 +1466,234 @@ function examCard(m) {
   return a;
 }
 
+/* ================= קופסת ההסבר =================
+   ההסברים בארכיון נכתבו כפסקה אחת ארוכה, אבל המבנה שלהם קבוע: קודם למה
+   התשובה הנכונה נכונה, ואחר כך פסילה של כל מסיח בנפרד. כשזה מוצג כבלוק
+   טקסט אחד צריך לסרוק אותו בעיניים כדי למצוא את המסיח שבחרת — אז המנוע
+   מפרק את הפסקה לתבנית: כותרת "למה זה נכון", ומתחתיה פסילה לכל מסיח, עם
+   מספר המסיח כמו בשאלה עצמה, והפסילה שלך מסומנת.
+
+   כל זה קורה ברינדור בלבד: אין שינוי בקבצי ה-JSON, וכשההסבר לא בנוי כך
+   (רוב הבנקים) הוא מוצג בדיוק כמו קודם, רק עם ריווח וטיפוגרפיה טובים יותר.
+
+   ⚠️ עברית ורג׳קס: אסור לכתוב `מסיחים?` — ה-? נדבק ל-ם ומייצר "מסיחי".
+   כל ריבוי בקבוצה מפורשת: (?:מסיח|מסיחים). */
+const EX_ORD_M = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
+const EX_ORD_F = ['ראשונה', 'שנייה', 'שלישית', 'רביעית', 'חמישית'];
+const EX_WEND = '(?![א-ת])';                       // סוף מילה עברית (\b לא עובד על עברית)
+const EX_MAS = '(?:ה)?(?:מסיח|מסיחים)';
+const EX_REJ_START = new RegExp(
+  '^(?:' + EX_MAS + EX_WEND + '|(?:התשובה|הקביעה)\\s+ה(?:' + EX_ORD_F.join('|') + ')' + EX_WEND + ')');
+const exNorm = (s) => (s || '').replace(/[֑-ׇ"'׳״`]/g, '').replace(/\s+/g, ' ').trim();
+
+/* מה נכתב בפתיח הפסילה: "המסיח הרביעי" → סידורי 4; "מסיח 2" → אינדקס
+   0-בסיס; "המסיח שטוען „…”" → ציטוט שאפשר להצליב מול המסיחים עצמם. */
+function exReadMark(s) {
+  /* "המסיח הראשון והשני שגויים כי…" — פסילה אחת שמדברת על שני מסיחים.
+     אין לזה שבב אחד נכון, והורדת הפתיח הייתה משאירה "והשני שגויים כי…".
+     אז לא נוגעים: הבולט מוצג בשלמותו, בלי מספר. */
+  const SECOND = '\\s+ו(?:' + EX_MAS + '\\s+)?(?:ה)?(?:' +
+    EX_ORD_M.concat(EX_ORD_F, ['אחרון', 'אחרונה']).join('|') + ')' + EX_WEND;
+  let m = s.match(new RegExp('^' + EX_MAS + '\\s+ה(' + EX_ORD_M.join('|') + ')' + EX_WEND + '(' + SECOND + ')?'));
+  if (m) return m[2] ? { kind: 'none', len: 0 } : { kind: 'ord', n: EX_ORD_M.indexOf(m[1]) + 1, len: m[0].length };
+  m = s.match(new RegExp('^(?:' + EX_MAS + '|התשובה|הקביעה)\\s+ה(' + EX_ORD_F.join('|') + ')' + EX_WEND + '(' + SECOND + ')?'));
+  if (m) return m[2] ? { kind: 'none', len: 0 } : { kind: 'ord', n: EX_ORD_F.indexOf(m[1]) + 1, len: m[0].length };
+  m = s.match(new RegExp('^' + EX_MAS + '\\s+(\\d)(?!\\d)'));
+  if (m) return { kind: 'zero', n: +m[1], len: m[0].length };
+  return { kind: 'none', len: 0 };
+}
+
+/* זוגות מירכאות, כל זוג בנפרד — כך גרש בתוך ציטוט („המוט 'אוסף' שדות”)
+   לא חותך את הלכידה באמצע. הגרש הבודד אחרון, כי הוא גם משמש לקיצורים. */
+const EX_Q_PAIRS = [['„', '”'], ['"', '"'], ['״', '״'], ["'", "'"]];
+const exQuoteRe = (a, b, anchor) =>
+  new RegExp((anchor ? '^' + EX_MAS + '\\s+(?:שטוען|הטוען|על)\\s*' : '') +
+    a + '([^' + b + ']{5,})' + b + (anchor ? '\\s*' : ''));
+/* מוציא את הציטוט מהמשפט. anchor=true → רק כפתיח, ואז len מאפשר להוריד אותו. */
+function exQuoteOf(s, anchor) {
+  for (const [a, b] of EX_Q_PAIRS) {
+    const m = s.match(exQuoteRe(a, b, anchor));
+    if (m) return { q: m[1], len: m[0].length };
+  }
+  return null;
+}
+
+/* "המסיח שטוען שהתדירות תקטן שגוי כי…" / "המסיח על מבנה מוצק…" — פתיח
+   שמצטט את המסיח בלי מירכאות. group1 = כל הפתיח (מה שמורידים כשיש שבב),
+   group2 = הטענה עצמה, שאותה מצליבים מול המסיחים. */
+const EX_CLAIM = new RegExp(
+  '^(' + EX_MAS + '\\s+(?:שטוען|הטוען|על)\\s+(.{6,140}?))' +
+  '(?:\\s+(?:שגוי|שגויה|שגויים|מפתה|נכון|נכונה|מתאר|מתארת|מבלבל|מחליף|מגזים|מייבא|מפספס|מייחס|הופך|אינו|אינה|אינם|הוא|היא)' + EX_WEND + '|[.,]|$)');
+/* מילות קישור — נשארות בכל מסיח ולכן לא מזהות אף אחד מהם. */
+const EX_STOP = new Set(['של', 'את', 'כי', 'אבל', 'אינו', 'אינה', 'לא', 'הוא', 'היא', 'כך', 'ולכן', 'לכן',
+  'יותר', 'אשר', 'גם', 'רק', 'כל', 'זה', 'זו', 'שגוי', 'מפתה', 'נכון', 'בגלל', 'עקב', 'מכיוון', 'משום',
+  'אך', 'או', 'עם', 'ללא', 'בין', 'על', 'אל', 'מן', 'יש', 'אין', 'כאשר', 'אם', 'כמו', 'בעוד', 'ואילו',
+  'שהם', 'שהוא', 'שהיא']);
+
+/* מצליב טענה מצוטטת מול המסיחים לפי מילות תוכן. דורש שני מילים משותפות
+   לפחות ומנצח יחיד — אחרת אין שבב. */
+function exMatchClaim(claim, opts, aIdx) {
+  const toks = [...new Set(exNorm(claim).split(' ')
+    .map((w) => w.replace(/[^א-תa-zA-Z0-9]/g, ''))
+    .filter((w) => w.length >= 3 && !EX_STOP.has(w)))];
+  if (toks.length < 2) return null;
+  const scores = opts.map((o, k) => {
+    if (k === aIdx) return -1;
+    const no = exNorm(o);
+    return toks.filter((t) => no.includes(t)).length;
+  });
+  let best = -1, at = -1, second = -1;
+  scores.forEach((s, k) => { if (s > best) { second = best; best = s; at = k; } else if (s > second) second = s; });
+  return best >= 2 && best > second ? at : null;
+}
+
+/* מפרק הסבר ל-{head, items}. מחזיר null אם אין בו פסילות — ואז המנוע
+   מציג את הטקסט כמו שהוא. */
+function parseExplain(text, item) {
+  const raw = (text || '').trim();
+  if (!raw) return null;
+  const lead = [], rej = [];
+  /* חלק מההסברים כבר כתובים בבולטים: "…הסבר. • 'לא תשתנה' — נכון רק אם…".
+     שם הפיצול הוא ה-• עצמו, ולא תחילת משפט. */
+  if (raw.includes('•')) {
+    const parts = raw.split(/\s*•\s*/).filter(Boolean);
+    lead.push(parts[0]);
+    parts.slice(1).forEach((s) => rej.push({ sents: [s] }));
+  } else {
+    for (const s of raw.split(/(?<=\.)\s+(?=\S)/)) {
+      if (EX_REJ_START.test(s)) rej.push({ sents: [s] });
+      else if (rej.length) rej[rej.length - 1].sents.push(s);   // המשך של אותה פסילה
+      else lead.push(s);
+    }
+  }
+  if (!rej.length) return null;
+
+  const opts = item.opts || [];
+  const nOpt = opts.length;
+  const marks = rej.map((r) => exReadMark(r.sents[0]));
+
+  /* מיפוי לפי ציטוט — הוודאי מכולם: הטקסט המצוטט מופיע במסיח אחד ויחיד.
+     כשהציטוט הוא הפתיח ("המסיח שטוען „…”"), הוא גם יורד מהטקסט: השבב
+     והרמז המרחף כבר אומרים באיזה מסיח מדובר. */
+  rej.forEach((r, i) => {
+    const lead = exQuoteOf(r.sents[0], true);
+    const hit = lead || exQuoteOf(r.sents[0], false);
+    if (!hit) return;
+    /* ציטוט מקוצר נגמר ב"…" — שלוש נקודות שלא קיימות באף מסיח, והיו
+       מפילות את ההשוואה בדיוק בציטוטים הקצרים. */
+    const nq = exNorm(hit.q).replace(/[…]|\.\.\./g, '').trim().slice(0, 16);
+    if (nq.length < 4) return;
+    const hits = opts.map((o, k) => (k !== item.a && exNorm(o).includes(nq) ? k : -1)).filter((k) => k >= 0);
+    if (hits.length !== 1) return;
+    r.opt = hits[0];
+    if (lead) marks[i] = { kind: 'quote', len: lead.len };
+  });
+
+  /* מיפוי לפי טענה מצוטטת בלי מירכאות ("המסיח שטוען ש…"). */
+  rej.forEach((r, i) => {
+    if (r.opt != null || marks[i].kind !== 'none') return;
+    const m = r.sents[0].match(EX_CLAIM);
+    if (!m) return;
+    /* "שטוען ש<טענה>" — ה-ש׳ הזאת היא לרוב מילת שעבוד, אבל לא תמיד: ב"המסיח
+       שטוען שמאלה" היא האות הראשונה של המילה. אז מנסים קודם כמו שנכתב, ורק
+       אם זה לא נצמד לאף מסיח מנסים בלי ה-ש׳. */
+    const hit = exMatchClaim(m[2], opts, item.a) ?? exMatchClaim(m[2].replace(/^ש/, ''), opts, item.a);
+    if (hit == null) return;
+    r.opt = hit;
+    /* מורידים את הפתיח רק כשהוא באמת נגמר לפני "שגוי כי" — בטענה קצרה
+       הרג׳קס מגלגל מעליו, ואז חיתוך היה משאיר משפט קטוע. */
+    if (!/\s(?:שגוי|מפתה|נכון|מתאר)/.test(m[2])) marks[i] = { kind: 'claim', len: m[1].length };
+  });
+
+  /* מיפוי לפי מספר סידורי. בארכיון יש שתי אמנות: "המסיח השני" = התשובה
+     השנייה בשאלה, או המסיח השני מבין המסיחים (בלי לספור את הנכונה). אמנה
+     תקפה רק אם *כל* המספרים בהסבר מתיישבים איתה — מסיח קיים, לא הנכונה,
+     ובלי כפילות. בוחרים רק כשאמנה אחת תקפה, או ששתיהן מסכימות.
+     שבב שמצביע על המסיח הלא-נכון גרוע בהרבה מאין שבב בכלל. */
+  const ords = marks.map((m) => (m.kind === 'ord' || m.kind === 'zero' ? m.n : null));
+  const dis = opts.map((_, k) => k).filter((k) => k !== item.a);
+  const byPos = ords.map((n) => (n == null ? null : n - 1));           // מקום התשובה בשאלה
+  const byDis = ords.map((n) => (n == null ? null : dis[n - 1] ?? null)); // מקום בין המסיחים
+  const byZero = ords.slice();                                        // "מסיח 2" — כבר אינדקס
+  const fits = (arr) => {
+    const seen = new Set();
+    for (let i = 0; i < arr.length; i++) {
+      if (ords[i] == null) continue;
+      const v = arr[i];
+      if (v == null || !(v >= 0 && v < nOpt) || v === item.a || seen.has(v)) return false;
+      seen.add(v);
+    }
+    return ords.some((n) => n != null);
+  };
+  let map = null;
+  if (marks.some((m) => m.kind === 'zero')) map = fits(byZero) ? byZero : null;
+  else {
+    const okP = fits(byPos), okD = fits(byDis);
+    if (okP && okD) map = byPos.every((v, i) => v === byDis[i]) ? byPos : null;
+    else map = okP ? byPos : okD ? byDis : null;
+  }
+  if (map) map.forEach((v, i) => { if (rej[i].opt == null && v != null) rej[i].opt = v; });
+
+  /* כשיש שבב עם המספר, הפתיח "המסיח הרביעי" מיותר — הוא כבר על השבב.
+     אבל אם מה שנשאר קצר מדי או פותח ב-ו׳ החיבור, הפתיח היה חלק מהמשפט
+     ולא תווית — ואז משאירים את הבולט כמו שנכתב. */
+  const items = rej.map((r, i) => {
+    const full = r.sents.join(' ');
+    let t = full;
+    if (r.opt != null && marks[i].len) {
+      const cut = full.slice(marks[i].len).replace(/^[\s,–—:־-]+/, '');
+      /* ו׳ החיבור או מילת זיקה ("שבה", "בו") בפתח מה שנשאר = הפתיח היה חלק
+         מהמשפט, וחיתוך משאיר משפט שתלוי באוויר. */
+      if (cut.length >= 15 && !/^(?:ו|ש?ב[הוםן]?\s|שב?[הו]\s)/.test(cut)) t = cut;
+    }
+    return { opt: r.opt ?? null, text: t };
+  });
+  /* סדר לפי מספר המסיח — אותו סדר שבו הוא קרא אותם בשאלה. הלא-ממופים
+     בסוף, בסדר שבו נכתבו. */
+  items.sort((a, b) => (a.opt == null) - (b.opt == null) || (a.opt ?? 0) - (b.opt ?? 0));
+
+  /* "התשובה הנכונה נכונה כי…" — מיותר מתחת לכותרת "למה זה נכון". */
+  const head = lead.join(' ').replace(/^התשובה\s+הנכונה\s+נכונה\s+(?:כי|משום\s+ש|מפני\s+ש)\s*/, '');
+  return { head, items };
+}
+
+/* קופסת ההסבר להצגה. chosen = המסיח שנבחר (אם נבחר), כדי לסמן את הפסילה
+   שמסבירה בדיוק את הטעות שלך. */
+function explainBox(text, item, chosen = null) {
+  const box = el('div', 'explain');
+  const p = parseExplain(text, item);
+  /* הסבר שאינו בנוי כתבנית מקבל את אותה כותרת בלבד — כך לכל קופסת משוב
+     באתר יש אותה אנטומיה, גם במקצועות שההסברים בהם פסקה אחת. */
+  if (!p) {
+    box.append(el('div', 'ex-t', 'ההסבר'));
+    box.append(el('p', 'ex-head', text));
+    return box;
+  }
+
+  if (p.head) {
+    box.append(el('div', 'ex-t', 'למה זה נכון'));
+    box.append(el('p', 'ex-head', p.head));
+  }
+  /* תמיד בלשון רבים: בולט אחד לא אומר שנפסל מסיח אחד — לפעמים הוא פוסל
+     את כל השאר במשפט אחד. */
+  box.append(el('div', 'ex-t', 'למה השאר נפסלים'));
+  const ul = el('ul', 'ex-rej');
+  p.items.forEach((r) => {
+    const mine = r.opt != null && r.opt === chosen;
+    const li = el('li', mine ? 'mine' : null);
+    li.append(el('span', 'ex-n', r.opt != null ? String(r.opt + 1) : '✗'));
+    /* מספר המסיח לבד לא מזכיר מה היה כתוב בו — הטקסט המלא יושב ברמז מרחף,
+       כמו בכל כפתור באתר, בלי להכריח לקרוא את המסיח פעם שנייה. */
+    if (r.opt != null && item.opts && item.opts[r.opt]) li.title = item.opts[r.opt];
+    const body = el('span', 'ex-b', r.text);
+    if (mine) body.prepend(el('b', 'ex-mine', 'זה מה שבחרת · '));
+    li.append(body);
+    ul.append(li);
+  });
+  box.append(ul);
+  return box;
+}
+
 /* ================= נגן מבחן ================= */
 async function renderExam(id, focusIdx = null) {
   setNav('home');
@@ -2339,7 +2567,7 @@ async function renderCase(id, caseId = null) {
       const ok = answers[i] === s.a;
       const fb = el('div', 'fb show ' + (ok ? 'ok' : 'no'));
       fb.append(el('div', null, ok ? '✓ נכון' : `✗ לא — הנכון: ${s.opts[s.a]}`));
-      fb.append(el('div', 'explain', s.why));
+      fb.append(explainBox(s.why, s, answers[i]));
       /* משוב מלא ואחיד כמו בנגן — סים/מפה/NotebookLM לפי נושא המקרה. */
       const topic = s.topic || cs.topic;
       const sim = SIM_BY_TOPIC[topic];
@@ -3011,7 +3239,7 @@ function playQuestions(cfg) {
     fb.className = 'fb show ' + (isRight ? 'ok' : 'no');
     fb.innerHTML = '';
     fb.append(el('div', null, isRight ? '✓ נכון' : `✗ לא נכון — התשובה הנכונה: ${item.opts[item.a]}`));
-    if (item.explain) fb.append(el('div', 'explain', item.explain));
+    if (item.explain) fb.append(explainBox(item.explain, item, oi));
 
     /* הפסילות הן חלון לחשיבה שהובילה לתשובה, ולא רק לתוצאה. שני מצבים
        שווים אמירה: פסלת את הנכונה (הטעות קרתה לפני הבחירה — שם צריך לתקן),

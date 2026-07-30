@@ -533,6 +533,46 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   max-width:70ch;
 }
 
+/* --- תבנית ההסבר: למה נכון, ואחר כך פסילה לכל מסיח ---
+   ההסבר הוא הטקסט הכי חשוב באתר ובו-זמנית הארוך ביותר. פסקה אחת של חמישה
+   משפטים מכריחה לסרוק בעיניים כדי למצוא את המסיח שנבחר; החלוקה לכותרות
+   ולבולטים ממוספרים נותנת לעין נקודת עגינה, ומספר המסיח הוא אותו מספר
+   שמופיע ליד התשובה עצמה למעלה. */
+.fb .ex-t{
+  margin-top:14px; margin-bottom:6px;
+  font-size:11.5px; font-weight:800; letter-spacing:.04em;
+  color:var(--muted); text-transform:none;
+}
+.fb .ex-t:first-child{margin-top:0;}
+.fb .ex-head{margin:0; font-size:14.5px; font-weight:500; line-height:1.85;}
+.fb .ex-rej{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:9px;}
+.fb .ex-rej > li{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:8px 11px; border-radius:9px;
+  background:color-mix(in srgb, var(--surface) 72%, transparent);
+  border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  line-height:1.75;
+}
+/* מספר המסיח — אותו שבב שמופיע ליד התשובה בשאלה, רק קטן יותר. */
+.fb .ex-n{
+  flex:none; width:22px; height:22px; margin-top:2px; border-radius:6px;
+  display:grid; place-items:center;
+  background:var(--surface-2); border:1px solid var(--line);
+  font-size:11.5px; font-weight:800; color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.fb .ex-b{flex:1; min-width:0;}
+/* הפסילה של המסיח שנבחר — היא ההסבר לטעות עצמה, ולכן היא בולטת. */
+.fb .ex-rej > li.mine{
+  border-color:var(--bad-ln); background:var(--bad-bg);
+}
+.fb .ex-rej > li.mine .ex-n{background:var(--bad); border-color:var(--bad); color:#fff;}
+.fb .ex-mine{color:var(--bad); font-weight:800;}
+
+@media (max-width:640px){
+  .fb .ex-rej > li{padding:8px 9px; gap:8px;}
+}
+
 /* ═══════════════ שכבת התגמול — חגיגות, רצפים ════════════════
    משוב דופמינרגי על הצלחה. משתמש בטוקנים הקיימים (--good/--accent) ובאידיום
    ההילה 0 0 0 3px של האתר. כל אנימציה מקבלת גארד prefers-reduced-motion:
