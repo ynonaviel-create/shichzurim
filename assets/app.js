@@ -1952,7 +1952,7 @@ async function renderShinun(courseId, topicFilter) {
     const intro = el('div', 'intro shn-intro');
     const txt = el('div');
     txt.append(el('b', null, '🧠 חדש: i❤️Shinun — לדעת בעל־פה'));
-    txt.append(el('span', null, 'כאן משננים את העובדות היבשות שאי אפשר להסיק — חלבונים, רעלנים, בופרים. ' +
+    txt.append(el('span', null, 'כאן עוברים על החומר צד-מול-צד, בלי מסיחים ובלי ניחושים. ' +
       'שלושה מצבים: 🎴 היפוך (ידעתי/לא), 📋 כסה־וגלה לחזרה מהירה, ו-📝 מבחן קצר.'));
     intro.append(txt);
     const close = el('button', 'btn ghost', 'הבנתי, בואו נתחיל');
@@ -5567,7 +5567,7 @@ function shinunHomePush() {
   b.href = '#/shinun/' + deck.course;
   const txt = el('div');
   txt.append(el('b', null, '🧠 חדש: i❤️Shinun — שינון בעל־פה'));
-  txt.append(el('span', null, 'המקום לעובדות שאי אפשר להסיק, רק לזכור — חלבונים, רעלנים, בופרים. ' +
+  txt.append(el('span', null, 'המקום לעבור על החומר צד-מול-צד, בלי מסיחים. ' +
     'כרטיסי היפוך, כסה־וגלה, ומבחן קצר. נסה עכשיו ←'));
   b.append(txt);
   const x = el('button', 'intro-x', '✕');

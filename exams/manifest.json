@@ -1,11 +1,11 @@
 {
   "updated": "2026-07-30",
-  "version": "0c48f34a",
+  "version": "20433b03",
   "assets": {
     "tokens": "3e9add29",
     "components": "6a81887c",
     "css": "d3ae9e75",
-    "js": "92e2a4ae",
+    "js": "cb946333",
     "cloud": "d8773ba4"
   },
   "courses": [
@@ -1319,6 +1319,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "physics-shinun",
+      "file": "physics-shinun.json",
+      "course": "physics",
+      "part": null,
+      "title": "i❤️Shinun — שאלות הכיתה",
+      "kind": "shinun",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-07-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "heroSub": "כל 40 השאלות שהכיתה כתבה, בלי מסיחים: השאלה בצד אחד והתשובה הנכונה בצד השני. בשיעור החזרה נצח אמר ש~20% מהמבחן יילקח מהן — זו הדרך המהירה ביותר לעבור עליהן שוב.",
+      "heroEyebrow": null,
+      "count": 40
     },
     {
       "id": "physics-submitted",
