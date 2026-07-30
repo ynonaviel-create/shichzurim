@@ -3044,6 +3044,19 @@ function playQuestions(cfg) {
         sq.onclick = () => openSheet(cfg.courseId, sec.k);
         tools.append(sq);
       }
+
+      /* דיווח על טעות. הארכיון בנוי משחזורים — טעויות מפתח וניסוח הן חלק
+         מהמציאות, והדרך הכי מהירה לתפוס אותן היא הסטודנט שנתקל בהן. הדיווח
+         מגיע מובנה (qid + סיבה + מה נבחר) במקום "יש טעות באתר" בוואטסאפ. */
+      const rp = el('button', 'q-tool');
+      rp.type = 'button';
+      rp.textContent = '🚩';
+      rp.title = 'דיווח על טעות בשאלה';
+      rp.setAttribute('aria-label', rp.title);
+      rp.onclick = () => openReport({
+        courseId: cfg.courseId, item, chosen: answers[qi] ?? null,
+      });
+      tools.append(rp);
       top.append(tools);
     }
 
@@ -3767,6 +3780,128 @@ function openSheet(courseId, focusKey = null) {
   document.addEventListener('keydown', onKey);
   document.body.append(overlay);
   btn.focus();
+}
+
+/* ================= דיווח על טעות בשאלה =================
+   חלון צף כמו openSheet — Escape סוגר, לחיצה על הרקע סוגרת. בלי מלכודת
+   Tab לכפתור הסגירה: כאן יש טופס, והמקלדת צריכה לנוע בין השדות. */
+const REPORT_REASONS = [
+  ['wrong_answer', 'התשובה המסומנת כנכונה — שגויה'],
+  ['typo',         'טעות הקלדה או ניסוח'],
+  ['unclear',      'השאלה לא ברורה או חסר בה מידע'],
+  ['other',        'משהו אחר'],
+];
+
+function openReport({ courseId, item, chosen }) {
+  const overlay = el('div', 'lightbox report-lb');
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'דיווח על טעות בשאלה');
+
+  const pane = el('div', 'lb-pane report-pane');
+  pane.addEventListener('click', (e) => e.stopPropagation());
+
+  pane.append(el('h3', 'report-title', '🚩 דיווח על טעות בשאלה'));
+  pane.append(el('p', 'report-q', (item.q || '').slice(0, 140) + ((item.q || '').length > 140 ? '…' : '')));
+
+  const C = window.Cloud;
+  if (!C || !C.enabled || !C.user) {
+    /* בלי חשבון אין למי לשייך את הדיווח (וזה גם רסן הספאם). לא טופס מת —
+       הסבר וכפתור התחברות במקום. */
+    pane.append(el('p', 'report-note',
+      C && C.enabled
+        ? 'כדי לשלוח דיווח צריך להתחבר — כך אפשר לחזור אליך אם יהיו שאלות על הדיווח.'
+        : 'הדיווחים זמינים רק בגרסה המקוונת של האתר.'));
+    if (C && C.enabled) {
+      const lg = el('button', 'btn primary', 'התחברות עם Google');
+      lg.type = 'button';
+      lg.title = 'התחברות לחשבון — ואז אפשר לדווח';
+      lg.onclick = () => C.login();
+      pane.append(lg);
+    }
+  } else {
+    let reason = null;
+    const pills = el('div', 'report-reasons');
+    const pillEls = [];
+    REPORT_REASONS.forEach(([k, label]) => {
+      const b = el('button', 'report-reason', label);
+      b.type = 'button';
+      b.title = 'בחירת סיבת הדיווח';
+      b.onclick = () => {
+        reason = k;
+        pillEls.forEach((x) => x.classList.toggle('on', x === b));
+        syncSend();
+      };
+      pillEls.push(b);
+      pills.append(b);
+    });
+    pane.append(pills);
+
+    const ta = el('textarea', 'report-ta');
+    ta.rows = 3;
+    ta.maxLength = 2000;
+    ta.placeholder = 'פירוט (לא חובה) — למשל: לפי ההרצאה של שיעור 4, התשובה הנכונה היא ג׳';
+    ta.addEventListener('input', () => syncSend());
+    pane.append(ta);
+
+    const row = el('div', 'report-actions');
+    const send = el('button', 'btn primary', 'שליחת הדיווח');
+    send.type = 'button';
+    send.title = 'שליחת הדיווח לבדיקה';
+    const msg = el('span', 'report-msg');
+    row.append(send, msg);
+    pane.append(row);
+
+    /* "משהו אחר" בלי מילה אחת של הסבר הוא דיווח שאי אפשר לעשות איתו כלום. */
+    const ready = () => reason && (reason !== 'other' || ta.value.trim());
+    function syncSend() { send.disabled = !ready(); }
+    syncSend();
+
+    send.onclick = async () => {
+      if (!ready() || send.disabled) return;
+      send.disabled = true;
+      msg.textContent = 'שולח…';
+      msg.className = 'report-msg';
+      const r = await C.report({
+        courseId,
+        examId: item.examId,
+        qid: item.qid,
+        reason,
+        detail: ta.value,
+        chosen,
+        qPreview: (item.q || '').slice(0, 160),
+      });
+      if (r.ok) {
+        msg.textContent = '✓ הדיווח נשלח — תודה! נבדוק מול חומרי הקורס.';
+        msg.classList.add('ok');
+        setTimeout(close, 1600);
+      } else {
+        msg.textContent = r.reason === 'net'
+          ? '✗ אין חיבור — נסה שוב עוד רגע.'
+          : '✗ השליחה נכשלה. נסה שוב מאוחר יותר.';
+        msg.classList.add('bad');
+        send.disabled = false;
+      }
+    };
+  }
+
+  const btn = el('button', 'lb-close', '✕');
+  btn.type = 'button';
+  btn.title = 'סגירה (או Esc)';
+  btn.setAttribute('aria-label', 'סגירה');
+  btn.onclick = close;
+
+  overlay.append(pane, btn);
+  const prev = document.activeElement;
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+    if (prev && prev.focus) prev.focus();
+  }
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.body.append(overlay);
 }
 
 /* השבב במשוב: לא "הנה דף הנוסחאות" אלא "זה היה בעמוד 2, סעיף קבוע הזמן". */
@@ -5630,6 +5765,55 @@ async function renderAdmin() {
     card.append(el('p', 'adm-hint', 'כותבים ייחודיים לכל מרחב שם ב-7 הימים האחרונים:'));
     card.append(nsWrap);
     box.append(card);
+  });
+
+  /* ── 2.5 דיווחי טעויות — מה שהסטודנטים סימנו בכפתור ה-🚩 ─────────── */
+  const sR = admSection('🚩 דיווחים על שאלות');
+  const repBox = el('div');
+  sR.append(repBox);
+  view.append(sR);
+
+  section(repBox, async (box) => {
+    const rows = await rpc(C.admin.reports('open', 100));
+    if (!rows || !rows.length) {
+      box.append(el('p', 'adm-empty', 'אין דיווחים פתוחים 🎉'));
+      return;
+    }
+    const REASON_HE = {
+      wrong_answer: 'התשובה המסומנת שגויה',
+      typo: 'טעות הקלדה/ניסוח',
+      unclear: 'שאלה לא ברורה',
+      other: 'אחר',
+    };
+    rows.forEach((r) => {
+      const card = admCard(
+        `${REASON_HE[r.reason] || r.reason} · ${r.course_id}`,
+        `${admAgo(r.created_at)}${r.chosen != null ? ` · המדווח בחר מסיח ${r.chosen + 1}` : ''}`);
+      if (r.q_preview) card.append(el('p', 'adm-rep-q', r.q_preview));
+      if (r.detail) card.append(el('p', 'adm-rep-d', '💬 ' + r.detail));
+
+      const acts = el('div', 'adm-rep-acts');
+      const link = el('a', 'adm-chip', 'לשאלה ↗');
+      link.href = '#/q/' + r.qid;
+      link.title = 'פתיחת השאלה המדווחת';
+      acts.append(link);
+
+      /* טופל/נדחה מעלימים את הכרטיס מיד — הרשימה היא תור עבודה, לא ארכיון. */
+      [['resolved', '✓ טופל', 'סימון שהדיווח טופל'], ['rejected', '✗ נדחה', 'סימון שהדיווח אינו טעות']]
+        .forEach(([st, label, tip]) => {
+          const b = el('button', 'adm-chip', label);
+          b.title = tip;
+          b.onclick = async () => {
+            b.disabled = true;
+            const res = await C.admin.setReportStatus(r.id, st);
+            if (res.error) { b.disabled = false; return; }
+            card.remove();
+          };
+          acts.append(b);
+        });
+      card.append(acts);
+      box.append(card);
+    });
   });
 
   /* ── 3. מגמות שימוש — הצ׳יפים חלים על הסקשן הזה בלבד ─────────────── */

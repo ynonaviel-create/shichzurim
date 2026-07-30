@@ -50,7 +50,7 @@
       enabled: false, user: null, isAdmin: false,
       init: async () => {}, login: () => {}, logout: async () => {}, setName: async () => {},
       queue: () => {}, queueDelete: () => {}, queueClear: () => {}, queueClearPrefix: () => {},
-      track: () => {}, admin: {},
+      track: () => {}, report: async () => ({ ok: false, reason: 'disabled' }), admin: {},
       status: () => ({ pending: 0, lastSync: 0, syncing: false }),
     };
     return;
@@ -385,9 +385,30 @@
     /* מעקב אגרגטיבי — app.js קורא Cloud.track('view', courseId) וכו׳. */
     track,
 
+    /* דיווח על טעות בשאלה. בניגוד ל-track זה *לא* fire-and-forget: המדווח
+       צריך לדעת אם הדיווח נקלט, אז מחכים לשרת ומחזירים תשובה. לא עובר דרך
+       ה-outbox — דיווח הוא אירוע חד-פעמי, לא מצב שמסתנכרן בין מכשירים. */
+    async report(r) {
+      if (!state.session) return { ok: false, reason: 'login' };
+      try {
+        const { error } = await sb.from('question_reports').insert({
+          user_id:   state.session.user.id,
+          course_id: r.courseId,
+          exam_id:   r.examId || null,
+          qid:       r.qid,
+          reason:    r.reason,
+          detail:    (r.detail || '').trim().slice(0, 2000) || null,
+          chosen:    r.chosen ?? null,
+          q_preview: r.qPreview || null,
+        });
+        if (error) return { ok: false, reason: 'server' };
+        return { ok: true };
+      } catch { return { ok: false, reason: 'net' }; }
+    },
+
     /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת).
        הפונקציות הישנות (0002) נשארות לקליינטים שמורים במטמון; הלוח הנוכחי
-       קורא ל-v2 (0004): יום לפי שעון ישראל, ותובנות מ-user_kv. */
+       קורא ל-v2 (0005): יום לפי שעון ישראל, ותובנות מ-user_kv. */
     admin: {
       overview:     ()   => sb.rpc('admin_overview'),
       signupsDaily: (d)  => sb.rpc('admin_signups_daily', { days: d ?? 30 }),
@@ -404,6 +425,10 @@
       examStats:       (n)  => sb.rpc('admin_exam_stats',       { min_n: n ?? 10 }),
       shinunHealth:    ()   => sb.rpc('admin_shinun_health'),
       opsHealth:       ()   => sb.rpc('admin_ops_health'),
+
+      /* דיווחי טעויות (0006) */
+      reports:         (st, l)  => sb.rpc('admin_question_reports', { st: st ?? 'open', lim: l ?? 100 }),
+      setReportStatus: (id, st) => sb.rpc('admin_set_report_status', { rid: id, new_status: st }),
     },
 
     status: () => ({ pending: outbox.length, lastSync: state.lastSync, syncing: state.syncing }),

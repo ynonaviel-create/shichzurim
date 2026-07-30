@@ -2146,3 +2146,46 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .spotlight-box b{display:block; margin-bottom:7px; color:var(--warn); font-size:15px;}
 .spotlight-box p{font-size:14px; line-height:1.7;}
 .practice-hero-extra .tag.spotlight{margin-inline-start:7px; font-size:11px; padding:1px 7px;}
+
+/* ═══════════════ דיווח על טעות בשאלה ═══════════════
+   חלון צף על תבנית הלייטבוקס. אותם טוקנים כמו כל טופס באתר — שני המצבים
+   (בהיר/כהה) מכוסים דרכם, בלי CSS מותנה-ערכה. */
+.report-lb{cursor:default;}
+.report-pane{
+  background:var(--surface); border-radius:var(--radius);
+  padding:22px 24px; width:min(560px, 100%);
+  box-shadow:var(--shadow-lg); cursor:auto;
+  display:flex; flex-direction:column; gap:12px;
+}
+.report-title{margin:0; font-size:18px;}
+.report-q{
+  margin:0; font-size:13.5px; color:var(--muted); line-height:1.6;
+  border-inline-start:3px solid var(--line); padding-inline-start:10px;
+}
+.report-note{margin:0; font-size:14px; color:var(--text); line-height:1.7;}
+.report-reasons{display:flex; flex-wrap:wrap; gap:8px;}
+.report-reason{
+  border:1px solid var(--line); background:var(--surface-2); color:var(--text);
+  font-family:var(--font); font-size:13.5px; font-weight:700;
+  border-radius:999px; padding:7px 13px; cursor:pointer; transition:.15s;
+}
+.report-reason:hover{border-color:var(--accent); color:var(--accent);}
+.report-reason.on{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
+.report-ta{
+  width:100%; resize:vertical; min-height:70px;
+  padding:9px 13px; border-radius:var(--radius-sm);
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  font-family:var(--font); font-size:14px; line-height:1.6;
+}
+.report-ta:focus{outline:none; border-color:var(--accent);}
+.report-actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+.report-actions .btn[disabled]{opacity:.45; cursor:not-allowed;}
+.report-msg{font-size:13.5px; font-weight:700;}
+.report-msg.ok{color:var(--good);}
+.report-msg.bad{color:var(--bad);}
+
+/* דיווחים בלוח הבקרה — תור עבודה, לא ארכיון */
+.adm-rep-q{font-size:13.5px; color:var(--text); line-height:1.6; margin:8px 0 0; font-weight:600;}
+.adm-rep-d{font-size:13.5px; color:var(--muted); line-height:1.6; margin:6px 0 0;}
+.adm-rep-acts{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;}
+a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
