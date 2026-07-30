@@ -4005,11 +4005,9 @@ function surveySteps() {
                ['nothing', 'שום דבר — רק חינמי']] },
     ]},
     { icon: '💜', title: 'מילה אחרונה', sub: 'זהו, כמעט סיימנו.', qs: [
-      { k: 'vacation', type: 'single', required: true,
-        label: 'ושאלה אחרונה, הכי חשובה: לאן טסים בחופש? ✈️',
-        opts: [['abroad', 'חו״ל, ביי 🌍'], ['israel', 'נופש בארץ 🏖️'],
-               ['work', 'עובד/ת בחופש 💼'], ['sleep', 'ישן/ה עד דצמבר 😴'],
-               ['home', 'בית, מזגן, שקט 🛋️'], ['secret', 'סוד 🤫']] },
+      { k: 'vacation', type: 'text',
+        label: 'ושאלה אחרונה, הכי חשובה: לאן אתם טסים בחופש? ✈️',
+        ph: 'ארץ או יעד — יוון, תאילנד, הספה בסלון…' },
       { k: 'freeText', type: 'text', tall: true,
         label: 'במה עוד בא לך לשתף?',
         ph: 'ביקורת, רעיון, בקשה, מילה טובה — הכול מתקבל באהבה' },
@@ -6259,7 +6257,6 @@ async function renderAdmin() {
       dist('🛒 על מה שווה לשלם', countBy('payFor', true)),
       dist('📱 מכשירים', countBy('device', true)),
       dist('📣 איך שמעו עלינו', countBy('heard')),
-      dist('✈️ לאן טסים בחופש', countBy('vacation')),
     ].forEach((c2) => { if (c2) box.append(c2); });
 
     /* הטקסטים החופשיים — הזהב האמיתי. כל תשובה עם הקשר קצר. */
@@ -6268,6 +6265,7 @@ async function renderAdmin() {
       ['frictionDetail', '🔧 מה הפריע — פירוט'],
       ['missing', '🎯 מה חשוב לדצמבר'],
       ['oneChange', '🪄 הדבר האחד לשינוי'],
+      ['vacation', '✈️ לאן טסים בחופש'],
       ['freeText', '💬 מילים אחרונות'],
     ];
     TEXT_QS.forEach(([k, title]) => {
