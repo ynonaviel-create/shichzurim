@@ -2298,3 +2298,8 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
   .survey-hero{padding:26px 16px 18px;}
   .survey-hero h2{font-size:22px;}
 }
+
+/* הפוגת המם שבין חלקי הסקר */
+.sv-meme{text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px;}
+.sv-meme h2{margin:0; font-size:20px;}
+.sv-meme-img{max-width:min(360px, 100%); border-radius:14px; box-shadow:var(--shadow);}

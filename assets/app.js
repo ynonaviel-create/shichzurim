@@ -3916,6 +3916,15 @@ const SURVEY_VERSION   = 1;
 const SURVEY_DRAFT_KEY = 'shichzurim.surveyDraft.v1';
 const SURVEY_DONE_KEY  = 'shichzurim.surveyDone.v1';
 
+/* הפוגות קומיות בין חלקי הסקר — מם קופץ אחרי כל "המשך". ארבעה ממים לארבעה
+   מעברים; אם יתווספו חלקים, מעבר בלי מם פשוט ממשיך ישר. */
+const SURVEY_MEMES = [
+  ['assets/img/mail/meme-biomol-electro.jpg', 'הפסקת מם! זוכרים? 🥲'],
+  ['assets/img/mail/meme-atp.jpg', 'ביקוע ATP, גרסת הריאליטי 🧪'],
+  ['assets/img/mail/meme-almog.jpg', 'לנצח נזכור 📖'],
+  ['assets/img/mail/meme-ai-site.jpg', 'עוד חלק אחד ואתם חופשיים 🎉'],
+];
+
 const SURVEY_FEATURES = [
   ['exams',    '📝 שחזורים ותרגול שאלות'],
   ['simexam',  '🎓 סימולציית מבחן מלאה'],
@@ -4201,9 +4210,31 @@ function renderSurvey() {
       msg.className = 'sv-msg';
     }
 
+    /* מעבר עם הפוגת מם: ההתקדמות כבר נשמרה, אז רענון באמצע המם פשוט
+       ינחת על החלק הבא. */
+    function showMeme(idx) {
+      const m = SURVEY_MEMES[idx];
+      if (!m) { drawStep(); toTop(); return; }
+      wrap.innerHTML = '';
+      const card = el('div', 'sv-card sv-meme');
+      card.append(el('h2', null, m[1]));
+      const img = document.createElement('img');
+      img.src = m[0];
+      img.alt = 'מם להפוגה';
+      img.className = 'sv-meme-img';
+      card.append(img);
+      const go = el('button', 'btn primary', 'ממשיכים ←');
+      go.type = 'button';
+      go.title = 'לחלק הבא של הסקר';
+      go.onclick = () => { drawStep(); toTop(); };
+      card.append(go);
+      wrap.append(card);
+      toTop();
+    }
+
     next.onclick = async () => {
       if (next.disabled) return;
-      if (!last) { draft.step = si + 1; save(); drawStep(); toTop(); return; }
+      if (!last) { draft.step = si + 1; save(); showMeme(si); return; }
 
       next.disabled = true;
       msg.textContent = 'שולח…';
