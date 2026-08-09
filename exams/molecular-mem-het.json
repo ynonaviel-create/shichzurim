@@ -50,6 +50,7 @@
         ],
         "span": 6,
         "flipped": true,
+        "optsDiffer": true,
         "conflict": true,
         "ruling": {
           "answer": "תא ללא יכולת חידוש עצמי (self-renewal)",

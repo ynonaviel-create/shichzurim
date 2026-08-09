@@ -501,6 +501,7 @@
         ],
         "span": 6,
         "flipped": true,
+        "optsDiffer": true,
         "conflict": true,
         "rulingMissing": "תא ללא יכולת חידוש עצמי (self-renewal)"
       }

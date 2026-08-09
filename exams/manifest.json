@@ -1,6 +1,6 @@
 {
   "updated": "2026-08-09",
-  "version": "6d1cd3f2",
+  "version": "be71e76a",
   "assets": {
     "tokens": "3e9add29",
     "components": "6f782215",
@@ -325,6 +325,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
+    },
+    {
+      "id": "biochem-nun-bet",
+      "file": "biochem-nun-bet.json",
+      "course": "biochem",
+      "part": "א׳+ב׳",
+      "title": "שחזור מחזור נ״ב",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": 52,
+      "moed": "א",
+      "added": "2026-08-09",
+      "official": false,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 37
     },
     {
       "id": "clinical-2020-moodle",
@@ -1337,6 +1355,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "physics-nun-bet",
+      "file": "physics-nun-bet.json",
+      "course": "physics",
+      "part": null,
+      "title": "שחזור מחזור נ״ב",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": 52,
+      "moed": "א",
+      "added": "2026-08-09",
+      "official": false,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 36
     },
     {
       "id": "physics-shinun",
