@@ -1730,6 +1730,10 @@ async function renderExam(id, focusIdx = null) {
     questions: exam.questions.map((q, i) => ({ ...q, examId: exam.id, idx: i })),
     persist: true,
     allowExam: true,   // מבחן ספציפי → מציעים גם "מצב מבחן" (משוב בסוף)
+    /* בשחזור אמיתי מספור המסיחים הוא חלק מהמסמך ההיסטורי — סטודנטים מצליבים
+       אותו מול ה-PDF ומול מפתח הפתרונות, ו"תשובה 3" חייבת להישאר תשובה 3.
+       בבנקי תרגול וב-High Yield אין מסמך להצליב מולו, ושם מערבבים. */
+    keepOptOrder: exam.kind === 'shichzur',
     back: { text: c ? c.name : 'חזרה', href: '#/course/' + exam.course },
   });
 
@@ -2723,7 +2727,7 @@ function resumeRound(hash) {
   if (!liveRound || liveRound.hash !== hash) return false;
   if (!Object.keys(liveRound.answers).length) return false;   // סבב שלא נגעו בו — אין מה לשחזר
   const cfg = liveRound.cfg;
-  playQuestions({ ...cfg, _resume: { answers: liveRound.answers, elim: liveRound.elim } });
+  playQuestions({ ...cfg, _resume: { answers: liveRound.answers, elim: liveRound.elim, order: liveRound.order } });
   return true;
 }
 
@@ -2755,9 +2759,13 @@ function playQuestions(cfg) {
      נשמרות: הן חלק מרגע החשיבה על השאלה, לא מההתקדמות. */
   const elim = (cfg._resume && cfg._resume.elim) || new Map();   // qi → Set של אינדקסי מסיחים פסולים
 
+  /* סדר התצוגה של המסיחים בכל שאלה — נקבע פעם אחת לסבב, כדי שרינדור מחדש
+     (אחרי מענה, או חזרה לסבב חי) לא יערבב מתחת לידיים. */
+  const order = (cfg._resume && cfg._resume.order) || new Map();   // qi → מערך אינדקסים מקוריים
+
   /* סבב שלא נשמר לאחסון נרשם כאן, כדי שחזרה לכתובת שממנה נפתח תנגן אותו
      מחדש במקום לצייר את הבורר. מבחן וסימולציה לא צריכים את זה — הם persist. */
-  if (!persist) liveRound = { hash: back.href, cfg, answers, elim };
+  if (!persist) liveRound = { hash: back.href, cfg, answers, elim, order };
 
   /* שאלות "מחוץ לחומר" (offSyllabus) — נושא שיצא מהסילבוס (למשל הלב במחזור נ״ב).
      מוצגות ומתורגלות להעשרה, אבל לא נספרות בציון, בהתקדמות ובפילוח הנושאים. */
@@ -3225,11 +3233,15 @@ function playQuestions(cfg) {
     /* מסיח הוא div ולא button כי button דורס את הטיפוגרפיה והעטיפה של טקסט
        ארוך בעברית. המחיר הוא שהתפקיד והמקלדת לא מגיעים בחינם — ובלעדיהם
        אפשר לענות רק בעכבר או בקיצור 1-9, וקורא מסך לא יודע שזו בחירה. */
-    item.opts.forEach((text, oi) => {
+    const ord = order.get(qi) || order.set(qi, optOrder(item, cfg.keepOptOrder)).get(qi);
+    ord.forEach((oi, di) => {
+      const text = item.opts[oi];
       const o = el('div', 'opt');
       o.setAttribute('role', 'button');
       o.tabIndex = 0;
-      o.append(el('span', 'key', String(oi + 1)));
+      /* המספר שרואים הוא מקום התצוגה (וגם קיצור המקלדת), ולא האינדקס
+         בקובץ — `oi` נשאר המקורי ומזין את כל מה שנשמר. */
+      o.append(el('span', 'key', String(di + 1)));
       o.append(el('span', null, text));
 
       const ex = el('button', 'opt-x');
@@ -3300,7 +3312,9 @@ function playQuestions(cfg) {
     card.classList.add('done');
     const isRight = oi === item.a;
     const hide = examMode && !revealed;   // מצב מבחן לפני חשיפה — נעילה בלי לחשוף נכונות
-    opts.querySelectorAll('.opt').forEach((o, i) => {
+    const ord = order.get(qi) || item.opts.map((_, k) => k);
+    opts.querySelectorAll('.opt').forEach((o, di) => {
+      const i = ord[di];
       o.classList.add('locked');
       /* אחרי המענה אין יותר מה לבחור. בלי זה הטאב ממשיך לעצור על ארבעה
          "כפתורים" מתים בדרך להסבר — שהוא מה שבאמת רוצים להגיע אליו. */
@@ -4785,6 +4799,37 @@ async function renderPractice(courseId, seedTopic = null) {
   updateFooter();
 }
 
+
+/* ================= סדר המסיחים =================
+
+   שניים ביקשו את זה בסקר בנפרד: "בתרגול טעויות לשנות את סדר התשובות כדי
+   שהזיכרון הצילומי לא ישחק תפקיד", ו"לערבב את הסדר של המסיחים בכל פעם".
+   הם צודקים — בלי זה "הטעויות שלי" מלמד איפה לסמן, לא מה נכון.
+
+   שתי משפחות של מסיחים לא סובלות ערבוב עיוור:
+
+   • **מפנים למיקום** — "תשובות א+ד נכונות", "1+3", "כל המצבים בסעיפים 1-4".
+     אלה נשברים לגמרי אם משהו זז. השאלה כולה נשארת בסדר המקורי.
+   • **מסיחי סיכום** — "כל התשובות נכונות", "אין תשובה נכונה". המשמעות שלהם
+     אינה תלויה בסדר, אבל מקומם המוסכם הוא בתחתית. מערבבים סביבם ומצמידים
+     אותם למטה.
+
+   ‼️ הערבוב הוא של **התצוגה בלבד**. מה שנשמר — התשובה שנבחרה, הפסילות,
+   ופילוח המסיחים בלוח הבקרה — ממשיך לדבר במספור המקורי של הקובץ, אחרת
+   1,059 רשומות ההתקדמות שכבר בענן היו הופכות לג'יבריש. */
+const OPT_REFS = /(תשובות|סעיפים|תשובה)\s*[0-9א-ה]['’׳]?\s*([+]|ו-|,|[-–]\s*[0-9])|^\s*[0-9]\s*[+]\s*[0-9]|[א-ה]['’׳]\s*[+]\s*[א-ה]/;
+const OPT_TAIL = /^\s*(כל|אף|אין)\s+(ה)?תשוב|^\s*כל\s+ה?נ["'״׳]?ל/;
+
+function optOrder(item, keep) {
+  const opts = item.opts || [];
+  const idx = opts.map((_, i) => i);
+  if (keep || opts.length < 3) return idx;
+  if (opts.some((o) => OPT_REFS.test(String(o)))) return idx;
+  const tail = idx.filter((i) => OPT_TAIL.test(String(opts[i])));
+  if (tail.length === idx.length) return idx;
+  const body = idx.filter((i) => !tail.includes(i));
+  return [...shuffle(body.slice()), ...tail];
+}
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
