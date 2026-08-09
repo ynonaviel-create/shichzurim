@@ -1,6 +1,6 @@
 {
   "updated": "2026-08-09",
-  "version": "ea571b43",
+  "version": "f4d89fbd",
   "assets": {
     "tokens": "3e9add29",
     "components": "6f782215",
@@ -1030,7 +1030,7 @@
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 54
+      "count": 60
     },
     {
       "id": "molecular-lab-2026-moed-a",
@@ -1157,6 +1157,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 29
+    },
+    {
+      "id": "molecular-nun-bet",
+      "file": "molecular-nun-bet.json",
+      "course": "molecular",
+      "part": null,
+      "title": "שחזור מחזור נ״ב",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": 52,
+      "moed": "א",
+      "added": null,
+      "official": false,
+      "trust": "unverified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 35
     },
     {
       "id": "molecular-nun-moed-a",
