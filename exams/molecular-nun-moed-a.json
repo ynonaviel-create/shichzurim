@@ -489,14 +489,17 @@
       "source": "שחזור מחזור נ׳ — מועד א׳",
       "qid": "8e546aeb",
       "repeat": {
-        "n": 3,
+        "n": 6,
         "unit": "מחזורים",
         "in": [
+          "נ״ב",
           "נ׳",
           "מ״ט",
-          "מ״ח"
+          "מ״ח",
+          "מ״ז",
+          "מ״ו"
         ],
-        "span": 2,
+        "span": 6,
         "flipped": true,
         "conflict": true,
         "rulingMissing": "תא ללא יכולת חידוש עצמי (self-renewal)"

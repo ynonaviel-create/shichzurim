@@ -1,6 +1,6 @@
 {
   "updated": "2026-08-09",
-  "version": "f4d89fbd",
+  "version": "6d1cd3f2",
   "assets": {
     "tokens": "3e9add29",
     "components": "6f782215",
@@ -1030,7 +1030,7 @@
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 60
+      "count": 59
     },
     {
       "id": "molecular-lab-2026-moed-a",

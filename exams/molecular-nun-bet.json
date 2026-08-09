@@ -441,15 +441,20 @@
       "topic": "מחזור התא והתמיינות",
       "qid": "20a7e80b",
       "repeat": {
-        "n": 3,
+        "n": 6,
         "unit": "מחזורים",
         "in": [
           "נ״ב",
+          "נ׳",
+          "מ״ט",
+          "מ״ח",
           "מ״ז",
           "מ״ו"
         ],
         "span": 6,
-        "flipped": true
+        "flipped": true,
+        "conflict": true,
+        "rulingMissing": "תא ללא יכולת חידוש עצמי (self-renewal)"
       }
     },
     {
