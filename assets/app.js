@@ -4511,6 +4511,9 @@ async function renderPractice(courseId, seedTopic = null) {
   const modeField = el('div', 'field');
   modeField.append(el('label', null, 'מה לתרגל'));
   const modeChips = el('div', 'chips');
+  /* מוצב כאן כדי שמחליף-המצב יוכל לקרוא לו; מאוכלס אחרי שצ׳יפי הכמות נבנים. */
+  let setCount = null;
+
   const MODES = [
     { id: 'new',   label: '✨ שאלות חדשות', tip: 'רק שאלות שעוד לא ראית — להרחבת הכיסוי' },
     { id: 'wrong', label: '🎯 רק מה שטעיתי', tip: 'רק שאלות שהמענה האחרון שלך בהן היה שגוי' },
@@ -4525,6 +4528,11 @@ async function renderPractice(courseId, seedTopic = null) {
       mode = m.id;
       modeChips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
       ch.classList.add('on');
+      /* „הייתי שמח שהיה תרגול של כל הטעויות שעשיתי — זה לא תמיד עבד” (שחף).
+         אחת הסיבות: תקרת 20 שאלות שחלה גם על „רק מה שטעיתי”. מי שצבר 80
+         טעויות קיבל 20 מהן, והחיווי על כך היה שורה אפורה קטנה. אלה קבוצות
+         סופיות שהמשתמש רוצה *לגמור*, ולכן ברירת המחדל בהן היא הכול. */
+      if ((m.id === 'wrong' || m.id === 'due') && setCount) setCount(0);
       update();
     };
     modeChips.append(ch);
@@ -4693,6 +4701,11 @@ async function renderPractice(courseId, seedTopic = null) {
     };
     cc.append(ch);
   });
+  setCount = (n) => {
+    count = n;
+    [...cc.querySelectorAll('.chip')].forEach((x) =>
+      x.classList.toggle('on', x.textContent === (n === 0 ? 'הכול' : String(n))));
+  };
   countField.append(cc);
   form.append(countField);
 
@@ -4762,6 +4775,15 @@ async function renderPractice(courseId, seedTopic = null) {
         : mode === 'due' ? 'שאלות שהגיע הזמן לרענן'
         : 'שאלות';
       info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
+      /* פילטר נושא נדבק כשמגיעים מכרטיס מלכודת או מפילוח, והפאנל שמציג אותו
+         מקופל — אז המשתמש רואה „רק מה שטעיתי” ולא מבין למה חסרות טעויות.
+         מציגים את זה בגובה העיניים, עם דרך אחת לנקות. */
+      if (selTopics.size) {
+        const clear = el('button', 'linky', `מסונן ל-${selTopics.size} נושאים · הצג הכול`);
+        clear.type = 'button';
+        clear.onclick = () => { selTopics.clear(); drawTopics(); update(); };
+        info.append(' ', clear);
+      }
       go.disabled = false;
       go.textContent = `התחל תרגול · ${take} שאלות`;
       return;
