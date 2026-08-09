@@ -725,6 +725,33 @@ function nextDate(course) {
     .sort((a, b) => a.ts - b.ts)[0] || null;
 }
 
+/* ---------- מתי מקצוע נכנס לארכיון ----------
+
+   הקיבוץ לפי שנה/סמסטר ומדף הארכיון היו בנויים מזמן, ומעולם לא עשו כלום:
+   הפילטר חיפש `status === 'archived'` — ערך שאינו חוקי בסכימה בכלל (מותר
+   active/done/soon). כלומר המדף לא יכול היה להתמלא, וכל הקורסים נערמו
+   בשורה אחת.
+
+   התיקון גם עונה על „מי יתחזק את זה”: אף אחד. הארכוב נגזר מהתאריכים שכבר
+   קיימים — מקצוע יורד מהחזית כשעברו שבועיים מהמועד האחרון שלו. `status`
+   נשאר כעקיפה ידנית לשני המקרים שהתאריך לא יודע עליהם: `soon` (הקורס טרם
+   התחיל) ו-`done` (נגמר, בלי קשר למה שכתוב בתאריכים).
+
+   שבועיים ולא יום: מי שניגש למועד ב׳ עדיין חוזר על החומר בימים שאחריו. */
+const ARCHIVE_GRACE_MS = 14 * 24 * 3600e3;
+
+function lastExamAt(course) {
+  const ts = (course.dates || []).map((d) => new Date(d.at).getTime()).filter((t) => !Number.isNaN(t));
+  return ts.length ? Math.max(...ts) : null;
+}
+
+function isArchived(course) {
+  if (course.status === 'done') return true;
+  if (course.status === 'soon') return false;
+  const last = lastExamAt(course);
+  return last != null && Date.now() > last + ARCHIVE_GRACE_MS;
+}
+
 /* המבחן הקרוב ביותר בכל הארכיון. */
 function nextExamOverall() {
   return COURSES
@@ -940,8 +967,8 @@ function renderHome() {
 
   /* המדף: הסמסטר הפעיל למעלה, ושנים/סמסטרים קודמים מקופלים בארכיון.
      כך האתר "גדל בחן" — ריבוי שנים לא נערם מול העיניים. */
-  const active = COURSES.filter((c) => c.status !== 'archived');
-  const archived = COURSES.filter((c) => c.status === 'archived');
+  const active = COURSES.filter((c) => !isArchived(c));
+  const archived = COURSES.filter(isArchived);
 
   groupBySemester(active).forEach((g) => view.append(shelfGroup(g.label, g.courses, false)));
 
@@ -949,7 +976,10 @@ function renderHome() {
     const det = el('details', 'shelf-arch');
     const sum = el('summary');
     sum.append(el('span', 'chev', '⌄'));
-    sum.append(el('span', null, 'ארכיון סמסטרים קודמים'));
+    /* מה שכתוב על המגירה צריך לומר מה בפנים. כשכל הארכיון הוא שנה אחת —
+       אומרים אותה בשם, כי „ארכיון סמסטרים קודמים” לא מרמז על כלום. */
+    const years = [...new Set(archived.map(semLabel))];
+    sum.append(el('span', null, years.length === 1 ? years[0] + ' — הסתיים' : 'מקצועות שהסתיימו'));
     sum.append(el('span', 'shelf-arch-line'));
     sum.append(el('span', 'shelf-head-n', plural(archived.length, 'מקצוע', 'מקצועות')));
     det.append(sum);
