@@ -960,4 +960,60 @@ apply();})();</script><section class="cover">
       /* הבלוקים החדשים מצטרפים לאחזור-האקטיבי ול"גלה הכל" אוטומטית (details.reveal) */
       sizeRail(); onScroll();
     });
-})();</script></body></html>
+})();</script>
+<script>
+/* ---- עוגן נושא מהאתר: #top-<שם הנושא הקנוני> ----
+
+   האתר מקשר לכאן מכרטיס היחידה במפת החומרים ("📖 קרא בסיכום המלא"), ובונה
+   את העוגן משם הנושא הקנוני. שני מסמכי הסיכום בונים את המזהים שלהם אחרת —
+   פיזיקה מחזיק id בקובץ, אלקטרו מייצר אותו בזמן ריצה — ולכן הקישור נשען על
+   מה שמשותף לשניהם: **כותרת הסעיף**, שהיא בדיוק שם הנושא.
+
+   בלי זה כל לחיצה נחתה בראש המסמך, וזה מה שדווח בסקר ("ההפניות לסיכום לרוב
+   לא מסודרות ומגיעות למקום הנכון"). */
+(function () {
+  function titleOf(sec) {
+    var h = sec.querySelector('header.ch h2') || sec.querySelector('h3') || sec.querySelector('h2');
+    if (!h) return '';
+    var c = h.cloneNode(true);
+    /* כפתורי ההקראה ותג האחוזים יושבים בתוך הכותרת ואינם חלק מהשם */
+    var junk = c.querySelectorAll('button, .speak-wrap, .ch-f, .pct');
+    for (var i = 0; i < junk.length; i++) junk[i].remove();
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function norm(s) {
+    return (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '')
+      .replace(/\s+/g, ' ').trim();
+  }
+  function resolve() {
+    var m = /^#top-(.+)$/.exec(location.hash);
+    if (!m) return;
+    var want = norm(decodeURIComponent(m[1]));
+    var secs = document.querySelectorAll('section.unit, section.chap');
+    for (var i = 0; i < secs.length; i++) {
+      if (norm(titleOf(secs[i])) !== want) continue;
+      var sec = secs[i];
+      /* פרק מקופל לא ייגלל לשום מקום שימושי — פותחים אותו קודם */
+      var d = sec.closest ? sec.closest('details') : null;
+      if (d) d.open = true;
+      sec.scrollIntoView({ block: 'start' });
+      sec.classList.add('topjump');
+      setTimeout(function () { sec.classList.remove('topjump'); }, 2200);
+      return;
+    }
+    /* נושא שאין לו פרק — עדיף ראש המסמך מאשר מיקום הגלילה הקודם */
+    window.scrollTo(0, 0);
+  }
+  /* אחרי הסקריפטים של המסמך עצמו: אלקטרו מזריק פרקים ומזהים בזמן ריצה */
+  function boot() { setTimeout(resolve, 60); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('hashchange', resolve);
+})();
+</script>
+<style>
+@keyframes topjump-in { from { background: rgba(255,214,102,.34); } to { background: transparent; } }
+.topjump { animation: topjump-in 2.2s ease-out; border-radius: 10px; }
+</style>
+
+</body></html>

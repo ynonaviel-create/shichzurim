@@ -357,6 +357,45 @@ guides.forEach((g) => {
   });
 });
 
+/* --- עוגני הסיכום המלא ---
+
+   כרטיס היחידה במפה מקשר ל-`<studyDoc>#top-<topic>`, והמסמכים פותרים את
+   העוגן לפי **כותרת הסעיף**. אם נושא במפה משנה שם, או שפרק במסמך מקבל
+   כותרת אחרת, הקישור נוחת בראש המסמך בלי להתלונן — וזה בדיוק מה שקרה
+   ודווח בסקר. הבדיקה הזאת תופסת את הפער לפני שהוא מגיע לסטודנט. */
+const anchorGaps = [];
+guides.forEach((g) => {
+  const course = courses.find((c) => c.id === g.course);
+  const doc = course && course.studyDoc && course.studyDoc.href;
+  if (!doc) return;
+  let html;
+  try { html = fs.readFileSync(path.join(__dirname, doc), 'utf8'); } catch { return; }
+
+  /* כותרות הפרקים בשני המבנים: section.unit>h3 (פיזיקה), section.chap>header.ch>h2 (אלקטרו) */
+  const titles = new Set();
+  const push = (t) => {
+    const clean = t
+      /* כפתורי ההקראה יושבים *בתוך* ה-h3, וטקסט הכפתור אינו חלק משם הנושא */
+      .replace(/<button[\s\S]*?<\/button>/g, ' ')
+      .replace(/<[^>]*>/g, ' ').replace(/[\u0591-\u05C7]/g, '')
+      .replace(/["'\u05F3\u05F4`]/g, '').replace(/\s+/g, ' ').trim();
+    if (clean) titles.add(clean);
+  };
+  let m;
+  const reUnit = /<section[^>]*class="[^"]*\bunit\b[^"]*"[^>]*>\s*<h3>([\s\S]*?)<\/h3>/g;
+  while ((m = reUnit.exec(html))) push(m[1]);
+  const reChap = /<section[^>]*class="[^"]*\bchap\b[^"]*"[^>]*>[\s\S]{0,400}?<h2>([\s\S]*?)<\/h2>/g;
+  while ((m = reChap.exec(html))) push(m[1]);
+
+  const norm = (x) => x.replace(/[\u0591-\u05C7]/g, '').replace(/["'\u05F3\u05F4`]/g, '')
+    .replace(/\s+/g, ' ').trim();
+  const have = new Set([...titles].map(norm));
+  (g.units || []).forEach((u) => {
+    if (u.topic && !have.has(norm(u.topic)))
+      anchorGaps.push(`${doc} · "${u.topic}" — אין פרק בכותרת הזאת; הקישור ינחת בראש המסמך`);
+  });
+});
+
 /* --- תבנית ה-explain --- ראו QUESTION-STANDARD.md
    הסבר שנכתב כתבנית (הסבר + פסילה למסיח) מוצג באתר עם מספר המסיח על כל בולט,
    והמנוע קובע את המספר רק כשהוא חד-משמעי. כאן בודקים מה שהמנוע יבדוק בהמשך,
@@ -567,6 +606,11 @@ html = html
   .replace(/assets\/app\.js(\?v=[a-f0-9]+)?/g, `assets/app.js?v=${jsV}`)
   .replace(/assets\/cloud\.js(\?v=[a-f0-9]+)?/g, `assets/cloud.js?v=${cloudV}`);
 fs.writeFileSync(indexPath, html, 'utf8');
+
+if (anchorGaps.length) {
+  console.log('\n⚠️  עוגני הסיכום המלא — נושאים שהקישור אליהם ינחת בראש המסמך:');
+  anchorGaps.forEach((c) => console.log('   • ' + c));
+}
 
 if (coverage.length) {
   console.log('\n⚠️  כיסוי "מה באמת נשאל" — מה שנשאר למפות:');
