@@ -443,6 +443,12 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
     const others = labels.filter((l) => l !== rep._exam.label);
     const notes = [`נוסח מ${rep._exam.label}${others.length ? `. הופיעה גם ב${others.join(', ')}` : ''}.`];
 
+    /* ‼️ `notes` מוצג *מעל* המסיחים, לפני שהמשתמש בחר. כל טקסט שנוקב בתשובה
+       — "מ״ז → ChIP-seq", הכרעה, או מה שסימן כל מפתח — הולך ל-`after`, שנכתב
+       ל-`noteAfter` ומוצג רק אחרי המענה (ראו lateNotes ב-app.js). הסקר תפס
+       את הדליפה הזאת, והיא נולדה כאן: 13 מ-21 המקרים הם הערות מחוללות. */
+    const after = [];
+
     if (flipped) {
       /* new Set — מבחן אחד יכול לתרום כמה שאלות לאותו אשכול (במועד א׳ 2023 יש
          שתי שאלות גליה נפרדות), ובלעדיו התג יקרא "מועד א׳ 2023, מועד א׳ 2023". */
@@ -456,12 +462,16 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       );
     }
 
-    if (optsDiffer) {
+    /* שני הדגלים נקבעים לכל *זוג* בנפרד, ולכן אשכול אחד יכול להצדיק את שניהם.
+       אבל שתי הפסקאות מדפיסות את אותה רשימה — "מה סימן כל מופע" — ולקורא זה
+       נראה כמו תקלה. כשיש גם סתירה אמיתית, היא הפסקה שנושאת את הרשימה,
+       ו-optsDiffer מצטמצם למשפט הסיוג שלו. */
+    if (optsDiffer && !conflict) {
       const each = [...g]
         .sort((a, b) => b._trust - a._trust)
         .map((q) => `${q._exam.label} → "${q.opts[q.a]}"`)
         .join('  |  ');
-      notes.push(
+      after.push(
         `ℹ️ אותה שאלה, אבל ערכת המסיחים לא הייתה זהה בין ${cfg.they}, ולכן גם התשובה הנכונה שונה: ${each}. ` +
         `אלה לא מפתחות סותרים — כל אחת נכונה למסיחים שהוצעו לה. תבין את התוכן, אל תשנן אות.`
       );
@@ -482,7 +492,7 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
 
       if (ruling && at >= 0) {
         clean.a = at;                       // מתקנים את המפתח בפועל, לא רק מעירים
-        notes.push(
+        after.push(
           `⚠️ ${cfg.they} היו חלוקים על התשובה: ${disagree}. ` +
           `✅ הוכרע מול חומרי הקורס: הנכונה היא "${ruling.answer}". ${ruling.why || ''}`.trim()
         );
@@ -490,18 +500,23 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       } else if (ruling) {
         /* הוכרע, אבל התשובה הנכונה לא הופיעה כמסיח באף אחד מהמופעים —
            כלומר בכל הגרסאות שיש לנו השאלה פגומה. זה עצמו ממצא. */
-        notes.push(
+        after.push(
           `⚠️ ${cfg.they} חלוקים: ${disagree}. ` +
           `❗ לפי חומרי הקורס התשובה הנכונה היא "${ruling.answer}" — והיא לא הוצעה כמסיח באף אחד ` +
           `מהם. ${ruling.why || ''}`.trim()
         );
       } else {
-        notes.push(
+        after.push(
           `⚠️ ${cfg.they} חלוקים על התשובה: ${disagree}. ` + cfg.clashNote(rep) +
           ` אל תשנן את השאלה הזאת; תבין אותה.`
         );
       }
     }
+    if (optsDiffer && conflict)
+      after.push(
+        `ℹ️ שים לב: בחלק מהמופעים ערכת המסיחים לא הייתה זהה, ושם תשובה שונה אינה סתירה ` +
+        `אלא פשוט מסיחים אחרים.`
+      );
     if (rep.note) notes.push(rep.note);
 
     /* עכשיו לקבצי המקור.
@@ -530,7 +545,9 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       q._exam.touched = true;
     });
 
-    hy.push({ ...clean, qid, note: notes.join(' '), repeat: stamp, source: cfg.source(rep._exam.label) });
+    const hyQ = { ...clean, qid, note: notes.join(' '), repeat: stamp, source: cfg.source(rep._exam.label) };
+    if (after.length) hyQ.noteAfter = after.join(' ');
+    hy.push(hyQ);
   });
 
   /* --- כתיבת קבצי השחזור --- */

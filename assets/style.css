@@ -386,6 +386,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   border:1px solid var(--warn-ln); border-radius:8px;
   padding:10px 14px; margin-top:14px; line-height:1.65;
 }
+/* הערה שנוקבת בתשובה, ולכן חיה בתוך המשוב ולא מעל המסיחים. הצהוב של האזהרה
+   מיותר כאן — היא כבר לא מזהירה מכלום, היא מלמדת. */
+.fb .q-note.late{
+  color:var(--text); background:transparent;
+  border:0; border-inline-start:3px solid var(--warn-ln); border-radius:0;
+  padding:2px 12px; margin-top:12px;
+}
 
 /* הסבר על הקורס והמבחנים — קופסת הקשר בעמוד המקצוע */
 .course-about{

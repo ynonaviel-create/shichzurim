@@ -37,9 +37,17 @@
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 
+  /* עותק מקומי לא מדבר עם מסד הייצור. זה גם מה שפותח את האתר לבדיקה מקומית:
+     REQUIRE_LOGIN נשאר דלוק, אבל השער תלוי ב-Cloud.enabled — ובלי ענן אין
+     מסך כניסה, בדיוק כמו שהיה לפני שהענן נולד. `?cloud=1` מדליק בכל זאת,
+     למי שכן רוצה לבדוק את זרימת ההתחברות עצמה. */
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const forceCloud = new URLSearchParams(location.search).has('cloud');
+
   const disabled =
     !CONFIG.url || !CONFIG.anonKey ||
     location.protocol === 'file:' ||
+    (isLocal && !forceCloud) ||
     typeof window.supabase === 'undefined';
 
   /* ממשק ריק כשהענן כבוי — כל הקריאות מ-app.js הופכות ללא-כלום. */
