@@ -27,7 +27,7 @@ const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
    הם לא נספרים בסיכומי ה"שאלות" (כמו NOT_QUIZ ב-app.js). */
 const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
 const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e) => a + e.count, 0);
-const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json', 'qid-course.json']);
+const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
 
 const problems = [];
 const quizFiles = [];   // {file, items} לכל קובץ שאלות — לבדיקת תבנית ה-explain
@@ -601,25 +601,6 @@ const compV = stamp('assets/components.css');
 const cssV = stamp('assets/style.css');
 const jsV = stamp('assets/app.js');
 const cloudV = stamp('assets/cloud.js');   // גשר הענן — נחתם כמו app.js; הספרייה שב-vendor נעוצה בפין ידני
-
-/* ---------- אינדקס שאלה→מקצוע ----------
-
-   מסך הבית צריך לענות „12 שאלות מחכות לך בביומול” — כלומר לספור רשומות
-   ב-seenH, שממופתחות ב-qid בלבד ואינן יודעות לאיזה מקצוע הן שייכות.
-   הדרך היחידה לדעת הייתה לטעון את כל 64 קבצי המבחנים, 2.8 מגה, בכל
-   כניסה לדף הבית. האינדקס הזה שוקל בערך 20KB ונטען פעם אחת.
-
-   מקובץ לפי מקצוע ולא {qid: course} — אותו מידע, כשליש מהתווים. */
-const qidsByCourse = {};
-exams.forEach((m) => {
-  const data = JSON.parse(fs.readFileSync(path.join(EXAMS, m.file), 'utf8'));
-  (data.questions || []).forEach((q) => {
-    if (!q || !q.qid) return;
-    (qidsByCourse[m.course] ||= []).push(q.qid);
-  });
-});
-Object.keys(qidsByCourse).forEach((c) => { qidsByCourse[c] = [...new Set(qidsByCourse[c])]; });
-fs.writeFileSync(path.join(EXAMS, 'qid-course.json'), JSON.stringify(qidsByCourse), 'utf8');
 
 fs.writeFileSync(
   path.join(EXAMS, 'manifest.json'),
