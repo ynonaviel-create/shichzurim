@@ -2978,7 +2978,17 @@ function playQuestions(cfg) {
     box.append(el('div', 'sub', `${good} נכונות מתוך ${scoredCount}. ${praise}`));
     const row = el('div', 'btn-row');
     row.style.justifyContent = 'center';
-    const again = el('button', 'btn primary', 'סבב נוסף');
+    /* „אחרי סבב של 10 שאלות למשל לעשות עוד סבב של אותו דבר בלחיצת כפתור ולא
+       לחזור אחורה לבחור נושאים מחדש” (גלב, בסקר). היה כפתור „סבב נוסף” — אבל
+       הוא הגיש בדיוק את אותן עשר שאלות, והדרך היחידה לעשרה חדשים הייתה לחזור
+       לבורר, ששם כל הפילטרים מתאפסים. עכשיו החדשות הן ברירת המחדל. */
+    if (cfg.reroll) {
+      const fresh = el('button', 'btn primary', 'עוד סבב — שאלות חדשות');
+      fresh.title = 'סבב חדש באותם נושאים ובאותו סינון, עם שאלות אחרות';
+      fresh.onclick = () => { forgetRound(); cfg.reroll(); };
+      row.append(fresh);
+    }
+    const again = el('button', 'btn' + (cfg.reroll ? '' : ' primary'), cfg.reroll ? 'לחזור על אלה' : 'סבב נוסף');
     again.title = 'איפוס והתחלת סבב חדש על אותן שאלות';
     again.onclick = doReset;
     row.append(again);
@@ -3115,12 +3125,17 @@ function playQuestions(cfg) {
          בדיוק מה שעושים במבחן: מזהים את סוג החישוב ומדפדפים למקום הנכון. */
       const sec = sheetRefFor(cfg.courseId, item);
       if (sec) {
+        /* בסימולציה זה מזיק במקום לעזור: שחף כתב בסקר „כשאני פותח דף נוסחאות
+           לא יקבע אותי לאיור ספציפי — חלק מהאתגר זה למצוא לבד; בתרגול זה טוב
+           אבל בדימוי מבחן לא רציתי לעבוד על עצמי”. במבחן האמיתי הדף מגיע שלם.
+           גם ה-tooltip הסגיר את שם הסעיף עוד לפני הלחיצה. */
+        const blind = examMode;
         const sq = el('button', 'q-tool');
         sq.type = 'button';
         sq.textContent = '📄';
-        sq.title = `דף הנוסחאות · ${sec.label}`;
+        sq.title = blind ? 'דף הנוסחאות' : `דף הנוסחאות · ${sec.label}`;
         sq.setAttribute('aria-label', sq.title);
-        sq.onclick = () => openSheet(cfg.courseId, sec.k);
+        sq.onclick = () => openSheet(cfg.courseId, blind ? null : sec.k);
         tools.append(sq);
       }
 
@@ -4792,6 +4807,9 @@ async function renderPractice(courseId, seedTopic = null) {
       /* אבן דרך "כיסית את כל המקצוע" — נמדדת מול כל בריכת השאלות, לא רק
          תת-הקבוצה שנבחרה לסבב הזה. */
       milestone: { courseId, courseName: c.name, total: pool.length, qids: pool.map(qKey) },
+      /* אותה בחירה בדיוק, הגרלה חדשה — הבורר עדיין חי בקלוז׳ר הזה, כולל
+         `selTopics`, `mode`, `count` וכל השאר. */
+      reroll: () => go.onclick(),
     });
   };
 
@@ -9472,7 +9490,16 @@ function trapBox(item) {
   const t = item.qid && TRAP_BY_QID[item.qid];
   if (!t) return null;
   const box = el('div', 'trapbox');
-  box.append(el('b', null, '🪤 המלכודת שנפלת בה'));
+  /* שניים דיווחו בסקר בנפרד שהמלכודת „הרגישה לא מדויקת” ו„לפעמים לא קשורה”.
+     ההצמדה עצמה מדויקת (לפי qid), אבל הטענה לא הייתה: המלכודת נכתבת עבור
+     *נקודה* שיכולה להישען על עד שמונה שאלות, והיא נורית על כל טעות בלי קשר
+     למסיח שנבחר. כלומר אי אפשר לדעת שנפלת דווקא בה.
+
+     אין בדאטה מה שצריך כדי לדעת — ולכן מתקנים את הטענה ולא ממציאים נתון:
+     „שנפלת בה” נאמר רק כשהמלכודת שייכת לשאלה הזאת בלבד. אחרת היא מוצגת
+     כמה שהיא — המלכודת שהנושא בודק. */
+  const only = (t.qids || []).length <= 1;
+  box.append(el('b', null, only ? '🪤 המלכודת שנפלת בה' : '🪤 המלכודת שהנושא הזה בודק'));
   box.append(el('div', 'trap-text', t.trap));
   const others = (t.qids || []).length - 1;
   if (others > 0) {
