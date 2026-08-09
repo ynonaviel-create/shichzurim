@@ -857,6 +857,10 @@ function router() {
   if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet','simexam','survey'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
+  /* חזרה לכתובת שממנה נפתח סבב חי — מנגנים אותו מחדש במקום לצייר את הבורר
+     מאפס. חייב לרוץ אחרי המעקב (זו עדיין צפייה) ולפני כל רנדרר. */
+  if (resumeRound(location.hash)) return;
+
   if (route === 'admin') return renderAdmin();
   if (route === 'account') return renderAccount();
   if (route === 'survey') return renderSurvey();
@@ -2694,6 +2698,41 @@ function lateNotes(item) {
   return out;
 }
 
+/* ================= הסבב החי =================
+
+   סבב תרגול הוא DOM שמצויר *מתחת* לכתובת שכבר היית בה — `playQuestions` לא
+   נוגע ב-hash. לכן לדפדפן אין רשומת היסטוריה שאומרת "אני באמצע סבב": קפיצה
+   למפת החומרים וחזרה מחזירה אותך לכתובת `#/practice/<course>`, הראוטר מצייר
+   את הבורר מאפס, והתשובות והפילטרים נעלמים. רק מבחן וסימולציה שרדו, כי שם
+   `persist:true` שומר לאחסון.
+
+   בסקר זה הופיע כ"בחזרות אחורה זה תמיד היה מוציא אותך מהסשן ומתחיל מהתחלה".
+
+   הפתרון: הסבב האחרון נשמר כאן יחד עם ה-cfg שיצר אותו, והראוטר מנגן אותו
+   מחדש כשחוזרים לכתובת שממנה נפתח. `answers` ו-`elim` הם אותם אובייקטים
+   שהנגן עובד עליהם, ולכן אין מה לסנכרן — הם תמיד עדכניים.
+
+   יציאה מכוונת (הפירורים למעלה, "חזרה ל..." בסוף) מוחקת אותו — אחרת הכפתור
+   שאמור להוציא אותך היה מחזיר אותך פנימה. */
+let liveRound = null;
+
+function forgetRound() { liveRound = null; }
+
+/* מחזיר true אם היה סבב חי לכתובת הזאת והוא נוגן מחדש. */
+function resumeRound(hash) {
+  if (!liveRound || liveRound.hash !== hash) return false;
+  if (!Object.keys(liveRound.answers).length) return false;   // סבב שלא נגעו בו — אין מה לשחזר
+  const cfg = liveRound.cfg;
+  playQuestions({ ...cfg, _resume: { answers: liveRound.answers, elim: liveRound.elim } });
+  return true;
+}
+
+/* עוטף קישור יציאה כך שלחיצה עליו סוגרת את הסבב. */
+function exitLink(node) {
+  node.addEventListener('click', forgetRound);
+  return node;
+}
+
 function playQuestions(cfg) {
   const { key, title, subtitle, note, persist, back } = cfg;
   const questions = (cfg.questions || []).map(rulingA);
@@ -2708,18 +2747,23 @@ function playQuestions(cfg) {
      `v:2` מסמן שהמפתחות כבר qid. בלי הדגל אין דרך להבחין — qid בן 8 תווים
      יכול להיות "12345678", ומפתח אינדקס נראה בדיוק אותו דבר. */
   const rec = persist ? store.exam(key) : { answers: {} };
-  const answers = persist ? fromStore(rec, questions) : {};
+  const answers = persist ? fromStore(rec, questions)
+                : (cfg._resume ? cfg._resume.answers : {});
 
   /* פסילת תשובות — עבודה כמו על דף מבחן אמיתי: מוחקים בקו את המסיחים שברור
      שהם לא, ורק אז מכריעים בין מה שנשאר. הפסילות חיות בזיכרון בלבד ולא
      נשמרות: הן חלק מרגע החשיבה על השאלה, לא מההתקדמות. */
-  const elim = new Map();   // qi → Set של אינדקסי מסיחים פסולים
+  const elim = (cfg._resume && cfg._resume.elim) || new Map();   // qi → Set של אינדקסי מסיחים פסולים
+
+  /* סבב שלא נשמר לאחסון נרשם כאן, כדי שחזרה לכתובת שממנה נפתח תנגן אותו
+     מחדש במקום לצייר את הבורר. מבחן וסימולציה לא צריכים את זה — הם persist. */
+  if (!persist) liveRound = { hash: back.href, cfg, answers, elim };
 
   /* שאלות "מחוץ לחומר" (offSyllabus) — נושא שיצא מהסילבוס (למשל הלב במחזור נ״ב).
      מוצגות ומתורגלות להעשרה, אבל לא נספרות בציון, בהתקדמות ובפילוח הנושאים. */
   const scoredCount = questions.filter((q) => !q.offSyllabus).length;
 
-  view.append(crumb(back.text, back.href));
+  view.append(exitLink(crumb(back.text, back.href)));
 
   const head = el('div', 'page-head');
   head.append(el('h1', null, title));
@@ -2930,7 +2974,7 @@ function playQuestions(cfg) {
     again.title = 'איפוס והתחלת סבב חדש על אותן שאלות';
     again.onclick = doReset;
     row.append(again);
-    const bk = el('a', 'btn', 'חזרה ל' + back.text);
+    const bk = exitLink(el('a', 'btn', 'חזרה ל' + back.text));
     bk.title = 'יציאה מהתרגול — ההתקדמות שלך נשמרת';
     bk.href = back.href;
     row.append(bk);
