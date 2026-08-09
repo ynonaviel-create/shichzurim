@@ -891,7 +891,7 @@ function router() {
   if (route === 'admin') return renderAdmin();
   if (route === 'account') return renderAccount();
   if (route === 'survey') return renderSurvey();
-  if (route === 'course' && param) return renderCourse(param);
+  if (route === 'course' && param) return renderCourse(param, sub || null);
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'cards' && param) return renderCards(param);
@@ -935,10 +935,11 @@ function renderHome() {
   view.innerHTML = '';
   delete view.dataset.course;  // מנקה צבע-מקצוע שנשאר מעמוד מקצוע קודם
 
+  /* הכותרת מתקצרת: הברכה עברה ללוח „מה עכשיו”, ושתי ברכות באותו מסך הן
+     ערימה. מי שאין לו לוח עדיין מקבל אותה כאן. */
   const head = el('div', 'page-head');
-  const nm = window.Cloud?.user?.firstName;
-  head.append(el('h1', null, nm ? `${timeGreeting()}, ${nm} 👋` : 'ארכיון השחזורים'));
-  head.append(el('p', null, 'בחר מקצוע. בתוכו — ללמוד, לתרגל, להיבחן, ולחזור על הטעויות.'));
+  head.append(el('h1', null, 'ארכיון השחזורים'));
+  head.append(el('p', null, 'שחזורי מבחנים אמיתיים — לפתור, להבין, ולחזור על מה שטעית.'));
   view.append(head);
 
   /* באנר הסקר — ראשון ובולט, לפני כל השאר, עד שיירד בקוד. */
@@ -959,18 +960,39 @@ function renderHome() {
   /* "פוש" חד-פעמי — מוצג אחרי שהעמוד התיישב, ורק אם הסיור לא רץ. */
   setTimeout(themeAnnounce, 700);
 
-  const nextup = nextExamBanner();
-  if (nextup) view.append(nextup);
+  /* ‼️ הספירה לאחור ופוש השננת **אינם** נוספים כאן יותר.
 
-  const push = shinunHomePush();
-  if (push) view.append(push);
+     הצילום הראשון של המסך החדש הראה את הבעיה מיד: ארבעה באנרים נערמו לפני
+     שהעין הגיעה למשימות, ואחד מהם הכריז „מועד ב׳ בביומול” — בדיוק מה שהלוח
+     אומר בשורה משלו. זו אותה ערימה שאופציה ב׳ אמורה לפרק, רק בגובה אחר.
+     לכן שניהם נבלעים ללוח כשורות משימה, ומופיעים במקום אחד בלבד.
 
-  /* המדף: הסמסטר הפעיל למעלה, ושנים/סמסטרים קודמים מקופלים בארכיון.
-     כך האתר "גדל בחן" — ריבוי שנים לא נערם מול העיניים. */
+     המדף: הסמסטר הפעיל למעלה, ושנים קודמות מקופלות בארכיון. */
   const active = COURSES.filter((c) => !isArchived(c));
   const archived = COURSES.filter(isArchived);
 
-  groupBySemester(active).forEach((g) => view.append(shelfGroup(g.label, g.courses, false)));
+  /* הלוח נטען אסינכרונית (הוא צריך את אינדקס השאלות), ולכן הוא מוזרק למקום
+     שמור במקום להשהות את הדף. מי שאין לו כלום ממתין לא רואה כלום — המקום
+     השמור נשאר ריק ואינו תופס גובה. */
+  const slot = el('div', 'today-slot');
+  view.append(slot);
+  todayPanel().then((p) => { if (p && slot.isConnected) slot.append(p); });
+
+  /* הקורסים הפעילים כשורות מכווצות: הם עדיין הדבר השני שרואים, אבל הם כבר
+     לא תופסים מסך שלם. הארכיון ממשיך להשתמש בכרטיסים המלאים — הוא מקופל
+     ממילא, ומי שפותח אותו מחפש מקצוע ספציפי ורוצה את כל ההקשר. */
+  if (active.length) {
+    const sec = el('div', 'chips-c');
+    const h = el('div', 'shelf-head');
+    h.append(el('span', 'shelf-head-t', 'הקורסים שלי'));
+    h.append(el('span', 'shelf-head-line'));
+    h.append(el('span', 'shelf-head-n', plural(active.length, 'מקצוע', 'מקצועות')));
+    sec.append(h);
+    const grid = el('div', 'chips-c-grid');
+    active.forEach((c) => grid.append(courseChip(c)));
+    sec.append(grid);
+    view.append(sec);
+  }
 
   if (archived.length) {
     const det = el('details', 'shelf-arch');
@@ -997,6 +1019,158 @@ function renderHome() {
 
   toTop();
   updateFooter();
+}
+
+/* ================= „מה עכשיו” — לוח המשימות של הבית =================
+
+   51% מהמשיבים בסקר נכנסים לאתר **רק לפני מבחן**, וארבעה כתבו בנפרד שהם
+   רוצים שהוא ילווה אותם לאורך הסמסטר. הסיבה פשוטה: עד היום הדף ענה על
+   „אילו מקצועות יש”, וזו שאלה שנשאלת פעם אחת. הדף הזה עונה על „מה לעשות
+   היום” — שאלה שנשאלת כל יום.
+
+   כל שורה כאן היא עבודה שכבר צברת, לא הצעה כללית. אם אין שום דבר לעשות —
+   הלוח לא מוצג בכלל. */
+
+let qidIndexCache = null;
+async function qidIndex() {
+  if (qidIndexCache) return qidIndexCache;
+  try {
+    const res = await fetch('exams/qid-course.json?v=' + (VERSION || ''));
+    qidIndexCache = res.ok ? await res.json() : {};
+  } catch { qidIndexCache = {}; }
+  return qidIndexCache;
+}
+
+/* מה מחכה לך, לפי מקצוע. שתי הקבוצות נספרות מ-seenH בלבד — בלי לטעות אף
+   קובץ מבחן — בזכות האינדקס ששוקל 19KB.
+
+   ⚠️ `seenH.due` לבדו מחזיר אמת גם לשאלה שלא נראתה מעולם („לא יודעים זו
+   סיבה לחזור”). זה נכון לבורר התרגול, אבל כאן זה היה סופר את כל הארכיון
+   כ„ממתין”. לכן `b > 0` — רק מה שידעת פעם וייתכן ששכחת. */
+function reviewLoad(index) {
+  const map = seenH.read();
+  const now = Date.now();
+  const out = [];
+  COURSES.forEach((c) => {
+    const qids = index[c.id];
+    if (!qids || isArchived(c)) return;
+    let due = 0, wrong = 0;
+    qids.forEach((q) => {
+      const r = seenH.rec(q, map);
+      if (!r) return;
+      if (seenH.isOpenMistake(r)) wrong++;
+      else if (r.b > 0 && seenH.due(q, now, map)) due++;
+    });
+    if (due || wrong) out.push({ course: c, due, wrong });
+  });
+  return out.sort((a, b) => (b.due + b.wrong) - (a.due + a.wrong));
+}
+
+/* מבחן שהתחלת ולא סיימת. `persist` שומר את התשובות, אז זה שורד סגירת טאב —
+   וזו בדיוק העבודה שהכי קל לשכוח שהתחלת. */
+function unfinishedExams() {
+  const out = [];
+  COURSES.forEach((c) => {
+    if (isArchived(c)) return;
+    quizzesOf(c.id).forEach((m) => {
+      const s = quickScore(m);
+      if (s.answered > 0 && s.answered < m.count) out.push({ course: c, meta: m, ...s });
+    });
+  });
+  return out.sort((a, b) => (b.answered / b.total) - (a.answered / a.total));
+}
+
+function taskRow(icon, title, sub, href, cta) {
+  const a = el('a', 'today-row');
+  a.href = href;
+  a.append(el('span', 'today-ico', icon));
+  const body = el('span', 'today-body');
+  body.append(el('b', null, title));
+  if (sub) body.append(el('span', null, sub));
+  a.append(body);
+  a.append(el('span', 'today-cta', cta));
+  return a;
+}
+
+async function todayPanel() {
+  const index = await qidIndex();
+  const rows = [];
+
+  /* הסדר הוא סדר דחיפות, לא סדר נוחות: מבחן קרוב גובר על הכול כי יש לו
+     תאריך, ואחריו מה שכבר צברת. התקרה של חמש שורות היא הסיבה שהסדר חשוב —
+     בלעדיו הספירה לאחור נחתכה החוצה, וזה בדיוק הפריט שאסור לפספס. */
+  const nx = nextExamOverall();
+  if (nx) {
+    const days = Math.ceil((nx.ts - Date.now()) / 864e5);
+    rows.push(taskRow('🗓️', `מועד ${nx.moed}׳ ב${nx.course.name}`,
+      days <= 0 ? 'היום' : days === 1 ? 'מחר' : `בעוד ${plural(days, 'יום', 'ימים', true)}`,
+      `#/course/${nx.course.id}`, 'להיערך'));
+  }
+
+  const load = reviewLoad(index);
+  load.filter((x) => x.due).slice(0, 2).forEach((x) => rows.push(taskRow('🔁',
+    `${plural(x.due, 'שאלה בשלה', 'שאלות בשלות', true)} לחזרה`,
+    x.course.name, `#/practice/${x.course.id}`, 'לחזור')));
+
+  load.filter((x) => x.wrong).slice(0, 2).forEach((x) => rows.push(taskRow('🎯',
+    plural(x.wrong, 'טעות פתוחה', 'טעויות פתוחות', true),
+    x.course.name, `#/review/${x.course.id}`, 'לתרגל')));
+
+  unfinishedExams().slice(0, 2).forEach((x) => rows.push(taskRow('📝',
+    x.meta.title, `${x.course.name} · ${x.answered} מתוך ${x.total}`,
+    `#/exam/${x.meta.id}`, 'להמשיך')));
+
+  /* השננת הייתה באנר נפרד בבית, עם אותה בחירת חפיסה בדיוק. כשורה אחרונה
+     היא מוצעת בלי להתחרות על תשומת הלב עם עבודה שכבר צברת. */
+  const sh = shinunPick();
+  if (sh) rows.push(taskRow('🧠', 'i❤️Shinun — שינון בעל־פה',
+    `${sh.c.name} · צד-מול-צד, בלי מסיחים`, '#/shinun/' + sh.d.course, 'לשנן'));
+
+  if (!rows.length) return null;
+
+  const box = el('section', 'today');
+  const head = el('div', 'today-head');
+  head.append(el('h2', null, `${timeGreeting()}${firstName() ? ', ' + firstName() : ''}`));
+  head.append(el('span', null, 'מה מחכה לך'));
+  box.append(head);
+  const list = el('div', 'today-list');
+  rows.slice(0, 5).forEach((r) => list.append(r));
+  box.append(list);
+  return box;
+}
+
+/* כרטיס קורס מכווץ — שורה, לא ריבוע.
+
+   ‼️ הקישור „שחזורים” כאן אינו קישוט. באופציה הזאת המשימות תופסות את ראש
+   הדף, ובלעדיו רשימת השחזורים יורדת לשני קליקים (בית ← קורס ← שחזורים) —
+   בדיוק מה שינון הזהיר ממנו: „המטרה הראשונית — זה מקום לפתור בו שחזורים”.
+   הקישור מחזיר אותה למרחק קליק אחד. */
+function courseChip(c) {
+  const wrap = el('div', 'chip-c');
+  wrap.dataset.course = c.id;
+  const a = el('a', 'chip-c-main');
+  a.href = '#/course/' + c.id;
+  a.dataset.tour = 'course';
+  a.append(el('span', 'chip-c-ico', c.icon || '📘'));
+  const t = el('span', 'chip-c-txt');
+  t.append(el('b', null, c.name));
+  const d = nextDate(c);
+  if (d) {
+    const days = Math.ceil((new Date(d.at).getTime() - Date.now()) / 864e5);
+    t.append(el('span', 'chip-c-cd' + (days <= 7 ? ' hot' : ''),
+      `מועד ${d.moed}׳ · ${days <= 0 ? 'היום' : days === 1 ? 'מחר' : 'בעוד ' + days + ' ימים'}`));
+  }
+  a.append(t);
+  wrap.append(a);
+  const shich = examsOf(c.id).filter((e) => e.kind === 'shichzur');
+  if (shich.length) {
+    const s = el('a', 'chip-c-go');
+    s.href = '#/course/' + c.id + '/sec-test';
+    s.textContent = `שחזורים · ${shich.length}`;
+    s.title = `${shich.length} שחזורים ב${c.name}`;
+    wrap.append(s);
+  }
+  return wrap;
 }
 
 /* תווית סמסטר קריאה מתוך year/semester שב-courses.json. */
@@ -1143,7 +1317,7 @@ function emptyState(icon, title, text) {
 }
 
 /* ================= דף מקצוע ================= */
-function renderCourse(courseId) {
+function renderCourse(courseId, focusSec) {
   setNav('home');
   const c = courseOf(courseId);
   view.innerHTML = '';
@@ -1366,6 +1540,15 @@ function renderCourse(courseId) {
   }
 
   toTop();
+  /* `#/course/<id>/sec-test` — נחיתה ישירה על מדף השחזורים. זה מה שמחזיק את
+     „שחזורים” במרחק קליק אחד מהבית אחרי שהמשימות תפסו את ראשו. rAF כפול
+     כדי ש-toTop() שלמעלה יספיק לרוץ ולא ידרוס אותנו. */
+  if (focusSec) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const t = document.getElementById(focusSec);
+      if (t) t.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }));
+  }
   updateFooter();
 }
 
@@ -5748,6 +5931,19 @@ function renderAbout() {
 
 /* פוש במסך הבית ל-i❤️Shinun — באנר חד-פעמי (עד סגירה) שמפנה למקצוע שיש בו
    שננת. מוצג רק אם קיימת חפיסת שינון כלשהי, ורק למי שעדיין לא ראה/סגר. */
+/* החפיסה שראוי להציע עכשיו — של המקצוע שהמבחן שלו הכי קרוב. הופרדה מהבאנר
+   כדי שלוח „מה עכשיו” יוכל להציג אותה כשורה במקום כבאנר נוסף בערימה. */
+function shinunPick() {
+  try { if (localStorage.getItem('shichzurim.shinunHomePush')) return null; } catch { return null; }
+  const decks = EXAMS.filter((e) => e.kind === 'shinun');
+  if (!decks.length) return null;
+  const active = decks.filter((d) => { const c = courseOf(d.course); return c && !isArchived(c); });
+  if (!active.length) return null;
+  return active
+    .map((d) => { const c = courseOf(d.course); const nd = c && nextDate(c); return { d, c, ts: nd ? nd.ts : Infinity }; })
+    .sort((a, b) => a.ts - b.ts)[0];
+}
+
 function shinunHomePush() {
   try { if (localStorage.getItem('shichzurim.shinunHomePush')) return null; } catch { return null; }
   /* החפיסה של המקצוע שהמבחן שלו הכי קרוב, ולא "הראשונה שנמצאה". הבחירה
