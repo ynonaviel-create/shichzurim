@@ -5761,9 +5761,12 @@ function shinunHomePush() {
    הוא יורד לכולם רק כשנוריד אותו בקוד, ולמי שכבר מילא — מיד. "אחר כך"
    מסתיר עד הביקור הבא (sessionStorage), לא לתמיד. */
 function whatsNewBanner() {
-  /* בלי התאריך הזה הבאנר רץ לנצח: „דקה לפני קו הסיום של שנה א׳” היה ממשיך
-     להתנוסס בראש הבית גם באוקטובר. הארכה = לשנות את התאריך. */
-  if (Date.now() > Date.parse('2026-08-20T23:59:59+03:00')) return null;
+  /* ── הסקר נסגר ב-09/08/2026, אחרי 57 תשובות ──
+     ינון: „אפשר להוריד אותו; אנשים כבר לא יענו עליו”. הבאנר יורד; עמוד
+     הסקר עצמו (#/survey) נשאר נגיש למי שיש לו קישור, וגם התשובות שנשמרו
+     מקומית בלי רשת עדיין יישלחו. הסקר הבא: להעלות את SURVEY_VERSION,
+     לכתוב את הנוסח החדש, ולהחזיר את השורה הזאת עם תאריך תפוגה. */
+  return null;
   try { if (localStorage.getItem(SURVEY_DONE_KEY)) return null; } catch { return null; }
   try { if (sessionStorage.getItem('shichzurim.surveyHeroHide')) return null; } catch { /* מציגים */ }
 
