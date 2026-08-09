@@ -3975,10 +3975,13 @@ function openReport({ courseId, item, chosen }) {
         msg.classList.add('ok');
         setTimeout(close, 1600);
       } else {
-        msg.textContent = r.reason === 'net'
-          ? '✗ אין חיבור — נסה שוב עוד רגע.'
+        /* `saved` = נשמר מקומית ויישלח כשתחזור רשת. זו לא שגיאה מבחינת
+           המשתמש — הדיווח שלו לא אבד — ולכן גם הצבע ירוק. */
+        msg.textContent = r.saved
+          ? '✓ אין רשת כרגע — הדיווח נשמר ויישלח אוטומטית כשתחזור.'
+          : r.reason === 'net' ? '✗ אין חיבור — נסה שוב עוד רגע.'
           : '✗ השליחה נכשלה. נסה שוב מאוחר יותר.';
-        msg.classList.add('bad');
+        msg.classList.add(r.saved ? 'ok' : 'bad');
         send.disabled = false;
       }
     };
@@ -4360,10 +4363,11 @@ function renderSurvey() {
         celebrate({ line: 'תודה ענקית! 💜', sub: 'המשוב נשלח — הוא באמת ישפיע', tier: 'high', confetti: 32, sound: 'big' });
         toTop();
       } else {
-        msg.textContent = r.reason === 'net'
-          ? '✗ אין חיבור — התשובות שמורות אצלך, נסו שוב עוד רגע.'
+        msg.textContent = r.saved
+          ? '✓ אין רשת כרגע — התשובות נשמרו ויישלחו אוטומטית כשתחזרו.'
+          : r.reason === 'net' ? '✗ אין חיבור — התשובות שמורות אצלך, נסו שוב עוד רגע.'
           : '✗ השליחה נכשלה — התשובות שמורות אצלך, נסו שוב מאוחר יותר.';
-        msg.classList.add('bad');
+        msg.classList.add(r.saved ? 'ok' : 'bad');
         next.disabled = false;
       }
     };
@@ -5746,6 +5750,9 @@ function shinunHomePush() {
    הוא יורד לכולם רק כשנוריד אותו בקוד, ולמי שכבר מילא — מיד. "אחר כך"
    מסתיר עד הביקור הבא (sessionStorage), לא לתמיד. */
 function whatsNewBanner() {
+  /* בלי התאריך הזה הבאנר רץ לנצח: „דקה לפני קו הסיום של שנה א׳” היה ממשיך
+     להתנוסס בראש הבית גם באוקטובר. הארכה = לשנות את התאריך. */
+  if (Date.now() > Date.parse('2026-08-20T23:59:59+03:00')) return null;
   try { if (localStorage.getItem(SURVEY_DONE_KEY)) return null; } catch { return null; }
   try { if (sessionStorage.getItem('shichzurim.surveyHeroHide')) return null; } catch { /* מציגים */ }
 
@@ -5782,8 +5789,12 @@ function introBanner() {
 
   const b = el('div', 'intro');
   const txt = el('div');
-  txt.append(el('b', null, '✨ חדש: חשבון אישי וסנכרון בין מכשירים'));
-  txt.append(el('span', null, 'מתחברים עם Google וההתקדמות ממשיכה מכל מכשיר. סיור של דקה עובר על זה ועל כל השאר.'));
+  /* היה כאן „✨ חדש: חשבון אישי וסנכרון” — הכרזה על פיצ׳ר מ-22/07 שהוצגה
+     לכל נכנס חדש עוד שבועות אחרי שהיא הפסיקה להיות חדשה. באנר הפתיחה נראה
+     פעם אחת בחיים של משתמש, ולכן הוא צריך להסביר *מה זה המקום הזה* — לא מה
+     נוסף בו לאחרונה. חידושים מוכרזים בבאנר „מה חדש”, שנושא מספר גרסה. */
+  txt.append(el('b', null, '👋 ברוכים הבאים לארכיון'));
+  txt.append(el('span', null, 'שחזורי מבחנים אמיתיים לתרגול, עם הסבר לכל שאלה ומעקב אחרי מה שטעיתם. סיור של דקה עובר על הכול.'));
   b.append(txt);
 
   const acts = el('div', 'btn-row');

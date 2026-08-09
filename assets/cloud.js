@@ -37,6 +37,17 @@
   };
   const OUTBOX_KEY = 'shichzurim.outbox';
 
+  /* דיווח 🚩 וסקר לא עוברים ב-outbox בכוונה: הם אירוע חד-פעמי ולא מצב
+     שמסתנכרן, והמדווח צריך לדעת מיד אם נקלט. אבל המחיר היה שכשאין רשת
+     המידע פשוט מתאדה — ולשני אלה אין הזדמנות שנייה: סטודנט שמילא סקר
+     ברכבת לא ימלא אותו שוב. לכן כישלון *רשת* נשמר כאן ונשלח בהזדמנות
+     הבאה. כישלון שרת (דחיית RLS, מיגרציה שלא רצה) לא נשמר — הוא לא
+     יתוקן מעצמו, וניסיון חוזר רק היה בונה תור נצחי. */
+  const PEND_KEY = 'shichzurim.pendingSend';
+  const readPend = () => { try { return JSON.parse(localStorage.getItem(PEND_KEY)) || []; } catch { return []; } };
+  const savePend = (a) => { try { localStorage.setItem(PEND_KEY, JSON.stringify(a.slice(-20))); } catch {} };
+  const stash = (kind, row) => { const a = readPend(); a.push({ kind, row, ts: Date.now() }); savePend(a); };
+
   /* עותק מקומי לא מדבר עם מסד הייצור. זה גם מה שפותח את האתר לבדיקה מקומית:
      REQUIRE_LOGIN נשאר דלוק, אבל השער תלוי ב-Cloud.enabled — ובלי ענן אין
      מסך כניסה, בדיוק כמו שהיה לפני שהענן נולד. `?cloud=1` מדליק בכל זאת,
@@ -287,6 +298,7 @@
       state.syncing = false;
       emit('cloud:sync');
       flush();
+      flushPending();   // דיווח/סקר שנתקעו בלי רשת
     }
   }
 
@@ -309,6 +321,21 @@
 
   /* ---------- session ---------- */
   const NAME_KEY = 'shichzurim.name';
+  /* שולח מה שנתקע בלי רשת. רץ אחרי כל סנכרון. שורה שהשרת דוחה נזרקת —
+     אחרת היא הייתה מנסה לנצח. */
+  async function flushPending() {
+    const a = readPend();
+    if (!a.length || !state.session) return;
+    const left = [];
+    for (const it of a) {
+      try {
+        const { error } = await sb.from(it.kind).insert(it.row);
+        if (error) continue;            // דחיית שרת — לא יתוקן מעצמו, מוותרים
+      } catch { left.push(it); }        // עדיין אין רשת — שומרים לפעם הבאה
+    }
+    savePend(left);
+  }
+
   function setSession(session) {
     state.session = session || null;
     if (session) {
@@ -410,7 +437,19 @@
         });
         if (error) return { ok: false, reason: 'server' };
         return { ok: true };
-      } catch { return { ok: false, reason: 'net' }; }
+      } catch {
+        stash('question_reports', {
+          user_id:   state.session.user.id,
+          course_id: r.courseId,
+          exam_id:   r.examId || null,
+          qid:       r.qid,
+          reason:    r.reason,
+          detail:    (r.detail || '').trim().slice(0, 2000) || null,
+          chosen:    r.chosen ?? null,
+          q_preview: r.qPreview || null,
+        });
+        return { ok: false, reason: 'net', saved: true };
+      }
     },
 
     /* שליחת סקר המשוב (0007). כמו report — לא דרך ה-outbox, מחכים לתשובה.
@@ -425,7 +464,10 @@
         });
         if (error) return { ok: false, reason: error.message && error.message.includes('rate limit') ? 'rate' : 'server' };
         return { ok: true };
-      } catch { return { ok: false, reason: 'net' }; }
+      } catch {
+        stash('survey_responses', { user_id: state.session.user.id, version: version || 1, answers });
+        return { ok: false, reason: 'net', saved: true };
+      }
     },
 
     /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת).

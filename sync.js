@@ -357,6 +357,29 @@ guides.forEach((g) => {
   });
 });
 
+/* --- מרחבי-השם של הענן מול המיגרציות ---
+
+   `KEYMAP` ב-cloud.js מגדיר לאילו מרחבי-שם האתר כותב, וה-`check` על `user_kv`
+   מגדיר מה המסד מקבל. כשהראשון מקדים את השני, המסד דוחה כל כתיבה, התור זורק
+   אותה, והמשתמש לא רואה כלום — קרה בפועל עם 0003 והצריך את 0004.
+   ראו supabase/MIGRATIONS-RUN.md. */
+try {
+  const cloudSrc = fs.readFileSync(path.join(__dirname, 'assets', 'cloud.js'), 'utf8');
+  const km = cloudSrc.match(/const KEYMAP = \{([\s\S]*?)\};/);
+  if (km) {
+    const nss = [...km[1].matchAll(/^\s*(\w+)\s*:/gm)].map((m) => m[1]);
+    const migDir = path.join(__dirname, 'supabase', 'migrations');
+    const sql = fs.readdirSync(migDir).filter((f) => f.endsWith('.sql'))
+      .map((f) => fs.readFileSync(path.join(migDir, f), 'utf8')).join('\n');
+    const missing = nss.filter((ns) => !sql.includes(`'${ns}'`));
+    if (missing.length)
+      problems.push(
+        `assets/cloud.js · KEYMAP מכיל מרחבי-שם שאין להם מיגרציה: ${missing.join(', ')}. ` +
+        `המסד ידחה כל כתיבה אליהם והתור יזרוק אותה בשקט — ראו supabase/MIGRATIONS-RUN.md.`
+      );
+  }
+} catch { /* אין ענן בריפו — לא רלוונטי */ }
+
 /* --- עוגני הסיכום המלא ---
 
    כרטיס היחידה במפה מקשר ל-`<studyDoc>#top-<topic>`, והמסמכים פותרים את
