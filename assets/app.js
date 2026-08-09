@@ -1413,8 +1413,19 @@ function examCardCompact(m) {
   bar.append(f);
   a.append(bar);
   if (s.answered) {
-    const sc = el('div', 'exam-c-score', `${s.correct}/${s.answered} · ${Math.round(pct)}%`);
-    sc.style.color = pct >= 70 ? 'var(--good)' : 'var(--bad)';
+    /* ירדן בסקר: „ראיתי כזה 50/50 שאלות שעשית על שחזור מ״ז, ועכשיו האפליקציה
+       השתנתה ואני לא רואה את זה. זה היה פיצ׳ר טוב.” היא צודקת — המספר הזה
+       הוסר בשדרוג העיצוב, והנשאר (`נכונות/נענו · אחוז`) עונה על שאלה אחרת
+       לגמרי. **כיסוי** ו**איכות** הם שני דברים: „ענית על 50 מתוך 50” אומר
+       שסיימת, „42 מתוך 50 נכונות” אומר כמה ידעת. הרוחב של הפס תמיד קידד את
+       הכיסוי, אבל בלי מספר אי אפשר לדעת אם נשארו שאלות. */
+    const sc = el('div', 'exam-c-score');
+    const cov = el('span', 'exam-c-cov',
+      s.answered >= m.count ? `הושלם · ${m.count} שאלות` : `${s.answered}/${m.count} נענו`);
+    sc.append(cov);
+    const qual = el('span', null, `${s.correct}/${s.answered} · ${Math.round(pct)}%`);
+    qual.style.color = pct >= 70 ? 'var(--good)' : 'var(--bad)';
+    sc.append(qual);
     a.append(sc);
   }
   return a;

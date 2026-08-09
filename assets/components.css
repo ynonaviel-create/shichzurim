@@ -199,7 +199,13 @@
 .exam-c-bar > i{ display:block; height:100%; background:var(--course-accent); }
 .exam-c-bar > i.good{ background:var(--good); }
 .exam-c-bar > i.bad{ background:var(--bad); }
-.exam-c-score{ font-size:11px; margin-top:4px; }
+.exam-c-score{
+  font-size:11px; margin-top:4px;
+  display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+}
+/* כיסוי („כמה ענית”) ואיכות („כמה ידעת”) הם שני נתונים שונים — הכיסוי
+   מושתק בכוונה כדי שהאחוז יישאר הדבר שהעין תופסת ראשון. */
+.exam-c-cov{ color:var(--dim); font-weight:700; }
 
 /* מעבדות — accordion מקופל בתחתית (הכי פחות בשימוש) */
 .labs-acc{ margin-top:4px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
