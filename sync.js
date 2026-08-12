@@ -46,6 +46,8 @@ try {
   process.exit(1);
 }
 const courseIds = new Set(courses.map((c) => c.id));
+/* הקורסים שנבדקים בחומרה. ראו ההערה על `strict` למעלה. */
+const strictCourses = new Set(courses.filter((c) => c.strict).map((c) => c.id));
 
 /* שדות החובה של מקצוע. עד היום courses.json לא נבדק בכלל, ולכן מקצוע חדש
    שנוסף בלי accent קיבל צבע ברירת מחדל בשקט, ובלי dates איבד את הספירה
@@ -62,6 +64,26 @@ courses.forEach((c, i) => {
     if (c[f] == null || c[f] === '') problems.push(`${at}: אין "${f}"`);
   });
   if (!c.about) courseNotes.push(`${at}: אין "about" — עמוד המקצוע נפתח בלי הסבר מה הקורס ואיך נראה המבחן`);
+  /* ── קורס „מחמיר” ──
+     ינון (13/08/2026): „שכל המסקנות מהסקר ייכנסו למנוע, ככה שכשנכניס את
+     הקורסים הבאים הכל כבר ייכנס לפי מה שאנחנו רוצים.”
+
+     הבעיה שהתגלתה: אף בדיקה לא אימתה שלשאלה יש `explain` או `topic`, ולכן
+     108 שאלות נכנסו בלי הסבר בשקט — בדיוק התלונה מספר 1 בסקר (23 מ-57).
+
+     ההכרעה: **חוסמים רק קורסים חדשים.** קורס שנושא `strict: true` נבדק
+     בחומרה ולא עולה לאוויר עד שהוא תקין. הקורסים הקיימים ממשיכים לעבוד
+     בדיוק כמו קודם — אין להם את הדגל, ואף אחד לא נוגע בהם. כך אפשר להחמיר
+     בלי לחסום את מה שכבר חי.
+
+     כשמעלים קורס חדש: לשים `strict: true` בכרטיס לפני השאלה הראשונה. */
+  if (c.strict) {
+    if (!Array.isArray(c.topics) || !c.topics.length)
+      problems.push(`${at}: קורס מחמיר (strict) חייב רשימת "topics" — היא מה שמונע 15 שמות ל-7 נושאים`);
+    if (!c.about)
+      problems.push(`${at}: קורס מחמיר (strict) חייב "about" — עמוד המקצוע נפתח בלי הסבר מה הקורס ואיך נראה המבחן`);
+  }
+
   if (c.status && !COURSE_STATUS.includes(c.status))
     problems.push(`${at}: status="${c.status}" לא חוקי (מותר: ${COURSE_STATUS.join(' / ')})`);
   /* accent = שלושה צבעים לכל ערכה: ראשי, כהה, ורקע רך. חסר אחד → הצבע
@@ -119,6 +141,13 @@ for (const file of files) {
     problems.push(`${file}: kind לא חוקי "${data.kind}" (מותר: ${KINDS.join(' / ')})`);
     continue;
   }
+  if (strictCourses.has(data.course) && data.kind === 'shichzur'
+      && !['verified', 'partial', 'unverified'].includes(data.trust))
+    problems.push(
+      `${file}: שחזור בקורס מחמיר חייב "trust" (verified / partial / unverified) — ` +
+      `הוא מה שמכריע כשמחזורים חלוקים על תשובה`
+    );
+
   const isCards = data.kind === 'cards';
   const isGuide = data.kind === 'guide';
   const isCase = data.kind === 'case';
@@ -226,6 +255,14 @@ for (const file of files) {
         problems.push(`${file} · שאלה ${n}: צריך לפחות שתי תשובות`);
       if (typeof q.a !== 'number' || q.a < 0 || (q.opts && q.a >= q.opts.length))
         problems.push(`${file} · שאלה ${n}: "a"=${q.a} מצביע על תשובה שלא קיימת`);
+      /* רק בקורס מחמיר. בלי `explain` השאלה אומרת „טעית” ולא מלמדת, ובלי
+         `topic` היא נעלמת מהסינון לפי נושא ומהפילוח שבסוף המבחן. */
+      if (strictCourses.has(data.course)) {
+        if (!q.explain || !String(q.explain).trim())
+          problems.push(`${file} · שאלה ${n}: אין "explain" — חובה בקורס מחמיר (QUESTION-STANDARD.md)`);
+        if (!q.topic || !String(q.topic).trim())
+          problems.push(`${file} · שאלה ${n}: אין "topic" — בלעדיו השאלה לא נכנסת לסינון לפי נושא`);
+      }
     });
   }
 
@@ -435,6 +472,12 @@ const EXPL_ORD_RE = new RegExp('^' + EXPL_MAS + '\\s+ה(' + EXPL_ORD.concat(EXPL
 const EXPL_PAIR = new RegExp('^' + EXPL_MAS + '\\s+ה(?:' + EXPL_ORD.concat(EXPL_ORD_F).join('|') + ')' + EXPL_WEND +
   '\\s+ו(?:' + EXPL_MAS + '\\s+)?(?:ה)?(?:' + EXPL_ORD.concat(EXPL_ORD_F, ['אחרון', 'אחרונה']).join('|') + ')' + EXPL_WEND);
 const explainNotes = [];
+/* תבנית ה-explain בקורס מחמיר היא שגיאה ולא אזהרה: האתר מפרק את המחרוזת
+   לתבנית „למה זה נכון / למה השאר נפסלים”, ומחרוזת לא-תקנית מתקפלת לפסקה
+   אחת — כלומר הפיצ׳ר נעלם בשקט. */
+const explainSink = (courseId, msg) => {
+  if (strictCourses.has(courseId)) problems.push(msg); else explainNotes.push(msg);
+};
 
 quizFiles.forEach((e) => {
   (e.items || []).forEach((q, i) => {
@@ -443,7 +486,7 @@ quizFiles.forEach((e) => {
     if (!sents.length) return;
     const at = `${e.file} · שאלה ${i + 1}`;
     if (sents.some((s) => EXPL_PAIR.test(s))) {
-      explainNotes.push(`${at}: פסילה אחת מדברת על שני מסיחים ("המסיח הראשון והשני…") — פצל למשפט לכל מסיח`);
+      explainSink(e.course, `${at}: פסילה אחת מדברת על שני מסיחים ("המסיח הראשון והשני…") — פצל למשפט לכל מסיח`);
       return;
     }
     const ords = sents.map((s) => {
@@ -467,7 +510,7 @@ quizFiles.forEach((e) => {
     const byPos = ords.map((n) => n - 1);
     const byDis = ords.map((n) => (dis[n - 1] ?? null));
     if (!fits(byPos) && !fits(byDis))
-      explainNotes.push(`${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
+      explainSink(e.course, `${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
         `"המסיח השני" = התשובה השנייה בשאלה, כולל הנכונה`);
   });
 });
@@ -485,7 +528,11 @@ courses.forEach((c) => {
   const official = new Set(c.topics);
   const used = topicsUsed[c.id] || new Map();
   used.forEach((file, t) => {
-    if (!official.has(t)) topicNotes.push(`${file}: "${t}" אינו ברשימת הנושאים של ${c.id}`);
+    if (official.has(t)) return;
+    const msg = `${file}: "${t}" אינו ברשימת הנושאים של ${c.id}`;
+    /* בקורס מחמיר שם נושא שנסחף הוא שגיאה: הוא שובר את הסינון ואת הקישור
+       הדו-כיווני בין המפה לשאלות, ואי אפשר לראות את זה בעין. */
+    if (c.strict) problems.push(msg); else topicNotes.push(msg);
   });
   /* גם הכיוון ההפוך: נושא רשמי שאין לו אף שאלה הוא או פער כיסוי אמיתי, או
      שם שהשתנה בלי לעדכן את הרשימה. שניהם שווים לדעת. */
