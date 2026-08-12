@@ -10,7 +10,7 @@
       "order": 1,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#0d8b84",
@@ -44,7 +44,7 @@
       "order": 2,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#6b62d6",
@@ -184,7 +184,7 @@
       "order": 5,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#5a8a1f",

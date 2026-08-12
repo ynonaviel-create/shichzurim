@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-09",
-  "version": "be71e76a",
+  "updated": "2026-08-12",
+  "version": "2873d333",
   "assets": {
     "tokens": "3e9add29",
     "components": "6f782215",
@@ -18,7 +18,7 @@
       "order": 1,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#0d8b84",
@@ -52,7 +52,7 @@
       "order": 2,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#6b62d6",
@@ -192,7 +192,7 @@
       "order": 5,
       "year": 1,
       "semester": "ב",
-      "status": "active",
+      "status": "done",
       "accent": {
         "light": [
           "#5a8a1f",
@@ -898,7 +898,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-08-09",
+      "added": "2026-08-12",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -1042,7 +1042,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-08-09",
+      "added": "2026-08-12",
       "official": null,
       "trust": null,
       "spotlight": null,
