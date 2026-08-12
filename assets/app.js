@@ -938,32 +938,36 @@ function renderHome() {
   const head = el('div', 'page-head');
   const nm = window.Cloud?.user?.firstName;
   head.append(el('h1', null, nm ? `${timeGreeting()}, ${nm} 👋` : 'ארכיון השחזורים'));
-  head.append(el('p', null, 'בחר מקצוע. בתוכו — ללמוד, לתרגל, להיבחן, ולחזור על הטעויות.'));
+  head.append(el('p', null, 'שחזורי מבחנים אמיתיים — לפתור, להבין, ולחזור על מה שטעית.'));
   view.append(head);
 
-  /* באנר הסקר — ראשון ובולט, לפני כל השאר, עד שיירד בקוד. */
-  const wn = whatsNewBanner();
-  if (wn) view.append(wn);
+  /* ── באנר אחד לכל היותר ──
 
-  const namePr = namePrompt();
-  if (namePr) view.append(namePr);
+     ינון (13/08/2026): „הכי חשוב שהאתר יהיה מאוד מאוד נוח לשימוש, מאוד
+     ברור.” הבעיה הייתה מדידה: דף הבית רינדר עד **שמונה** באנרים לפני
+     שהעין הגיעה לקורס הראשון — סקר, בקשת שם, סיור, התחברות, ערכת נושא,
+     ספירה לאחור ופוש שננת. כל אחד מהם היה הגיוני בנפרד; ביחד הם קיר.
 
-  const banner = introBanner();
-  if (banner) view.append(banner);
-  /* הצעת ההתחברות מחכה בתור: קודם הסיור למי שחדש, ורק אחריו הענן. */
-  if (!banner) {
-    const lb = loginBanner();
-    if (lb) view.append(lb);
+     מעכשיו: תור לפי עדיפות, והראשון שיש לו תוכן הוא היחיד שמוצג. השאר
+     ימתינו לביקור הבא. סדר התור הוא סדר הדחיפות למשתמש חדש. */
+  const bannerQueue = [whatsNewBanner, namePrompt, introBanner, loginBanner, shinunHomePush];
+  for (const make of bannerQueue) {
+    let b = null;
+    try { b = make(); } catch { b = null; }
+    if (b) { view.append(b); break; }
   }
 
-  /* "פוש" חד-פעמי — מוצג אחרי שהעמוד התיישב, ורק אם הסיור לא רץ. */
-  setTimeout(themeAnnounce, 700);
-
+  /* ── אזור 1: מה קרוב ──
+     תמיד מוצג, גם כשאין מבחן. „אין מבחנים כרגע” הוא מידע — הוא אומר
+     לסטודנט שהוא לא מפספס כלום, וזה עדיף על שקט שנראה כמו תקלה. */
   const nextup = nextExamBanner();
   if (nextup) view.append(nextup);
-
-  const push = shinunHomePush();
-  if (push) view.append(push);
+  else {
+    const calm = el('div', 'nextup-none');
+    calm.append(el('b', null, 'אין מבחנים בקרוב'));
+    calm.append(el('span', null, 'זה הזמן לחזור על מה שטעית, או לעבור על החומר בשקט.'));
+    view.append(calm);
+  }
 
   /* המדף: הסמסטר הפעיל למעלה, ושנים/סמסטרים קודמים מקופלים בארכיון.
      כך האתר "גדל בחן" — ריבוי שנים לא נערם מול העיניים. */
