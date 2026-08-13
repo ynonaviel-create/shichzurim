@@ -6,12 +6,18 @@
    בהיר כברירת מחדל, כהה דרך [data-theme="dark"] על <html>. */
 
 :root{
-  --bg:        #f6f8fa;
-  --bg-tint:   #eef3f4;
-  --surface:   #ffffff;
-  --surface-2: #f2f5f7;
-  --line:      #dfe5ea;
-  --line-soft: #eaeff3;
+  --bg:        #eef2f7;
+  --bg-tint:   #e7edf4;
+  /* משטחי זכוכית: שקופים-למחצה, נשענים על הילות הרקע. למשטחים שחייבים
+     אטימות (תפריטים צפים, חלוניות מעל תוכן) יש --surface-solid. */
+  --surface:   rgba(255,255,255,.55);
+  --surface-2: rgba(255,255,255,.42);
+  --surface-solid: #ffffff;
+  --line:      rgba(30,60,90,.14);
+  --line-soft: rgba(30,60,90,.08);
+  /* קצה-האור והברק של הזכוכית (Liquid Glass) */
+  --glass-edge:  rgba(255,255,255,.85);
+  --glass-shine: rgba(255,255,255,.5);
 
   --text:      #16222e;
   --muted:     #5a6b7b;
@@ -49,10 +55,10 @@
   --topic-ln:  #c3bcea;
   --topic-tx:  #56499c;
 
-  --radius:    14px;
-  --radius-sm: 10px;
-  --shadow:    0 1px 2px rgba(20,35,50,.05), 0 8px 24px rgba(20,35,50,.06);
-  --shadow-lg: 0 2px 4px rgba(20,35,50,.06), 0 16px 40px rgba(20,35,50,.10);
+  --radius:    22px;
+  --radius-sm: 14px;
+  --shadow:    0 2px 8px rgba(25,45,70,.06), 0 16px 40px rgba(25,45,70,.09);
+  --shadow-lg: 0 4px 12px rgba(25,45,70,.08), 0 28px 64px rgba(25,45,70,.13);
 
   --font: "Assistant", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
@@ -68,16 +74,19 @@
 }
 
 :root[data-theme="dark"]{
-  --bg:        #0e1620;
-  --bg-tint:   #101c27;
-  --surface:   #16222e;
-  --surface-2: #1d2c3a;
-  --line:      #2b3d4d;
-  --line-soft: #223140;
+  --bg:        #070c13;
+  --bg-tint:   #0a1019;
+  --surface:   rgba(26,40,58,.42);
+  --surface-2: rgba(38,56,78,.45);
+  --surface-solid: #16222e;
+  --line:      rgba(170,210,240,.16);
+  --line-soft: rgba(170,210,240,.08);
+  --glass-edge:  rgba(255,255,255,.22);
+  --glass-shine: rgba(255,255,255,.09);
 
-  --text:      #e7eef4;
-  --muted:     #9db0c0;
-  --dim:       #708496;
+  --text:      #f0f6fc;
+  --muted:     #a6bacb;
+  --dim:       #70869a;
 
   --accent:    #2bb3aa;
   --accent-dk: #178f88;
@@ -101,6 +110,6 @@
   --topic-ln:  #474394;
   --topic-tx:  #b7b0f0;
 
-  --shadow:    0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
-  --shadow-lg: 0 2px 4px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.4);
+  --shadow:    0 2px 8px rgba(0,0,0,.35), 0 18px 48px rgba(0,0,0,.5);
+  --shadow-lg: 0 4px 14px rgba(0,0,0,.4), 0 32px 80px rgba(0,0,0,.6);
 }

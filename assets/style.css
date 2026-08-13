@@ -6,7 +6,14 @@
 
 body{
   font-family:var(--font);
-  background:var(--bg);
+  /* אווירת Liquid Glass: הילות צבע נוזליות שהמשטחים השקופים נשענים עליהן.
+     ההילה העליונה לובשת את צבע-המקצוע ומתחלפת איתו מדף לדף. */
+  background:
+    radial-gradient(1100px 600px at 88% -120px, color-mix(in srgb, var(--course-accent) 20%, transparent), transparent 62%),
+    radial-gradient(800px 520px at -80px 25%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 58%),
+    radial-gradient(900px 700px at 50% 120%, color-mix(in srgb, var(--course-accent) 9%, transparent), transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
   color:var(--text);
   min-height:100vh;
   display:flex; flex-direction:column;
@@ -15,20 +22,19 @@ body{
   text-rendering:optimizeLegibility;
 }
 
-/* פס עדין בראש הדף — "רפואי" מהאופי, לא מתמונת רקע */
-body::before{
-  content:""; position:fixed; inset:0 0 auto 0; height:3px; z-index:100;
-  background:linear-gradient(90deg,var(--accent),#4fb3ab 40%,var(--accent-dk));
-}
-
 /* ===== סרגל עליון ===== */
 .topbar{
-  position:sticky; top:0; z-index:50;
+  position:sticky; top:12px; z-index:50;
   display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:14px 24px;
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:blur(14px) saturate(1.4);
-  border-bottom:1px solid var(--line-soft);
+  margin:14px 16px 0; padding:12px 20px;
+  border-radius:24px;
+  border:1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(165deg, var(--glass-edge), transparent 45%, color-mix(in srgb, var(--glass-edge) 40%, transparent)) border-box;
+  backdrop-filter:blur(28px) saturate(1.8);
+  -webkit-backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow);
 }
 .brand{display:flex; align-items:center; gap:11px; text-decoration:none; color:var(--text);}
 .brand-mark{font-size:25px; line-height:1;}
@@ -43,7 +49,12 @@ body::before{
   border:1px solid transparent; transition:.15s;
 }
 .topnav a:hover{color:var(--text); background:var(--surface-2);}
-.topnav a.active{color:#fff; background:var(--accent-dk); border-color:var(--accent-dk);}
+.topnav a.active{
+  color:#fff; border-color:transparent;
+  background:color-mix(in srgb, var(--accent) 88%, #fff 6%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),
+             0 6px 20px color-mix(in srgb, var(--accent) 50%, transparent);
+}
 
 .theme-btn{
   width:38px; height:38px; border-radius:11px; margin-inline-start:6px;
@@ -68,7 +79,13 @@ body::before{
 main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px;}
 
 .page-head{margin-bottom:30px;}
-.page-head h1{font-size:30px; font-weight:800; letter-spacing:-.6px; line-height:1.25; margin-bottom:8px;}
+.page-head h1{
+  font-size:34px; font-weight:800; letter-spacing:-.9px; line-height:1.25; margin-bottom:8px;
+  /* גרדיאנט שקט אל צבע-המקצוע — חתימת הכותרות של השפה */
+  background:linear-gradient(120deg, var(--text) 35%, color-mix(in srgb, var(--course-accent) 80%, var(--text)));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  width:fit-content;
+}
 .page-head p{color:var(--muted); font-size:16px; max-width:62ch;}
 
 .crumb{
@@ -88,8 +105,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 /* ===== לוח מחוונים ===== */
 .dash{display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px; margin-bottom:30px;}
 .stat{
-  background:var(--surface); border:1px solid var(--line-soft);
-  border-radius:var(--radius); padding:17px 19px; box-shadow:var(--shadow);
+  border-radius:var(--radius); padding:17px 19px;
 }
 .stat b{display:block; font-size:27px; font-weight:800; letter-spacing:-.7px; line-height:1.2;}
 .stat span{font-size:12.5px; color:var(--dim); font-weight:700;}
@@ -230,11 +246,14 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
 .card{
   display:block; text-decoration:none; color:inherit;
-  background:var(--surface); border:1px solid var(--line-soft);
-  border-radius:var(--radius); padding:18px 19px;
-  box-shadow:var(--shadow); transition:.16s;
+  border-radius:var(--radius); padding:19px 20px;
+  transition:.16s;
 }
-.card:hover{border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow-lg);}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow-lg),
+             0 0 0 1px color-mix(in srgb, var(--course-accent) 35%, transparent);
+}
 .card h3{font-size:16.5px; font-weight:800; letter-spacing:-.2px; line-height:1.4; margin-bottom:11px;}
 .card-meta{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;}
 .tag{
@@ -275,14 +294,20 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 /* ===== כפתורים ===== */
 .btn{
   display:inline-flex; align-items:center; gap:7px;
-  padding:11px 19px; border-radius:var(--radius-sm);
-  border:1px solid var(--line); background:var(--surface);
+  padding:11px 19px; border-radius:14px;
+  border:1px solid var(--line-soft); background:var(--surface-2);
   color:var(--text); font-family:var(--font); font-size:14.5px; font-weight:700;
   cursor:pointer; text-decoration:none; transition:.15s;
+  box-shadow:inset 0 1px 0 var(--glass-shine);
 }
-.btn:hover{background:var(--surface-2); border-color:var(--accent); color:var(--accent-dk);}
-.btn.primary{background:var(--accent-dk); border-color:var(--accent-dk); color:#fff;}
-.btn.primary:hover{background:var(--accent); color:#fff;}
+.btn:hover{background:var(--surface); border-color:color-mix(in srgb, var(--accent) 45%, transparent); color:var(--accent-dk);}
+.btn.primary{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--course-accent) 90%, #fff 8%), var(--course-accent-dk));
+  border-color:transparent; color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),
+             0 8px 26px color-mix(in srgb, var(--course-accent) 45%, transparent);
+}
+.btn.primary:hover{filter:brightness(1.08); transform:translateY(-1px); color:#fff;}
 .btn.ghost{background:transparent;}
 .btn:disabled{opacity:.45; cursor:not-allowed;}
 .btn-row{display:flex; flex-wrap:wrap; gap:10px;}
@@ -2383,3 +2408,52 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 .sv-meme h2{margin:0; font-size:20px;}
 .sv-meme-img{max-width:min(360px, 100%); border-radius:14px; box-shadow:var(--shadow);}
 .adm-sv-who{display:flex; justify-content:space-between; gap:10px; align-items:center; font-weight:600;}
+
+/* ═══════════ Liquid Glass — שכבת הזכוכית המשותפת ═══════════
+   השפה שנבחרה באוגוסט 2026: משטחים שקופים-למחצה עם קצה-אור בגרדיאנט
+   וברק ספקולרי בקצה העליון, מעל הילות הצבע של הרקע (ראו body).
+   כל משטח "קופסתי" עובר כאן פעם אחת — לא לכל רכיב בנפרד. */
+
+.card,.stat,.nextup,.sim-card,.learn-card,.adm-card,.about-card,.account-card,
+.srch-box,.tour-pop,.cheer{
+  border:1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(160deg, var(--glass-edge), transparent 40%,
+                    color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;
+  backdrop-filter:blur(18px) saturate(1.5);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow);
+}
+
+/* באנר המבחן-הקרב שומר על צבע-הדחיפות שלו — הזכוכית רק מאחוריו */
+.nextup{
+  background:
+    linear-gradient(var(--u-far-bg), var(--u-far-bg)) padding-box,
+    linear-gradient(160deg, var(--glass-edge), transparent 40%,
+                    color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;
+  border-radius:var(--radius);
+}
+.nextup.u-near{background:linear-gradient(var(--u-near-bg),var(--u-near-bg)) padding-box,
+  linear-gradient(160deg, var(--glass-edge), transparent 40%, color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;}
+.nextup.u-soon{background:linear-gradient(var(--u-soon-bg),var(--u-soon-bg)) padding-box,
+  linear-gradient(160deg, var(--glass-edge), transparent 40%, color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;}
+.nextup.u-now{background:linear-gradient(var(--u-now-bg),var(--u-now-bg)) padding-box,
+  linear-gradient(160deg, var(--glass-edge), transparent 40%, color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;}
+
+.cd-unit{border-radius:16px; background:var(--surface-2); box-shadow:inset 0 1px 0 var(--glass-shine);}
+
+/* עדשות עגולות: כפתורי המערכת בקפסולה */
+.theme-btn,.srch-btn{border-radius:99px;}
+
+/* קו כותרת-אזור נמוג — לא קו קשיח */
+.zone-head-line{background:linear-gradient(90deg, var(--line), transparent);}
+
+/* המשוב והחלוניות הצפות — יריעות זכוכית עמוקות יותר */
+.fb{border-radius:18px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);}
+.srch-box,.tour-pop{backdrop-filter:blur(30px) saturate(1.6); -webkit-backdrop-filter:blur(30px) saturate(1.6);}
+
+/* בקפסולה הצפה במובייל אין צורך בשוליים גדולים */
+@media (max-width:640px){
+  .topbar{margin:10px 10px 0; top:8px; border-radius:20px;}
+}
