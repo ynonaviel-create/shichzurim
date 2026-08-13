@@ -108,7 +108,9 @@ def unit_html(cid, i, topic, u, shinun_topics=frozenset()):
                    'מתוך היחידה, או data-shinun="נושא א|נושא ב" אם יש נושאי שינון קרובים -->\n'
                    '<div class="ex ex-match">\n'
                    '<span data-t><!-- מונח --></span><span data-d><!-- ההגדרה שלו --></span>\n'
-                   "</div>")
+                   "</div>\n"
+                   '<!-- TODO אם ביחידה יש תהליך רב-שלבי — תרגיל סידור: '
+                   '<div class="ex ex-order"><b>כותרת</b><ol><li>שלב 1</li>…</ol></div> -->')
     if vids:
         out.append('\n<div class="vids">\n<h4>לצפייה</h4>')
         for v in vids:

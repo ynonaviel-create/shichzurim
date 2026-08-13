@@ -372,6 +372,63 @@ if (CFG.qa) {
     }).catch(function () {});
   }
 
+  /* ex-order: סידור שלבים בתהליך. הכותבים נותנים <ol> בסדר הנכון; הערכה
+     מערבבת ומציגה ככפתורים — לוחצים לפי הסדר, נכון ננעל ומקבל את מספרו,
+     שגוי רועד. בסוף: אפשרות ערבוב מחדש. */
+  [].forEach.call(document.querySelectorAll('.ex-order'), function (box) {
+    var ol = box.querySelector('ol');
+    if (!ol) return;
+    var steps = [].map.call(ol.querySelectorAll('li'), function (li) { return li.innerHTML; });
+    if (steps.length < 3) return;
+    var title = box.querySelector('b');
+    function build() {
+      [].forEach.call(box.querySelectorAll('.exo-head, .exo-list, .exo-fin'), function (x) { x.remove(); });
+      if (ol.parentNode) ol.remove();
+      var head = document.createElement('div');
+      head.className = 'exo-head';
+      head.textContent = '🔢 סדרו את השלבים: לחצו עליהם לפי הסדר הנכון';
+      box.appendChild(head);
+      var list = document.createElement('div');
+      list.className = 'exo-list';
+      var next = 0;
+      shuffle(steps.map(function (s, i) { return { s: s, i: i }; })).forEach(function (st) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'exo-step';
+        b.innerHTML = st.s;
+        b.addEventListener('click', function () {
+          if (b.classList.contains('done')) return;
+          if (st.i === next) {
+            b.classList.add('done');
+            var n = document.createElement('span');
+            n.className = 'exo-n';
+            n.textContent = ++next;
+            b.prepend(n);
+            if (next === steps.length) {
+              var fin = document.createElement('div');
+              fin.className = 'exo-fin';
+              fin.textContent = '🎉 הסדר נכון!';
+              var again = document.createElement('button');
+              again.type = 'button';
+              again.className = 'exm-again';
+              again.textContent = '🔄 ערבוב מחדש';
+              again.addEventListener('click', build);
+              fin.appendChild(again);
+              box.appendChild(fin);
+            }
+          } else {
+            b.classList.add('bad');
+            setTimeout(function () { b.classList.remove('bad'); }, 450);
+          }
+        });
+        list.appendChild(b);
+      });
+      box.appendChild(list);
+    }
+    build();
+    if (title) box.insertBefore(title, box.firstChild);
+  });
+
   /* ex-map: כל li שיש לו ul פנימי הופך לצומת מתקפל. הרמה הראשונה פתוחה. */
   [].forEach.call(document.querySelectorAll('.ex-map'), function (map) {
     [].forEach.call(map.querySelectorAll('li'), function (li) {
