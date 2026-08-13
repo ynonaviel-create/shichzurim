@@ -79,7 +79,59 @@ def add_map_links(html, course):
     return pat.sub(repl, html)
 
 
-def inject(name, cfg):
+def validate(name, html, cfg):
+    """שערי איכות על המסמך הסופי. לומדה שבורה לא יכולה לעלות — הבדיקות
+    שהיו ידניות בדפדפן רצות כאן על כל הזרקה, וכשל מפיל את התהליך בקול."""
+    errs, warns = [], []
+    unit_sel = (cfg.get("modes") or {}).get("unit", "section.unit")
+    if unit_sel == "section.unit":
+        units = len(re.findall(r'<section class="unit[" ]', html))
+        speak = len(re.findall(r'class="speak"', html))
+        drills = len(re.findall(r'<a class="drill"(?! dk-map)', html))
+        figs = len(re.findall(r"<figure>", html))
+        if units and speak != units:
+            errs.append(f"הקראה: {speak} כפתורים מול {units} יחידות")
+        if units and drills != units:
+            errs.append(f"קישורי תרגול: {drills} מול {units} יחידות")
+        if units and figs < units:
+            warns.append(f"איורים: {figs} מול {units} יחידות")
+
+    # <b> בתוך <text> של SVG — שובר את פריסת הטקסט על הדף
+    if re.search(r"<text[^>]*>(?:(?!</text>).)*?<b>", html, re.S):
+        errs.append("<b> בתוך <text> של SVG — שובר את הפריסה")
+
+    # כל עוגן פנימי מצביע על id קיים (עוגני #top- נפתרים בזמן ריצה — מוחרגים)
+    ids = set(re.findall(r'id="([^"]+)"', html))
+    for a in set(re.findall(r'href="#([^"/][^"]*)"', html)):
+        if not a.startswith("top-") and a not in ids:
+            errs.append(f"עוגן שבור: #{a}")
+
+    # זוגות ex-match: מספר מונחים = מספר הגדרות, ומינימום 3
+    for m in re.finditer(r'<div class="ex ex-match"(.*?)>(.*?)</div>', html, re.S):
+        if "data-shinun" in m.group(1):
+            continue
+        t, d = m.group(2).count("data-t"), m.group(2).count("data-d")
+        if t != d:
+            errs.append(f"ex-match: {t} מונחים מול {d} הגדרות")
+        elif 0 < t < 3:
+            warns.append(f"ex-match עם {t} זוגות בלבד (מינימום מומלץ: 3)")
+
+    if re.search(r'data-yt="\s*"', html):
+        errs.append('data-yt ריק — כרטיס סרטון בלי מזהה')
+
+    todos = html.count("TODO")
+    if todos:
+        warns.append(f"{todos} סימוני TODO במסמך חי")
+
+    for w in warns:
+        print(f"   ⚠️  {name}: {w}")
+    if errs:
+        for e in errs:
+            print(f"   ❌ {name}: {e}")
+        sys.exit(1)
+
+
+def inject(name, cfg, check=True):
     path = GUIDES / name
     html = path.read_text(encoding="utf-8")
     if START in html:
@@ -88,16 +140,22 @@ def inject(name, cfg):
     else:
         i = html.rindex("</body>")
         html = html[:i] + "<<<DOCKIT>>>\n" + html[i:]
-    html = html.replace("<<<DOCKIT>>>", build_block(cfg))
     if cfg.get("maplinks"):
         html = add_map_links(html, cfg["maplinks"])
+    if check:
+        # על התוכן בלבד: הערכה עצמה מכילה דוגמאות קוד (ex-match בהערות
+        # kit.js) שמפעילות את הבדיקות בטעות.
+        validate(name, html.replace("<<<DOCKIT>>>", ""), cfg)
+    html = html.replace("<<<DOCKIT>>>", build_block(cfg))
     path.write_text(html, encoding="utf-8")
     print(f"✅ {name}")
 
 
 if __name__ == "__main__":
-    only = sys.argv[1] if len(sys.argv) > 1 else None
+    args = [a for a in sys.argv[1:] if a != "--no-validate"]
+    check = "--no-validate" not in sys.argv
+    only = args[0] if args else None
     for name, cfg in DOCS.items():
         if only and only not in name:
             continue
-        inject(name, cfg)
+        inject(name, cfg, check=check)
