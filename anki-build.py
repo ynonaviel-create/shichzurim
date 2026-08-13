@@ -1,20 +1,34 @@
 #!/usr/bin/env python3
-"""בונה חפיסות אנקי (.apkg) ממפות החומרים של הארכיון.
+"""בונה חפיסות אנקי (.apkg) מכרטיסי הנוטבוק, עם שערי איכות.
 
     python3 anki-build.py
 
 למה מפייתון ולא מ-node: קובץ .apkg הוא מסד SQLite בתוך zip, ולפייתון יש את
 שניהם בספרייה התקנית. ב-node זה היה דורש תלות חיצונית, ולריפו הזה אין אף אחת.
 
-מאיפה מגיעים הכרטיסים: `exams/<course>-guide.json` — מפת החומרים. לכל יחידה
-יש נושא, ובתוכה נקודות; לכל נקודה יש `point` (העיקרון) ו-`trap` (איך נופלים
-בו במבחן). זה בדיוק כרטיס: הצד הקדמי הוא המלכודת, הצד האחורי הוא העיקרון
-שמונע אותה. שני הטקסטים מועתקים כמו שהם — לא ממציאים כאן תוכן.
+מאיפה מגיעים הכרטיסים (הבנייה מחדש, 08/2026): `sources/anki-<course>-notebook.json`
+— כרטיסים שהנוטבוק של הקורס כתב לפי סדר היום של מפת החומרים (`anki-ask.py`).
+הגרסה הראשונה העתיקה את טקסט המפה עצמו, וטקסט של סיכום אינו טקסט של כרטיס:
+פסקאות, כמה עובדות בכרטיס, צד קדמי שהוא אמירה. המפה נשארת סדר היום —
+דרך השדה `pi` כל כרטיס יודע איזו נקודה הוא מכסה — אבל הטקסט הוא של הנוטבוק.
 
-מבנה החפיסה: חפיסת-אב אחת לקורס, ותת-חפיסה לכל נושא. כך המשתמש מוריד קובץ
-אחד ובוחר באנקי איזה נושא ללמוד, בלי שנצטרך לייצר קובץ לכל שילוב נושאים.
+שערי איכות — כרטיס שנכשל באחד מהם לא נכנס לחפיסה, ומודפס בסוף הריצה:
+  · צד קדמי בלי סימן שאלה (אמירה במקום שאלה)
+  · יותר משני משפטים באחד הצדדים
+  · יותר מ-25 מילים בצד הקדמי
 
-‼️ מזהה הכרטיס (`guid`) נגזר מ-sha1 של מקצוע+נושא+נקודה, ולכן הוא **יציב**:
+תמונות: אין. שתי האפשרויות שנבדקו נפסלו — איורי הנושא מהסיכומים הוצמדו
+בגרסה הראשונה לכרטיסים שאין להם קשר אליהם, ו"גרפי המבחן" (exams/media)
+התבררו כצילומי מסך של שאלה שלמה, כולל נוסח ומסיחים — רעש שמדליף תשובות
+של שאלות אחרות לתוך כרטיס. תמונה תצורף רק כשיהיה מקור לאיור שהוא של
+הכרטיס עצמו.
+
+מבנה הפלט: חפיסת-אב לקורס עם תת-חפיסה לכל נושא (`anki/<course>.apkg`),
+וגם קובץ נפרד לכל נושא (`anki/<course>/<nn>.apkg`) — לסטודנט שרוצה נושא
+אחד בלי להוריד את הכול. שתי הצורות בנויות מאותם כרטיסים עם אותם מזהים,
+כך שייבוא כפול לא משכפל.
+
+‼️ מזהה הכרטיס (`guid`) נגזר מ-sha1 של מקצוע+נושא+שאלה, ולכן הוא **יציב**:
 בנייה חוזרת מייצרת אותם מזהים, ואנקי מעדכן את הכרטיס הקיים במקום ליצור
 כרטיס שני. זה הדבר היחיד כאן שאי אפשר לתקן בדיעבד — מי שכבר למד מהחפיסה
 היה מקבל כפילויות בכל עדכון.
@@ -23,6 +37,7 @@
 import hashlib
 import json
 import os
+import re
 import sqlite3
 import tempfile
 import time
@@ -30,11 +45,14 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EXAMS = os.path.join(ROOT, 'exams')
+SRC = os.path.join(ROOT, 'sources')
 OUT = os.path.join(ROOT, 'anki')
 
 # זמן קבוע ולא now(): כך בנייה חוזרת מייצרת קובץ זהה, והדיף בגיט קריא.
 EPOCH = 1735689600  # 2025-01-01
-MODEL_ID = 1735689600001
+# מודל חדש לבנייה מחדש — לא ממחזרים את מזהה מודל ה"מלכודת/עיקרון" הישן,
+# כי השדות שונים ואנקי לא יודע למזג סכמות.
+MODEL_ID = 1735689600002
 DECK_BASE = 1735689600100
 
 
@@ -56,19 +74,19 @@ CSS = """.card {
 }
 .topic { font-size: 13px; font-weight: 700; color: #0F6B58;
          letter-spacing: .04em; margin-bottom: 12px; }
-.trap  { font-size: 22px; font-weight: 600; line-height: 1.5; }
-.point { font-size: 20px; line-height: 1.6; }
+.q { font-size: 22px; font-weight: 600; line-height: 1.5; }
+.a { font-size: 20px; line-height: 1.6; }
 hr#answer { border: 0; border-top: 1px solid #E3E8E5; margin: 18px 0; }
-.hint { font-size: 13px; color: #7D8C88; margin-top: 14px; }
+.nightMode.card { color: #E8EDF2; background: #1B2530; }
+.nightMode hr#answer { border-top-color: #33404D; }
 """
 
 FRONT = ('<div class="topic">{{נושא}}</div>\n'
-         '<div class="trap">{{מלכודת}}</div>\n'
-         '<div class="hint">מה העיקרון שמונע אותה?</div>')
+         '<div class="q">{{שאלה}}</div>')
 BACK = ('<div class="topic">{{נושא}}</div>\n'
-        '<div class="trap">{{מלכודת}}</div>\n'
+        '<div class="q">{{שאלה}}</div>\n'
         '<hr id="answer">\n'
-        '<div class="point">{{עיקרון}}</div>')
+        '<div class="a">{{תשובה}}</div>')
 
 SCHEMA = """
 CREATE TABLE col (id integer primary key, crt integer not null, mod integer not null,
@@ -109,143 +127,98 @@ CONF = {"nextPos": 1, "estTimes": True, "activeDecks": [1], "sortType": "noteFld
         "collapseTime": 1200}
 
 
-def image_by_qid():
-    """qid → נתיב תמונה, מכל קבצי המבחנים.
+# ================= שערי איכות =================
 
-    זו הדרך היחידה לצרף תמונה לכרטיס בלי להמציא: אם נקודה במפה מקושרת לשאלה
-    שיש לה גרף, הגרף הזה **הוא** האיור של הנקודה. באלקטרו זה מכסה 42 מתוך 147
-    הנקודות; בביומול כמעט כלום, ושם נדרשים איורים חדשים.
-    """
-    out = {}
-    for f in sorted(os.listdir(EXAMS)):
-        if not f.endswith('.json'):
-            continue
-        try:
-            j = json.load(open(os.path.join(EXAMS, f), encoding='utf-8'))
-        except Exception:
-            continue
-        for q in (j.get('questions') or []):
-            if isinstance(q, dict) and q.get('qid') and q.get('image'):
-                out.setdefault(q['qid'], q['image'])
-    return out
+def sentence_count(text):
+    """ספירת משפטים גסה. נקודה בתוך סוגריים/קיצור לא נספרת כי אין אחריה רווח+אות."""
+    clean = re.sub(r'\([^)]*\)', '', text)          # (Schwann) וכד' לא משפט
+    clean = re.sub(r'\b\d+\.\d+\b', '', clean)      # מספרים עשרוניים
+    ends = re.findall(r'[.!?](?:\s|$)', clean.strip())
+    return max(1, len(ends)) if clean.strip() else 0
 
 
-def topic_figures(course):
-    """נושא → איור SVG מהסיכום המלא.
+def gate(card):
+    """שם השער שהכרטיס נכשל בו, או None אם עבר. כרטיס שנפסל לא נכנס לחפיסה."""
+    q, a = card['q'], card['a']
+    if '?' not in q:
+        return 'צד קדמי בלי סימן שאלה'
+    if len(q.split()) > 25:
+        return f'צד קדמי ארוך מדי ({len(q.split())} מילים)'
+    if sentence_count(q) > 2:
+        return 'יותר משני משפטים בצד הקדמי'
+    if sentence_count(a) > 2:
+        return f'יותר משני משפטים בצד האחורי ({sentence_count(a)})'
+    return None
 
-    בסיכומים כבר יש 33 איורים שצוירו ידנית — 21 בפיזיקה, 12 באלקטרו — והם
-    ישבו שם בלי שימוש. לכל סעיף בסיכום יש כותרת ששווה לשם הנושא, ולכן
-    אפשר לחבר אותם בלי לנחש.
 
-    האיור מצורף רק לכרטיס שאין לו כבר גרף מהמבחן: גרף מהשאלה ספציפי יותר
-    ולכן עדיף, והאיור הוא הרשת מתחת.
-    """
-    import re
-    src = {'physics': ('guides/physics-full.html', 'unit', 'h3'),
-           'electro': ('guides/electro-full.html', 'chap', 'h2')}.get(course)
-    if not src:
-        return {}
-    path = os.path.join(ROOT, src[0])
+# ================= מקורות =================
+
+def blocked_questions(course):
+    """שאלות שנפסלו בבדיקת התוכן — sources/anki-blocked.json.
+
+    שער האיכות תופס צורה (סימן שאלה, אורך); את התוכן בודקים סוכנים מול
+    נקודות המפה, והפסילות נרשמות שם. קובץ נפרד ולא עריכת המקור, כי
+    anki-ask.py דורס נושא בכל שאילה מחדש והחסימה צריכה לשרוד."""
+    path = os.path.join(SRC, 'anki-blocked.json')
     if not os.path.exists(path):
-        return {}
-    html = open(path, encoding='utf-8').read()
-    secs = re.findall(r'<section[^>]*class="[^"]*\b' + src[1] + r'\b[^"]*"[^>]*>(.*?)(?=<section|</body>)',
-                      html, re.S)
-    out = {}
-    for sec in secs:
-        h = re.search(r'<' + src[2] + r'[^>]*>(.*?)</' + src[2] + r'>', sec, re.S)
-        g = re.search(r'<svg[\s>].*?</svg>', sec, re.S)
-        if not (h and g):
-            continue
-        title = re.sub(r'<button.*?</button>', ' ', h.group(1), flags=re.S)
-        title = re.sub(r'<[^>]+>', ' ', title)
-        title = re.sub(r'[\u0591-\u05C7]', '', title)
-        title = re.sub(r'\s+', ' ', title).strip()
-        if title:
-            svg = g.group(0)
-            # ‼️ בתוך HTML הדפדפן מסיק namespace; בקובץ .svg עצמאי הוא לא,
-            # והאיור פשוט לא מרונדר. כל 21 איורי הפיזיקה נשברו ככה בשקט.
-            if 'xmlns' not in svg[:200]:
-                svg = svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"', 1)
-            out[title] = svg
-    return out
+        return set()
+    data = json.load(open(path, encoding='utf-8'))
+    return {b['q'] for b in data.get('blocked', []) if b.get('course') == course}
 
 
-def build(course, title):
+def guide_points(course):
+    """נושא → רשימת הנקודות מהמפה, לפי הסדר במפה. סדר היום של החפיסה."""
     src = os.path.join(EXAMS, f'{course}-guide.json')
     if not os.path.exists(src):
-        return None
+        return {}
     guide = json.load(open(src, encoding='utf-8'))
-
-    # נקודות לפי נושא, בסדר שבו הן מופיעות במפה
-    by_topic = []
+    out = {}
     for unit in guide.get('units', []):
         topic = (unit.get('topic') or '').strip()
-        pts = [p for p in (unit.get('points') or [])
-               if (p.get('point') or '').strip() and (p.get('trap') or '').strip()]
-        if topic and pts:
-            by_topic.append((topic, pts))
-    if not by_topic:
-        return None
+        if topic:
+            out[topic] = unit.get('points') or []
+    return out
 
+
+# ================= בנייה =================
+
+def make_collection(course, title, decks_cards, model_extra_did=None):
+    """בונה קובץ collection.anki2 זמני ומחזיר את הנתיב.
+
+    decks_cards: רשימת (שם-חפיסה-מלא, כרטיסים) — כרטיס הוא dict עם
+    q/a/topic/guid."""
     model = {str(MODEL_ID): {
-        "id": MODEL_ID, "name": "ארכיון השחזורים — מלכודת ועיקרון", "type": 0,
+        "id": MODEL_ID, "name": "ארכיון השחזורים — שאלה ותשובה", "type": 0,
         "mod": EPOCH, "usn": -1, "sortf": 0, "did": 1, "css": CSS, "latexPre": "",
         "latexPost": "", "latexsvg": False, "req": [[0, "any", [0, 1]]], "tags": [],
         "vers": [],
         "flds": [{"name": n, "ord": i, "sticky": False, "rtl": True, "font": "Arial",
-                  "size": 20, "media": []} for i, n in enumerate(['מלכודת', 'עיקרון', 'נושא'])],
-        "tmpls": [{"name": "מלכודת → עיקרון", "ord": 0, "qfmt": FRONT, "afmt": BACK,
+                  "size": 20, "media": []} for i, n in enumerate(['שאלה', 'תשובה', 'נושא'])],
+        "tmpls": [{"name": "שאלה → תשובה", "ord": 0, "qfmt": FRONT, "afmt": BACK,
                    "did": None, "bqfmt": "", "bafmt": "", "bfont": "", "bsize": 0}],
     }}
 
-    parent = f'ארכיון השחזורים::{title}'
     decks = {"1": {"id": 1, "name": "Default", "mod": EPOCH, "usn": -1, "lrnToday": [0, 0],
                    "revToday": [0, 0], "newToday": [0, 0], "timeToday": [0, 0],
                    "collapsed": True, "browserCollapsed": True, "desc": "", "dyn": 0,
                    "conf": 1, "extendNew": 0, "extendRev": 0}}
-
-    def add_deck(did, name, collapsed=False):
-        decks[str(did)] = {"id": did, "name": name, "mod": EPOCH, "usn": -1,
-                           "lrnToday": [0, 0], "revToday": [0, 0], "newToday": [0, 0],
-                           "timeToday": [0, 0], "collapsed": collapsed,
-                           "browserCollapsed": collapsed, "desc": "", "dyn": 0, "conf": 1,
-                           "extendNew": 0, "extendRev": 0}
-
-    add_deck(DECK_BASE, parent)
-
-    qimg = image_by_qid()
-    figs = topic_figures(course)
-    media = {}          # שם → נתיב במאגר
-    inline = {}         # שם → תוכן (איורי SVG שנחתכו מהסיכום)
     notes, cards = [], []
     nid = EPOCH * 1000
-    for ti, (topic, pts) in enumerate(by_topic):
-        did = DECK_BASE + 1 + ti
-        add_deck(did, f'{parent}::{topic}', collapsed=True)
-        for p in pts:
-            trap = p['trap'].strip()
-            point = p['point'].strip()
-            guid = stable_id(course, topic, point)
-            # אם לאחת השאלות של הנקודה יש גרף — הוא נכנס לצד האחורי
-            img = next((qimg[q] for q in (p.get('qids') or []) if q in qimg), None)
-            back_extra = ''
-            if img and os.path.exists(os.path.join(ROOT, img)):
-                name = os.path.basename(img)
-                media[name] = img
-                back_extra = f'<br><img src="{name}">'
-            elif topic in figs:
-                name = f'fig-{course}-{stable_id(topic)[:8]}.svg'
-                inline[name] = figs[topic]
-                back_extra = f'<br><img src="{name}">'
-            flds = '\x1f'.join([trap, point + back_extra, topic])
-            notes.append((nid, guid, MODEL_ID, EPOCH, -1, f' {topic} ', flds,
-                          trap, field_checksum(trap), 0, ''))
+    for di, (deck_name, deck_cards) in enumerate(decks_cards):
+        did = DECK_BASE + di
+        decks[str(did)] = {"id": did, "name": deck_name, "mod": EPOCH, "usn": -1,
+                           "lrnToday": [0, 0], "revToday": [0, 0], "newToday": [0, 0],
+                           "timeToday": [0, 0], "collapsed": di > 0,
+                           "browserCollapsed": di > 0, "desc": "", "dyn": 0, "conf": 1,
+                           "extendNew": 0, "extendRev": 0}
+        for c in deck_cards:
+            flds = '\x1f'.join([c['q'], c['a'], c['topic']])
+            notes.append((nid, c['guid'], MODEL_ID, EPOCH, -1, f' {c["topic"]} ', flds,
+                          c['q'], field_checksum(c['q']), 0, ''))
             cards.append((nid + 1, nid, did, 0, EPOCH, -1, 0, 0, len(cards) + 1,
                           0, 0, 0, 0, 0, 0, 0, 0, ''))
             nid += 2
 
-    os.makedirs(OUT, exist_ok=True)
     tmp = tempfile.mkdtemp()
     db_path = os.path.join(tmp, 'collection.anki2')
     db = sqlite3.connect(db_path)
@@ -258,24 +231,82 @@ def build(course, title):
     db.executemany('INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', cards)
     db.commit()
     db.close()
+    return db_path
 
-    apkg = os.path.join(OUT, f'{course}.apkg')
-    with zipfile.ZipFile(apkg, 'w', zipfile.ZIP_DEFLATED) as z:
+
+def write_apkg(path, db_path, media):
+    """media: שם-קובץ → נתיב מלא במאגר."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as z:
         z.write(db_path, 'collection.anki2')
         # פורמט המדיה של אנקי: הקבצים נשמרים בשמות 0,1,2… ו-`media` הוא
         # המפה מהמספר לשם האמיתי, והכרטיס מפנה לשם האמיתי.
-        names = sorted(media) + sorted(inline)
+        names = sorted(media)
         z.writestr('media', json.dumps({str(i): n for i, n in enumerate(names)},
                                        ensure_ascii=False))
         for i, n in enumerate(names):
-            if n in media:
-                z.write(os.path.join(ROOT, media[n]), str(i))
-            else:
-                z.writestr(str(i), inline[n])
+            z.write(media[n], str(i))
+    return os.path.getsize(path)
 
-    return {'course': course, 'title': title, 'file': f'anki/{course}.apkg',
-            'cards': len(notes), 'images': len(media) + len(inline), 'topics': [{'topic': t, 'cards': len(p)} for t, p in by_topic],
-            'bytes': os.path.getsize(apkg)}
+
+def build(course, title):
+    src = os.path.join(SRC, f'anki-{course}-notebook.json')
+    if not os.path.exists(src):
+        return None, []
+    store = json.load(open(src, encoding='utf-8'))
+    points = guide_points(course)
+    if not points or not store.get('topics'):
+        return None, []
+
+    blocked = blocked_questions(course)
+    rejected = []
+    by_topic = []           # (topic, cards) לפי סדר המפה
+    for topic, pts in points.items():
+        entry = store['topics'].get(topic)
+        if not entry or not entry.get('cards'):
+            continue
+        ok = []
+        for c in entry['cards']:
+            # כרטיס בלי pi הוא מהפורמט הישן (הפיילוט של ביומול) — לא חלק
+            # מהבנייה מחדש, ואין דרך לקשר אותו לנקודה במפה.
+            if 'pi' not in c:
+                continue
+            if c['q'] in blocked:
+                rejected.append((topic, c['q'][:60], 'נחסם בבדיקת התוכן'))
+                continue
+            why = gate(c)
+            if why:
+                rejected.append((topic, c['q'][:60], why))
+                continue
+            ok.append({'q': c['q'], 'a': c['a'], 'topic': topic,
+                       'guid': stable_id(course, topic, c['q'])})
+        if ok:
+            by_topic.append((topic, ok))
+    if not by_topic:
+        return None, rejected
+
+    parent = f'ארכיון השחזורים::{title}'
+
+    # החפיסה המלאה: אב + תת-חפיסה לכל נושא
+    decks_cards = [(parent, [])] + [(f'{parent}::{t}', cs) for t, cs in by_topic]
+    all_cards = [c for _, cs in by_topic for c in cs]
+    db = make_collection(course, title, decks_cards)
+    size = write_apkg(os.path.join(OUT, f'{course}.apkg'), db, {})
+
+    # קובץ לנושא: אותה היררכיה בדיוק (אב::נושא), אותם guids — ייבוא של
+    # קובץ נושא אחרי החפיסה המלאה (או להפך) מתמזג ולא משכפל.
+    topics_out = []
+    for ti, (topic, cs) in enumerate(by_topic):
+        tdb = make_collection(course, title, [(f'{parent}::{topic}', cs)])
+        tfile = f'anki/{course}/{ti:02d}.apkg'
+        tsize = write_apkg(os.path.join(ROOT, tfile), tdb, {})
+        topics_out.append({'topic': topic, 'cards': len(cs),
+                           'file': tfile, 'bytes': tsize,
+                           'preview': [{'q': c['q'], 'a': c['a']} for c in cs[:3]]})
+
+    info = {'course': course, 'title': title, 'file': f'anki/{course}.apkg',
+            'cards': len(all_cards), 'bytes': size, 'topics': topics_out}
+    return info, rejected
 
 
 COURSES = [('electro', 'אלקטרופיזיולוגיה'),
@@ -283,11 +314,20 @@ COURSES = [('electro', 'אלקטרופיזיולוגיה'),
            ('physics', 'פיזיקה לרפואנים ב׳')]
 
 if __name__ == '__main__':
-    built = [b for b in (build(c, t) for c, t in COURSES) if b]
+    built, all_rejected = [], []
+    for c, t in COURSES:
+        info, rej = build(c, t)
+        all_rejected += [(t, *r) for r in rej]
+        if info:
+            built.append(info)
     index = {'built': time.strftime('%Y-%m-%d', time.gmtime()), 'decks': built}
     json.dump(index, open(os.path.join(EXAMS, 'anki-index.json'), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=1)
     for b in built:
         print(f"  {b['title']:22s} {b['cards']:4d} כרטיסים · "
-              f"{len(b['topics']):2d} נושאים · {b['images']:3d} תמונות · {b['bytes'] // 1024} KB")
+              f"{len(b['topics']):2d} נושאים · {b['bytes'] // 1024} KB")
+    if all_rejected:
+        print(f'\n⛔ {len(all_rejected)} כרטיסים נפסלו בשערי האיכות:')
+        for course_t, topic, q, why in all_rejected:
+            print(f'  · [{course_t} / {topic}] {q}… — {why}')
     print(f"\n{len(built)} חפיסות ב-anki/ · אינדקס ב-exams/anki-index.json")

@@ -4597,16 +4597,6 @@ async function ankiIndex() {
    התנאי כאן זהה לתנאי הבנייה ב-anki-build.py: חפיסה נבנית ממפת החומרים,
    אז מקצוע שיש לו מפה יש לו חפיסה. */
 function hasAnkiDeck(courseId) {
-  /* ⛔ מוסתר זמנית (13/08/2026).
-
-     הגרסה הראשונה של החפיסות נכשלה: הכרטיסים נבנו מטקסט של מפת החומרים,
-     וזה טקסט של סיכום ולא של כרטיס — פסקאות ארוכות, כמה עובדות בכרטיס
-     אחד, וצד קדמי שהוא אמירה ולא שאלה. חפיסה כזאת מבזבזת לסטודנט זמן.
-
-     הקוד והקבצים נשארים; רק הכניסה סגורה עד הבנייה מחדש. להחזיר: להסיר
-     את השורה הבאה. */
-  return false;
-  // eslint-disable-next-line no-unreachable
   return examsOf(courseId).some((e) => e.kind === 'guide');
 }
 
@@ -4636,9 +4626,9 @@ async function renderAnki(courseId) {
   const p = el('p');
   p.textContent =
     `${deck.cards} כרטיסים ב-${deck.topics.length} נושאים` +
-    (deck.images ? `, ומתוכם ${deck.images} עם איור מהמבחן` : '') +
-    '. כל כרטיס בנוי מהצד השני: בפנים מופיעה המלכודת שנופלים בה, ואתה נזכר בעיקרון שמונע אותה. ' +
-    'הנושאים נכנסים כתת-חפיסות, כך שאפשר ללמוד נושא אחד בכל פעם.';
+    '. כל כרטיס הוא שאלה אחת קצרה ותשובה של משפט או שניים — מה ששואלים במבחן, ' +
+    'לפי מפת החומרים של המקצוע. אפשר להוריד את הכול כקובץ אחד עם תת-חפיסה ' +
+    'לכל נושא, או נושא-נושא; שילוב של השניים לא ישכפל כרטיסים.';
   box.append(p);
   view.append(box);
 
@@ -4646,16 +4636,45 @@ async function renderAnki(courseId) {
   const dl = el('a', 'btn primary');
   dl.href = deck.file;
   dl.setAttribute('download', '');
-  dl.textContent = `⬇️ הורדה · ${Math.round(deck.bytes / 1024)} KB`;
+  dl.textContent = `⬇️ כל החפיסה · ${Math.round(deck.bytes / 1024)} KB`;
   dl.title = 'הקובץ נפתח באנקי בלחיצה — אין צורך בייבוא ידני';
   act.append(dl);
   view.append(act);
 
+  /* נושא-נושא: שורה עם הורדה נפרדת, ותצוגה מקדימה של כרטיסים אמיתיים.
+     ההורדה יושבת מחוץ ל-summary — קישור בתוך summary גם מוריד וגם מקפל,
+     וזה מרגיש כמו באג. */
   const list = el('div', 'anki-topics');
   deck.topics.forEach((t) => {
     const row = el('div', 'anki-topic');
-    row.append(el('b', null, t.topic));
-    row.append(el('span', null, plural(t.cards, 'כרטיס', 'כרטיסים', true)));
+    const head = el('div', 'anki-topic-head');
+    head.append(el('b', null, t.topic));
+    head.append(el('span', null, plural(t.cards, 'כרטיס', 'כרטיסים', true)));
+    if (t.file) {
+      const tdl = el('a', 'btn anki-topic-dl');
+      tdl.href = t.file;
+      tdl.setAttribute('download', '');
+      tdl.textContent = '⬇️';
+      tdl.title = `הורדת הנושא הזה בלבד · ${Math.round((t.bytes || 0) / 1024)} KB`;
+      head.append(tdl);
+    }
+    row.append(head);
+    if (t.preview && t.preview.length) {
+      const det = el('details', 'anki-prev');
+      const sum = el('summary');
+      sum.append(el('span', null, 'איך נראים הכרטיסים'));
+      sum.append(el('span', 'chev', '⌄'));
+      det.append(sum);
+      const body = el('div', 'anki-prev-body');
+      t.preview.forEach((c) => {
+        const card = el('div', 'anki-prev-card');
+        card.append(el('div', 'anki-prev-q', c.q));
+        card.append(el('div', 'anki-prev-a', c.a));
+        body.append(card);
+      });
+      det.append(body);
+      row.append(det);
+    }
     list.append(row);
   });
   view.append(list);
