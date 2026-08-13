@@ -12,3 +12,4 @@ mailing/contacts-*.csv
 
 # תשובות גולמיות מהנוטבוק — נשמרות מקומית עד שינון מאשר
 sources/anki-*-notebook.json
+sources/explain-*.json
