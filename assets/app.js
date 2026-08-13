@@ -5407,6 +5407,15 @@ async function buildSearchIndex() {
         if (!d) return;
         if (m.kind === 'guide') {
           (d.units || []).forEach((u) => {
+            /* פרק בלומדה — תוצאה שקופצת ישר לפרק הנכון דרך עוגן #top-.
+               ה-hay כולל את התמצית והסיכום, כי המונח שמחפשים חי לרוב שם. */
+            if (c.studyDoc) rows.push({
+              kind: 'doc', course: c, icon: '📖',
+              title: u.topic, body: 'פרק בלומדה — ' + (u.what || '').slice(0, 70),
+              href: c.studyDoc.href + '#top-' + encodeURIComponent(u.topic),
+              newTab: true,
+              hay: searchNorm([u.topic, u.what, u.summary].filter(Boolean).join(' ')),
+            });
             (u.points || []).forEach((p) => rows.push({
               kind: 'point', course: c, icon: '🎯',
               title: u.topic, body: p.point,
@@ -5488,6 +5497,7 @@ function openSearch() {
     hits.forEach((r) => {
       const a = el('a', 'srch-row');
       a.href = r.href;
+      if (r.newTab) { a.target = '_blank'; a.rel = 'noopener'; }
       a.onclick = close;
       a.append(el('span', 'srch-ico', r.icon));
       const d = el('div', 'srch-txt');
