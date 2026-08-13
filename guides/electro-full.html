@@ -1066,7 +1066,11 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}
+  #dk-reveal .dk-rv-tx{display:none;}
+  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+/* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
+body.dk-has-modes{padding-bottom:72px;}
 
 body[data-dk-mode="focus"] .dk-deep,
 body[data-dk-mode="play"] .dk-deep{display:none;}
@@ -1096,8 +1100,6 @@ details.dk-qa>summary:hover{background:rgba(24,95,165,.06);}
 .dk-qa-n{display:inline-block;background:rgba(24,95,165,.1);color:var(--brand,#185FA5);
   border-radius:99px;padding:.05em .6em;font-size:.78rem;font-weight:800;
   margin-inline-end:.4em;white-space:nowrap;}
-.dk-qa-trap{display:block;margin-top:.3rem;font-size:.88rem;
-  color:var(--warn,#b45309);}
 .dk-qa-foot{display:flex;gap:.6rem;flex-wrap:wrap;padding:.6rem 1rem .8rem;}
 .dk-qa-foot a{font-size:.85rem;font-weight:700;text-decoration:none;
   color:var(--brand,#185FA5);border:1px solid var(--line,#d8dee7);
@@ -1217,8 +1219,16 @@ if (CFG.gate) {
     var rv = document.createElement('button');
     rv.type = 'button';
     rv.id = 'dk-reveal';
+    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
+       מתנגש במתג המצבים שבמרכז התחתית. */
+    var rvIc = document.createElement('span');
+    var rvTx = document.createElement('span');
+    rvTx.className = 'dk-rv-tx';
+    rv.appendChild(rvIc);
+    rv.appendChild(rvTx);
     var paintRv = function () {
-      rv.textContent = opened ? '🙈 הסתירו את התשובות' : '👁️ גלו את כל התשובות';
+      rvIc.textContent = opened ? '🙈' : '👁️';
+      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
       rv.title = opened
         ? 'החזרת שערי "נסה קודם" על המלכודות'
         : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
@@ -1290,6 +1300,7 @@ if (CFG.modes) {
       bar.appendChild(b);
     });
     document.body.appendChild(bar);
+    document.body.classList.add('dk-has-modes');
 
     function apply(m, save) {
       if (!LBL[m]) m = 'read';
@@ -1360,6 +1371,9 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + p + '</p>'; }).join('');
           det.appendChild(s);
         }
+        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
+           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
+           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1367,8 +1381,7 @@ if (CFG.qa) {
           row.className = 'dk-qa-p';
           var n = (p.qids || []).length;
           row.innerHTML = '<span class="dk-qa-n">' +
-            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + p.point +
-            (p.trap ? '<span class="dk-qa-trap"><b>המלכודת:</b> ' + p.trap + '</span>' : '');
+            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + p.point;
           det.appendChild(row);
         });
         var foot = document.createElement('div');

@@ -70,8 +70,16 @@ if (CFG.gate) {
     var rv = document.createElement('button');
     rv.type = 'button';
     rv.id = 'dk-reveal';
+    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
+       מתנגש במתג המצבים שבמרכז התחתית. */
+    var rvIc = document.createElement('span');
+    var rvTx = document.createElement('span');
+    rvTx.className = 'dk-rv-tx';
+    rv.appendChild(rvIc);
+    rv.appendChild(rvTx);
     var paintRv = function () {
-      rv.textContent = opened ? '🙈 הסתירו את התשובות' : '👁️ גלו את כל התשובות';
+      rvIc.textContent = opened ? '🙈' : '👁️';
+      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
       rv.title = opened
         ? 'החזרת שערי "נסה קודם" על המלכודות'
         : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
@@ -143,6 +151,7 @@ if (CFG.modes) {
       bar.appendChild(b);
     });
     document.body.appendChild(bar);
+    document.body.classList.add('dk-has-modes');
 
     function apply(m, save) {
       if (!LBL[m]) m = 'read';
@@ -213,6 +222,9 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + p + '</p>'; }).join('');
           det.appendChild(s);
         }
+        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
+           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
+           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -220,8 +232,7 @@ if (CFG.qa) {
           row.className = 'dk-qa-p';
           var n = (p.qids || []).length;
           row.innerHTML = '<span class="dk-qa-n">' +
-            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + p.point +
-            (p.trap ? '<span class="dk-qa-trap"><b>המלכודת:</b> ' + p.trap + '</span>' : '');
+            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + p.point;
           det.appendChild(row);
         });
         var foot = document.createElement('div');

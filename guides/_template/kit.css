@@ -46,7 +46,11 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}
+  #dk-reveal .dk-rv-tx{display:none;}
+  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+/* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
+body.dk-has-modes{padding-bottom:72px;}
 
 body[data-dk-mode="focus"] .dk-deep,
 body[data-dk-mode="play"] .dk-deep{display:none;}
@@ -76,8 +80,6 @@ details.dk-qa>summary:hover{background:rgba(24,95,165,.06);}
 .dk-qa-n{display:inline-block;background:rgba(24,95,165,.1);color:var(--brand,#185FA5);
   border-radius:99px;padding:.05em .6em;font-size:.78rem;font-weight:800;
   margin-inline-end:.4em;white-space:nowrap;}
-.dk-qa-trap{display:block;margin-top:.3rem;font-size:.88rem;
-  color:var(--warn,#b45309);}
 .dk-qa-foot{display:flex;gap:.6rem;flex-wrap:wrap;padding:.6rem 1rem .8rem;}
 .dk-qa-foot a{font-size:.85rem;font-weight:700;text-decoration:none;
   color:var(--brand,#185FA5);border:1px solid var(--line,#d8dee7);
