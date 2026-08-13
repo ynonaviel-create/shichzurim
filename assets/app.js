@@ -388,6 +388,30 @@ const SEEN_Q_KEY = 'shichzurim.seen';
    עדיין צריכה מפתח כלשהו, ומיקום עדיף על כלום. */
 const qKey = (item) => item.qid || `${item.examId}#${item.idx}`;
 
+/* ---------- קושי המחזור ----------
+   qid → {n: כמה ענו, w: אצל כמה המצב האחרון שגוי}. אגרגט אנונימי מהענן
+   (מיגרציה 0009), עם רצפת 10 עונים בשרת. נטען פעם אחת בעצלתיים; כשאין
+   ענן/מיגרציה/התחברות — נשאר null וכל שכבת ה-UI פשוט לא מופיעה. */
+let COHORT = null, cohortAsked = false;
+function loadCohort(onReady) {
+  if (COHORT || cohortAsked || !window.Cloud || !window.Cloud.cohortStats) {
+    if (COHORT && onReady) onReady();
+    return;
+  }
+  cohortAsked = true;
+  window.Cloud.cohortStats().then((map) => {
+    if (map && Object.keys(map).length) {
+      COHORT = map;
+      if (onReady) onReady();
+    }
+  }).catch(() => {});
+}
+/* שאלה "קשה למחזור": לפחות שליש מהעונים עדיין טועים בה. */
+const cohortHard = (q) => {
+  const s = COHORT && q.qid && COHORT[q.qid];
+  return !!(s && s.n >= 10 && s.w / s.n >= 0.35);
+};
+
 const seen = {
   read() {
     try { return JSON.parse(localStorage.getItem(SEEN_Q_KEY)) || {}; }
@@ -2828,6 +2852,8 @@ function exitLink(node) {
 
 function playQuestions(cfg) {
   const { key, title, subtitle, note, persist, back } = cfg;
+  /* קושי המחזור לתגית שבמשוב — נטען ברקע; אם לא יגיע, התג פשוט לא יופיע. */
+  loadCohort();
   const questions = (cfg.questions || []).map(rulingA);
   view.innerHTML = '';
 
@@ -3455,6 +3481,16 @@ function playQuestions(cfg) {
       else if (isRight && ex.size >= item.opts.length - 2)
         fb.append(el('div', 'elim-note ok',
           `✓ צמצמת ל-${item.opts.length - ex.size} והכרעת נכון — בדיוק מה שפסילה טובה אמורה לעשות.`));
+    }
+
+    /* קושי המחזור — רק כשהשאלה באמת קשה (≥25% טועים). למי שטעה זו נחמה
+       מעוגנת בנתונים; למי שצדק — הישג. שאלות קלות לא מקבלות תג, כי
+       "8% טעו" הוא רעש. */
+    const cs = COHORT && item.qid && COHORT[item.qid];
+    if (cs && cs.n >= 10 && cs.w / cs.n >= 0.25) {
+      const pct = Math.round((cs.w / cs.n) * 100);
+      fb.append(el('div', 'fb-cohort',
+        `🌡️ שאלה קשה למחזור — ${pct}% מהעונים עדיין נופלים בה`));
     }
 
     const sim = SIM_BY_TOPIC[item.topic];
@@ -4712,8 +4748,17 @@ async function renderPractice(courseId, seedTopic = null) {
     { id: 'due',   label: '🔁 בשל לחזרה', tip: 'שאלות שידעת בעבר והגיע הזמן לוודא שאתה עדיין יודע' },
     { id: 'all',   label: '📚 הכול, כולל מה שראיתי', tip: 'כל השאלות שעוברות את המסננים, בלי התחשבות בהיסטוריה' },
   ];
-  MODES.forEach((m) => {
+  /* צ׳יפ "קשות למחזור" — מצטרף רק כשיש דאטה (מיגרציה 0009 + התחברות) ויש
+     לפחות 5 שאלות כאלה במקצוע. עד אז אף אחד לא יודע שהוא חסר. */
+  loadCohort(() => {
+    if (pool.filter(cohortHard).length < 5) return;
+    if (modeChips.querySelector('[data-mode="hard"]')) return;
+    MODES.push({ id: 'hard', label: '🌡️ קשות למחזור', tip: 'השאלות שלפחות שליש מהמחזור עדיין טועה בהן — אגרגט אנונימי' });
+    addModeChip(MODES[MODES.length - 1]);
+  });
+  function addModeChip(m) {
     const ch = chipEl('chip' + (m.id === mode ? ' on' : ''), m.label, m.tip);
+    ch.dataset.mode = m.id;
     ch.onclick = () => {
       mode = m.id;
       modeChips.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
@@ -4726,7 +4771,8 @@ async function renderPractice(courseId, seedTopic = null) {
       update();
     };
     modeChips.append(ch);
-  });
+  }
+  MODES.forEach(addModeChip);
   modeField.append(modeChips);
   form.append(modeField);
 
@@ -4951,6 +4997,7 @@ async function renderPractice(courseId, seedTopic = null) {
       const s = r == null ? undefined : (r.b >= 1 ? 1 : 0);
       if (mode === 'wrong') return seenH.isOpenMistake(r);
       if (mode === 'new') return s === undefined;
+      if (mode === 'hard') return cohortHard(q);
       return true;
     });
   }
@@ -4963,6 +5010,7 @@ async function renderPractice(courseId, seedTopic = null) {
       const label = mode === 'new' ? 'שאלות שלא ראית'
         : mode === 'wrong' ? 'שאלות שטעית בהן ועוד לא נגמלת מהן'
         : mode === 'due' ? 'שאלות שהגיע הזמן לרענן'
+        : mode === 'hard' ? 'שאלות שהמחזור נופל בהן'
         : 'שאלות';
       info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
       /* פילטר נושא נדבק כשמגיעים מכרטיס מלכודת או מפילוח, והפאנל שמציג אותו

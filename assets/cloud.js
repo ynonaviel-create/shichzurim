@@ -470,6 +470,26 @@
       }
     },
 
+    /* דירוג קושי של המחזור (0009) — אגרגט בלבד: qid → כמה ענו, כמה המצב
+       האחרון שלהם שגוי. לכל משתמש מחובר, עם רצפת 10 עונים בשרת.
+       דעיכה שקטה מלאה: עד שהמיגרציה תרוץ (או בלי התחברות) מוחזר null
+       ושום שכבת UI לא מופיעה. מטמון שעה — הנתון זז לאט וכל מסך תרגול
+       היה יורה קריאה. */
+    async cohortStats() {
+      if (!state.session) return null;
+      try {
+        const CK = 'shichzurim.cohortStats';
+        const hit = JSON.parse(localStorage.getItem(CK) || 'null');
+        if (hit && Date.now() - hit.at < 60 * 60 * 1000) return hit.map;
+        const { data, error } = await sb.rpc('cohort_question_stats', { min_n: 10, lim: 500 });
+        if (error || !Array.isArray(data)) return hit ? hit.map : null;
+        const map = {};
+        data.forEach((r) => { map[r.qid] = { n: Number(r.attempts), w: Number(r.wrong) }; });
+        try { localStorage.setItem(CK, JSON.stringify({ at: Date.now(), map })); } catch {}
+        return map;
+      } catch { return null; }
+    },
+
     /* קריאות לוח הבקרה — מחזירות אגרגטים בלבד, ורק למנהל (נאכף בשרת).
        הפונקציות הישנות (0002) נשארות לקליינטים שמורים במטמון; הלוח הנוכחי
        קורא ל-v2 (0005): יום לפי שעון ישראל, ותובנות מ-user_kv. */
