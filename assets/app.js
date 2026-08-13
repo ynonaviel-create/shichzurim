@@ -918,6 +918,7 @@ function router() {
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param);
   if (route === 'traps' && param) return renderTraps(param);
+  if (route === 'tree' && param) return renderTree(param);
   if (route === 'q' && param) return renderOneQuestion(param);
   if (route === 'tonight' && param) return renderTonight(param);
   if (route === 'flagged' && param) return renderFlagged(param);
@@ -1282,6 +1283,11 @@ function renderCourse(courseId) {
     tr.title = 'המלכודות שנפלת בהן בתרגול — מה הטעות, מה הנכון, ואיפה ללמוד';
     tr.href = '#/traps/' + courseId;
     lRow.append(tr);
+    /* עץ הידע — אותו תנאי בדיוק: התוכן נגזר מהמפה. */
+    const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.title = 'מפת השליטה שלך — כל נושא נצבע לפי כמה אתה יודע אותו עכשיו, ובמה כדאי לגעת';
+    kt.href = '#/tree/' + courseId;
+    lRow.append(kt);
   }
   /* "הלילה לפני" — רק כשהמבחן באמת קרוב. באמצע הסמסטר זה רעש; שלושה ימים
      לפני זה הדבר היחיד שרוצים ללחוץ עליו. */
@@ -5783,6 +5789,120 @@ async function renderTraps(courseId) {
     card.append(acts);
     view.append(card);
   });
+
+  toTop();
+  updateFooter();
+}
+
+/* ================= עץ הידע =================
+   מפת-מצב מיידית: כל נושא נצבע לפי strength — כמה אתה יודע *עכשיו*, עם
+   דעיכה בזמן. בנוי קודם כול ללחץ של לפני-מבחן (רוב השימוש באתר): שורת
+   "במה לגעת עכשיו" בראש, והעץ עצמו קריא גם בכניסה ראשונה אחרי סבב תרגול
+   אחד. רצף והתמדה — שורה קטנה בתחתית, בכוונה לא במרכז הבמה. */
+async function renderTree(courseId) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+  const c = courseOf(courseId);
+  const g = c && await loadGuide(courseId);
+  if (!g) {
+    view.innerHTML = '';
+    view.append(emptyState('📭', 'אין עדיין מפת חומרים', 'עץ הידע נבנה ממנה.'));
+    toTop();
+    return;
+  }
+  await Promise.all(quizzesOf(courseId).map((m) => loadExam(m.id).catch(() => null)));
+
+  view.innerHTML = '';
+  view.dataset.course = courseId;
+  view.append(crumb(c.name, '#/course/' + courseId));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '🌳 עץ הידע — ' + c.name));
+  head.append(el('p', null,
+    'כל נושא נצבע לפי כמה אתה שולט בו עכשיו — הציון דועך עם הזמן, כמו הזיכרון. לחיצה מובילה לתרגול.'));
+  view.append(head);
+
+  const ranked = priorityList(courseId, g);
+  const touched = ranked.filter((r) => r.m.total && r.m.strength > 0).length;
+
+  /* במה לגעת עכשיו — שלושת הנושאים עם הציון הגבוה (חלש × כבד במבחן). */
+  const nowRow = el('section', 'tree-now');
+  nowRow.append(el('h2', 'g-h2', '🎯 במה לגעת עכשיו'));
+  const nowSub = el('p', 'tree-now-sub');
+  nowSub.textContent = touched
+    ? 'השילוב של "כמה זה נשאל" עם "כמה אתה שולט" — הכי כבד למעלה.'
+    : 'עדיין לא תרגלת כאן — הסדר הוא לפי המשקל במבחן. אחרי סבב אחד העץ ייצבע.';
+  nowRow.append(nowSub);
+  const chips = el('div', 'tree-now-chips');
+  ranked.slice(0, 3).forEach((r) => {
+    const a = el('a', 'tree-chip');
+    a.href = `#/practice/${courseId}/${encodeURIComponent(r.u.topic)}`;
+    a.innerHTML = `<b>${r.u.topic}</b><span>${r.u.freq}% מהשאלות · שליטה ${Math.round(r.m.strength * 100)}%</span>`;
+    a.title = 'תרגול הנושא הזה עכשיו';
+    chips.append(a);
+  });
+  nowRow.append(chips);
+  view.append(nowRow);
+
+  /* העץ — לפי הבלוקים של המפה; מפה שטוחה מקבלת קבוצה אחת. */
+  const lvl = (s) => (s >= 0.67 ? 'high' : s >= 0.34 ? 'mid' : s > 0 ? 'low' : 'none');
+  const byTopic = {};
+  ranked.forEach((r) => { byTopic[r.u.topic] = r; });
+  const groups = (g.blocks && g.blocks.length)
+    ? g.blocks.map((b) => ({ title: `${b.icon || ''} ${b.title}`, topics: b.topics || [] }))
+    : [{ title: '📖 כל הנושאים', topics: ranked.map((r) => r.u.topic) }];
+  const sd = c.studyDoc;
+  groups.forEach((grp) => {
+    const sec = el('section', 'tree-block');
+    sec.append(el('h3', null, grp.title));
+    const wrap = el('div', 'tree-nodes');
+    grp.topics.forEach((t) => {
+      const r = byTopic[t];
+      if (!r) return;
+      const pct = Math.round(r.m.strength * 100);
+      /* תא עוטף: הקישור ללומדה יושב כאח של קישור התרגול ולא בתוכו —
+         קישור בתוך קישור אסור, והדפדפן מפרק אותו בשקט. */
+      const cell = el('div', 'tree-cell');
+      const node = el('a', 'tree-node lv-' + lvl(r.m.strength));
+      node.href = `#/practice/${courseId}/${encodeURIComponent(t)}`;
+      node.title = r.m.total
+        ? `${t} — שליטה ${pct}% · ${r.m.correct}/${r.m.total} נכונות בארכיון · לחיצה לתרגול`
+        : `${t} — טרם תורגל · לחיצה לתרגול`;
+      node.innerHTML = `<span class="tree-pct">${r.m.total ? pct + '%' : '—'}</span>` +
+        `<span class="tree-topic">${t}</span>` +
+        `<span class="tree-meta">${r.u.freq}% מהמבחן</span>`;
+      cell.append(node);
+      if (sd) {
+        /* קישור משני, קטן, ללומדה — התרגול הוא הראשי. */
+        const doc = el('a', 'tree-doc', '📖');
+        doc.href = sd.href + '#top-' + encodeURIComponent(t);
+        doc.target = '_blank';
+        doc.rel = 'noopener';
+        doc.title = 'הפרק של ' + t + ' בלומדה';
+        cell.append(doc);
+      }
+      wrap.append(cell);
+    });
+    sec.append(wrap);
+    view.append(sec);
+  });
+
+  /* שורת ההתמדה — בתחתית ובקטן, בכוונה. רצף = ימים עם תרגול, נגזר
+     מחותמות "המגע האחרון" שב-seenH; זה קירוב שמחמיר לרעתנו (יום ישן
+     שנדרס לא נספר), ולכן לא מציגים מספרים גרנדיוזיים — רק את הרצף החי. */
+  const d = seenH.read();
+  const days = new Set();
+  Object.values(d).forEach((r) => { if (r && r.t) days.add(new Date(r.t).toDateString()); });
+  /* רצף שמסתיים היום או אתמול — היום שעוד לא תרגלת בו לא שובר אותו. */
+  let streak = 0;
+  const start = days.has(new Date().toDateString()) ? 0 : 1;
+  while (days.has(new Date(Date.now() - (start + streak) * MS.day).toDateString())) streak++;
+  const foot = el('div', 'tree-foot');
+  const bits = [];
+  if (streak >= 2) bits.push(`🔥 ${streak} ימים ברצף`);
+  bits.push(`${touched}/${ranked.length} נושאים תורגלו`);
+  if (touched === ranked.length && ranked.length) bits.push('🏅 נגעת בהכול');
+  foot.textContent = bits.join(' · ');
+  view.append(foot);
 
   toTop();
   updateFooter();
