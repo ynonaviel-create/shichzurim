@@ -943,6 +943,7 @@ function router() {
   if (route === 'review' && param) return renderReview(param);
   if (route === 'traps' && param) return renderTraps(param);
   if (route === 'tree' && param) return renderTree(param);
+  if (route === 'semester' && param) return renderSemester(param);
   if (route === 'q' && param) return renderOneQuestion(param);
   if (route === 'tonight' && param) return renderTonight(param);
   if (route === 'flagged' && param) return renderFlagged(param);
@@ -1401,6 +1402,12 @@ function renderCourse(courseId) {
   }
   /* מסמכים נוספים לצד הסיכום — מוגדרים כולם בדאטה (courses.json), אפס ידע במנוע. */
   (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
+  /* ליווי הסמסטר — רק לקורס שהוגדרה לו תוכנית הוראה (teaching). */
+  if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) {
+    lg.append(learnCard('🗓️', 'השבוע בקורס',
+      'איפה ההוראה עומדת, מה אתה אמור לדעת כבר, ומה נשאר לסגור',
+      '#/semester/' + courseId));
+  }
   if (hasGuide) {
     const gcard = learnCard('🗺️', 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId);
     gcard.dataset.tour = 'guide';   // עוגן לסיור
@@ -5951,6 +5958,118 @@ async function renderTree(courseId) {
   if (touched === ranked.length && ranked.length) bits.push('🏅 נגעת בהכול');
   foot.textContent = bits.join(' · ');
   view.append(foot);
+
+  toTop();
+  updateFooter();
+}
+
+/* ================= ליווי סמסטר =================
+   "השבוע בקורס" — עמוד פסיבי לגמרי (בלי התראות ובלי דיוור): מיישר את
+   החומר לשבועות ההוראה לפי `teaching` בכרטיס המקצוע. הביקוש הכי חזק בסקר.
+
+   ולפי ההנחיה שרוב השימוש הוא לפני מבחנים: כשהמבחן קרוב (או כשהשבועות
+   נגמרו) המסך מתהפך מ"איפה אנחנו השבוע" ל"מה נשאר לסגור" — כל הנושאים
+   שטרם נשלטו, מדורגים לפי המפה. מי שמגיע רק בסוף מקבל בדיוק את מה
+   שהוא צריך, בלי להרגיש שאיחר את הרכבת. */
+async function renderSemester(courseId) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+  const c = courseOf(courseId);
+  const t = c && c.teaching;
+  if (!t || !t.start || !(t.weeks || []).length) {
+    view.innerHTML = '';
+    view.append(emptyState('🗓️', 'אין תוכנית סמסטר למקצוע הזה',
+      'היא מוגדרת בכרטיס המקצוע (teaching) כשקורס מלווה מתחילתו.'));
+    toTop();
+    return;
+  }
+  const g = await loadGuide(courseId);
+  await Promise.all(quizzesOf(courseId).map((m) => loadExam(m.id).catch(() => null)));
+
+  view.innerHTML = '';
+  view.dataset.course = courseId;
+  view.append(crumb(c.name, '#/course/' + courseId));
+
+  const startTs = new Date(t.start + 'T00:00').getTime();
+  const weekIdx = Math.floor((Date.now() - startTs) / (7 * MS.day));
+  const nd = nextDate(c);
+  const examSoon = nd && nd.ts - Date.now() < 14 * MS.day;
+  const over = weekIdx >= t.weeks.length;
+
+  const d = seenH.read(), nowTs = Date.now();
+  const mastery = (topic) => masteryOf(courseId, topic, d, nowTs);
+  const byTopic = {};
+  (g && g.units || []).forEach((u) => { byTopic[u.topic] = u; });
+
+  /* שורת פעולות לנושא — אותו עוגן קנוני בכל היעדים. */
+  const topicRow = (topic, extra) => {
+    const row = el('div', 'sem-topic');
+    const m = mastery(topic);
+    const pct = m.total ? Math.round(m.strength * 100) + '%' : '—';
+    row.innerHTML = `<b>${topic}</b><span class="sem-pct">${pct}</span>`;
+    if (extra) row.append(el('span', 'sem-note', extra));
+    const acts = el('span', 'sem-acts');
+    if (c.studyDoc) {
+      const a = el('a', null, '📖');
+      a.href = c.studyDoc.href + '#top-' + encodeURIComponent(topic);
+      a.target = '_blank'; a.rel = 'noopener';
+      a.title = 'הפרק בלומדה';
+      acts.append(a);
+    }
+    if (byTopic[topic]) {
+      const a = el('a', null, '🗺️');
+      a.href = `#/guide/${courseId}/${encodeURIComponent(topic)}`;
+      a.title = 'הנושא במפת החומרים';
+      acts.append(a);
+    }
+    const p = el('a', null, '✍️');
+    p.href = `#/practice/${courseId}/${encodeURIComponent(topic)}`;
+    p.title = 'תרגול הנושא';
+    acts.append(p);
+    row.append(acts);
+    return row;
+  };
+
+  const head = el('div', 'page-head');
+  if (examSoon || over) {
+    /* מצב לפני-מבחן: המסלול השבועי כבר לא מעניין — רק מה נשאר. */
+    head.append(el('h1', null, '🗓️ ' + c.name + ' — מה נשאר לסגור'));
+    head.append(el('p', null, over
+      ? 'ההוראה נגמרה. אלה כל הנושאים שעוד לא סגרת, לפי הסדר שכדאי לסגור אותם.'
+      : 'המבחן קרוב, אז במקום "איפה אנחנו השבוע" — כל מה שעוד פתוח, החשוב קודם.'));
+    view.append(head);
+    const list = el('section', 'sem-week is-now');
+    const openTopics = [...new Set(t.weeks.flatMap((w) => w.topics || []))]
+      .map((topic) => ({ topic, m: mastery(topic), u: byTopic[topic] }))
+      .filter((x) => x.m.strength < 0.5)
+      .sort((a, b) => ((b.u?.freq || 0) * (1 - b.m.strength)) - ((a.u?.freq || 0) * (1 - a.m.strength)));
+    if (!openTopics.length) {
+      view.append(emptyState('🏅', 'הכול סגור', 'כל נושאי הסמסטר בשליטה. סבב רענון ב"בשל לחזרה"?'));
+    } else {
+      openTopics.forEach((x) => list.append(topicRow(x.topic,
+        x.u ? `${x.u.freq}% מהמבחן` : null)));
+      view.append(list);
+    }
+  } else {
+    head.append(el('h1', null, '🗓️ ' + c.name + ' — השבוע בקורס'));
+    head.append(el('p', null,
+      `שבוע ${Math.max(weekIdx + 1, 1)} מתוך ${t.weeks.length}. הצבע ליד כל נושא — כמה אתה שולט בו עכשיו.`));
+    view.append(head);
+    t.weeks.forEach((w, i) => {
+      const state = i < weekIdx ? 'past' : i === weekIdx ? 'now' : 'future';
+      const sec = el(state === 'now' ? 'section' : 'details', 'sem-week is-' + state);
+      const title = `שבוע ${i + 1}` + (state === 'now' ? ' — אתם כאן' : '') +
+        (w.note ? ` · ${w.note}` : '');
+      if (state === 'now') sec.append(el('h2', 'g-h2', '📍 ' + title));
+      else {
+        const s = el('summary', null, (state === 'past' ? '✓ ' : '') + title);
+        sec.append(s);
+        if (state === 'past') sec.open = false;
+      }
+      (w.topics || []).forEach((topic) => sec.append(topicRow(topic)));
+      view.append(sec);
+    });
+  }
 
   toTop();
   updateFooter();

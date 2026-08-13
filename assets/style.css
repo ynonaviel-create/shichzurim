@@ -1945,6 +1945,26 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
    קשר למסיח, והרגישה "לא קשורה". המלכודות חיות בלומדה מאחורי "נסה קודם". */
 .trap-text{ font-size:14.5px; line-height:1.8; max-width:70ch; }
 
+/* ═══════════════ ליווי סמסטר ═══════════════ */
+.sem-week{ margin-top:14px; border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--surface); padding:6px 16px 12px; }
+.sem-week.is-now{ border-color:var(--accent); box-shadow:var(--shadow); padding-top:2px; }
+.sem-week.is-past{ opacity:.75; }
+.sem-week.is-future{ opacity:.6; }
+.sem-week summary{ cursor:pointer; font-weight:800; font-size:14px; padding:8px 0; }
+.sem-topic{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  padding:9px 2px; border-top:1px solid var(--line-soft); font-size:14px;
+}
+.sem-topic:first-of-type{ border-top:none; }
+.sem-topic b{ font-weight:700; }
+.sem-pct{ font-size:12.5px; font-weight:900; color:var(--accent-dk); }
+[data-theme="dark"] .sem-pct{ color:var(--accent); }
+.sem-note{ font-size:12px; color:var(--dim); }
+.sem-acts{ margin-inline-start:auto; display:flex; gap:10px; }
+.sem-acts a{ text-decoration:none; font-size:15px; opacity:.75; }
+.sem-acts a:hover{ opacity:1; }
+
 /* ═══════════════ עץ הידע ═══════════════
    מפת-מצב: צבע לפי שליטה עכשווית (strength). ארבע רמות בלבד — יותר מזה
    הופך את המפה לקשת שאי אפשר לקרוא במבט. */
