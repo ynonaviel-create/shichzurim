@@ -130,6 +130,47 @@ def image_by_qid():
     return out
 
 
+def topic_figures(course):
+    """נושא → איור SVG מהסיכום המלא.
+
+    בסיכומים כבר יש 33 איורים שצוירו ידנית — 21 בפיזיקה, 12 באלקטרו — והם
+    ישבו שם בלי שימוש. לכל סעיף בסיכום יש כותרת ששווה לשם הנושא, ולכן
+    אפשר לחבר אותם בלי לנחש.
+
+    האיור מצורף רק לכרטיס שאין לו כבר גרף מהמבחן: גרף מהשאלה ספציפי יותר
+    ולכן עדיף, והאיור הוא הרשת מתחת.
+    """
+    import re
+    src = {'physics': ('guides/physics-full.html', 'unit', 'h3'),
+           'electro': ('guides/electro-full.html', 'chap', 'h2')}.get(course)
+    if not src:
+        return {}
+    path = os.path.join(ROOT, src[0])
+    if not os.path.exists(path):
+        return {}
+    html = open(path, encoding='utf-8').read()
+    secs = re.findall(r'<section[^>]*class="[^"]*\b' + src[1] + r'\b[^"]*"[^>]*>(.*?)(?=<section|</body>)',
+                      html, re.S)
+    out = {}
+    for sec in secs:
+        h = re.search(r'<' + src[2] + r'[^>]*>(.*?)</' + src[2] + r'>', sec, re.S)
+        g = re.search(r'<svg[\s>].*?</svg>', sec, re.S)
+        if not (h and g):
+            continue
+        title = re.sub(r'<button.*?</button>', ' ', h.group(1), flags=re.S)
+        title = re.sub(r'<[^>]+>', ' ', title)
+        title = re.sub(r'[\u0591-\u05C7]', '', title)
+        title = re.sub(r'\s+', ' ', title).strip()
+        if title:
+            svg = g.group(0)
+            # ‼️ בתוך HTML הדפדפן מסיק namespace; בקובץ .svg עצמאי הוא לא,
+            # והאיור פשוט לא מרונדר. כל 21 איורי הפיזיקה נשברו ככה בשקט.
+            if 'xmlns' not in svg[:200]:
+                svg = svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"', 1)
+            out[title] = svg
+    return out
+
+
 def build(course, title):
     src = os.path.join(EXAMS, f'{course}-guide.json')
     if not os.path.exists(src):
@@ -174,7 +215,9 @@ def build(course, title):
     add_deck(DECK_BASE, parent)
 
     qimg = image_by_qid()
-    media = {}          # שם-בזיפ → נתיב במאגר
+    figs = topic_figures(course)
+    media = {}          # שם → נתיב במאגר
+    inline = {}         # שם → תוכן (איורי SVG שנחתכו מהסיכום)
     notes, cards = [], []
     nid = EPOCH * 1000
     for ti, (topic, pts) in enumerate(by_topic):
@@ -190,6 +233,10 @@ def build(course, title):
             if img and os.path.exists(os.path.join(ROOT, img)):
                 name = os.path.basename(img)
                 media[name] = img
+                back_extra = f'<br><img src="{name}">'
+            elif topic in figs:
+                name = f'fig-{course}-{stable_id(topic)[:8]}.svg'
+                inline[name] = figs[topic]
                 back_extra = f'<br><img src="{name}">'
             flds = '\x1f'.join([trap, point + back_extra, topic])
             notes.append((nid, guid, MODEL_ID, EPOCH, -1, f' {topic} ', flds,
@@ -217,14 +264,17 @@ def build(course, title):
         z.write(db_path, 'collection.anki2')
         # פורמט המדיה של אנקי: הקבצים נשמרים בשמות 0,1,2… ו-`media` הוא
         # המפה מהמספר לשם האמיתי, והכרטיס מפנה לשם האמיתי.
-        names = sorted(media)
+        names = sorted(media) + sorted(inline)
         z.writestr('media', json.dumps({str(i): n for i, n in enumerate(names)},
                                        ensure_ascii=False))
         for i, n in enumerate(names):
-            z.write(os.path.join(ROOT, media[n]), str(i))
+            if n in media:
+                z.write(os.path.join(ROOT, media[n]), str(i))
+            else:
+                z.writestr(str(i), inline[n])
 
     return {'course': course, 'title': title, 'file': f'anki/{course}.apkg',
-            'cards': len(notes), 'images': len(media), 'topics': [{'topic': t, 'cards': len(p)} for t, p in by_topic],
+            'cards': len(notes), 'images': len(media) + len(inline), 'topics': [{'topic': t, 'cards': len(p)} for t, p in by_topic],
             'bytes': os.path.getsize(apkg)}
 
 

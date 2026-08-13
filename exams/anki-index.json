@@ -1,12 +1,12 @@
 {
- "built": "2026-08-12",
+ "built": "2026-08-13",
  "decks": [
   {
    "course": "electro",
    "title": "אלקטרופיזיולוגיה",
    "file": "anki/electro.apkg",
    "cards": 147,
-   "images": 40,
+   "images": 52,
    "topics": [
     {
      "topic": "סידן, אקסוציטוזה ומחזור הווזיקולה",
@@ -57,7 +57,7 @@
      "cards": 10
     }
    ],
-   "bytes": 6203678
+   "bytes": 6227884
   },
   {
    "course": "molecular",
@@ -122,7 +122,7 @@
    "title": "פיזיקה לרפואנים ב׳",
    "file": "anki/physics.apkg",
    "cards": 57,
-   "images": 0,
+   "images": 21,
    "topics": [
     {
      "topic": "מטען, שדה ופוטנציאל חשמלי",
@@ -209,7 +209,7 @@
      "cards": 2
     }
    ],
-   "bytes": 14815
+   "bytes": 33424
   }
  ]
 }
