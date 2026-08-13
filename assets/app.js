@@ -3355,6 +3355,14 @@ function playQuestions(cfg) {
 
     if (item.table) card.append(tableOf(item.table));
 
+    /* ---------- שאלת hotspot: "לחצו על האזור הנכון" ----------
+       סכימה: type:'hotspot' + image + regions:[{x,y,w,h,label}] באחוזים
+       (כמו מלבני דף הנוסחאות) + a = אינדקס האזור הנכון. המסיחים נגזרים
+       מתוויות האזורים, כך שכל צנרת המענה/משוב/התקדמות הקיימת עובדת כרגיל
+       — האזורים על התמונה הם פשוט דרך שנייה ללחוץ על אותו מסיח. */
+    const isHotspot = item.type === 'hotspot' && (item.regions || []).length && item.image;
+    if (isHotspot && !item.opts) item.opts = item.regions.map((r) => r.label);
+
     const opts = el('div', 'opts');
     const fb = el('div', 'fb');
 
@@ -3414,6 +3422,45 @@ function playQuestions(cfg) {
       });
       opts.append(o);
     });
+
+    /* שכבת האזורים של hotspot — מעל התמונה שכבר רונדרה למעלה. */
+    if (isHotspot) {
+      const imgWrap = card.querySelector('.q-img');
+      if (imgWrap) {
+        imgWrap.classList.add('q-hotspot');
+        const rects = [];
+        const paintRects = () => {
+          const done = answers[qi] != null;
+          rects.forEach(({ r, oi }) => {
+            r.classList.toggle('hs-ok', done && oi === item.a);
+            r.classList.toggle('hs-bad', done && oi === answers[qi] && oi !== item.a);
+            r.classList.toggle('hs-idle', !done);
+          });
+        };
+        item.regions.forEach((rg, oi) => {
+          const r = el('button', 'hs-rect');
+          r.type = 'button';
+          r.style.left = rg.x + '%';
+          r.style.top = rg.y + '%';
+          r.style.width = rg.w + '%';
+          r.style.height = rg.h + '%';
+          r.title = 'בחירת האזור הזה';
+          r.setAttribute('aria-label', rg.label);
+          r.onclick = (e) => {
+            e.stopPropagation();   // בלי הזום של התמונה
+            if (answers[qi] != null) return;
+            /* אותו מסלול בדיוק כמו לחיצה על המסיח — כולל שמירה ומשוב. */
+            choose(qi, oi, card, opts, fb, item);
+            paintRects();
+          };
+          rects.push({ r, oi });
+          imgWrap.append(r);
+        });
+        /* מענה דרך רשימת המסיחים חייב לצבוע גם את האזורים. */
+        opts.addEventListener('click', () => setTimeout(paintRects, 0), true);
+        paintRects();
+      }
+    }
 
     card.append(opts, clearEx, fb);
     syncClear();
