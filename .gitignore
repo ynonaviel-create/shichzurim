@@ -9,3 +9,6 @@ sources/
 # מרשם החלטות העיצוב — קובץ עבודה בין ינון לסוכן, מצהיר על עצמו "לא לקומיט".
 _design-rejects.md
 mailing/contacts-*.csv
+
+# תשובות גולמיות מהנוטבוק — נשמרות מקומית עד שינון מאשר
+sources/anki-*-notebook.json

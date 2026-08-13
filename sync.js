@@ -27,7 +27,7 @@ const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
    הם לא נספרים בסיכומי ה"שאלות" (כמו NOT_QUIZ ב-app.js). */
 const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
 const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e) => a + e.count, 0);
-const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json']);
+const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json', 'anki-index.json']);
 
 const problems = [];
 const quizFiles = [];   // {file, items} לכל קובץ שאלות — לבדיקת תבנית ה-explain

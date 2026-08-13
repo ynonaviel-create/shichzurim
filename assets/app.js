@@ -584,6 +584,9 @@ async function loadManifest() {
   EXAMS = m.exams;
   VERSION = m.version || '';
   injectCourseAccents(COURSES);
+  /* אינדקס האנקי (כ-1KB) נטען כאן ולא בדף האנקי, כי הקישור בעמוד הקורס
+     מוצג רק כשיש חפיסה — ובלי טעינה מוקדמת הוא היה חסר בכניסה הראשונה. */
+  ankiIndex();
 
   /* המניפסט תמיד טרי (no-cache), אז הוא יודע מה הגרסה האמיתית. אם ה-index.html
      שהוגש לנו מהמטמון מצביע לגרסה ישנה של הקוד — אנחנו רצים כרגע כקוד ישן,
@@ -907,6 +910,8 @@ function router() {
   if (route === 'formulas' && param) return renderFormulas(param, sub ? decodeURIComponent(sub) : null);
   // #/sheet/<course> — דף הנוסחאות הרשמי, לעיון מחוץ לתרגול
   if (route === 'sheet' && param) return renderSheet(param);
+  // #/anki/<course> — חפיסות אנקי להורדה
+  if (route === 'anki' && param) return renderAnki(param);
   // #/exam/<id>/<qi> — קופץ ישר לשאלה מסוימת (מגיע מקישורי התרגול שבכרטיסיות)
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
@@ -1234,6 +1239,15 @@ function renderCourse(courseId) {
   };
   addChip('sec-practice', '🏋️ תרגול');
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
+  /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
+     רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
+  if (hasAnkiDeck(courseId)) {
+    const a = el('a', 'verb-chip');
+    a.href = '#/anki/' + courseId;
+    a.textContent = '🃏 אנקי';
+    a.title = 'חפיסת אנקי להורדה — כרטיסים ממפת החומרים';
+    nav.append(a);
+  }
   view.append(nav);
 
   /* 1) תרגול — באנר-גיבור בראש (הדבר ה-2 הכי בשימוש, אבל באנר יחיד קומפקטי). */
@@ -4436,6 +4450,96 @@ function sheetButton(courseId, sec, label) {
   b.title = 'פתיחת דף הנוסחאות של המבחן, ממוקד על הסעיף הזה';
   b.onclick = () => openSheet(courseId, sec.k);
   return b;
+}
+
+/* ================= אנקי — דף ההורדות =================
+
+   ינון (13/08/2026): „אחד הכלים הכי הכי מרכזיים זה הכלי של האנקי.”
+
+   ההחלטה שקובעת את כל השאר: **קובץ אחד לכל קורס, עם תת-חפיסה לכל נושא.**
+   כך מורידים פעם אחת ובוחרים באנקי מה ללמוד — במקום לייצר קובץ לכל שילוב
+   נושאים אפשרי, שזה מה שהופך את זה לבלתי מתחזק.
+
+   החפיסות נבנות מחוץ לאתר ב-`anki-build.py`, מתוך מפת החומרים: כל נקודה
+   ומלכודת הופכות לכרטיס, והגרף מהשאלה המקושרת נכנס לצד האחורי. האתר רק
+   מציג ומקשר — הוא לא מייצר כלום בזמן ריצה. */
+let ankiIndexCache = null;
+async function ankiIndex() {
+  if (ankiIndexCache) return ankiIndexCache;
+  try {
+    const r = await fetch('exams/anki-index.json?v=' + (VERSION || ''));
+    ankiIndexCache = r.ok ? await r.json() : { decks: [] };
+  } catch { ankiIndexCache = { decks: [] }; }
+  return ankiIndexCache;
+}
+
+/* יש חפיסה למקצוע הזה?
+
+   נבדק דרך המניפסט ולא דרך אינדקס האנקי, ובכוונה: האינדקס נטען אסינכרונית,
+   ועמוד המקצוע מרונדר סינכרונית — כלומר בכניסה הראשונה הקישור היה נעלם.
+   התנאי כאן זהה לתנאי הבנייה ב-anki-build.py: חפיסה נבנית ממפת החומרים,
+   אז מקצוע שיש לו מפה יש לו חפיסה. */
+function hasAnkiDeck(courseId) {
+  return examsOf(courseId).some((e) => e.kind === 'guide');
+}
+
+async function renderAnki(courseId) {
+  setNav('home');
+  const c = courseOf(courseId);
+  view.innerHTML = '';
+  if (!c) { view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.')); toTop(); return; }
+  view.append(crumb(c.name, '#/course/' + courseId));
+  view.dataset.course = courseId;
+
+  const idx = await ankiIndex();
+  const deck = (idx.decks || []).find((d) => d.course === courseId);
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `🃏 חפיסת אנקי — ${c.name}`));
+  view.append(head);
+
+  if (!deck) {
+    view.append(emptyState('🃏', 'אין עדיין חפיסה למקצוע הזה',
+      'חפיסה נבנית ממפת החומרים של המקצוע. כשתהיה מפה — תהיה חפיסה.'));
+    toTop(); updateFooter(); return;
+  }
+
+  const box = el('div', 'course-about');
+  box.append(el('div', 'course-about-title', 'מה יש בחפיסה'));
+  const p = el('p');
+  p.textContent =
+    `${deck.cards} כרטיסים ב-${deck.topics.length} נושאים` +
+    (deck.images ? `, ומתוכם ${deck.images} עם איור מהמבחן` : '') +
+    '. כל כרטיס בנוי מהצד השני: בפנים מופיעה המלכודת שנופלים בה, ואתה נזכר בעיקרון שמונע אותה. ' +
+    'הנושאים נכנסים כתת-חפיסות, כך שאפשר ללמוד נושא אחד בכל פעם.';
+  box.append(p);
+  view.append(box);
+
+  const act = el('div', 'btn-row');
+  const dl = el('a', 'btn primary');
+  dl.href = deck.file;
+  dl.setAttribute('download', '');
+  dl.textContent = `⬇️ הורדה · ${Math.round(deck.bytes / 1024)} KB`;
+  dl.title = 'הקובץ נפתח באנקי בלחיצה — אין צורך בייבוא ידני';
+  act.append(dl);
+  view.append(act);
+
+  const list = el('div', 'anki-topics');
+  deck.topics.forEach((t) => {
+    const row = el('div', 'anki-topic');
+    row.append(el('b', null, t.topic));
+    row.append(el('span', null, plural(t.cards, 'כרטיס', 'כרטיסים', true)));
+    list.append(row);
+  });
+  view.append(list);
+
+  const note = el('p', 'anki-note');
+  note.textContent = 'צריך את אפליקציית אנקי (חינמית, למחשב ולטלפון). ' +
+    'עדכון של החפיסה לא ישכפל כרטיסים — לכל כרטיס מזהה קבוע, ואנקי מעדכן את הקיים.';
+  view.append(note);
+
+  toTop();
+  updateFooter();
 }
 
 function renderSheet(courseId) {

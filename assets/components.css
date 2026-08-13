@@ -227,3 +227,17 @@
 }
 .nextup-none b{font-size:15.5px; font-weight:800;}
 .nextup-none span{font-size:13.5px; color:var(--muted); font-weight:600;}
+
+/* ---- דף חפיסת האנקי ---- */
+.anki-topics{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;
+  margin:22px 0 18px;
+}
+.anki-topic{
+  display:flex; align-items:baseline; gap:10px;
+  border:1px solid var(--line); border-radius:9px; padding:9px 13px;
+  background:var(--surface);
+}
+.anki-topic b{font-size:14px; font-weight:800; flex:1; min-width:0;}
+.anki-topic span{font-size:12px; color:var(--dim); font-weight:700; flex:none;}
+.anki-note{font-size:13.5px; color:var(--muted); line-height:1.7; max-width:66ch;}
