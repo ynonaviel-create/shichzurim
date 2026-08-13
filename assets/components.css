@@ -182,6 +182,16 @@
 .learn-card-badge{ font-size:11px; font-weight:900; color:#fff; background:var(--course-accent);
   border-radius:99px; padding:2px 8px; letter-spacing:.02em; line-height:1.5; }
 .learn-card-sub{ font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
+/* כרטיס הלומדה — div (מכיל קישורים, וקישור בתוך קישור אסור) עם שלושת המצבים */
+.learn-card-doc{ grid-column:1 / -1; cursor:default; }
+.learn-card-doc:hover{ transform:none; }
+.learn-modes{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.learn-mode{
+  font-size:13px; font-weight:800; text-decoration:none; color:var(--course-accent);
+  border:1px solid var(--line); border-radius:999px; padding:5px 13px;
+  transition:border-color .14s ease, background .14s ease;
+}
+.learn-mode:hover{ border-color:var(--course-accent); background:var(--surface-2); }
 
 /* שחזורים — כרטיס צפוף (בלי התגיות החוזרות), כדי שהרשימה לא תשתלט על העמוד */
 .exam-cgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }

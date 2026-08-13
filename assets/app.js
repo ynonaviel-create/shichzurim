@@ -1344,7 +1344,31 @@ function renderCourse(courseId) {
     return a;
   };
   const lg = el('div', 'learn-grid');
-  if (c.studyDoc) lg.append(learnCard('📖', 'הסיכום המלא', c.studyDoc.meta || 'קריאה לעומק', c.studyDoc.href));
+  if (c.studyDoc) {
+    /* הלומדה — הכניסה הראשית ללמידה, עם שלושת מצבי הקריאה כקישורים נפרדים.
+       div ולא <a> כמו שאר הקלפים: קישור בתוך קישור אסור, וכאן המצבים הם
+       שלושה יעדים אמיתיים. מסמך ישן שלא הוזרק לו מנוע המצבים פשוט יתעלם
+       מהפרמטר — ולכן אין צורך בדגל בדאטה. */
+    const sd = c.studyDoc;
+    const card = el('div', 'learn-card learn-card-doc');
+    card.append(el('span', 'learn-card-ico', '📖'));
+    const t = el('div');
+    t.append(el('div', 'learn-card-ttl', 'הלומדה — הסיכום המלא'));
+    t.append(el('div', 'learn-card-sub', sd.meta || 'קריאה לעומק'));
+    const modes = el('div', 'learn-modes');
+    [['📖 קריאה מלאה', '', 'כל התוכן, כמעבר ראשון על החומר'],
+     ['⚡ מרוכז', '?m=focus', 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'],
+     ['🎮 אינטראקטיבי', '?m=play', 'תרגילי התאמה, מפות חשיבה ושערי "נסה קודם"']]
+      .forEach(([lbl, q, tip]) => {
+        const a = el('a', 'learn-mode', lbl);
+        a.href = sd.href + q;
+        a.title = tip;
+        modes.append(a);
+      });
+    t.append(modes);
+    card.append(t);
+    lg.append(card);
+  }
   /* מסמכים נוספים לצד הסיכום — מוגדרים כולם בדאטה (courses.json), אפס ידע במנוע. */
   (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
   if (hasGuide) {
@@ -3427,9 +3451,6 @@ function playQuestions(cfg) {
           `✓ צמצמת ל-${item.opts.length - ex.size} והכרעת נכון — בדיוק מה שפסילה טובה אמורה לעשות.`));
     }
 
-    /* המלכודת — רק כשטועים, ורק אם באמת יש כזו לשאלה הזאת. "הנה התשובה
-       הנכונה" מתקן; "זו המלכודת שנפלת בה, והיא תופסת גם כאן וכאן" מלמד. */
-    if (!isRight) { const tb = trapBox(item); if (tb) fb.append(tb); }
     const sim = SIM_BY_TOPIC[item.topic];
     if (sim) fb.append(simButton(sim));
     /* טעית בשאלת שעתוק? הרגע הזה הוא בדיוק הרגע לדעת מאיזה עמוד ללמוד אותו. */
@@ -8996,32 +9017,8 @@ async function loadGuide(courseId) {
   const g = guideCache[courseId];
   if (g) {
     g.units.forEach((u) => (GUIDE_BY_TOPIC[u.topic] = { unit: u, course: courseId }));
-    indexTraps(courseId, g);
   }
   return g;
-}
-
-/* ---------- אינדקס המלכודות ----------
-
-   שלוש מפות החומרים מחזיקות 341 נקודות, **ולכל אחת מהן יש `trap`** — תיאור
-   כתוב של התפיסה השגויה, עם ה-qids של השאלות שנופלים בה. sync.js מאמת שכל
-   qid קיים ושייך לאותו נושא, ולכן אי אפשר להמציא מלכודת.
-
-   זה הנכס היקר ביותר בארכיון, והוא מוצג היום רק בתוך כרטיס מתקפל בעמוד המפה
-   — כלומר אחרי שסיימת, אם בכלל נכנסת. ההיפוך כאן הופך אותו לזמין ברגע היחיד
-   שבו הוא באמת שווה משהו: הרגע שבו נפלת. */
-const TRAP_BY_QID = {};
-function indexTraps(courseId, g) {
-  (g.units || []).forEach((u) => {
-    (u.points || []).forEach((p) => {
-      if (!p.trap) return;
-      (p.qids || []).forEach((qid) => {
-        /* qid לא יכול להשתייך לשתי נקודות — sync.js נכשל על זה במפורש
-           ("אותה שאלה משמשת ראיה לשתי נקודות"). לכן ההשמה בטוחה. */
-        TRAP_BY_QID[qid] = { trap: p.trap, point: p.point, qids: p.qids, topic: u.topic, course: courseId };
-      });
-    });
-  });
 }
 
 /* נושא → יחידה. מתמלא ב-loadGuide, ולכן כל מסך שמציג שאלות טוען את המפה
@@ -9678,45 +9675,34 @@ function sourcesPanel(g) {
   return sec;
 }
 
-/* קופסת המלכודת בפאנל המשוב. מוצגת רק אחרי טעות, ורק לשאלה שמופיעה כראיה
-   לנקודה שיש לה trap. הספירה "תופסת גם ב-N" נגזרת בזמן ריצה מה-qids — אם
-   שאלה תימחק מהארכיון, המספר יקטן מעצמו במקום להישאר שקר. */
-function trapBox(item) {
-  const t = item.qid && TRAP_BY_QID[item.qid];
-  if (!t) return null;
-  const box = el('div', 'trapbox');
-  /* שניים דיווחו בסקר בנפרד שהמלכודת „הרגישה לא מדויקת” ו„לפעמים לא קשורה”.
-     ההצמדה עצמה מדויקת (לפי qid), אבל הטענה לא הייתה: המלכודת נכתבת עבור
-     *נקודה* שיכולה להישען על עד שמונה שאלות, והיא נורית על כל טעות בלי קשר
-     למסיח שנבחר. כלומר אי אפשר לדעת שנפלת דווקא בה.
+/* trapBox — המלכודת שהוצגה כאן אחרי כל טעות — נמחקה (13/08/2026) בעקבות
+   הסקר: המלכודת נכתבת לנקודה שנשענת על עד שמונה שאלות ונורתה על כל טעות
+   בלי קשר למסיח שנבחר, ולכן הרגישה "לא קשורה" והפריעה אחרי השאלות.
+   המלכודות עצמן חיות בלומדה מאחורי שער "נסה קודם" — שם הן שאלה-עצמית
+   לפני חשיפה, לא האשמה אחרי טעות — ובעמוד #/traps שנשאר opt-in. */
 
-     אין בדאטה מה שצריך כדי לדעת — ולכן מתקנים את הטענה ולא ממציאים נתון:
-     „שנפלת בה” נאמר רק כשהמלכודת שייכת לשאלה הזאת בלבד. אחרת היא מוצגת
-     כמה שהיא — המלכודת שהנושא בודק. */
-  const only = (t.qids || []).length <= 1;
-  box.append(el('b', null, only ? '🪤 המלכודת שנפלת בה' : '🪤 המלכודת שהנושא הזה בודק'));
-  box.append(el('div', 'trap-text', t.trap));
-  const others = (t.qids || []).length - 1;
-  if (others > 0) {
-    const foot = el('div', 'trap-foot');
-    foot.append(el('span', null,
-      `אותה מלכודת נבדקת בעוד ${plural(others, 'שאלה', 'שאלות', true)} בארכיון.`));
-    const a = el('a', 'trap-link', 'כל המלכודות שלי ←');
-    a.href = '#/traps/' + t.course;
-    foot.append(a);
-    box.append(foot);
-  }
-  return box;
-}
-
-/* מהשאלה למפה. נבחר אוטומטית לפי topic — ראו GUIDE_BY_TOPIC. */
+/* מהשאלה למפה — וכשיש סיכום מלא, גם ישר לפרק הנכון בו. שני הקישורים חיים
+   על אותו עוגן (הנושא הקנוני), ולכן הצד השני של הלולאה סיכום→תרגול→סיכום
+   מגיע בחינם: מהסיכום מגיעים לתרגול דרך קישורי ה-drill, ומטעות בתרגול
+   חוזרים לפרק שמסביר אותה. */
 function guideButton(topic) {
   const hit = GUIDE_BY_TOPIC[topic];
   if (!hit) return null;
   const a = el('a', 'fb-guide');
   a.href = `#/guide/${hit.course}/${encodeURIComponent(topic)}`;
   a.textContent = `📚 איפה ללמוד את ${topic}`;
-  return a;
+  const sd = courseOf(hit.course) && courseOf(hit.course).studyDoc;
+  if (!sd) return a;
+  const frag = document.createDocumentFragment();
+  frag.append(a);
+  const d = el('a', 'fb-guide fb-study');
+  d.href = sd.href + '#top-' + encodeURIComponent(topic);
+  d.target = '_blank';
+  d.rel = 'noopener';
+  d.textContent = '📖 קרא על זה בסיכום המלא';
+  d.title = 'קפיצה ישירה לפרק של הנושא בסיכום המלא';
+  frag.append(d);
+  return frag;
 }
 
 /* ---------- כותרת תחתונה ---------- */

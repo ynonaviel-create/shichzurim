@@ -1,0 +1,124 @@
+/* doc-kit — יכולות משותפות לכל "סיכום מלא". לא נטען כקובץ: inject.py מטמיע
+   אותו לתוך ה-HTML בין סמני dockit, כדי שהמסמך יישאר עצמאי לחלוטין.
+   הצבעים דרך משתני ה-CSS של המסמך (--brand, --warn-bg...) עם fallback. */
+
+/* ---------- פס התקדמות ---------- */
+#dk-prog{position:fixed;top:0;right:0;height:3px;width:0;
+  background:var(--brand,#185FA5);z-index:90;transition:width .1s linear;}
+
+/* ---------- סימון על הטקסט ---------- */
+mark.dk-hl{background:#ffdf7e;color:inherit;border-radius:2px;cursor:pointer;
+  box-shadow:0 0 0 1px rgba(180,130,0,.25);}
+:root[data-theme="dark"] mark.dk-hl{background:#6b5300;box-shadow:0 0 0 1px rgba(255,220,120,.25);}
+mark.dk-hl:hover{filter:brightness(1.06);}
+#dk-hlbtn{position:absolute;z-index:95;border:none;border-radius:99px;
+  background:var(--brand,#185FA5);color:#fff;font:inherit;font-size:.8rem;font-weight:700;
+  padding:.35em .9em;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.25);
+  display:none;white-space:nowrap;}
+#dk-hlbtn.on{display:block;}
+
+/* ---------- שער "נסה קודם" במלכודות ---------- */
+.dk-gated{display:none;}
+.dk-open .dk-gated{display:inline;}
+button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
+  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
+  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
+  margin-inline-start:.35em;}
+button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
+button.dk-gate:hover{border-style:solid;}
+.dk-open button.dk-gate{display:none;}
+#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
+  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
+  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);}
+#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
+
+/* ---------- קישור "במפה" ליד קישור התרגול ---------- */
+a.dk-map{margin-inline-start:.6em;}
+
+/* ---------- שלושת מצבי הקריאה ---------- */
+#dk-modes{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
+  display:flex;gap:4px;background:var(--panel,#fff);border:1px solid var(--line,#d8dee7);
+  border-radius:99px;padding:4px;box-shadow:0 3px 14px rgba(0,0,0,.16);}
+#dk-modes button{border:none;background:none;color:var(--dim,#5a6572);font:inherit;
+  font-size:.82rem;font-weight:700;border-radius:99px;padding:.35em .8em;cursor:pointer;
+  white-space:nowrap;}
+#dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
+#dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
+@media (max-width:640px){#dk-modes button span{display:none;}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
+
+body[data-dk-mode="focus"] .dk-deep,
+body[data-dk-mode="play"] .dk-deep{display:none;}
+body[data-dk-mode="focus"] .dk-open-deep .dk-deep,
+body[data-dk-mode="play"] .dk-open-deep .dk-deep{display:block;}
+body[data-dk-mode="focus"] .ex{display:none;}
+
+button.dk-more{display:none;border:1px dashed var(--line,#d8dee7);background:none;
+  color:var(--dim,#5a6572);font:inherit;font-size:.85rem;font-weight:700;
+  border-radius:8px;padding:.3em .9em;cursor:pointer;margin:.6rem 0;}
+button.dk-more::before{content:"👁️ הצג את ההעמקה — ההסבר המלא, האיורים והסרטונים";}
+.dk-open-deep button.dk-more::before{content:"🙈 קפל את ההעמקה";}
+button.dk-more:hover{border-style:solid;color:var(--ink,#1c2733);}
+body[data-dk-mode="focus"] button.dk-more,
+body[data-dk-mode="play"] button.dk-more{display:inline-block;}
+
+/* ---------- 📌 מה באמת נשאל ---------- */
+details.dk-qa{margin:1rem 0;border:1px solid var(--line,#d8dee7);
+  border-radius:12px;background:var(--panel,#fff);overflow:hidden;}
+details.dk-qa>summary{cursor:pointer;padding:.7rem 1rem;font-weight:800;
+  font-size:.95rem;color:var(--brand,#185FA5);list-style-position:inside;}
+details.dk-qa>summary:hover{background:rgba(24,95,165,.06);}
+.dk-qa-sum{padding:.2rem 1rem .6rem;border-bottom:1px dashed var(--line,#d8dee7);}
+.dk-qa-sum p{margin:.4rem 0;font-size:.92rem;line-height:1.75;}
+.dk-qa-p{padding:.55rem 1rem;border-top:1px solid var(--line,#e6ebf1);
+  font-size:.92rem;line-height:1.7;}
+.dk-qa-n{display:inline-block;background:rgba(24,95,165,.1);color:var(--brand,#185FA5);
+  border-radius:99px;padding:.05em .6em;font-size:.78rem;font-weight:800;
+  margin-inline-end:.4em;white-space:nowrap;}
+.dk-qa-trap{display:block;margin-top:.3rem;font-size:.88rem;
+  color:var(--warn,#b45309);}
+.dk-qa-foot{display:flex;gap:.6rem;flex-wrap:wrap;padding:.6rem 1rem .8rem;}
+.dk-qa-foot a{font-size:.85rem;font-weight:700;text-decoration:none;
+  color:var(--brand,#185FA5);border:1px solid var(--line,#d8dee7);
+  border-radius:99px;padding:.3em .9em;}
+.dk-qa-foot a:hover{border-color:var(--brand,#185FA5);}
+
+/* ---------- 🎮 תרגילים ---------- */
+.ex{margin:1.1rem 0;border:1px solid var(--line,#d8dee7);border-radius:12px;
+  padding:1rem;background:var(--panel,#fff);}
+.exm-head{font-weight:800;font-size:.92rem;margin-bottom:.7rem;color:var(--ink,#1c2733);}
+.exm-grid{display:grid;grid-template-columns:minmax(110px,1fr) 2fr;gap:.5rem;}
+.exm-col{display:flex;flex-direction:column;gap:.45rem;}
+.exm-t,.exm-d{border:1px solid var(--line,#d8dee7);background:none;color:inherit;
+  font:inherit;font-size:.88rem;line-height:1.5;border-radius:10px;
+  padding:.45em .7em;cursor:pointer;text-align:start;}
+.exm-t.sel{border-color:var(--brand,#185FA5);background:rgba(24,95,165,.1);
+  font-weight:800;}
+.exm-t.done,.exm-d.done{border-color:var(--ok,#1d8a4e);background:rgba(29,138,78,.1);
+  opacity:.75;cursor:default;}
+.exm-d.bad{animation:dk-shake .4s;border-color:#c0392b;}
+@keyframes dk-shake{20%,60%{transform:translateX(4px);}40%,80%{transform:translateX(-4px);}}
+.exm-fin{margin-top:.8rem;font-weight:800;display:flex;gap:.8rem;align-items:center;}
+.exm-again{border:1px solid var(--line,#d8dee7);background:none;color:inherit;
+  font:inherit;font-size:.85rem;font-weight:700;border-radius:99px;
+  padding:.3em .9em;cursor:pointer;}
+.ex-map ul{list-style:none;margin:.3rem 0;padding-inline-start:1.1rem;}
+.ex-map>ul{padding-inline-start:0;}
+.ex-map li{margin:.25rem 0;}
+.ex-map li li{border-inline-start:2px solid var(--line,#e6ebf1);padding-inline-start:.8rem;}
+button.dk-node{border:none;background:none;color:inherit;font:inherit;
+  font-weight:700;cursor:pointer;padding:.1em .2em;text-align:start;}
+button.dk-node::before{content:"◂ ";color:var(--brand,#185FA5);}
+li.open>button.dk-node::before{content:"▾ ";}
+button.dk-node:hover{color:var(--brand,#185FA5);}
+.ex-map li>ul{display:none;}
+.ex-map li.open>ul{display:block;}
+
+@media print{
+  .dk-gated{display:inline !important;}
+  .dk-deep{display:block !important;}
+  details.dk-qa{display:none;}
+  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes{display:none !important;}
+  mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
+}
