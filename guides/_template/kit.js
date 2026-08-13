@@ -176,6 +176,113 @@ if (CFG.modes) {
     var q = null;
     try { q = new URLSearchParams(location.search).get('m'); } catch (e) {}
     apply(q || read('mode', 'read'), !!q);
+
+    /* ---------- 🖨️ דף שבת — בורר נושאים להדפסה ----------
+       בוחרים נושאים בתיבות סימון + עומק (מרוכז/מלא) ← window.print() ←
+       שמירה כ-PDF מהדפדפן. דף חזרה מודפס בדיוק במה שבחרת. */
+    (function () {
+      var unitSel2 = CFG.modes.unit || 'section.unit';
+      var titleOf = function (sec) {
+        var h = sec.querySelector('h3, h2');
+        if (!h) return '';
+        var c = h.cloneNode(true);
+        [].forEach.call(c.querySelectorAll('button, .speak-wrap, .ch-f, .pct'), function (x) { x.remove(); });
+        return c.textContent.replace(/\s+/g, ' ').trim();
+      };
+      var units = [].slice.call(document.querySelectorAll(unitSel2));
+      if (!units.length) return;
+
+      var pbtn = document.createElement('button');
+      pbtn.type = 'button';
+      pbtn.className = 'dk-print-btn';
+      pbtn.innerHTML = '🖨️<span> דף שבת</span>';
+      pbtn.title = 'בחירת נושאים והכנת PDF להדפסה — חזרה בלי מסך';
+      bar.appendChild(pbtn);
+
+      var head = document.createElement('div');
+      head.id = 'dk-print-head';
+      document.body.insertBefore(head, document.body.firstChild);
+
+      var panel = null;
+      function closePanel() { if (panel) { panel.remove(); panel = null; } }
+      pbtn.addEventListener('click', function () {
+        if (panel) return closePanel();
+        panel = document.createElement('div');
+        panel.id = 'dk-print';
+        var inner = document.createElement('div');
+        inner.className = 'dk-print-box';
+        inner.innerHTML = '<b>🖨️ דף שבת — מה להדפיס?</b>' +
+          '<p class="dk-print-sub">בוחרים נושאים ועומק, ומקבלים PDF נקי דרך חלון ההדפסה (שם בוחרים "שמירה כ-PDF").</p>';
+        var list = document.createElement('div');
+        list.className = 'dk-print-list';
+        var boxes = units.map(function (u) {
+          var lbl = document.createElement('label');
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = true;
+          lbl.appendChild(cb);
+          lbl.appendChild(document.createTextNode(' ' + titleOf(u)));
+          list.appendChild(lbl);
+          return cb;
+        });
+        inner.appendChild(list);
+        var all = document.createElement('button');
+        all.type = 'button';
+        all.className = 'dk-print-all';
+        all.textContent = 'סמן/נקה הכול';
+        all.addEventListener('click', function () {
+          var on = boxes.some(function (b) { return !b.checked; });
+          boxes.forEach(function (b) { b.checked = on; });
+        });
+        inner.appendChild(all);
+        var depth = document.createElement('div');
+        depth.className = 'dk-print-depth';
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+          '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
+        inner.appendChild(depth);
+        var acts = document.createElement('div');
+        acts.className = 'dk-print-acts';
+        var go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'dk-print-go';
+        go.textContent = '🖨️ הכן PDF';
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'dk-print-cancel';
+        cancel.textContent = 'ביטול';
+        cancel.addEventListener('click', closePanel);
+        acts.appendChild(go);
+        acts.appendChild(cancel);
+        inner.appendChild(acts);
+        panel.appendChild(inner);
+        panel.addEventListener('click', function (e) { if (e.target === panel) closePanel(); });
+        document.body.appendChild(panel);
+
+        go.addEventListener('click', function () {
+          var chosen = [];
+          units.forEach(function (u, i) {
+            u.classList.toggle('dk-print-skip', !boxes[i].checked);
+            if (boxes[i].checked) chosen.push(titleOf(u));
+          });
+          if (!chosen.length) return;
+          var focus = depth.querySelector('input[value="focus"]').checked;
+          document.body.classList.toggle('dk-print-focus', focus);
+          head.textContent = document.title + ' · דף חזרה — ' +
+            (chosen.length === units.length ? 'כל הנושאים' : chosen.length + ' נושאים') +
+            (focus ? ' · תמצית' : '');
+          closePanel();
+          var clean = function () {
+            units.forEach(function (u) { u.classList.remove('dk-print-skip'); });
+            document.body.classList.remove('dk-print-focus');
+            removeEventListener('afterprint', clean);
+          };
+          addEventListener('afterprint', clean);
+          setTimeout(function () { window.print(); }, 60);
+        });
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
+    })();
+
     return { apply: apply };
   })();
 }

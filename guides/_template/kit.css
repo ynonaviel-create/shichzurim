@@ -130,10 +130,43 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
 .ex-map li>ul{display:none;}
 .ex-map li.open>ul{display:block;}
 
+/* ---------- 🖨️ דף שבת ---------- */
+.dk-print-btn{border-inline-start:1px solid var(--line,#d8dee7) !important;
+  border-radius:0 99px 99px 0 !important;}
+#dk-print{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:120;
+  display:flex;align-items:center;justify-content:center;padding:16px;}
+.dk-print-box{background:var(--panel,#fff);color:var(--ink,#1c2733);
+  border-radius:16px;padding:1.2rem 1.4rem;max-width:26rem;width:100%;
+  max-height:85vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+.dk-print-box>b{font-size:1.05rem;}
+.dk-print-sub{margin:.4rem 0 .8rem;font-size:.85rem;color:var(--dim,#5a6572);line-height:1.6;}
+.dk-print-list{display:flex;flex-direction:column;gap:.35rem;max-height:38vh;
+  overflow:auto;border:1px solid var(--line,#e6ebf1);border-radius:10px;
+  padding:.6rem .8rem;}
+.dk-print-list label{font-size:.9rem;cursor:pointer;display:flex;gap:.4em;
+  align-items:baseline;}
+.dk-print-all{border:none;background:none;color:var(--brand,#185FA5);
+  font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;
+  padding:.4em 0;text-align:start;}
+.dk-print-depth{display:flex;flex-direction:column;gap:.3rem;margin:.5rem 0 .8rem;}
+.dk-print-depth label{font-size:.9rem;cursor:pointer;}
+.dk-print-acts{display:flex;gap:.6rem;}
+.dk-print-go{flex:1;border:none;background:var(--brand,#185FA5);color:#fff;
+  font:inherit;font-weight:800;border-radius:10px;padding:.55em 1em;cursor:pointer;}
+.dk-print-cancel{border:1px solid var(--line,#d8dee7);background:none;color:inherit;
+  font:inherit;font-weight:700;border-radius:10px;padding:.55em 1em;cursor:pointer;}
+#dk-print-head{display:none;font-weight:800;font-size:1.05rem;
+  padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
+
 @media print{
   .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes{display:none !important;}
+  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
+  /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
+  .dk-print-skip{display:none !important;}
+  body.dk-print-focus .dk-deep{display:none !important;}
+  body.dk-print-focus .ex,body.dk-print-focus .vids{display:none !important;}
+  #dk-print-head{display:block !important;}
 }
