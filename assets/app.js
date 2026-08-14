@@ -1236,14 +1236,20 @@ function renderCourse(courseId) {
   const p = courseProgress(courseId);
   const pct = p.answered ? Math.round((p.correct / p.answered) * 100) : 0;
 
-  const dash = el('div', 'dash');
   /* NOT_QUIZ ולא רשימה ידנית: הספירה הזו החריגה 'cards' בלבד, ולכן מפת החומרים
      כבר נספרה כמבחן. p.total ממילא נגזר מ-quizzesOf — הדשבורד סתר את עצמו. */
-  dash.append(stat(list.filter((e) => !NOT_QUIZ.has(e.kind)).length, 'מבחנים', 'accent'));
-  dash.append(stat(p.total, 'שאלות'));
-  dash.append(stat(p.answered, 'שאלות שענית'));
-  dash.append(stat(p.answered ? pct + '%' : '—', 'אחוז הצלחה', pct >= 70 ? 'good' : p.answered ? 'bad' : ''));
-  view.append(dash);
+  const nQuiz = list.filter((e) => !NOT_QUIZ.has(e.kind)).length;
+  if (p.answered) {
+    const dash = el('div', 'dash');
+    dash.append(stat(nQuiz, 'מבחנים', 'accent'));
+    dash.append(stat(p.total, 'שאלות'));
+    dash.append(stat(p.answered, 'שאלות שענית'));
+    dash.append(stat(pct + '%', 'אחוז הצלחה', pct >= 70 ? 'good' : 'bad'));
+    view.append(dash);
+  } else {
+    /* לפני שענית — אין מה למדוד: שורה דקה במקום ארבע קוביות של אפסים. */
+    view.append(el('div', 'dash-slim', `${plural(nQuiz, 'מבחן', 'מבחנים')} · ${p.total} שאלות — המספרים שלך יופיעו כאן אחרי שתתחיל לענות`));
+  }
 
   /* ===== עמוד המקצוע — זרימה לפי סדר עדיפויות השימוש =====
      תרגול (באנר-גיבור בראש) › שחזורים › ללמוד › מעבדות(מקופל). התרגול הוא באנר
@@ -1476,24 +1482,59 @@ function cardsHero(m) {
    "מתרגלים", כדי ששחזורים ובנקי-תרגול יוצגו באותה שפה. */
 function examListFrag(exams, c) {
   const wrap = el('div');
+
+  /* כשכל המבחנים בקבוצה רשמיים — התג עולה לכותרת הקבוצה במקום לחזור על כל
+     כרטיס (20× "✓ רשמי" היה רעש). בקבוצה מעורבת התג נשאר פר-כרטיס, כי שם
+     הוא באמת מבחין. */
+  const allOfficial = (arr) => arr.every((e) => e.official === true);
+
+  /* קיפול שנים ישנות: שלוש השנים האחרונות גלויות, השאר מאחורי "שנים קודמות".
+     חיתוך לפי שנה ולא לפי מספר מבחנים — כך מועד א׳+ב׳ של אותה שנה לא נפרדים.
+     מבחן בלי שנה נשאר תמיד גלוי. */
+  const yearSplitGrid = (arr, hideOff) => {
+    const frag = document.createDocumentFragment();
+    const years = [...new Set(arr.map((e) => e.year).filter(Boolean))].sort((a, b) => b - a);
+    const recent = new Set(years.slice(0, 3));
+    const fresh = arr.filter((e) => !e.year || recent.has(e.year));
+    const old = arr.filter((e) => e.year && !recent.has(e.year));
+    const grid = el('div', 'exam-cgrid');
+    fresh.forEach((e) => grid.append(examCardCompact(e, hideOff)));
+    frag.append(grid);
+    if (old.length) {
+      const acc = el('details', 'years-acc');
+      const sum = el('summary');
+      sum.append(el('span', null,
+        `🗓️ שנים קודמות — ${plural(old.length, 'מבחן', 'מבחנים')} (${years.slice(3).join(' · ')})`));
+      sum.append(el('span', 'chev', '⌄'));
+      sum.title = 'הצגת השחזורים מהשנים הישנות יותר';
+      acc.append(sum);
+      const g = el('div', 'exam-cgrid');
+      old.forEach((e) => g.append(examCardCompact(e, hideOff)));
+      acc.append(g);
+      frag.append(acc);
+    }
+    return frag;
+  };
+
   if (c.flatExams) {
-    const cards = el('div', 'exam-cgrid');
-    exams.forEach((e) => cards.append(examCardCompact(e)));
-    wrap.append(cards);
+    const hideOff = allOfficial(exams);
+    if (hideOff && exams.length > 2) wrap.append(el('div', 'zone-note', '✓ כל המבחנים כאן רשמיים'));
+    wrap.append(yearSplitGrid(exams, hideOff));
   } else {
     const byPart = {};
     exams.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
     Object.keys(byPart).sort().forEach((part) => {
+      const hideOff = allOfficial(byPart[part]);
       if (part) {
         const ph = el('div', 'part-head');
         ph.append(el('h3', null, part));
         const n = byPart[part].reduce((a, e) => a + e.count, 0);
-        ph.append(el('span', 'pill', `${plural(byPart[part].length, 'מבחן', 'מבחנים')} · ${n} שאלות`));
+        const bits = [`${plural(byPart[part].length, 'מבחן', 'מבחנים')} · ${n} שאלות`];
+        if (hideOff && byPart[part].length > 2) bits.push('✓ כולם רשמיים');
+        ph.append(el('span', 'pill', bits.join(' · ')));
         wrap.append(ph);
       }
-      const cards = el('div', 'exam-cgrid');
-      byPart[part].forEach((e) => cards.append(examCardCompact(e)));
-      wrap.append(cards);
+      wrap.append(yearSplitGrid(byPart[part], hideOff && byPart[part].length > 2));
     });
   }
   return wrap;
@@ -1502,7 +1543,7 @@ function examListFrag(exams, c) {
 /* כרטיס שחזור צפוף — כותרת, שנה, מס' שאלות, אינדיקציה קטנה של "רשמי", ופס דק.
    בלי התגיות החוזרות (שחזור/מאסטר רשמי בכל כרטיס) שהיו רעש; המידע הזה עולה
    ממילא מכותרת הזונה. משאיר את הרשימה קצרה ומסודרת. */
-function examCardCompact(m) {
+function examCardCompact(m, hideOfficial) {
   const s = quickScore(m);
   const a = el('a', 'exam-c');
   a.dataset.tour = 'exam';
@@ -1511,7 +1552,7 @@ function examCardCompact(m) {
   const meta = el('div', 'exam-c-meta');
   if (m.year) meta.append(el('span', 'exam-c-yr', m.year));
   meta.append(el('span', null, `${m.count} שאלות`));
-  if (m.official === true) meta.append(el('span', 'exam-c-off', '✓ רשמי'));
+  if (m.official === true && !hideOfficial) meta.append(el('span', 'exam-c-off', '✓ רשמי'));
   else if (m.official === false) meta.append(el('span', null, 'שחזור סטודנטים'));
   a.append(meta);
   const pct = s.answered ? (s.correct / s.answered) * 100 : 0;

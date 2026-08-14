@@ -113,9 +113,20 @@
 
 /* באנר-גיבור התרגול — בראש העמוד, מעל השחזורים. באנר יחיד ואלגנטי:
    התרגול הוא הדבר הראשון שרואים, והשחזורים (רשימה ארוכה) זורמים מתחתיו. */
+/* באנר התרגול — זכוכית עם נשיפת צבע-קורס, במקום משטח צבע מלא: הכי חשוב
+   בעמוד אבל לא הכי רועש. הקצה הצבעוני שומר את הזהות. */
 .practice-hero{
-  border:1.5px solid var(--course-accent); border-radius:var(--radius);
-  background:var(--course-accent-sl); padding:20px 22px; margin:0 0 24px;
+  border:1px solid color-mix(in srgb, var(--course-accent) 45%, transparent);
+  border-radius:var(--radius);
+  background:
+    linear-gradient(color-mix(in srgb, var(--course-accent-sl) 55%, transparent),
+                    color-mix(in srgb, var(--course-accent-sl) 55%, transparent)) padding-box;
+  backdrop-filter:blur(20px) saturate(1.6);
+  -webkit-backdrop-filter:blur(20px) saturate(1.6);
+  box-shadow:inset 0 1px 0 var(--glass-shine),
+             inset 0 -20px 40px -30px color-mix(in srgb, var(--course-accent) 40%, transparent),
+             var(--shadow);
+  padding:20px 22px; margin:0 0 24px;
   scroll-margin-top:90px;
 }
 .practice-hero h2{ font-size:22px; margin:0 0 5px; }
@@ -125,11 +136,16 @@
   margin-top:15px; padding-top:14px; border-top:1px solid var(--line);
 }
 .practice-hero-extra .lbl{ font-size:12px; color:var(--muted); font-weight:700; }
+/* קישורי ה"גם:" — אותם צ׳יפי זכוכית כמו בכל האתר, לא משפחה נפרדת */
 .practice-hero-extra a{
   font-size:12.5px; font-weight:700; color:var(--course-accent-dk);
-  background:var(--surface); border:1px solid var(--course-accent); border-radius:20px;
-  padding:6px 13px; text-decoration:none; transition:transform .12s ease;
+  background:var(--surface-2); border:1px solid var(--line-soft); border-radius:99px;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
+  padding:7px 14px; text-decoration:none; transition:transform .12s ease, border-color .12s ease;
 }
+[data-theme="dark"] .practice-hero-extra a{ color:var(--course-accent); }
+.practice-hero-extra a:hover{ border-color:var(--course-accent); }
 .practice-hero-extra a:hover{ transform:translateY(-1px); }
 
 /* עוגן-גלילה לסקשנים (כדי שהסרגל הדביק לא יכסה את הכותרת) */
