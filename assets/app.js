@@ -5554,6 +5554,36 @@ function openSearch() {
     }
     const hits = searchIdx.filter((r) => terms.every((t) => r.hay.includes(t))).slice(0, 40);
     if (!hits.length) { res.append(el('div', 'srch-hint', 'לא נמצא כלום.')); return; }
+    /* הדגשת מונחי החיפוש בתוצאה — העין מוצאת מיד למה השורה עלתה.
+       ההדגשה על הטקסט הגולמי (התאמה משוערת, כי האינדקס מנורמל) — מונח
+       שלא נמצא בטקסט המוצג פשוט לא יודגש, וזה בסדר. */
+    const hiLite = (parent, text, cls) => {
+      const s = el(cls === 'b' ? 'b' : 'span', null);
+      const raw = String(text);
+      /* הנרמול מוחק תווים (ניקוד, גרשיים) — אז אינדקס במחרוזת המנורמלת לא
+         מצביע לאותו מקום בגולמית. בונים מפה תו-לתו מהמנורמל אל הגולמי. */
+      let norm = ''; const map = [];
+      for (let i = 0; i < raw.length; i++) {
+        const ch = searchNorm(raw[i]);
+        for (let k = 0; k < ch.length; k++) { norm += ch[k]; map.push(i); }
+      }
+      let pos = 0;
+      while (pos < raw.length) {
+        let best = null;
+        terms.forEach((t) => {
+          const j = norm.indexOf(t, map.findIndex((m) => m >= pos));
+          if (j >= 0 && (best == null || j < best.j)) best = { j, len: t.length };
+        });
+        if (!best) { s.append(raw.slice(pos)); break; }
+        const from = map[best.j];
+        const to = map[best.j + best.len - 1] + 1;
+        if (from < pos) break;   // ביטחון — לא אמור לקרות
+        s.append(raw.slice(pos, from));
+        s.append(el('mark', 'srch-hl', raw.slice(from, to)));
+        pos = to;
+      }
+      parent.append(s);
+    };
     hits.forEach((r) => {
       const a = el('a', 'srch-row');
       a.href = r.href;
@@ -5561,8 +5591,8 @@ function openSearch() {
       a.onclick = close;
       a.append(el('span', 'srch-ico', r.icon));
       const d = el('div', 'srch-txt');
-      d.append(el('b', null, String(r.title).slice(0, 110)));
-      d.append(el('span', null, `${r.course.icon || ''} ${r.course.name}${r.body ? ' · ' + String(r.body).slice(0, 80) : ''}`));
+      hiLite(d, String(r.title).slice(0, 110), 'b');
+      hiLite(d, `${r.course.icon || ''} ${r.course.name}${r.body ? ' · ' + String(r.body).slice(0, 80) : ''}`, 'span');
       a.append(d);
       res.append(a);
     });
@@ -6036,10 +6066,13 @@ async function renderTree(courseId) {
       const cell = el('div', 'tree-cell');
       const node = el('a', 'tree-node lv-' + lvl(r.m.strength));
       node.href = `#/practice/${courseId}/${encodeURIComponent(t)}`;
-      node.title = r.m.total
+      /* נושא שלא נגעת בו מציג "—" ולא "0%": קיר של אפסים זהים לא אומר כלום,
+         ומקו-מקף שקט ההיררכיה עוברת ל"כמה מהמבחן" — שזה מה שמכריע בהתחלה. */
+      const virgin = !r.m.total || r.m.strength <= 0;
+      node.title = !virgin
         ? `${t} — שליטה ${pct}% · ${r.m.correct}/${r.m.total} נכונות בארכיון · לחיצה לתרגול`
         : `${t} — טרם תורגל · לחיצה לתרגול`;
-      node.innerHTML = `<span class="tree-pct">${r.m.total ? pct + '%' : '—'}</span>` +
+      node.innerHTML = `<span class="tree-pct">${virgin ? '—' : pct + '%'}</span>` +
         `<span class="tree-topic">${t}</span>` +
         `<span class="tree-meta">${r.u.freq}% מהמבחן</span>`;
       cell.append(node);
@@ -6096,7 +6129,7 @@ async function renderSemester(courseId) {
   if (!t || !t.start || !(t.weeks || []).length) {
     view.innerHTML = '';
     view.append(emptyState('🗓️', 'אין תוכנית סמסטר למקצוע הזה',
-      'היא מוגדרת בכרטיס המקצוע (teaching) כשקורס מלווה מתחילתו.'));
+      'ליווי שבועי נבנה רק לקורסים שנפתחים איתנו מתחילת הסמסטר — בקורס הזה פשוט מתרגלים רגיל.'));
     toTop();
     return;
   }

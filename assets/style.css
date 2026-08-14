@@ -2617,3 +2617,18 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
                0 6px 20px color-mix(in srgb, var(--course-accent) 50%, transparent);
   }
 }
+
+/* הדגשת מונח החיפוש בתוצאות */
+mark.srch-hl{
+  background:color-mix(in srgb, var(--warn) 22%, transparent);
+  color:inherit; border-radius:3px; padding:0 1px;
+}
+
+/* מפה — נשימה טיפוגרפית: שורות קריאה, לא קיר טקסט */
+.g-body p, .g-what, .g-points{max-width:68ch;}
+.g-body{line-height:1.8;}
+
+/* כשחלונית צפה פתוחה (חיפוש/סיור/לייטבוקס) — הסרגל התחתון מפנה את הבמה */
+body:has(.srch) .bnav,
+body:has(.tour) .bnav,
+body:has(.lightbox) .bnav{display:none;}
