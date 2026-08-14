@@ -6615,7 +6615,7 @@ function renderAccount() {
   };
   acts.append(exp);
   const out = el('button', 'btn ghost logout', 'התנתקות');
-  out.title = 'התנתקות מהחשבון — ההתקדמות לא נמחקת';
+  out.title = 'התנתקות מהחשבון — ההתקדמות שמורה בענן ותחזור בהתחברות הבאה';
   out.onclick = async () => {
     out.disabled = true;
     await C.logout();
@@ -10220,7 +10220,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return;
+  const t = e.target.tagName;
+  if (t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable || e.metaKey || e.ctrlKey) return;
   const n = parseInt(e.key, 10);
   if (!n || n < 1 || n > 9) return;
 

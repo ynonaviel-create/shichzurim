@@ -259,8 +259,18 @@
     state.syncing = true;
     emit('cloud:sync');
     try {
-      const { data, error } = await sb.from('user_kv').select('ns,k,v');
-      if (error) throw error;
+      /* דפדוף חובה: PostgREST קוטם ל-1000 שורות כברירת מחדל, וכל שאלה
+         שנענתה היא שתי שורות (seen+seenH) — משתמש פעיל חוצה את זה. בלי
+         הלולאה, מכשיר חדש היה מקבל רק את תחילת ההיסטוריה, בשקט. */
+      const PAGE = 1000;
+      const data = [];
+      for (let from = 0; ; from += PAGE) {
+        const { data: page, error } = await sb.from('user_kv')
+          .select('ns,k,v').order('ns').order('k').range(from, from + PAGE - 1);
+        if (error) throw error;
+        data.push(...(page || []));
+        if (!page || page.length < PAGE) break;
+      }
 
       /* נגזר מ-KEYMAP ולא נכתב ביד. כשהרשימה הייתה כפולה, הוספת מרחב חדש
          (shinunProg) עדכנה מקום אחד ולא את השני — והשורות הגיעו מהשרת
@@ -395,8 +405,17 @@
     },
 
     async logout() {
+      /* לרוקן את התור בעוד ה-session בתוקף — אחרי הניקוי אין ממה לשחזר. */
+      try { await flush(); } catch { /* מה שלא נשלח יעלה מהענן של הפעם הקודמת */ }
       try { await sb.auth.signOut(); } catch { /* גם אם השרת לא ענה — מקומית נותקנו */ }
+      /* מחשב משותף (ספרייה): בלי הניקוי המשתמש הבא יורש את ההתקדמות הזאת,
+         וגרוע מזה — syncNow שלו מעלה אותה לחשבון *שלו*. הענן שומר הכל;
+         התחברות מחדש מחזירה את המצב. מנקים רק את המרחבים המסונכרנים —
+         העדפות מכשיר (ערכת נושא, סיור) נשארות. */
       outbox = []; saveOutbox();
+      Object.values(KEYMAP).forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+      [NAME_KEY, PEND_KEY, 'shichzurim.cohortStats'].forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+      emit('cloud:merged', { changed: true });   // מפיל את מטמון seenH שבזיכרון ומרנדר
     },
 
     /* שם התצוגה שהמשתמש בחר. נשמר גם ב-user_metadata (מסונכרן בין מכשירים)
