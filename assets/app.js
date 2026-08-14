@@ -1454,29 +1454,6 @@ function renderCourse(courseId) {
   updateFooter();
 }
 
-/* הבאנר של כרטיסיות המרצה. נראה אחרת מכל השאר בכוונה — זה לא עוד מבחן
-   בערימה, זה מה שהמרצה אמר שיהיה במבחן. */
-function cardsHero(m) {
-  const done = Object.keys(cardsRead.read()).filter((k) => k.startsWith(m.id + '#')).length;
-  const a = el('a', 'lhero');
-  a.href = '#/cards/' + m.id;
-
-  const left = el('div', 'lhero-main');
-  /* הטקסט הזה היה קשיח ומדבר על קוקס והזום שלו — נכון לביומול בלבד. דק
-     כרטיסיות של מקצוע אחר היה מציג טענה שקרית, ולכן הוא מגיע מהקובץ. */
-  left.append(el('div', 'lhero-eyebrow', m.heroEyebrow || '🎓 ישירות מהמרצה'));
-  left.append(el('h2', null, m.title));
-  left.append(el('p', 'lhero-sub',
-    m.heroSub || 'כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.'));
-  a.append(left);
-
-  const right = el('div', 'lhero-side');
-  right.append(el('div', 'lhero-n', m.count));
-  right.append(el('div', 'lhero-n-lbl', 'כרטיסיות'));
-  if (done) right.append(el('div', 'lhero-done', `${done} נקראו`));
-  a.append(right);
-  return a;
-}
 
 /* רשימת מבחנים מקובצת (flat / לפי חלק) — משותפת לזונת "נבחנים" ולזונת
    "מתרגלים", כדי ששחזורים ובנקי-תרגול יוצגו באותה שפה. */
@@ -1578,58 +1555,6 @@ function examCardCompact(m, hideOfficial) {
     sc.append(qual);
     a.append(sc);
   }
-  return a;
-}
-
-function examCard(m) {
-  const s = quickScore(m);
-  const a = el('a', 'card');
-  a.dataset.tour = 'exam';       // הסיור מצביע על הראשון שהוא מוצא
-  a.href = '#/exam/' + m.id;
-  a.append(el('h3', null, m.title));
-
-  const meta = el('div', 'card-meta');
-  /* קודם לכול: מבחן שאינו רגיל. תג שנה או „40 שאלות” אינם מה שצריך לקרוא ראשון. */
-  if (m.spotlight) meta.append(el('span', 'tag spotlight', m.spotlight.tag));
-  if (m.year) meta.append(el('span', 'tag year', m.year));
-  meta.append(el('span', 'tag ' + m.kind, KIND_LABEL[m.kind] || m.kind));
-  // רק אם הכותרת לא אומרת את זה כבר ("מועד א׳" ככותרת + תג "מועד א׳" = רעש).
-  if (m.moed && !m.title.includes(`מועד ${m.moed}`)) meta.append(el('span', 'tag', `מועד ${m.moed}׳`));
-  meta.append(el('span', 'tag', `${m.count} שאלות`));
-  /* מאסטר רשמי מהמודל מול שחזור שכתבו סטודנטים מהזיכרון — הבדל מהותי באמינות
-     המפתח, ועד עכשיו הוא היה קבור ב-note שנראה רק אחרי שנכנסים למבחן. */
-  if (m.official === true) meta.append(el('span', 'tag official', '✓ מאסטר רשמי'));
-  else if (m.official === false) meta.append(el('span', 'tag recon', 'שחזור סטודנטים'));
-  /* האם התשובות אומתו במעמד החשיפה. עד עכשיו זה נאסף בכל ייבוא ולא הוצג
-     בשום מקום — כלומר יש שחזורים שהמשחזרים עצמם כתבו בהם "כלל התשובות לא
-     אומתו בחשיפה", והלומד תרגל 60 שאלות כאילו המפתח ודאי.
-
-     על מאסטר רשמי לא מוסיפים תג: בדאטה official===true חופף בדיוק ל-
-     trust==='verified', ושני תגים ירוקים זה אותו מידע פעמיים.
-     היעדר תג = לא ידוע, וזה בכוונה — 13 מבחנים עוד לא סומנו, ולומר עליהם
-     "אומת" יהיה שקר ולומר "לא אומת" יהיה הכפשה. */
-  const tr = m.official !== true && TRUST_TAG[m.trust];
-  if (tr) meta.append(el('span', 'tag ' + tr[1], tr[0]));
-  a.append(meta);
-
-  const foot = el('div', 'card-foot');
-  const bar = el('div', 'bar');
-  const f = el('i');
-  const pct = s.answered ? (s.correct / s.answered) * 100 : 0;
-  f.style.width = s.answered ? Math.round((s.answered / m.count) * 100) + '%' : '0%';
-  if (s.answered) f.classList.add(pct >= 70 ? 'good' : 'bad');
-  bar.append(f);
-  foot.append(bar);
-
-  const score = el('span', 'card-score');
-  if (s.answered) {
-    score.textContent = `${s.correct}/${s.answered} · ${Math.round(pct)}%`;
-    score.classList.add(pct >= 70 ? 'has' : 'low');
-  } else {
-    score.textContent = 'טרם התחלת';
-  }
-  foot.append(score);
-  a.append(foot);
   return a;
 }
 
@@ -2548,23 +2473,6 @@ const caseProg = {
 };
 const caseDone = (deck, cs) => caseProg.get(deck.id, cs.id).filter((v) => v != null).length >= cs.stages.length;
 
-/* הבאנר בעמוד המקצוע. */
-function casesHero(m) {
-  const a = el('a', 'lhero lhero-case');
-  a.href = '#/case/' + m.id;
-  const left = el('div', 'lhero-main');
-  left.append(el('div', 'lhero-eyebrow', '🩺 תרגול חשיבה קלינית'));
-  left.append(el('h2', null, m.title));
-  left.append(el('p', 'lhero-sub',
-    'המבחן בנוי מתיאורי מקרה מתגלגלים. כאן המקרה נפרש שלב-שלב — אנמנזה, בדיקה, בירור, אבחנה, טיפול — ' +
-    'וכל החלטה שלך חושפת מידע חדש ומצמצמת את האבחנה המבדלת מול העיניים.'));
-  a.append(left);
-  const right = el('div', 'lhero-side');
-  right.append(el('div', 'lhero-n', m.count));
-  right.append(el('div', 'lhero-n-lbl', plural(m.count, 'מקרה', 'מקרים')));
-  a.append(right);
-  return a;
-}
 
 async function renderCase(id, caseId = null) {
   setNav('home');
@@ -3252,9 +3160,9 @@ function playQuestions(cfg) {
     const top = el('div', 'q-top');
     top.append(el('span', 'q-num', `שאלה ${qi + 1} מתוך ${questions.length}`));
 
-    /* "לחזור לזה" + קישור לשאלה בודדת. שניהם היו חסרים לגמרי: לא הייתה שום
-       דרך לסמן שאלה, ולא הייתה דרך לשתף אחת — רק מבחן שלם. האתר מתפשט
-       בקישורי וואטסאפ, אז "תראה את השאלה הזאת" הוא בדיוק מה שאנשים רוצים. */
+    /* "לחזור לזה" — סימון שאלה לחזרה. (כפתור 🔗 להעתקת קישור לשאלה היה כאן
+       ובוטל ב-14/08/2026 — ינון: מיותר. הראוט #/q/<qid> נשאר חי, כדי
+       שקישורים שכבר שותפו ימשיכו לעבוד.) */
     if (item.qid) {
       const tools = el('div', 'q-tools');
 
@@ -3270,19 +3178,6 @@ function playQuestions(cfg) {
       paintFlag();
       fl.onclick = () => { flags.toggle(item.qid); paintFlag(); };
       tools.append(fl);
-
-      const lk = el('button', 'q-tool');
-      lk.type = 'button';
-      lk.textContent = '🔗';
-      lk.title = 'העתקת קישור לשאלה הזאת';
-      lk.setAttribute('aria-label', lk.title);
-      lk.onclick = async () => {
-        const url = location.origin + location.pathname + '#/q/' + item.qid;
-        try { await navigator.clipboard.writeText(url); lk.textContent = '✓'; }
-        catch { lk.textContent = '✗'; }
-        setTimeout(() => { lk.textContent = '🔗'; }, 1400);
-      };
-      tools.append(lk);
 
       /* פתיחת דף הנוסחאות ישר על הסעיף של השאלה הזאת — לפני התשובה, כי זה
          בדיוק מה שעושים במבחן: מזהים את סוג החישוב ומדפדפים למקום הנכון. */
@@ -5133,6 +5028,7 @@ async function renderPractice(courseId, seedTopic = null) {
       if (selTopics.size) {
         const clear = el('button', 'linky', `מסונן ל-${selTopics.size} נושאים · הצג הכול`);
         clear.type = 'button';
+        clear.title = 'ניקוי סינון הנושאים — חזרה לכל השאלות בבריכה';
         clear.onclick = () => { selTopics.clear(); drawTopics(); update(); };
         info.append(' ', clear);
       }
@@ -7558,73 +7454,6 @@ function updateAccountBtn() {
   }
 }
 
-/* ================= הודעה חד-פעמית לכל המשתמשים =================
-   "פוש" בתוך האתר: הודעה שמופיעה פעם אחת לכל דפדפן (נשמר ב-localStorage),
-   עם זרקור על כפתור ערכת הנושא — אותו כיסוי-חור של הסיור. אין כאן שרת שידחוף
-   התראות; זו הדרך להגיע לכל מי שנכנס, בלי הרשמה. להודעה חדשה בעתיד: שנה את
-   המפתח (או הוסף אחד) והיא תופיע מחדש לכולם. */
-const ANNOUNCE_KEY = 'shichzurim.announce.autoTheme';
-
-function themeAnnounce() {
-  if (tourStop) return;                              // לא נתנגש עם הסיור — ננסה שוב בכניסה הבאה
-  if (localStorage.getItem(ANNOUNCE_KEY)) return;
-  const btn = document.getElementById('themeBtn');
-  if (!btn) return;
-  localStorage.setItem(ANNOUNCE_KEY, '1');           // מוצג פעם אחת בלבד
-
-  const overlay = el('div', 'tour');
-  const hole = el('div', 'tour-hole');
-  const pop = el('div', 'tour-pop no-arrow');        // הזרקור על הכפתור הוא ההצבעה; בלי חץ
-  overlay.append(hole, pop);
-  document.body.append(overlay);
-
-  pop.append(el('div', 'tour-step', '✨ חדש באתר'));
-  pop.append(el('h4', null, 'חברים יקרים 💚'));
-  const p = el('p');
-  p.innerHTML = 'תנו בראש עם השחזורים — אבל <b>אל תהרסו את העיניים</b>. ' +
-    'הכפתור המודגש הפך תלת-מצבי, והכי נוח להשאיר אותו על <b>אוטומטי</b>: ' +
-    'כשהמכשיר עובר ללילה, האתר עובר איתו לבד. 🌙';
-  pop.append(p);
-
-  const row = el('div', 'tour-acts');
-  row.style.justifyContent = 'flex-end';
-  const ok = el('button', 'btn primary', 'סבבה, יאללה 👍');
-  ok.title = 'סגירת ההודעה';
-  ok.onclick = close;
-  row.append(ok);
-  pop.append(row);
-
-  function close() {
-    overlay.remove();
-    window.removeEventListener('resize', place);
-    window.removeEventListener('scroll', place);
-    document.removeEventListener('keydown', onKey);
-  }
-  function onKey(e) { if (e.key === 'Escape') close(); }
-  document.addEventListener('keydown', onKey);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-
-  /* ממקם את החור על הכפתור ואת הבועה מתחתיו — נמדד ב-viewport, אז גלילה/שינוי
-     גודל ממקמים מחדש (הכותרת דביקה, הכפתור זז מעט עם הגלילה). */
-  function place() {
-    const r = btn.getBoundingClientRect();
-    const pad = 6;
-    hole.style.top = r.top - pad + 'px';
-    hole.style.left = r.left - pad + 'px';
-    hole.style.width = r.width + pad * 2 + 'px';
-    hole.style.height = r.height + pad * 2 + 'px';
-    const w = Math.min(340, window.innerWidth - 24);
-    pop.style.width = w + 'px';
-    pop.style.left = Math.max(12, Math.min(r.left, window.innerWidth - w - 12)) + 'px';
-    pop.style.top = r.bottom + 14 + 'px';
-    pop.style.bottom = 'auto';
-  }
-  place();
-  window.addEventListener('resize', place);
-  window.addEventListener('scroll', place, { passive: true });
-  ok.focus();
-}
-
 /* ================= סיור ההיכרות =================
    רוב מי שנכנס לכאן לא נשלח לאתר — קיבל קישור בוואטסאפ, ואין לו מושג שיש
    מפת חומרים, תרגול חוצה-מבחנים, או תג שאומר אם התשובות אומתו. ינון עונה על
@@ -8888,25 +8717,6 @@ function renderSim(id) {
   updateFooter();
 }
 
-/* רצועה קומפקטית לעמודי התרגול. הבאנר של דף המקצוע תופס חצי מסך ולא
-   מתאים שם — אבל דווקא בתרגול, לפני שמתחילים לענות, זה הרגע שבו כדאי
-   ללכת לראות את הדבר עצמו. */
-function simStrip(courseId, title) {
-  const list = simsOf(courseId);
-  if (!list.length) return null;
-  const box = el('div', 'sim-strip');
-  box.append(el('div', 'sim-strip-t', title));
-  const row = el('div', 'sim-strip-row');
-  list.forEach((s) => {
-    const a = el('a', 'sim-chip');
-    a.href = '#/sim/' + s.id;
-    a.append(el('span', 'sim-chip-ico', s.icon));
-    a.append(el('span', null, s.title));
-    row.append(a);
-  });
-  box.append(row);
-  return box;
-}
 
 /* באנר הסימולציות בדף המקצוע */
 function simsHero(courseId) {

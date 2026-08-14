@@ -1481,6 +1481,7 @@ if (CFG.modes) {
         all.type = 'button';
         all.className = 'dk-print-all';
         all.textContent = 'סמן/נקה הכול';
+        all.title = 'סימון או ניקוי של כל הנושאים ברשימה בבת אחת';
         all.addEventListener('click', function () {
           var on = boxes.some(function (b) { return !b.checked; });
           boxes.forEach(function (b) { b.checked = on; });
@@ -1497,10 +1498,12 @@ if (CFG.modes) {
         go.type = 'button';
         go.className = 'dk-print-go';
         go.textContent = '🖨️ הכן PDF';
+        go.title = 'פתיחת חלון ההדפסה עם הנושאים והעומק שנבחרו';
         var cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'dk-print-cancel';
         cancel.textContent = 'ביטול';
+        cancel.title = 'סגירת החלון בלי להדפיס';
         cancel.addEventListener('click', closePanel);
         acts.appendChild(go);
         acts.appendChild(cancel);
@@ -1770,6 +1773,7 @@ if (CFG.qa) {
               again.type = 'button';
               again.className = 'exm-again';
               again.textContent = '🔄 ערבוב מחדש';
+              again.title = 'ערבוב הפריטים והתחלת התרגיל מחדש';
               again.addEventListener('click', build);
               fin.appendChild(again);
               box.appendChild(fin);
@@ -1795,6 +1799,7 @@ if (CFG.qa) {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'dk-node';
+      btn.title = 'פתיחה או סגירה של הענף במפת החשיבה';
       while (li.firstChild && li.firstChild !== sub) btn.appendChild(li.firstChild);
       li.insertBefore(btn, sub);
       var open = li.closest('ul').parentNode === map;   /* רמה ראשונה פתוחה */

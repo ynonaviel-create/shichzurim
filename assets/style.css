@@ -225,14 +225,8 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--accent); opacity:.85;
 }
 .course:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--accent);}
-.course-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
-.course-ico{font-size:32px; line-height:1;}
 .course h2{font-size:21px; font-weight:800; letter-spacing:-.4px; margin-bottom:5px;}
 .course .blurb{font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:8px; min-height:2.6em;}
-.course-when{font-size:12.5px; font-weight:700; color:var(--dim); margin-bottom:16px;}
-.course-foot{display:flex; align-items:center; gap:11px;}
-.course-foot .n{font-size:13px; font-weight:700; color:var(--dim); white-space:nowrap;}
-.course-foot .n.has{color:var(--accent);}
 
 /* ===== קבוצת חלק (בתוך מקצוע) ===== */
 .part{margin-bottom:34px;}
@@ -1141,8 +1135,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .bd-sim:hover{background:var(--sim); border-color:var(--sim); color:#fff;}
 
-/* רמז בכרטיס המקצוע בדף הבית */
-.course-sims{margin:6px 0 0; font-size:12px; font-weight:700; color:var(--sim);}
 
 @media (max-width:640px){
   .sim-strip-row{flex-direction:column; align-items:stretch;}
@@ -1191,22 +1183,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .g-stack-spine{border-inline-start-color:var(--good);}
 .g-stack-patch{border-inline-start-color:var(--accent);}
 .g-stack-warn{border-inline-start-color:var(--bad); background:var(--bad-bg);}
-
-.g-now{
-  background:var(--surface); border:2px solid var(--accent);
-  border-radius:var(--radius); padding:20px 24px; margin:0 0 20px; box-shadow:var(--shadow-lg);
-}
-.g-now-eyebrow{font-size:12px; font-weight:900; letter-spacing:.05em; color:var(--accent-dk);}
-.g-now h2{margin:4px 0 8px; font-size:24px;}
-.g-now-why{margin:0 0 14px; font-size:15px; line-height:1.65; color:var(--muted);}
-.g-now-why b{color:var(--text);}
-.g-now-acts{display:flex; flex-wrap:wrap; gap:10px;}
-.g-now-gap{
-  margin-top:14px; background:var(--warn-bg); border:1px solid var(--warn-ln);
-  color:var(--warn); border-radius:var(--radius-sm); padding:10px 14px;
-  font-size:13px; line-height:1.6;
-}
-.g-now-gap b{color:var(--warn);}
 
 .g-units{display:flex; flex-direction:column; gap:14px;}
 .g-unit{
@@ -1396,7 +1372,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   .g-unit-collapsible .g-unit-head{flex-direction:row; align-items:center; flex-wrap:wrap;}
   .g-unit-collapsible .g-freq{text-align:center;}
   .g-headline h2{font-size:17px;}
-  .g-now h2{font-size:20px;}
 }
 
 /* --- דיסקליימר האחריות ---
@@ -1545,7 +1520,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--accent); color:#fff;
   border-radius:99px; padding:2px 9px;
 }
-.g-point-src{font-size:11.5px; font-weight:700; color:var(--dim);}
 .g-point-bad{
   font-size:11px; font-weight:800; white-space:nowrap;
   background:var(--bad-bg); border:1px solid var(--bad-ln); color:var(--bad);
@@ -2098,24 +2072,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .trapcard-acts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
 
-/* ═══════════════ באנר "מה חדש" ═══════════════
-   יורש מ-.intro, אבל עם רשימה במקום שורה אחת: גל חידושים שלם לא נכנס
-   למשפט, ולהצטמצם למשפט אחד היה אומר שרוב מה שנבנה לא ייוודע. */
-.whatsnew{ align-items:flex-start; }
-.whatsnew > div:first-child{ flex:1 1 320px; }
-.whatsnew-list{ list-style:none; margin:12px 0 0; padding:0; display:grid; gap:13px; }
-.whatsnew-list li{ display:flex; gap:11px; align-items:flex-start; }
-.whatsnew-ico{ font-size:17px; line-height:1.5; flex:0 0 auto; }
-.whatsnew-list b{ font-size:14.5px; margin-bottom:2px; }
-.whatsnew-list span{ display:block; max-width:66ch; }
-/* ההמלצה שבסוף ההכרזה — מובחנת מרשימת החידושים, כי היא אומרת מה לעשות
-   ולא מה נוסף. */
-.whatsnew-tip{
-  margin-top:15px; padding:11px 14px; border-radius:10px;
-  background:var(--surface-2); border-inline-start:3px solid var(--accent);
-}
-.whatsnew-tip b{ display:block; font-size:14.5px; margin-bottom:3px; color:var(--accent); }
-.whatsnew-tip span{ display:block; max-width:70ch; font-size:14px; line-height:1.75; }
 
 /* ═══════════════ כלי השאלה — סימון וקישור ═══════════════
    פינה שקטה בראש כל שאלה. לא כפתורים בולטים: הם עוזרים למי שמחפש אותם
