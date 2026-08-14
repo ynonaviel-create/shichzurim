@@ -9,9 +9,10 @@ body{
   /* אווירת Liquid Glass: הילות צבע נוזליות שהמשטחים השקופים נשענים עליהן.
      ההילה העליונה לובשת את צבע-המקצוע ומתחלפת איתו מדף לדף. */
   background:
-    radial-gradient(1100px 600px at 88% -120px, color-mix(in srgb, var(--course-accent) 20%, transparent), transparent 62%),
-    radial-gradient(800px 520px at -80px 25%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 58%),
-    radial-gradient(900px 700px at 50% 120%, color-mix(in srgb, var(--course-accent) 9%, transparent), transparent 55%),
+    radial-gradient(1200px 640px at 88% -140px, color-mix(in srgb, var(--course-accent) 26%, transparent), transparent 60%),
+    radial-gradient(850px 560px at -90px 22%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 56%),
+    radial-gradient(700px 460px at 65% 55%, color-mix(in srgb, var(--course-accent) 7%, transparent), transparent 60%),
+    radial-gradient(950px 720px at 45% 125%, color-mix(in srgb, var(--course-accent) 13%, transparent), transparent 55%),
     var(--bg);
   background-attachment:fixed;
   color:var(--text);
@@ -30,11 +31,14 @@ body{
   border-radius:24px;
   border:1px solid transparent;
   background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(165deg, var(--glass-edge), transparent 45%, color-mix(in srgb, var(--glass-edge) 40%, transparent)) border-box;
-  backdrop-filter:blur(28px) saturate(1.8);
-  -webkit-backdrop-filter:blur(28px) saturate(1.8);
-  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow);
+    linear-gradient(color-mix(in srgb, var(--surface) 72%, transparent),
+                    color-mix(in srgb, var(--surface) 72%, transparent)) padding-box,
+    linear-gradient(165deg, var(--glass-edge), transparent 40%, color-mix(in srgb, var(--glass-edge) 55%, transparent)) border-box;
+  backdrop-filter:blur(34px) saturate(2);
+  -webkit-backdrop-filter:blur(34px) saturate(2);
+  box-shadow:inset 0 1px 0 var(--glass-shine),
+             inset 0 -14px 24px -20px color-mix(in srgb, var(--accent) 35%, transparent),
+             var(--shadow);
 }
 .brand{display:flex; align-items:center; gap:11px; text-decoration:none; color:var(--text);}
 .brand-mark{font-size:25px; line-height:1;}
@@ -302,10 +306,18 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .btn:hover{background:var(--surface); border-color:color-mix(in srgb, var(--accent) 45%, transparent); color:var(--accent-dk);}
 .btn.primary{
+  position:relative; overflow:hidden;
   background:linear-gradient(180deg, color-mix(in srgb, var(--course-accent) 90%, #fff 8%), var(--course-accent-dk));
   border-color:transparent; color:#fff;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),
-             0 8px 26px color-mix(in srgb, var(--course-accent) 45%, transparent);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),
+             inset 0 -8px 16px -8px rgba(0,0,0,.25),
+             0 10px 32px color-mix(in srgb, var(--course-accent) 55%, transparent);
+}
+/* ברק העדשה: השתקפות בחצי העליון של הכפתור */
+.btn.primary::after{
+  content:""; position:absolute; inset:0 0 55% 0; pointer-events:none;
+  background:linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.05));
+  border-radius:inherit;
 }
 .btn.primary:hover{filter:brightness(1.08); transform:translateY(-1px); color:#fff;}
 .btn.ghost{background:transparent;}
@@ -683,9 +695,11 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 
 /* ===== כפתור העתקה ל-NotebookLM ===== */
 .nb-btn{
-  display:inline-flex; align-items:center; gap:7px; margin-top:14px;
-  padding:8px 14px; border-radius:99px; cursor:pointer;
-  background:var(--surface); border:1px solid var(--line);
+  display:inline-flex; align-items:center; gap:7px; margin-top:10px; margin-inline-end:8px;
+  padding:8px 15px; border-radius:99px; cursor:pointer;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
   color:var(--muted); font-family:var(--font);
   font-size:12.5px; font-weight:700; transition:.15s;
 }
@@ -1081,7 +1095,9 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .formula-result .stat{margin:0;}
 
 /* הכפתור שמופיע אחרי מענה על שאלה בנושא שיש לו סימולציה */
-.nb-btn.sim-link{text-decoration:none; border-color:var(--sim-ln); color:var(--sim-dp);}
+/* גלולת הסים — אותה צורה כמו שאר גלולות המשוב, גוון-יעד = צבע הקורס */
+.nb-btn.sim-link{text-decoration:none; color:var(--sim-dp);}
+[data-theme="dark"] .nb-btn.sim-link{color:var(--sim);}
 .nb-btn.sim-link:hover{background:var(--sim-bg); border-color:var(--sim);}
 
 @media (max-width:640px){
@@ -1346,15 +1362,23 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 [data-theme="dark"] .fb-cohort{ color:#EF9F27; }
 
 /* מהשאלה למפה — יושב בתיבת המשוב ליד כפתור הסימולציה */
+/* משפחת "גלולות המשוב" — כל כפתורי הפעולה שאחרי תשובה (מפה/סיכום/NotebookLM/סים)
+   חולקים צורה אחת: גלולת זכוכית שקופה. היעד מזוהה בגוון הטקסט בלבד,
+   כדי שהשורה תיראה כמערכת אחת ולא כשלושה ניסויים. */
 .fb-guide{
-  display:inline-block; margin-top:10px; margin-inline-end:8px;
-  background:var(--topic-bg); border:1px solid var(--topic-ln); color:var(--topic-tx);
-  border-radius:999px; padding:6px 14px; font-size:13px; font-weight:800; text-decoration:none;
+  display:inline-flex; align-items:center; gap:7px; margin-top:10px; margin-inline-end:8px;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
+  color:var(--topic-tx);
+  border-radius:99px; padding:8px 15px; font-size:12.5px; font-weight:700; text-decoration:none;
+  transition:.15s;
 }
-.fb-guide:hover{background:var(--topic-ln);}
+.fb-guide:hover{background:var(--topic-bg); border-color:var(--topic-ln);}
 /* הקישור השני של אותו רגע — מהטעות אל הפרק בסיכום המלא */
-.fb-study{background:var(--accent-sl); border-color:var(--accent); color:var(--accent-dk);}
-.fb-study:hover{background:var(--accent); color:#fff;}
+.fb-study{color:var(--accent-dk);}
+[data-theme="dark"] .fb-study{color:var(--accent);}
+.fb-study:hover{background:var(--accent-sl); border-color:var(--accent);}
 .bd-guide{background:var(--topic-bg); border-color:var(--topic-ln); color:var(--topic-tx);}
 .bd-drill{background:var(--accent-sl); border-color:var(--accent); color:var(--accent-dk);}
 .bd-drill:hover{background:var(--accent); border-color:var(--accent); color:#fff;}
@@ -2416,14 +2440,35 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 
 .card,.stat,.nextup,.sim-card,.learn-card,.adm-card,.about-card,.account-card,
 .srch-box,.tour-pop,.cheer{
+  position:relative; overflow:hidden;
   border:1px solid transparent;
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
     linear-gradient(160deg, var(--glass-edge), transparent 40%,
                     color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;
-  backdrop-filter:blur(18px) saturate(1.5);
-  -webkit-backdrop-filter:blur(18px) saturate(1.5);
-  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow);
+  backdrop-filter:blur(26px) saturate(1.9);
+  -webkit-backdrop-filter:blur(26px) saturate(1.9);
+  box-shadow:inset 0 1px 0 var(--glass-shine),
+             inset 0 0 0 .5px rgba(255,255,255,.06),
+             inset 0 -18px 34px -24px color-mix(in srgb, var(--course-accent) 30%, transparent),
+             var(--shadow);
+}
+/* פס-הברק הספקולרי: השתקפות אלכסונית שחוצה את הפינה העליונה של כל משטח.
+   לא על חלוניות צפות (srch/tour/cheer) — שם הוא מסיח מתוכן קצר. */
+.card::after,.stat::after,.nextup::after,.sim-card::after,.learn-card::after,
+.about-card::after,.account-card::after{
+  content:""; position:absolute; pointer-events:none;
+  inset:-40% -20% auto -20%; height:65%;
+  background:linear-gradient(168deg,
+    transparent 38%,
+    color-mix(in srgb, var(--glass-shine) 55%, transparent) 47%,
+    color-mix(in srgb, var(--glass-shine) 22%, transparent) 52%,
+    transparent 60%);
+  opacity:.8;
+}
+@media (prefers-reduced-motion: reduce){
+  .card::after,.stat::after,.nextup::after,.sim-card::after,.learn-card::after,
+  .about-card::after,.account-card::after{display:none;}
 }
 
 /* באנר המבחן-הקרב שומר על צבע-הדחיפות שלו — הזכוכית רק מאחוריו */
@@ -2441,7 +2486,27 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 .nextup.u-now{background:linear-gradient(var(--u-now-bg),var(--u-now-bg)) padding-box,
   linear-gradient(160deg, var(--glass-edge), transparent 40%, color-mix(in srgb, var(--glass-edge) 35%, transparent)) border-box;}
 
-.cd-unit{border-radius:16px; background:var(--surface-2); box-shadow:inset 0 1px 0 var(--glass-shine);}
+.cd-unit{
+  border-radius:16px; background:var(--surface-2);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 var(--glass-shine),
+             inset 0 -10px 18px -14px color-mix(in srgb, currentColor 25%, transparent);
+}
+
+/* מסיחי הנגן — יריעות זכוכית דקות */
+.opt{
+  backdrop-filter:blur(14px) saturate(1.6);
+  -webkit-backdrop-filter:blur(14px) saturate(1.6);
+  background:var(--surface-2);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
+}
+
+/* צ׳יפים ותגים — שקופים על הזכוכית */
+.tag,.pill,.verb-chip,.crumb,.g-sortchip,.exam-toggle{
+  background:var(--surface-2);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
 
 /* עדשות עגולות: כפתורי המערכת בקפסולה */
 .theme-btn,.srch-btn{border-radius:99px;}
@@ -2450,8 +2515,8 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 .zone-head-line{background:linear-gradient(90deg, var(--line), transparent);}
 
 /* המשוב והחלוניות הצפות — יריעות זכוכית עמוקות יותר */
-.fb{border-radius:18px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);}
-.srch-box,.tour-pop{backdrop-filter:blur(30px) saturate(1.6); -webkit-backdrop-filter:blur(30px) saturate(1.6);}
+.fb{border-radius:18px; backdrop-filter:blur(24px) saturate(1.8); -webkit-backdrop-filter:blur(24px) saturate(1.8);}
+.srch-box,.tour-pop{backdrop-filter:blur(34px) saturate(1.8); -webkit-backdrop-filter:blur(34px) saturate(1.8);}
 
 /* בקפסולה הצפה במובייל אין צורך בשוליים גדולים */
 @media (max-width:640px){

@@ -10,14 +10,14 @@
   --bg-tint:   #e7edf4;
   /* משטחי זכוכית: שקופים-למחצה, נשענים על הילות הרקע. למשטחים שחייבים
      אטימות (תפריטים צפים, חלוניות מעל תוכן) יש --surface-solid. */
-  --surface:   rgba(255,255,255,.55);
-  --surface-2: rgba(255,255,255,.42);
+  --surface:   rgba(255,255,255,.38);
+  --surface-2: rgba(255,255,255,.26);
   --surface-solid: #ffffff;
-  --line:      rgba(30,60,90,.14);
-  --line-soft: rgba(30,60,90,.08);
+  --line:      rgba(30,60,90,.16);
+  --line-soft: rgba(30,60,90,.09);
   /* קצה-האור והברק של הזכוכית (Liquid Glass) */
-  --glass-edge:  rgba(255,255,255,.85);
-  --glass-shine: rgba(255,255,255,.5);
+  --glass-edge:  rgba(255,255,255,.95);
+  --glass-shine: rgba(255,255,255,.65);
 
   --text:      #16222e;
   --muted:     #5a6b7b;
@@ -76,13 +76,13 @@
 :root[data-theme="dark"]{
   --bg:        #070c13;
   --bg-tint:   #0a1019;
-  --surface:   rgba(26,40,58,.42);
-  --surface-2: rgba(38,56,78,.45);
+  --surface:   rgba(30,48,70,.30);
+  --surface-2: rgba(44,66,92,.32);
   --surface-solid: #16222e;
-  --line:      rgba(170,210,240,.16);
-  --line-soft: rgba(170,210,240,.08);
-  --glass-edge:  rgba(255,255,255,.22);
-  --glass-shine: rgba(255,255,255,.09);
+  --line:      rgba(170,215,250,.20);
+  --line-soft: rgba(170,215,250,.10);
+  --glass-edge:  rgba(255,255,255,.35);
+  --glass-shine: rgba(255,255,255,.14);
 
   --text:      #f0f6fc;
   --muted:     #a6bacb;
