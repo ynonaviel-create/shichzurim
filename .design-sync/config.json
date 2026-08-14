@@ -1,0 +1,5 @@
+{
+  "projectId": "dffb70ce-284a-467c-841a-7231467d2ee8",
+  "shape": "manual-css",
+  "note": "אתר וניל HTML+CSS — אין build/Storybook. החבילה נבנית ידנית: styles.css מייבא את שלושת קבצי ה-CSS האמיתיים, וכרטיסי התצוגה הם מרקאפ חי מהאתר. ראו conventions.md."
+}
