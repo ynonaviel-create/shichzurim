@@ -6609,12 +6609,22 @@ function admCard(title, hint) {
 /* כותרת סקשן בלוח — מקבצת כמה כרטיסים תחת נושא אחד. extra (אופציונלי)
    נכנס לצד הכותרת — כך הצ׳יפים 7/30/90 יושבים *בתוך* סקשן המגמות, וברור
    שהם חלים רק עליו ולא על ה-KPI שלמעלה. */
-function admSection(title, extra) {
+function admSection(title, extra, fold) {
   const s = el('div', 'adm-sec');
   const h = el('div', 'adm-sec-head');
   h.append(el('h2', null, title));
   if (extra) h.append(extra);
   s.append(h);
+  /* fold — "קומה 3" של הלוח: הסקשן קיים ונטען, אבל מקופל עד לחיצה על
+     הכותרת. תצוגה בלבד — הטעינה עצמה רצה כרגיל. */
+  if (fold) {
+    s.classList.add('fold', 'closed');
+    const ch = el('span', 'chev', '⌄');
+    h.append(ch);
+    h.style.cursor = 'pointer';
+    h.title = 'הצגה/קיפול';
+    h.onclick = () => s.classList.toggle('closed');
+  }
   return s;
 }
 
@@ -6853,10 +6863,12 @@ async function renderAdmin() {
     const lostC = kpiCard(lost, 'באו ולא נשארו', '👻');
     lostC.title = `${o.never_active ?? 0} נרשמו ומעולם לא פעלו · ${o.one_and_done ?? 0} פעלו יממה אחת ונעלמו`;
     box.append(lostC);
+    if (o.new_30d != null) box.append(kpiCard(o.new_30d, 'הצטרפו · 30 יום', '🌱'));
+    if (o.events_total != null) box.append(kpiCard(o.events_total, 'אירועים מאז ומעולם', '♾️'));
   });
 
   /* ── 2. בריאות תפעולית — הגלאי לתקלות שקטות כמו תקלת shinunProg ── */
-  const s2 = admSection('🩺 בריאות תפעולית');
+  const s2 = admSection('🩺 בריאות תפעולית — פירוט', null, true);
   const opsBox = el('div');
   s2.append(opsBox);
   view.append(s2);
@@ -6899,7 +6911,7 @@ async function renderAdmin() {
   });
 
   /* ── 2.5 דיווחי טעויות — מה שהסטודנטים סימנו בכפתור ה-🚩 ─────────── */
-  const sR = admSection('🚩 דיווחים על שאלות');
+  const sR = admSection('🚩 מה דורש טיפול — דיווחים על שאלות');
   const repBox = el('div');
   sR.append(repBox);
   view.append(sR);
@@ -6948,7 +6960,7 @@ async function renderAdmin() {
   });
 
   /* ── 2.7 סקר המשוב — התשובה האחרונה של כל משיב, אגרגטים + טקסטים ── */
-  const sSv = admSection('📋 סקר המשוב');
+  const sSv = admSection('📋 סקר המשוב', null, true);
   const svBox = el('div');
   sSv.append(svBox);
   view.append(sSv);
@@ -7177,7 +7189,7 @@ async function renderAdmin() {
   loadCharts();
 
   /* ── 4. בריאות התוכן — הנתונים מ-user_kv, כל הזמנים ──────────────── */
-  const s4 = admSection('🔬 בריאות התוכן');
+  const s4 = admSection('🔬 בריאות התוכן — לעומק', null, true);
   s4.append(el('p', 'adm-note',
     'נצבר מכל הזמנים ולא מושפע מבחירת הטווח. סייג חשוב: תרגול חופשי ו„הטעויות שלי" ' +
     'לא שומרים את המסיח שנבחר — פילוח המסיחים משקף מענה במבחנים בלבד, בעוד אחוזי ' +
@@ -7355,6 +7367,12 @@ async function renderAdmin() {
       'קופסה 3 = יודעים; קופסה 0 = בתחילת הדרך. הרבה פריטים תקועים ב-0 = חומר שכדאי לפשט או לפצל.'));
     box.append(card);
   });
+
+  /* ── סדר הקומות: append חוזר מזיז ב-DOM, אפס שינוי בלוגיקת הטעינה ──
+     קומה 1 "מה קורה עכשיו": קהילה + מגמות (גרפים יומיים/שעתיים + החמים).
+     קומה 2 "מה דורש טיפול": דיווחים.
+     קומה 3 (מקופלת): תפעול לעומק, בריאות תוכן, סקר. */
+  [s1, s3, sR, s2, s4, sSv].forEach((s) => view.append(s));
 
   toTop();
   updateFooter();

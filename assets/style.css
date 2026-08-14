@@ -2632,3 +2632,9 @@ mark.srch-hl{
 body:has(.srch) .bnav,
 body:has(.tour) .bnav,
 body:has(.lightbox) .bnav{display:none;}
+
+/* לוח הבקרה — קומה 3 מקופלת */
+.adm-sec.fold .adm-sec-head .chev{transition:transform .2s; color:var(--dim);}
+.adm-sec.fold.closed > :not(.adm-sec-head){display:none;}
+.adm-sec.fold.closed .adm-sec-head{margin-bottom:0;}
+.adm-sec.fold:not(.closed) .adm-sec-head .chev{transform:rotate(180deg);}
