@@ -2557,3 +2557,63 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
 }
 
 .zone-note{font-size:12.5px; font-weight:700; color:var(--good); margin:-6px 0 10px;}
+
+/* ── סרגל הניווט התחתון — קפסולת זכוכית צפה (מובייל בלבד) ── */
+.bnav{
+  position:fixed; z-index:60; inset-inline:14px; bottom:12px;
+  display:none; align-items:stretch; justify-content:space-around; gap:2px;
+  padding:8px 10px; border-radius:26px;
+  border:1px solid transparent;
+  background:
+    linear-gradient(color-mix(in srgb, var(--surface) 80%, transparent),
+                    color-mix(in srgb, var(--surface) 80%, transparent)) padding-box,
+    linear-gradient(165deg, var(--glass-edge), transparent 40%,
+                    color-mix(in srgb, var(--glass-edge) 55%, transparent)) border-box;
+  backdrop-filter:blur(34px) saturate(2);
+  -webkit-backdrop-filter:blur(34px) saturate(2);
+  box-shadow:inset 0 1px 0 var(--glass-shine), var(--shadow-lg);
+  transition:transform .25s ease, opacity .25s ease;
+}
+.bnav.hide{transform:translateY(calc(100% + 16px)); opacity:0;}
+.bnav-it{
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  flex:1; padding:6px 4px; border:0; background:transparent; cursor:pointer;
+  border-radius:16px; text-decoration:none; font-family:var(--font);
+  color:var(--muted); transition:.15s;
+}
+.bnav-ico{font-size:20px; line-height:1;}
+.bnav-lbl{font-size:10.5px; font-weight:800;}
+.bnav-it.on{
+  color:var(--course-accent-dk); background:var(--course-accent-sl);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
+}
+[data-theme="dark"] .bnav-it.on{color:var(--course-accent);}
+.bnav-it.dim{opacity:.4;}
+.bnav-it:active{transform:scale(.94);}
+
+/* לשונית הקורס הפעיל בטופ-בר — דסקטופ */
+.nav-course{display:none;}
+
+@media (max-width:640px){
+  .bnav{display:flex;}
+  main{padding-bottom:112px;}
+  .footer{padding-bottom:96px;}
+}
+@media (min-width:641px){
+  .nav-course.show{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 15px; border-radius:99px; text-decoration:none;
+    color:var(--muted); font-size:14.5px; font-weight:700;
+    border:1px solid var(--line-soft); background:var(--surface-2);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    transition:.15s; max-width:230px; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .nav-course.show:hover{color:var(--text); border-color:color-mix(in srgb, var(--course-accent) 45%, transparent);}
+  .nav-course.show.active{
+    color:#fff; border-color:transparent;
+    background:color-mix(in srgb, var(--course-accent) 88%, #fff 6%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),
+               0 6px 20px color-mix(in srgb, var(--course-accent) 50%, transparent);
+  }
+}

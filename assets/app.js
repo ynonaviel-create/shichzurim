@@ -10159,6 +10159,98 @@ document.addEventListener('keydown', (e) => {
 
 document.getElementById('searchBtn')?.addEventListener('click', openSearch);
 
+/* ═══════════ סרגל ניווט תחתון (מובייל) + לשונית הקורס (דסקטופ) ═══════════
+   האתר גדל, והדרך היחידה לנוע הייתה דרך הבית. הסרגל נותן מכל מסך, בלחיצה
+   אחת: בית · הקורס הפעיל · תרגול · חיפוש · חשבון. "הקורס הפעיל" נגזר
+   מהכתובת הנוכחית בלבד (בלי מפתח אחסון חדש) — הקורס האחרון שביקרת בו בסשן.
+   תצוגה בלבד: אפס לוגיקה חדשה, רק קיצורי-דרך לראוטים קיימים. */
+(() => {
+  let lastCourse = null;
+
+  const bar = el('nav', 'bnav');
+  bar.setAttribute('aria-label', 'ניווט מהיר');
+  const els = {};
+  [
+    { key: 'home',     ico: '🏠', lbl: 'בית',    href: '#/',         tip: 'חזרה למדף המקצועות' },
+    { key: 'course',   ico: '📚', lbl: 'הקורס',                      tip: 'עמוד הקורס האחרון שביקרת בו' },
+    { key: 'practice', ico: '🏋️', lbl: 'תרגול',                      tip: 'תרגול לפי נושא וכמות בקורס הפעיל' },
+    { key: 'search',   ico: '🔍', lbl: 'חיפוש',                      tip: 'חיפוש בכל הארכיון' },
+    { key: 'account',  ico: '👤', lbl: 'חשבון',  href: '#/account',  tip: 'החשבון והסנכרון שלך' },
+  ].forEach((it) => {
+    const a = el(it.key === 'search' ? 'button' : 'a', 'bnav-it');
+    a.title = it.tip;
+    a.append(el('span', 'bnav-ico', it.ico));
+    a.append(el('span', 'bnav-lbl', it.lbl));
+    if (it.href) a.href = it.href;
+    if (it.key === 'search') a.onclick = () => openSearch();
+    els[it.key] = a;
+    bar.append(a);
+  });
+  document.body.append(bar);
+
+  /* לשונית הקורס הפעיל בטופ-בר — לדסקטופ, אותו עיקרון */
+  const topTab = el('a', 'nav-course');
+  document.querySelector('.topnav')?.prepend(topTab);
+
+  const COURSE_ROUTES = new Set(['course', 'practice', 'review', 'guide', 'tree', 'traps',
+    'shinun', 'semester', 'anki', 'drills', 'tonight', 'flagged', 'formulas', 'sim', 'simexam']);
+  const courseFromHash = () => {
+    const [route, param] = location.hash.replace(/^#\/?/, '').split('/');
+    if (param && COURSE_ROUTES.has(route) && courseOf(param)) return param;
+    if (param && ['exam', 'q', 'cards', 'case', 'sheet'].includes(route)) {
+      const e = EXAMS.find((v) => v.id === param);
+      if (e) return e.course;
+    }
+    return null;
+  };
+
+  const update = () => {
+    const [route] = location.hash.replace(/^#\/?/, '').split('/');
+    const c = courseFromHash();
+    if (c) lastCourse = c;
+
+    Object.values(els).forEach((x) => x.classList.remove('on'));
+    if (!route) els.home.classList.add('on');
+    else if (route === 'account') els.account.classList.add('on');
+    else if (route === 'practice') els.practice.classList.add('on');
+    else if (c) els.course.classList.add('on');
+
+    if (lastCourse) {
+      els.course.href = '#/course/' + lastCourse;
+      els.practice.href = '#/practice/' + lastCourse;
+      els.course.classList.remove('dim');
+      els.practice.classList.remove('dim');
+      const cc = courseOf(lastCourse);
+      topTab.textContent = `${cc.icon || '📚'} ${cc.name}`;
+      topTab.href = '#/course/' + lastCourse;
+      topTab.classList.add('show');
+      topTab.classList.toggle('active', !!c);
+      topTab.title = 'חזרה לעמוד ' + cc.name;
+    } else {
+      els.course.href = '#/';
+      els.practice.href = '#/';
+      els.course.classList.add('dim');
+      els.practice.classList.add('dim');
+      topTab.classList.remove('show');
+    }
+  };
+  window.addEventListener('hashchange', update);
+  /* בטעינה ישירה לכתובת פנימית הדאטה עוד לא קיים כשהסקריפט רץ, ואין
+     hashchange שיעדכן אחר-כך — לכן מתעדכנים גם אחרי כל רינדור של העמוד. */
+  new MutationObserver(update).observe(view, { childList: true });
+
+  /* נעלם בגלילה מטה, חוזר בגלילה מעלה — משאיר את המסך לתוכן */
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y > lastY + 4 && y > 140) bar.classList.add('hide');
+    else if (y < lastY - 4 || y <= 140) bar.classList.remove('hide');
+    lastY = y;
+  }, { passive: true });
+
+  update();
+})();
+
 /* ---------- הפעלה ---------- */
 window.addEventListener('hashchange', router);
 
