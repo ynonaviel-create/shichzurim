@@ -2638,3 +2638,22 @@ body:has(.lightbox) .bnav{display:none;}
 .adm-sec.fold.closed > :not(.adm-sec-head){display:none;}
 .adm-sec.fold.closed .adm-sec-head{margin-bottom:0;}
 .adm-sec.fold:not(.closed) .adm-sec-head .chev{transform:rotate(180deg);}
+
+/* ── "איך זה עובד" — המסלול והקבוצות ── */
+.about-path{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:0 0 26px;}
+.about-step{
+  display:flex; gap:12px; align-items:flex-start; padding:15px 17px;
+  border-radius:var(--radius); border:1px solid var(--line-soft);
+  background:var(--surface-2);
+  box-shadow:inset 0 1px 0 var(--glass-shine);
+}
+.about-step-n{
+  flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center;
+  background:color-mix(in srgb, var(--accent) 88%, #fff 6%); color:#fff;
+  font-weight:900; font-size:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+}
+.about-step b{display:block; font-size:15px; margin-bottom:2px;}
+.about-step span{font-size:13px; color:var(--muted); line-height:1.55;}
+.about-toc{margin:0 0 24px;}
+.about-zone .about-card{margin-bottom:12px;}
