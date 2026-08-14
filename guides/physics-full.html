@@ -2366,6 +2366,54 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   body.dk-print-focus .ex,body.dk-print-focus .vids{display:none !important;}
   #dk-print-head{display:block !important;}
 }
+
+/* ═══════════ Liquid Glass — יישור הלומדה לשפת האתר (אוגוסט 2026) ═══════════
+   חל על כל מסמך מוזרק חוץ מ-electro-full (מזוהה לפי #ed-prog שלו) — הוא
+   מסמך print עצמאי שנשאר בעיצובו (R26). עקרון ביצועים: blur רק על רכיבים
+   צפים בודדים; מאות קופסאות התוכן מקבלות שקיפות בלי backdrop-filter. */
+
+body:not(:has(#ed-prog)){
+  --panel: color-mix(in srgb, var(--bg) 40%, transparent);
+  background:
+    radial-gradient(1000px 560px at 88% -120px, color-mix(in srgb, var(--brand) 16%, transparent), transparent 60%),
+    radial-gradient(760px 500px at -80px 25%, color-mix(in srgb, var(--brand) 8%, transparent), transparent 56%),
+    var(--bg);
+  background-attachment:fixed;
+}
+
+/* הסרגל העליון — קפסולת זכוכית כמו באתר */
+body:not(:has(#ed-prog)) .navbar{
+  margin:10px -10px 0; border-radius:20px; border:1px solid var(--line);
+  background:color-mix(in srgb, var(--bg) 62%, transparent);
+  backdrop-filter:blur(28px) saturate(1.8);
+  -webkit-backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:0 2px 8px rgba(20,40,60,.06), 0 14px 36px rgba(20,40,60,.08);
+}
+
+/* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
+body:not(:has(#ed-prog)) .tools,
+body:not(:has(#ed-prog)) #dk-modes,
+body:not(:has(#ed-prog)) #dk-reveal{
+  transition:transform .25s ease, opacity .25s ease;
+}
+body:not(:has(#ed-prog)) #dk-modes{
+  background:color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter:blur(24px) saturate(1.8);
+  -webkit-backdrop-filter:blur(24px) saturate(1.8);
+}
+body.dk-toolhide .tools,
+body.dk-toolhide #dk-modes,
+body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+
+/* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
+body:not(:has(#ed-prog)) .traps,
+body:not(:has(#ed-prog)) .vq,
+body:not(:has(#ed-prog)) .drill,
+body:not(:has(#ed-prog)) .plus,
+body:not(:has(#ed-prog)) details.dk-qa{
+  background:color-mix(in srgb, var(--panel) 60%, var(--bg));
+  border-color:color-mix(in srgb, var(--brand) 18%, transparent);
+}
 </style>
 <script>window.DOCKIT={"id": "physics-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "physics", "shinun": "physics"};</script>
 <script>
@@ -3080,6 +3128,19 @@ if (CFG.qa) {
     sel.removeAllRanges();
     hideBtn();
   });
+})();
+
+/* ---------- הכלים הצפים מתפנים מהדרך ----------
+   הפידבק: כפתור ה-Aa ישב על הטקסט. בגלילה מטה (קוראים) הכלים והמתג
+   נעלמים; בגלילה מעלה (מחפשים משהו) הם חוזרים. תצוגה בלבד. */
+(function () {
+  var lastY = 0;
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY;
+    if (y > lastY + 6 && y > 200) document.body.classList.add('dk-toolhide');
+    else if (y < lastY - 6 || y <= 200) document.body.classList.remove('dk-toolhide');
+    lastY = y;
+  }, { passive: true });
 })();
 })();
 </script>

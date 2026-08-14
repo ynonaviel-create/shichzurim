@@ -710,4 +710,17 @@ if (CFG.qa) {
     hideBtn();
   });
 })();
+
+/* ---------- הכלים הצפים מתפנים מהדרך ----------
+   הפידבק: כפתור ה-Aa ישב על הטקסט. בגלילה מטה (קוראים) הכלים והמתג
+   נעלמים; בגלילה מעלה (מחפשים משהו) הם חוזרים. תצוגה בלבד. */
+(function () {
+  var lastY = 0;
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY;
+    if (y > lastY + 6 && y > 200) document.body.classList.add('dk-toolhide');
+    else if (y < lastY - 6 || y <= 200) document.body.classList.remove('dk-toolhide');
+    lastY = y;
+  }, { passive: true });
+})();
 })();
