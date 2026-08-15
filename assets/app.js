@@ -6419,7 +6419,10 @@ function renderLogin() {
   view.innerHTML = '';
 
   const wrap = el('div', 'login-hero');
-  wrap.append(el('div', 'login-mark', '🧬'));
+  const mark = el('img', 'login-mark');
+  mark.src = 'assets/img/logo.png';
+  mark.alt = '';            // דקורטיבי — הכותרת שמתחתיו כבר אומרת את השם
+  wrap.append(mark);
   wrap.append(el('h1', null, 'ארכיון השחזורים'));
   wrap.append(el('p', 'login-sub',
     'הארכיון פתוח לסטודנטים של הפקולטה — נכנסים עם חשבון Google, וההתקדמות ' +

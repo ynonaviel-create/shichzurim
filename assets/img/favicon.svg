@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ארכיון השחזורים">
+  <!-- גרסת ה-16/32px של הלוגו. הרנדר התלת-ממדי המלא (assets/img/logo.png) נמרח
+       לכתם טורקיז מתחת ל-48px, ולכן כאן נשארים רק שלושת הכרטיסים והווי —
+       מה שעוד קריא בלשונית של הדפדפן. הצבעים נדגמו מהלוגו עצמו. -->
+  <rect x="3.6" y="7.4" width="8.8" height="15.4" rx="2" fill="#2b7c8a" transform="rotate(-10 8 15.1)"/>
+  <rect x="19.6" y="7.4" width="8.8" height="15.4" rx="2" fill="#2b7c8a" transform="rotate(10 24 15.1)"/>
+  <rect x="11.2" y="4.6" width="9.6" height="17.6" rx="2.3" fill="#2fb0b0"/>
+  <path d="M13.2 13.1l2.4 2.6 3.7-5.5" fill="none" stroke="#4fbe2a" stroke-width="2.8"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

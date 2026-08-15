@@ -41,7 +41,10 @@ body{
              var(--shadow);
 }
 .brand{display:flex; align-items:center; gap:11px; text-decoration:none; color:var(--text);}
-.brand-mark{font-size:25px; line-height:1;}
+/* הלוגו רחב (יחס ~1.58:1), ולכן נקבע לפי *גובה* והרוחב נגזר. פחות מ-36px
+   הרנדר התלת-ממדי מתחיל להימרח — זה הרצפה, לא טעם. הגובה מכוון לגובה שתי
+   שורות הטקסט שלצידו, כך שהסרגל לא גדל. */
+.brand-mark{height:38px; width:auto; display:block; flex:none;}
 .brand-text{display:flex; flex-direction:column; line-height:1.3;}
 .brand-text strong{font-size:16px; font-weight:800; letter-spacing:-.2px;}
 .brand-text small{font-size:12px; color:var(--dim); font-weight:600;}
@@ -775,7 +778,12 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 @media (max-width:640px){
   body{font-size:15.5px;}
   .topbar{padding:11px 15px; gap:8px;}
-  .brand-text small{display:none;}
+  /* בטלפון הלוגו *מחליף* את שם האתר במקום להצטרף אליו: השם ממילא מופיע
+     ככותרת הדף מיד מתחת, והסרגל של 375px היה צר ממילא (ראו ההערה למטה) —
+     שני הפריטים יחד דחפו את הניווט לגלישה. השם הנגיש עבר ל-aria-label
+     על .brand ב-index.html, כדי שהקישור לא יישאר בלי שם. */
+  .brand-text{display:none;}
+  .brand-mark{height:34px;}
   .topnav a{padding:7px 12px; font-size:13.5px;}
   /* סרגל העליון לא נכנס ל-375px: המותג והניווט יחד רוצים ~444, ופריט flex
      לא מתכווץ מתחת לתוכן שלו (min-width:auto) — אז *הדף כולו* נמתח, וכל
@@ -1690,7 +1698,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--surface); border:1px solid var(--line-soft);
   border-radius:var(--radius); padding:42px 30px 34px; box-shadow:var(--shadow-lg);
 }
-.login-mark{font-size:44px; line-height:1;}
+.login-mark{width:132px; height:auto; display:block;}
 .login-hero h1{font-size:26px; font-weight:800; letter-spacing:-.5px;}
 .login-sub{font-size:15px; color:var(--muted); line-height:1.8;}
 .login-hero .btn-google{margin-top:6px; padding:12px 26px; font-size:15.5px;}

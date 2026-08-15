@@ -26,20 +26,37 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0d8b84">
 
+<!-- כרטיס התצוגה המקדימה בוואטסאפ — שם האתר משותף בפועל. og.jpg היא גרסת
+     הלוגו *עם* הכיתוב, על רקע לבן: הכיתוב כהה ולכן לא שורד רקע כהה, ובכרטיס
+     שיתוף הרקע תמיד לבן. באתר עצמו משתמשים רק בגרסה בלי הכיתוב. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ארכיון השחזורים">
+<meta property="og:description" content="מאגר שחזורים ולמידה להצלחה בבחינות">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="assets/tokens.css?v=67607727">
-<link rel="stylesheet" href="assets/style.css?v=6c3d9eae">
+<link rel="stylesheet" href="assets/style.css?v=20b113e2">
 <link rel="stylesheet" href="assets/components.css?v=8eca9228">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🧬</text></svg>">
+<!-- הלשונית ומסך הבית. ה-SVG הוא הגרסה המפושטת של הלוגו (ראה את ההערה בקובץ);
+     ה-PNG של 180 הוא לאייקון שנוצר כשמוסיפים את האתר למסך הבית באייפון, ושם
+     אי-אפשר שקיפות — לכן יש לו רקע בהיר משלו. -->
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/img/icon-512.png">
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="#/">
-    <span class="brand-mark">🧬</span>
+  <!-- שם נגיש קבוע על הקישור עצמו: בטלפון הטקסט שלצד הלוגו מוסתר (ראו style.css),
+       והתמונה דקורטיבית (alt ריק) כדי לא לשכפל את השם בדסקטופ. בלי ה-aria-label
+       הזה הקישור לדף הבית היה נשאר בלי שם בכלל במסך צר. -->
+  <a class="brand" href="#/" aria-label="ארכיון השחזורים — לדף הבית">
+    <img class="brand-mark" src="assets/img/logo.png" alt="" width="320" height="202" decoding="async">
     <span class="brand-text">
       <strong>ארכיון השחזורים</strong>
       <small>רפואה — שנה א׳</small>
@@ -85,7 +102,7 @@
      cloud.js נחתם ע"י sync.js כמו app.js. אם אחד מהם נכשל, app.js ממשיך מקומית. -->
 <script src="assets/vendor/supabase.js?v=2.110.8"></script>
 <script src="assets/cloud.js?v=8bc020be"></script>
-<script src="assets/app.js?v=4ffff620"></script>
+<script src="assets/app.js?v=343430fa"></script>
 
 <!-- ═══ Cloudflare Web Analytics — תעבורה כוללת, גם מי שלא התחבר ═══
      קוקילס, ידידותי לפרטיות, חינם. נצפה בלוח של Cloudflare (לא בתוך האתר).
