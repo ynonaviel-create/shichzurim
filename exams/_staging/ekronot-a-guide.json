@@ -1,0 +1,331 @@
+{
+  "id": "ekronot-a-guide",
+  "course": "ekronot-a",
+  "part": null,
+  "title": "מפת החומרים",
+  "kind": "guide",
+  "added": "2026-09-20",
+  "method": "TODO: איך המפה הזאת נבנתה — מאילו מקורות ומה נספר.",
+  "noDayPlan": true,
+  "units": [
+    {
+      "topic": "חיסון מולד וריריות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "הצגת אנטיגן ו-MHC",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "הפעלת תאי T וסבילות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "תאי B ונוגדנים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "רגישות יתר ואלרגיה",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "כשל חיסוני ומשלים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "חיסונים, גידולים והשתלות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "מבנה החיידק והמעטפת",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "גנטיקה, גדילה ומטבוליזם של חיידקים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "שיטות אבחון ומעגל האבחון",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "אנטיביוטיקה ועמידות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "סטאפילוקוק וסטרפטוקוק",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "יחסי חיידק-מאכסן ומיקרוביום",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "מיקובקטריה ושחפת",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "מלריה",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "לישמניה",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "טריפנוזומה",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "פרוטוזואה של המעי ואופורטוניסטים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "נמטודות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "צסטודות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "טרמטודות",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "אקטופרזיטים ווקטורים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "וירולוגיה כללית ואבחון",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "וירוסים מסוג DNA",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "וירוסים מסוג RNA",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "הרפס",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "הפטיטיס",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "HIV ורטרווירוסים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    },
+    {
+      "topic": "וירוסים נשימתיים ומתעוררים",
+      "lecturers": [],
+      "freq": 0,
+      "certainty": "unknown",
+      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+      "main": {
+        "src": "TODO: המקור הראשי ללמידה"
+      },
+      "points": []
+    }
+  ]
+}
