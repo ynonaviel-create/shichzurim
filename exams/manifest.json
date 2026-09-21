@@ -1,6 +1,6 @@
 {
-  "updated": "2026-09-19",
-  "version": "ccf10475",
+  "updated": "2026-09-21",
+  "version": "07ff6ed0",
   "assets": {
     "tokens": "67607727",
     "components": "8eca9228",
@@ -600,6 +600,24 @@
       "count": 35
     },
     {
+      "id": "ekronot-a-nun-alef",
+      "file": "ekronot-a-nun-alef.json",
+      "course": "ekronot-a",
+      "part": "מבחן בלוק",
+      "title": "שחזור מבחן הבלוק — מחזור נ״א, מועד א׳",
+      "kind": "shichzur",
+      "year": 2026,
+      "cycle": 51,
+      "moed": "א",
+      "added": "2026-09-22",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 71
+    },
+    {
       "id": "electro-2021-boch1",
       "file": "electro-2021-boch1.json",
       "course": "electro",
@@ -1009,7 +1027,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-19",
+      "added": "2026-09-21",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -1153,7 +1171,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-19",
+      "added": "2026-09-21",
       "official": null,
       "trust": null,
       "spotlight": null,
