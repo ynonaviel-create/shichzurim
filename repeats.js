@@ -87,10 +87,13 @@ const COURSES = {
       `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
         rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
       } — אבל טרם הוכרע מי צודק.`,
+    /* בקורס הזה לכל מחזור יש כמה מבחנים — אחד לכל מקצוע — ולכן "נ׳" לבדו
+       מופיע שלוש פעמים באותה רשימה ולא אומר כלום. המקצוע יושב ב-part. */
     label: (e) => {
       const m = (e.title || '').match(/מחזור\s+([^\s—–,]+)/);
       const base = m ? m[1] : (e.title || String(e.cycle ?? e.id)).replace(/^שחזור\s+/, '').split(/[—–]/)[0].trim();
-      return e.moed === 'ב' ? `${base} ב׳` : base;
+      const cycle = e.moed === 'ב' ? `${base} ב׳` : base;
+      return e.part && e.part !== 'High Yield' ? `${cycle} · ${e.part}` : cycle;
     },
   },
   /* שני קורסי הבלוק של שנה ב׳. הציר הוא מחזור, כמו בביומול — מחזור נ״א=51,
@@ -110,10 +113,13 @@ const COURSES = {
       `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
         rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
       } — אבל טרם הוכרע מי צודק.`,
+    /* בקורס הזה לכל מחזור יש כמה מבחנים — אחד לכל מקצוע — ולכן "נ׳" לבדו
+       מופיע שלוש פעמים באותה רשימה ולא אומר כלום. המקצוע יושב ב-part. */
     label: (e) => {
       const m = (e.title || '').match(/מחזור\s+([^\s—–,]+)/);
       const base = m ? m[1] : (e.title || String(e.cycle ?? e.id)).replace(/^שחזור\s+/, '').split(/[—–]/)[0].trim();
-      return e.moed === 'ב' ? `${base} ב׳` : base;
+      const cycle = e.moed === 'ב' ? `${base} ב׳` : base;
+      return e.part && e.part !== 'High Yield' ? `${cycle} · ${e.part}` : cycle;
     },
   },
   electro: {
