@@ -198,7 +198,7 @@ python3 guides/_template/inject.py <course>-<key>.html
 | מיקרוביולוגיה | ekronot-a | micro | `2effa4f8-bf04-41a8-910e-4bfe62b0b594` | **נבנתה במטה — לא לפתוח לה סשן** |
 | פרזיטולוגיה | ekronot-a | para | `49b0b74e-04d3-44ba-af93-a37f7a03057b` | **נבנתה במטה — לא לפתוח לה סשן** |
 | וירולוגיה | ekronot-a | viro | `8b5f921d-6e33-44fe-86e8-db0db987b31e` | **נבנתה במטה (פיילוט) — לא לפתוח לה סשן** |
-| פתולוגיה | ekronot-b | patho | `c3f5e076-60c6-4f2b-9bda-6b0b6d9ffeaa` | **בבנייה במטה — לא לפתוח לה סשן** |
+| פתולוגיה | ekronot-b | patho | `c3f5e076-60c6-4f2b-9bda-6b0b6d9ffeaa` | **נבנתה במטה — לא לפתוח לה סשן** |
 | פרמקולוגיה | ekronot-b | pharma | `9cabe8d5-dcfa-446c-bbbe-94cab89effe6` | `פרמקולוגיה.md` |
 | פיזיולוגיה | ekronot-b | physio | `d4a8af85-27e5-4247-b857-dc70285063fe` | `פיזיולוגיה.md` |
 | גנטיקה | ekronot-b | genetics | `3db0652a-dd0d-442f-aad8-50a7547f4256` | `גנטיקה.md` |
