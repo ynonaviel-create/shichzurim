@@ -9973,6 +9973,58 @@ function pointsPanel(courseId, u, idx, summaryMode) {
   return det;
 }
 
+/* ---------- קשור גם ל… — הקפיות והדדיות ----------
+   ינון (23/09/2026): „שבתוך כל הטירוף של חודשיים לכל כך הרבה חומר, הכל יהיה
+   מסודר, נגיש, מקושר — הקפיות והדדיות.” יחידת מפה יכולה להצביע על נושא במקצוע
+   אחר (`related[{course, topic, why}]`). הקישור נכתב פעם אחת, והאינדקס כאן
+   הופך אותו לדו-כיווני: היעד מציג אותו גם הוא, בלי שמישהו יכתוב אותו פעמיים.
+   נטען מכל המפות, בלי לגעת ב-GUIDE_BY_TOPIC (שנושא בו הוא מפתח גלובלי). */
+let relatedIdx = null;
+async function loadRelated() {
+  if (relatedIdx) return relatedIdx;
+  const idx = {};
+  const add = (k, v) => { (idx[k] ||= []).some((x) => x.course === v.course && x.topic === v.topic) || idx[k].push(v); };
+  const metas = EXAMS.filter((e) => e.kind === 'guide');
+  const gs = await Promise.all(metas.map((m) =>
+    guideCache[m.course] !== undefined ? guideCache[m.course]
+      : fetch(`exams/${m.file}?v=${VERSION}`).then((r) => (r.ok ? r.json() : null)).catch(() => null)));
+  gs.forEach((g, i) => {
+    if (!g) return;
+    const from = metas[i].course;
+    (g.units || []).forEach((u) => (u.related || []).forEach((r) => {
+      if (!r.course || !r.topic) return;
+      add(`${from}|${u.topic}`, { course: r.course, topic: r.topic, why: r.why });
+      add(`${r.course}|${r.topic}`, { course: from, topic: u.topic, why: r.why });
+    }));
+  });
+  return (relatedIdx = idx);
+}
+
+function relatedPanel(courseId, topic) {
+  const list = (relatedIdx || {})[`${courseId}|${topic}`];
+  if (!list || !list.length) return null;
+  const me = courseOf(courseId);
+  const box = el('div', 'g-rel');
+  box.append(el('div', 'g-lbl', '🔗 קשור גם ל…'));
+  list.forEach((r) => {
+    const tc = courseOf(r.course);
+    const sj = subjectOfTopic(r.course, r.topic);
+    const where = sj ? `${sj.icon || ''} ${sj.name}`.trim() : (tc ? `${tc.icon || ''} ${tc.name}`.trim() : r.course);
+    /* מקצוע משנה קודמת: "כבר ראית" — זה חומר שהסטודנט כבר למד, לא עוד משהו ללמוד. */
+    const earlier = tc && me && tc.year && me.year && tc.year < me.year;
+    const a = el('a', 'g-rel-item');
+    /* מפה שעוד לא עלתה (עדיין ב-staging) — הקישור מוביל לתרגול הנושא, לא לדף ריק. */
+    a.href = guideOf(r.course)
+      ? `#/guide/${r.course}/${encodeURIComponent(r.topic)}`
+      : `#/practice/${r.course}/${encodeURIComponent(r.topic)}`;
+    a.append(el('span', 'g-rel-where', earlier ? `כבר ראית בשנה א׳ · ${where}` : where));
+    a.append(el('b', null, r.topic));
+    if (r.why) a.append(el('span', 'g-rel-why', r.why));
+    box.append(a);
+  });
+  return box;
+}
+
 function unitCard(courseId, g, r, focus, collapsible) {
   const u = r.u;
   const sec = el('section', 'g-unit' + (focus ? ' q-flash' : '') + (collapsible ? ' g-unit-collapsible' : '') + (collapsible && focus ? ' is-open' : ''));
@@ -10027,6 +10079,9 @@ function unitCard(courseId, g, r, focus, collapsible) {
      רשימה כזאת היא הכישלון עצמו ולא גרסת ביניים. */
   const pts = pointsPanel(courseId, u, qIndex(courseId), g.noDayPlan);
   if (pts) body.append(pts);
+
+  const rel = relatedPanel(courseId, u.topic);
+  if (rel) body.append(rel);
 
   if ((u.videos || []).length) {
     body.append(el('div', 'g-lbl', '▶️ סרטונים'));
@@ -10106,7 +10161,10 @@ async function renderGuide(courseId, focusTopic = null) {
   }
 
   /* צריך את השאלות עצמן כדי לספור שליטה לפי נושא — המניפסט מחזיק רק מטא-דאטה. */
-  await Promise.all(quizzesOf(courseId).map((m) => loadExam(m.id).catch(() => null)));
+  await Promise.all([
+    ...quizzesOf(courseId).map((m) => loadExam(m.id).catch(() => null)),
+    loadRelated().catch(() => null),
+  ]);
 
   view.innerHTML = '';
   view.append(crumb(c.name, '#/course/' + courseId));
