@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-23",
-  "version": "eb3cbc2d",
+  "version": "9ee23637",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1023,7 +1023,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 21
+      "count": 32
     },
     {
       "id": "ekronot-a-immuno-lab1-nun",
@@ -1463,6 +1463,25 @@
       "count": 46
     },
     {
+      "id": "ekronot-a-para-mem-tet-b",
+      "file": "ekronot-a-para-mem-tet-b.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "פרזיטולוגיה · מבחן · מחזור מ״ט · מועד ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 49,
+      "moed": "ב",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 31
+    },
+    {
       "id": "ekronot-a-para-nun-alef-quiz",
       "file": "ekronot-a-para-nun-alef-quiz.json",
       "course": "ekronot-a",
@@ -1501,6 +1520,25 @@
       "count": 44
     },
     {
+      "id": "ekronot-a-viro-arch-mem-dalet",
+      "file": "ekronot-a-viro-arch-mem-dalet.json",
+      "course": "ekronot-a",
+      "part": "וירולוגיה",
+      "title": "וירולוגיה · מבחן ישן, השאלות שבתוכנית · מחזור מ״ד",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 44,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 23
+    },
+    {
       "id": "ekronot-a-viro-arch-mem-het",
       "file": "ekronot-a-viro-arch-mem-het.json",
       "course": "ekronot-a",
@@ -1518,6 +1556,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 23
+    },
+    {
+      "id": "ekronot-a-viro-arch-mem-hey",
+      "file": "ekronot-a-viro-arch-mem-hey.json",
+      "course": "ekronot-a",
+      "part": "וירולוגיה",
+      "title": "וירולוגיה · מבחן ישן, השאלות שבתוכנית · מחזור מ״ה",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 45,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 27
     },
     {
       "id": "ekronot-a-viro-arch-mem-tet",
