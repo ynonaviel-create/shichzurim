@@ -1,11 +1,11 @@
 {
   "updated": "2026-09-23",
-  "version": "56b70acc",
+  "version": "e0a53968",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
     "css": "02432e16",
-    "js": "14ce0b0a",
+    "js": "7ee17efa",
     "cloud": "8bc020be"
   },
   "courses": [
@@ -735,6 +735,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 100
@@ -753,6 +754,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 50
@@ -771,6 +773,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -789,6 +792,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -807,6 +811,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 30
@@ -825,6 +830,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -843,6 +849,7 @@
       "official": false,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 37
@@ -861,6 +868,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 42
@@ -879,6 +887,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 35
@@ -897,6 +906,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 34
@@ -915,6 +925,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
@@ -933,6 +944,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -951,6 +963,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 5
@@ -969,6 +982,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "המתרגלים שלחו מיקוד למבחן. כאן הוא מפורק לכרטיסיות: מה בדיוק נשאל בכל נושא, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
       "heroEyebrow": "🎯 המיקוד מהמתרגלים",
       "count": 19
@@ -987,6 +1001,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 35
@@ -1005,6 +1020,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 15
@@ -1014,7 +1030,7 @@
       "file": "ekronot-a-immuno-lab1-nun.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "בוחן כניסה 1 באימונולוגיה — מחזור נ׳",
+      "title": "אימונולוגיה · בוחן כניסה לתרגול 1 · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1023,6 +1039,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1032,7 +1049,7 @@
       "file": "ekronot-a-immuno-lab2-nun.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "בוחן כניסה 2 באימונולוגיה — מחזור נ׳",
+      "title": "אימונולוגיה · בוחן כניסה לתרגול 2 · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1041,6 +1058,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1050,7 +1068,7 @@
       "file": "ekronot-a-immuno-lab3-nun.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "בוחן כניסה לתרגול 3 באימונולוגיה — מחזור נ׳",
+      "title": "אימונולוגיה · בוחן כניסה לתרגול 3 · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1059,6 +1077,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1068,7 +1087,7 @@
       "file": "ekronot-a-immuno-lab4-nun.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "בוחן כניסה לתרגול 4 באימונולוגיה — מחזור נ׳",
+      "title": "אימונולוגיה · בוחן כניסה לתרגול 4 · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1077,6 +1096,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1086,7 +1106,7 @@
       "file": "ekronot-a-immuno-mem-het.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "שחזור אימונולוגיה — מחזור מ״ח",
+      "title": "אימונולוגיה · מבחן · מחזור מ״ח",
       "kind": "shichzur",
       "year": null,
       "cycle": 48,
@@ -1095,6 +1115,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
@@ -1104,7 +1125,7 @@
       "file": "ekronot-a-immuno-mem-tet.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "שחזור אימונולוגיה — מחזור מ״ט",
+      "title": "אימונולוגיה · מבחן · מחזור מ״ט",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1113,6 +1134,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
@@ -1122,7 +1144,7 @@
       "file": "ekronot-a-immuno-nun-alef-quiz.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "בוחן אימונולוגיה — מחזור נ״א, שיעורים 1–4",
+      "title": "אימונולוגיה · בוחן על שיעורים 1–4 · מחזור נ״א",
       "kind": "shichzur",
       "year": null,
       "cycle": 51,
@@ -1131,6 +1153,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1140,7 +1163,7 @@
       "file": "ekronot-a-immuno-nun.json",
       "course": "ekronot-a",
       "part": "אימונולוגיה",
-      "title": "שחזור אימונולוגיה — מחזור נ׳",
+      "title": "אימונולוגיה · מבחן · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1149,6 +1172,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 37
@@ -1158,7 +1182,7 @@
       "file": "ekronot-a-micro-lab1.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "בוחן מעבדה 1 במיקרוביולוגיה — שיטות כלליות",
+      "title": "מיקרוביולוגיה · בוחן מעבדה 1 · שיטות כלליות",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1167,6 +1191,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 13
@@ -1176,7 +1201,7 @@
       "file": "ekronot-a-micro-lab3.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "בוחן כניסה למעבדה 3 במיקרוביולוגיה — מתגים גראם שליליים",
+      "title": "מיקרוביולוגיה · בוחן כניסה למעבדה 3 · מתגים גראם-שליליים",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1185,6 +1210,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 4
@@ -1194,7 +1220,7 @@
       "file": "ekronot-a-micro-mem-tet.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "שחזור מיקרוביולוגיה א׳ — מחזור מ״ט",
+      "title": "מיקרוביולוגיה · מבחן · מחזור מ״ט · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1203,6 +1229,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 38
@@ -1212,7 +1239,7 @@
       "file": "ekronot-a-micro-mem-zayin.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "שחזור מיקרוביולוגיה — מחזור מ״ז",
+      "title": "מיקרוביולוגיה · מבחן · מחזור מ״ז · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 47,
@@ -1221,6 +1248,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 42
@@ -1230,7 +1258,7 @@
       "file": "ekronot-a-micro-nun.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "שחזור מיקרוביולוגיה א׳ — מחזור נ׳",
+      "title": "מיקרוביולוגיה · מבחן · מחזור נ׳ · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1239,6 +1267,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -1248,7 +1277,7 @@
       "file": "ekronot-a-micro-tb.json",
       "course": "ekronot-a",
       "part": "מיקרוביולוגיה",
-      "title": "מיקובקטריה ושחפת — מתוך חוברת מיקרוביולוגיה ב׳",
+      "title": "מיקרוביולוגיה · שחפת · מתוך חוברת מיקרו ב׳",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1257,6 +1286,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": "bank",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 6
@@ -1266,7 +1296,7 @@
       "file": "ekronot-a-nun-alef.json",
       "course": "ekronot-a",
       "part": "מבחן בלוק",
-      "title": "שחזור מבחן הבלוק — מחזור נ״א, מועד א׳",
+      "title": "מבחן הבלוק · מחזור נ״א · מועד א׳",
       "kind": "shichzur",
       "year": 2026,
       "cycle": 51,
@@ -1275,6 +1305,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 71
@@ -1284,7 +1315,7 @@
       "file": "ekronot-a-para-exposure.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "פרזיטולוגיה — טופס חשיפה רשמי, מועד ב׳",
+      "title": "פרזיטולוגיה · טופס חשיפה רשמי · מועד ב׳",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1293,6 +1324,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 11
@@ -1302,7 +1334,7 @@
       "file": "ekronot-a-para-lab1-2018.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 1 בפרזיטולוגיה — לישמניה, טריפנוזומה ומלריה (2018)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 1 · 2018",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1311,6 +1343,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 18
@@ -1320,7 +1353,7 @@
       "file": "ekronot-a-para-lab1-mem-tet.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 1 בפרזיטולוגיה — מחזור מ״ט (טריפנוזומה, לישמניה ומלריה)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 1 · מחזור מ״ט",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1329,6 +1362,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1338,7 +1372,7 @@
       "file": "ekronot-a-para-lab2-2018.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 2 בפרזיטולוגיה — פרוטוזואה של המעי, אופורטוניסטים ונמטודות (2018)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 2 · 2018",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1347,6 +1381,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 18
@@ -1356,7 +1391,7 @@
       "file": "ekronot-a-para-lab2-mem-tet.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 2 בפרזיטולוגיה — מחזור מ״ט (אופורטוניסטים, פרוטוזואה של המעי ונמטודות)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 2 · מחזור מ״ט",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1365,6 +1400,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1374,7 +1410,7 @@
       "file": "ekronot-a-para-lab3-2018.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 3 בפרזיטולוגיה — תולעים: נמטודות, צסטודות וטרמטודות (2018)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 3 · 2018",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1383,6 +1419,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 16
@@ -1392,7 +1429,7 @@
       "file": "ekronot-a-para-lab3-mem-tet.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן מעבדה 3 בפרזיטולוגיה — מחזור מ״ט (תולעי רקמות, צסטודות, טרמטודות ואקטופרזיטים)",
+      "title": "פרזיטולוגיה · בוחן מעבדה 3 · מחזור מ״ט",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1401,6 +1438,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 9
@@ -1410,7 +1448,7 @@
       "file": "ekronot-a-para-mem-tet-a.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "שחזור פרזיטולוגיה — מחזור מ״ט, מועד א׳",
+      "title": "פרזיטולוגיה · מבחן · מחזור מ״ט · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1419,6 +1457,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
@@ -1428,7 +1467,7 @@
       "file": "ekronot-a-para-nun-alef-quiz.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "בוחן פרזיטולוגיה — מחזור נ״א, שיעורים 1–3",
+      "title": "פרזיטולוגיה · בוחן על שיעורים 1–3 · מחזור נ״א",
       "kind": "shichzur",
       "year": null,
       "cycle": 51,
@@ -1437,6 +1476,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1446,7 +1486,7 @@
       "file": "ekronot-a-para-nun.json",
       "course": "ekronot-a",
       "part": "פרזיטולוגיה",
-      "title": "שחזור פרזיטולוגיה — מחזור נ׳, מועד א׳",
+      "title": "פרזיטולוגיה · מבחן · מחזור נ׳ · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1455,6 +1495,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 44
@@ -1464,7 +1505,7 @@
       "file": "ekronot-a-viro-lab.json",
       "course": "ekronot-a",
       "part": "וירולוגיה",
-      "title": "בוחן מעבדה בווירולוגיה — שיטות אבחון",
+      "title": "וירולוגיה · בוחן מעבדה · מחזור מ״ח",
       "kind": "shichzur",
       "year": null,
       "cycle": 48,
@@ -1473,6 +1514,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 7
@@ -1482,7 +1524,7 @@
       "file": "ekronot-a-viro-legacy.json",
       "course": "ekronot-a",
       "part": "וירולוגיה",
-      "title": "וירולוגיה — הפריטים היסודיים מהשחזורים הישנים, מ״א–מ״ג",
+      "title": "וירולוגיה · שאלות יסוד מהמבחנים הישנים · מ״א–מ״ג",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1491,6 +1533,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "bank",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 37
@@ -1500,7 +1543,7 @@
       "file": "ekronot-a-viro-practice.json",
       "course": "ekronot-a",
       "part": "וירולוגיה",
-      "title": "תרגול וירולוגיה — שיעורי המבוא",
+      "title": "וירולוגיה · תרגול · ארבעת השיעורים",
       "kind": "practice",
       "year": 2026,
       "cycle": null,
@@ -1509,6 +1552,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": "bank",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -1518,7 +1562,7 @@
       "file": "ekronot-b-genetics-2013.json",
       "course": "ekronot-b",
       "part": "גנטיקה",
-      "title": "מאגר השאלות של ד״ר קויפמן — „מבחן בגנטיקה 2013 לפרסום”",
+      "title": "גנטיקה · מאגר השאלות של ד״ר קויפמן · 2013",
       "kind": "shichzur",
       "year": 2013,
       "cycle": null,
@@ -1527,6 +1571,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 32
@@ -1536,7 +1581,7 @@
       "file": "ekronot-b-genetics-2018.json",
       "course": "ekronot-b",
       "part": "גנטיקה",
-      "title": "מבחן סיום קורס גנטיקה רפואית 2018 — מועד א׳",
+      "title": "גנטיקה · מבחן סיום · 2018 · מועד א׳",
       "kind": "shichzur",
       "year": 2018,
       "cycle": null,
@@ -1545,6 +1590,7 @@
       "official": true,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -1554,7 +1600,7 @@
       "file": "ekronot-b-genetics-kaufman-1.json",
       "course": "ekronot-b",
       "part": "גנטיקה",
-      "title": "שאלות חשופות של ד״ר קויפמן — קובץ 1",
+      "title": "גנטיקה · שאלות חשופות של ד״ר קויפמן · קובץ 1",
       "kind": "shichzur",
       "year": null,
       "cycle": null,
@@ -1563,6 +1609,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -1572,7 +1619,7 @@
       "file": "ekronot-b-genetics-kaufman-3.json",
       "course": "ekronot-b",
       "part": "גנטיקה",
-      "title": "שאלות חשופות של ד״ר קויפמן — קובץ 3",
+      "title": "גנטיקה · שאלות חשופות של ד״ר קויפמן · קובץ 3",
       "kind": "shichzur",
       "year": 2015,
       "cycle": null,
@@ -1581,6 +1628,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -1590,7 +1638,7 @@
       "file": "ekronot-b-genetics-prep-quizzes.json",
       "course": "ekronot-b",
       "part": "גנטיקה",
-      "title": "בחני הכנה לתרגולים 2–3 בגנטיקה — מחזור מ״ו",
+      "title": "גנטיקה · בחני הכנה לתרגולים 2–3 · מחזור מ״ו",
       "kind": "shichzur",
       "year": null,
       "cycle": 46,
@@ -1599,6 +1647,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 14
@@ -1617,6 +1666,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 22
@@ -1626,7 +1676,7 @@
       "file": "ekronot-b-patho-bet-nun.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "שחזור פתולוגיה ב׳ — מחזור נ׳ (הנושאים שבסילבוס בלבד)",
+      "title": "פתולוגיה ב׳ · מבחן, נאופלסיה וזיהומיות · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1635,6 +1685,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 16
@@ -1644,7 +1695,7 @@
       "file": "ekronot-b-patho-exposure.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "פתולוגיה א׳ — טופס חשיפה רשמי, מועד ב׳ של מחזור מ״ז",
+      "title": "פתולוגיה א׳ · טופס חשיפה רשמי · מחזור מ״ז · מועד ב׳",
       "kind": "shichzur",
       "year": 2022,
       "cycle": 47,
@@ -1653,6 +1704,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 8
@@ -1662,7 +1714,7 @@
       "file": "ekronot-b-patho-labs.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "בחני המעבדה בפתולוגיה א׳ — שלושת הבחנים",
+      "title": "פתולוגיה א׳ · בחני מעבדה 1–3 · מחזור מ״א",
       "kind": "shichzur",
       "year": null,
       "cycle": 41,
@@ -1671,6 +1723,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 15
@@ -1680,7 +1733,7 @@
       "file": "ekronot-b-patho-mem-het.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "שחזור פתולוגיה א׳ — מחזור מ״ח, מועד א׳",
+      "title": "פתולוגיה א׳ · מבחן · מחזור מ״ח · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 48,
@@ -1689,6 +1742,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 53
@@ -1698,7 +1752,7 @@
       "file": "ekronot-b-patho-mem-tet.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "שחזור פתולוגיה א׳ — מחזור מ״ט, מועד א׳",
+      "title": "פתולוגיה א׳ · מבחן · מחזור מ״ט · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1707,6 +1761,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 47
@@ -1716,7 +1771,7 @@
       "file": "ekronot-b-patho-nun.json",
       "course": "ekronot-b",
       "part": "פתולוגיה",
-      "title": "שחזור פתולוגיה א׳ — מחזור נ׳",
+      "title": "פתולוגיה א׳ · מבחן · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1725,6 +1780,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 51
@@ -1734,7 +1790,7 @@
       "file": "ekronot-b-pharma-2022.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור מבוא לפרמקולוגיה — רוקחות 2022, מועד א׳",
+      "title": "פרמקולוגיה · מבחן רוקחות · 2022 · מועד א׳",
       "kind": "shichzur",
       "year": 2022,
       "cycle": null,
@@ -1743,6 +1799,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 28
@@ -1752,7 +1809,7 @@
       "file": "ekronot-b-pharma-mem-het-b.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור מ״ח, מועד ב׳",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ח · מועד ב׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 48,
@@ -1761,6 +1818,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 30
@@ -1770,7 +1828,7 @@
       "file": "ekronot-b-pharma-mem-het.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור מ״ח, מועד א׳",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ח · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 48,
@@ -1779,6 +1837,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 50
@@ -1788,7 +1847,7 @@
       "file": "ekronot-b-pharma-mem-hey.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור מ״ה, מועד א׳",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ה · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 45,
@@ -1797,6 +1856,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 55
@@ -1806,7 +1866,7 @@
       "file": "ekronot-b-pharma-mem-tet.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור מ״ט, מועד א׳",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ט · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1815,6 +1875,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -1824,7 +1885,7 @@
       "file": "ekronot-b-pharma-mem-zayin.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור מ״ז, מועד א׳",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ז · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 47,
@@ -1833,6 +1894,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 70
@@ -1842,7 +1904,7 @@
       "file": "ekronot-b-pharma-nun.json",
       "course": "ekronot-b",
       "part": "פרמקולוגיה",
-      "title": "שחזור פרמקולוגיה — מחזור נ׳, מועד א׳",
+      "title": "פרמקולוגיה · מבחן · מחזור נ׳ · מועד א׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1851,6 +1913,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "exam",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 55
@@ -1860,7 +1923,7 @@
       "file": "ekronot-b-physio-cardio-master.json",
       "course": "ekronot-b",
       "part": "פיזיולוגיה",
-      "title": "בוחן מערכת הלב — מאסטר רשמי, מחזור מ״ז (השאלות על מכניקת הכיווץ)",
+      "title": "פיזיולוגיה · בוחן מערכת הלב, מאסטר רשמי · מחזור מ״ז",
       "kind": "shichzur",
       "year": 2021,
       "cycle": 47,
@@ -1869,6 +1932,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 4
@@ -1878,7 +1942,7 @@
       "file": "ekronot-b-physio-cardio-mem-bet.json",
       "course": "ekronot-b",
       "part": "פיזיולוגיה",
-      "title": "בוחן פיזיולוגיה, מערכת הדם — מחזור מ״ב (השאלות על מכניקת הכיווץ)",
+      "title": "פיזיולוגיה · בוחן מערכת הדם · מחזור מ״ב",
       "kind": "shichzur",
       "year": null,
       "cycle": 42,
@@ -1887,6 +1951,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 3
@@ -1896,7 +1961,7 @@
       "file": "ekronot-b-physio-cardio-mem-tet.json",
       "course": "ekronot-b",
       "part": "פיזיולוגיה",
-      "title": "שחזור בוחן 1 בפיזיולוגיה, המערכת הקרדיווסקולרית — מחזור מ״ט (השאלות על מכניקת הכיווץ)",
+      "title": "פיזיולוגיה · בוחן קרדיו · מחזור מ״ט",
       "kind": "shichzur",
       "year": null,
       "cycle": 49,
@@ -1905,6 +1970,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 5
@@ -1914,7 +1980,7 @@
       "file": "ekronot-b-physio-cardio-nun.json",
       "course": "ekronot-b",
       "part": "פיזיולוגיה",
-      "title": "שחזור בוחן קרדיו בפיזיולוגיה — מחזור נ׳ (השאלות על מכניקת הכיווץ)",
+      "title": "פיזיולוגיה · בוחן קרדיו · מחזור נ׳",
       "kind": "shichzur",
       "year": null,
       "cycle": 50,
@@ -1923,6 +1989,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": "quiz",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 3
@@ -1932,7 +1999,7 @@
       "file": "ekronot-b-physio-master.json",
       "course": "ekronot-b",
       "part": "פיזיולוגיה",
-      "title": "מאגר השאלות הרשמי — אלקטרופיזיולוגיה של הלב, תשפ״א–תשפ״ה",
+      "title": "פיזיולוגיה · מאגר רשמי, אלקטרופיזיולוגיה של הלב · 2021–2025",
       "kind": "shichzur",
       "year": 2025,
       "cycle": null,
@@ -1941,6 +2008,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": "official",
       "heroSub": null,
       "heroEyebrow": null,
       "count": 83
@@ -1959,6 +2027,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1977,6 +2046,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -1995,6 +2065,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 45
@@ -2013,6 +2084,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 44
@@ -2031,6 +2103,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2049,6 +2122,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2067,6 +2141,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2085,6 +2160,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2103,6 +2179,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -2121,6 +2198,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
@@ -2139,6 +2217,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2157,6 +2236,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2175,6 +2255,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 32
@@ -2193,6 +2274,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 32
@@ -2211,6 +2293,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2229,6 +2312,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2247,6 +2331,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 31
@@ -2265,6 +2350,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 33
@@ -2283,6 +2369,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 9
@@ -2301,6 +2388,7 @@
       "official": true,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2323,6 +2411,7 @@
         "title": "המבחן הזה אינו מהמאגר הרשמי — ודווקא לכן שווה לתרגל אותו",
         "body": "אלה שאלות מ<b>מבחן של קורס אחר</b>: „נוירופיזיולוגיה של התא” בתואר במדעי המוח, שנבחן ב-21/07/2026 — <b>שבוע לפני שלכם, אצל אותו מרצה, פרופ׳ גיטלר</b>. שני הצדדים של זה חשובים באותה מידה. <b>מצד המהימנות זה החומר החלש ביותר באתר:</b> השחזור נכתב מהזיכרון דקות אחרי המבחן, רוב המסיחים לא נזכרו והושלמו על ידי שני מודלים בנפרד, ואין מפתח תשובות רשמי. אל תתייחסו לניסוח כאל מדויק. <b>מצד הרלוונטיות זה החומר החם ביותר:</b> אותו מרצה, אותו חומר, ומבחן שנכתב לפני ימים — ובחמש שאלות כבר אימתנו שהמאגר הרשמי שלנו מכיל גרסאות כמעט זהות. <b>תרגלו את המנגנון, לא את הניסוח.</b>"
       },
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 20
@@ -2341,6 +2430,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 12
@@ -2359,6 +2449,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 23
@@ -2377,6 +2468,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "חמש שיטות מחקר, וסיפור אחד שמחבר ביניהן: איך סינפסין מארגן את הווזיקולות כטיפת נוזל, ולמה בלעדיו אלפא-סינוקלאין מפסיק להיות רעיל.",
       "heroEyebrow": "🔬 השיעור האחרון",
       "count": 10
@@ -2395,6 +2487,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 20
@@ -2413,6 +2506,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "כל מחלה, רעלן ותרופה בקורס — דרך המשקפיים של הקורס: איזה זרם, איזו תעלה, איזה שלב במחזור הווזיקולה. ולכל כרטיסייה: השאלות מהמאגר הרשמי שבדקו בדיוק את זה.",
       "heroEyebrow": "🧠 פתולוגיות ותרופות",
       "count": 27
@@ -2431,6 +2525,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
@@ -2449,6 +2544,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, רעלנים, רצפטורים, בופרים ותאי גליה — ולצידן ארבע עובדות מהמודל החשמלי שכולן נגזרות מדף הנוסחאות ובכל זאת נופלים עליהן. מרוכז — לבדיקה עצמית ולחזרה אחרונה.",
       "heroEyebrow": null,
       "count": 49
@@ -2467,6 +2563,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "פרופ׳ תומר קוקס עבר איתנו בזום על השאלות שיהיו במבחן. כרטיסיות קריאה — מה נשאל, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
       "heroEyebrow": "🎓 ישירות מהמרצה",
       "count": 15
@@ -2485,6 +2582,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 12
@@ -2503,6 +2601,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 59
@@ -2521,6 +2620,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 28
@@ -2539,6 +2639,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 59
@@ -2557,6 +2658,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 38
@@ -2575,6 +2677,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 55
@@ -2593,6 +2696,7 @@
       "official": null,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 54
@@ -2611,6 +2715,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 11
@@ -2629,6 +2734,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 29
@@ -2647,6 +2753,7 @@
       "official": false,
       "trust": "unverified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 35
@@ -2665,6 +2772,7 @@
       "official": null,
       "trust": "unverified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 60
@@ -2683,6 +2791,7 @@
       "official": null,
       "trust": "partial",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
@@ -2701,6 +2810,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
@@ -2719,6 +2829,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 66
@@ -2737,6 +2848,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 10
@@ -2755,6 +2867,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 26
@@ -2773,6 +2886,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 21
@@ -2791,6 +2905,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 56
@@ -2809,6 +2924,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
@@ -2827,6 +2943,7 @@
       "official": false,
       "trust": "verified",
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 36
@@ -2845,6 +2962,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": "כל 40 השאלות שהכיתה כתבה, בלי מסיחים: השאלה בצד אחד והתשובה הנכונה בצד השני. בשיעור החזרה נצח אמר ש~20% מהמבחן יילקח מהן — זו הדרך המהירה ביותר לעבור עליהן שוב.",
       "heroEyebrow": null,
       "count": 40
@@ -2863,6 +2981,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 7
@@ -2881,6 +3000,7 @@
       "official": null,
       "trust": null,
       "spotlight": null,
+      "series": null,
       "heroSub": null,
       "heroEyebrow": null,
       "count": 51

@@ -1745,6 +1745,48 @@ function examListFrag(exams, c) {
     return frag;
   };
 
+  /* מבחן בלוק: בתוך כל מקצוע, קבוצות לפי סוג הבנק (series) — מבחני סוף קודם,
+     אחר כך בחנים ומעבדות, רשמיים ואוספים. ינון (23/09): „שיהיה נעים לעין, לא
+     מבלבל, וניתן למעקב.” בתוך קבוצה הסדר נשאר של examsOf — מהמחזור החדש לישן. */
+  const SERIES_HEAD = {
+    exam: ['📝 מבחני סוף', 'המבחנים של הקורסים שקדמו לתוכנית'],
+    quiz: ['🧪 בחנים ומעבדות', 'בחני כניסה, בחני מעבדה ובחנים לאורך הקורס'],
+    official: ['✓ מאגרים וחשיפות רשמיים', 'נוסח ומפתח של הקורס עצמו'],
+    bank: ['📚 אוספים נוספים', 'שאלות שנאספו מכמה מקורות'],
+  };
+  if (subjectsOf(c).length && exams.every((e) => e.series)) {
+    const byPart = {};
+    exams.forEach((e) => (byPart[e.part || ''] ||= []).push(e));
+    const parts = Object.keys(byPart);
+    parts.forEach((part) => {
+      if (part && parts.length > 1) {
+        const ph = el('div', 'part-head');
+        ph.append(el('h3', null, part));
+        wrap.append(ph);
+      }
+      Object.keys(SERIES_HEAD).forEach((sr) => {
+        const arr = byPart[part].filter((e) => e.series === sr);
+        if (!arr.length) return;
+        const [ttl, sub] = SERIES_HEAD[sr];
+        const ph = el('div', 'part-head');
+        ph.append(el('h3', null, ttl));
+        const n = arr.reduce((t, e) => t + e.count, 0);
+        const pill = el('span', 'pill', `${plural(arr.length, 'מבחן', 'מבחנים')} · ${n} שאלות`);
+        pill.title = sub;
+        ph.append(pill);
+        wrap.append(ph);
+        const grid = el('div', 'exam-cgrid');
+        /* בעמוד המקצוע שם המקצוע כבר בכותרת — „פרזיטולוגיה · ” בכל כרטיס הוא רעש.
+           הכותרת המלאה נשארת בכל מקום אחר (תרגול מעורב, חיפוש, סימולציה). */
+        const pre = part ? part + ' · ' : null;
+        arr.forEach((e) => grid.append(examCardCompact(e, sr === 'official',
+          pre && e.title.startsWith(pre) ? e.title.slice(pre.length) : null)));
+        wrap.append(grid);
+      });
+    });
+    return wrap;
+  }
+
   if (c.flatExams) {
     const hideOff = allOfficial(exams);
     if (hideOff && exams.length > 2) wrap.append(el('div', 'zone-note', '✓ כל המבחנים כאן רשמיים'));
@@ -1772,14 +1814,16 @@ function examListFrag(exams, c) {
 /* כרטיס שחזור צפוף — כותרת, שנה, מס' שאלות, אינדיקציה קטנה של "רשמי", ופס דק.
    בלי התגיות החוזרות (שחזור/מאסטר רשמי בכל כרטיס) שהיו רעש; המידע הזה עולה
    ממילא מכותרת הזונה. משאיר את הרשימה קצרה ומסודרת. */
-function examCardCompact(m, hideOfficial) {
+function examCardCompact(m, hideOfficial, shownTitle) {
   const s = quickScore(m);
   const a = el('a', 'exam-c');
   a.dataset.tour = 'exam';
   a.href = '#/exam/' + m.id;
-  a.append(el('div', 'exam-c-ttl', m.title));
+  a.append(el('div', 'exam-c-ttl', shownTitle || m.title));
+  if (shownTitle && shownTitle !== m.title) a.title = m.title;
   const meta = el('div', 'exam-c-meta');
-  if (m.year) meta.append(el('span', 'exam-c-yr', m.year));
+  /* שנה שכבר כתובה בכותרת לא חוזרת במטא (בנקי מבחן בלוק: „… · 2022 · מועד א׳”) */
+  if (m.year && !(shownTitle || m.title).includes(String(m.year))) meta.append(el('span', 'exam-c-yr', m.year));
   meta.append(el('span', null, `${m.count} שאלות`));
   if (m.official === true && !hideOfficial) meta.append(el('span', 'exam-c-off', '✓ רשמי'));
   else if (m.official === false) meta.append(el('span', null, 'שחזור סטודנטים'));

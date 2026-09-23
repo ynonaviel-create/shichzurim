@@ -324,6 +324,9 @@ for (const file of files) {
     /* מבחן שאינו רגיל בשני צירים בבת אחת — מהימנות נמוכה ורלוונטיות גבוהה.
        תג רגיל אומר אחד מהם; spotlight אומר את שניהם, ובכרטיס וגם בראש המבחן. */
     spotlight: data.spotlight ?? null,
+    /* סוג הבנק בתוך מקצוע של מבחן בלוק — מבחני סוף / בחנים ומעבדות / רשמיים /
+       אוספים. עמוד המקצוע מקבץ לפיו, כדי שמבחני סוף לא יתערבבו בבחני כניסה. */
+    series: data.series ?? null,
     heroSub: data.heroSub ?? null,     // מפה/כרטיסיות: הטקסט בבאנר שבעמוד המקצוע, לפני שהקובץ עצמו נטען
     heroEyebrow: data.heroEyebrow ?? null,   // כרטיסיות: מי מסר את החומר — מרצה או מתרגלים
     count: items.length,
@@ -564,6 +567,17 @@ courses.forEach((c) => {
   (c.topics || []).forEach((t) => {
     if (!seenT.has(t)) problems.push(`${at}: הנושא "${t}" לא שויך לאף מקצוע — הוא ייעלם מעמודי המקצוע`);
   });
+});
+
+/* --- series בקורס עם subjects — כל בנק בקבוצה אחת מוכרת --- */
+const SERIES = ['exam', 'quiz', 'official', 'bank'];
+courses.forEach((c) => {
+  if (!c.subjects) return;
+  exams.filter((e) => e.course === c.id && !['guide', 'highyield', 'cards', 'case', 'shinun'].includes(e.kind))
+    .forEach((e) => {
+      if (!SERIES.includes(e.series))
+        problems.push(`${e.file}: series="${e.series}" — בקורס עם subjects חובה אחד מ: ${SERIES.join(' / ')}`);
+    });
 });
 
 /* --- ליווי הסמסטר (teaching) ---
