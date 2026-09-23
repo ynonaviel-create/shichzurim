@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-23",
-  "version": "9133e9d8",
+  "version": "43dbb255",
   "assets": {
     "tokens": "67607727",
     "components": "8eca9228",
@@ -800,6 +800,42 @@
       "count": 37
     },
     {
+      "id": "ekronot-a-micro-lab1",
+      "file": "ekronot-a-micro-lab1.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "בוחן מעבדה 1 במיקרוביולוגיה — שיטות כלליות",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 13
+    },
+    {
+      "id": "ekronot-a-micro-lab3",
+      "file": "ekronot-a-micro-lab3.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "בוחן כניסה למעבדה 3 במיקרוביולוגיה — מתגים גראם שליליים",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 4
+    },
+    {
       "id": "ekronot-a-micro-mem-tet",
       "file": "ekronot-a-micro-mem-tet.json",
       "course": "ekronot-a",
@@ -852,6 +888,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
+    },
+    {
+      "id": "ekronot-a-micro-tb",
+      "file": "ekronot-a-micro-tb.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "מיקובקטריה ושחפת — מתוך חוברת מיקרוביולוגיה ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "unverified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 6
     },
     {
       "id": "ekronot-a-nun-alef",
@@ -1050,6 +1104,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 44
+    },
+    {
+      "id": "ekronot-a-viro-lab",
+      "file": "ekronot-a-viro-lab.json",
+      "course": "ekronot-a",
+      "part": "וירולוגיה",
+      "title": "בוחן מעבדה בווירולוגיה — שיטות אבחון",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 48,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "unverified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 7
     },
     {
       "id": "ekronot-a-viro-legacy",
