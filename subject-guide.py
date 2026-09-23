@@ -14,6 +14,7 @@
     python3 subject-guide.py check   <course> <key>   # בדיקת הפרגמנט — מה שסשן מקצוע מריץ
     python3 subject-guide.py merge   <course>         # המטה: כל הפרגמנטים → exams/_staging/<course>-guide.json
     python3 subject-guide.py publish <course>         # המטה: המפה עולה לאוויר (exams/<course>-guide.json)
+    python3 subject-guide.py status                   # לוח השלמות: שש הדלתות לכל נושא, בכל מבחני הבלוק
 
 מה נבדק (ואי אפשר לעקוף): כל נקודה ב-"מה באמת נשאל" מצביעה על qid-ים
 אמיתיים, מאותו נושא — כלומר אי אפשר להמציא נקודה בלי שאלה שבדקה אותה.
@@ -301,10 +302,80 @@ def cmd_publish(cid):
     print(f"🚀 {dest} — עכשיו להריץ node sync.js")
 
 
+# ───────────────────────── status — לוח השלמות ─────────────────────────
+def lomda_todos(cid, key):
+    """מספר ה-TODO בכל יחידה בלומדה של המקצוע, לפי כותרת ה-h3 (= שם הנושא)."""
+    import re
+    f = ROOT / "guides" / f"{cid}-{key}.html"
+    if not f.exists():
+        return None
+    html = f.read_text(encoding="utf-8")
+    out = {}
+    for m in re.finditer(r'<section class="unit"[^>]*>\s*<h3>(.*?)<', html):
+        start = m.start()
+        end = html.find('</section>', start)
+        out[m.group(1).strip()] = html[start:end].count("TODO")
+    return out
+
+
+def cmd_status():
+    """שש הדלתות לכל נושא — ינון: „הקפיות והדדיות”. ✅ קיים · ◐ חלקי · ✗ חסר."""
+    anywhere = topics_anywhere()
+    rel_count = Counter()
+    for c in courses():
+        if not c.get("subjects"):
+            continue
+        for s in c["subjects"]:
+            fp = frag_path(c["id"], s["key"])
+            units = json.loads(fp.read_text(encoding="utf-8")) if fp.exists() else []
+            for u in units:
+                for r in u.get("related") or []:
+                    rel_count[(c["id"], u["topic"])] += 1
+                    rel_count[(r.get("course"), r.get("topic"))] += 1
+    tot = Counter()
+    for c in courses():
+        if not c.get("subjects"):
+            continue
+        idx = qindex(c["id"])
+        n_in = Counter(m["topic"] for m in idx.values() if not m["off"])
+        weeks = {t for w in (c.get("teaching") or {}).get("weeks", []) for t in w.get("topics", [])}
+        quotas = (c.get("simExam") or {}).get("blocks") or {}
+        print(f"\n══ {c['name']} ══")
+        print("   שאלות  מפה   נקודות   לומדה  שבוע  סימ׳  קשור   נושא")
+        for s in c["subjects"]:
+            fp = frag_path(c["id"], s["key"])
+            units = {u["topic"]: u for u in (json.loads(fp.read_text(encoding="utf-8")) if fp.exists() else [])}
+            todos = lomda_todos(c["id"], s["key"]) or {}
+            print(f"  {s.get('icon', '')} {s['name']}")
+            for t in s["topics"]:
+                n = n_in[t]
+                u = units.get(t) or {}
+                filled = bool(u) and "TODO" not in str(u.get("what", "TODO")) and "TODO" not in str((u.get("main") or {}).get("src", "TODO"))
+                mapped = {q for p in u.get("points") or [] for q in p.get("qids") or []}
+                in_topic = {q for q, m in idx.items() if m["topic"] == t and not m["off"]}
+                cov = (len(mapped & in_topic) / len(in_topic)) if in_topic else 1.0
+                ld = todos.get(t)
+                cells = [
+                    f"{n:>4}{'✅' if n >= 8 else ('◐' if n else '✗')}",
+                    " ✅ " if filled else " ✗ ",
+                    f"{round(cov * 100):>4}%{'✅' if cov >= 0.999 else ('◐' if cov > 0 else '✗')}",
+                    " ✗ " if ld is None else (" ✅ " if ld == 0 else f"{ld:>3}◐"),
+                    " ✅ " if t in weeks else " ✗ ",
+                    " ✅ " if quotas.get(s["block"]) and n else " ✗ ",
+                    f"{rel_count[(c['id'], t)]:>3}",
+                ]
+                done = sum([n >= 8, filled, cov >= 0.999, ld == 0, t in weeks, bool(quotas.get(s["block"]) and n)])
+                tot["doors"] += done
+                tot["all"] += 6
+                print("  " + "  ".join(cells) + f"   {t}")
+    print(f"\n  סה״כ: {tot['doors']}/{tot['all']} דלתות פתוחות ({round(100 * tot['doors'] / max(tot['all'], 1))}%)")
+    print("  ✅ קיים · ◐ חלקי · ✗ חסר. „קשור” = מספר הקישורים הרוחביים (בשני הכיוונים).")
+
+
 def main():
     a = sys.argv[1:]
     cmds = {"dump": (cmd_dump, 2), "skeleton": (cmd_skeleton, 2), "check": (cmd_check, 2),
-            "merge": (cmd_merge, 1), "publish": (cmd_publish, 1)}
+            "merge": (cmd_merge, 1), "publish": (cmd_publish, 1), "status": (cmd_status, 0)}
     if not a or a[0] not in cmds or len(a) - 1 != cmds[a[0]][1]:
         print(__doc__)
         sys.exit(1)
