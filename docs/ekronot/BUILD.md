@@ -191,7 +191,7 @@ python3 guides/_template/inject.py <course>-<key>.html
 | מקצוע | course | key | נוטבוק (`-n`) | תדריך |
 |---|---|---|---|---|
 | אימונולוגיה | ekronot-a | immuno | `cb451376-135b-4209-9257-8fc315149f41` | `אימונולוגיה.md` |
-| מיקרוביולוגיה | ekronot-a | micro | `2effa4f8-bf04-41a8-910e-4bfe62b0b594` | `מיקרוביולוגיה.md` |
+| מיקרוביולוגיה | ekronot-a | micro | `2effa4f8-bf04-41a8-910e-4bfe62b0b594` | **בבנייה במטה — לא לפתוח לה סשן** |
 | פרזיטולוגיה | ekronot-a | para | `49b0b74e-04d3-44ba-af93-a37f7a03057b` | `פרזיטולוגיה.md` |
 | וירולוגיה | ekronot-a | viro | `8b5f921d-6e33-44fe-86e8-db0db987b31e` | **נבנית במטה כפיילוט — לא לפתוח לה סשן** |
 | פתולוגיה | ekronot-b | patho | `c3f5e076-60c6-4f2b-9bda-6b0b6d9ffeaa` | `פתולוגיה.md` |
