@@ -8,6 +8,12 @@
 
     python3 guides/_template/build.py <course-id>
     python3 guides/_template/build.py <course-id> --out <path>   # לתצוגה מקדימה
+    python3 guides/_template/build.py <course-id> --subject <key> # מבחן בלוק: לומדה למקצוע אחד
+
+--subject (קורס עם subjects ב-courses.json): שלד רק לנושאי המקצוע, ב-
+guides/<course>-<key>.html. הניווט הוא לפי נושא ולא לפי בלוק, והחזרה היא
+לעמוד המקצוע. מפה ב-exams/_staging/ נקראת גם היא — המפות של מבחני הבלוק
+נבנות שם עד שכל המקצועות מוכנים.
 
 מה שנכנס לשלד מהמפה בחינם: שמות הבלוקים והיחידות (חייבים להיות זהים למפה —
 זה מה שמחבר לתרגול), תמצית היחידה (what), המלכודות (points[].trap, עם TODO
@@ -42,7 +48,7 @@ def load_course(cid):
 
 
 def load_guide(cid):
-    for f in (ROOT / "exams").glob("*.json"):
+    for f in list((ROOT / "exams").glob("*.json")) + list((ROOT / "exams" / "_staging").glob("*.json")):
         try:
             d = json.loads(f.read_text(encoding="utf-8"))
         except Exception:
@@ -126,7 +132,7 @@ def unit_html(cid, i, topic, u, shinun_topics=frozenset()):
     return "\n".join(out)
 
 
-def build(cid, out_path=None):
+def build(cid, out_path=None, subject=None):
     c = load_course(cid)
     g = load_guide(cid)
     head, chrome, scripts = carve_base()
@@ -138,7 +144,16 @@ def build(cid, out_path=None):
     if not units and not c.get("topics"):
         sys.exit("❌ אין לא מפת חומרים ולא topics בכרטיס — אין ממה לבנות שלד (NEW-COURSE.md שלב 1)")
 
-    name = c.get("name", cid)
+    sj = None
+    if subject:
+        sj = next((s for s in c.get("subjects", []) if s["key"] == subject), None)
+        if not sj:
+            sys.exit(f"❌ אין מקצוע '{subject}' ב-subjects של {cid}")
+        # מקצוע = בלוק אחד. כל נושא הופך ל"בלוק" משלו, כדי שהניווט יהיה לפי נושא.
+        blocks = [{"key": f"t{i + 1:02d}", "title": t, "icon": "", "topics": [t]}
+                  for i, t in enumerate(sj["topics"])]
+
+    name = c.get("name", cid) if not sj else sj["name"]
     doc_title = f"{name} — הסיכום המלא"
     head = head.replace("פיזיקה ב׳ — הסיכום המלא", doc_title)
     scripts = scripts.replace("physRate", f"{cid}Rate").replace("physFont", f"{cid}Font")
@@ -150,7 +165,7 @@ def build(cid, out_path=None):
 
     n_units = sum(len(b.get("topics", [])) for b in blocks)
     body = [f'''<div class="cover">
-  <div class="eyebrow">ארכיון השחזורים · {name}</div>
+  <div class="eyebrow">ארכיון השחזורים · {c.get("name", cid) if sj else name}</div>
   <h1>הסיכום המלא</h1>
   <div class="sub"><!-- TODO: משפט אחד — מה יש בפנים --></div>
   <div class="st">
@@ -199,12 +214,12 @@ def build(cid, out_path=None):
 
 <footer>
   <!-- TODO: מהמקורות של מי נכתב + הבהרה. אם אין שחזורים לקורס — לומר במפורש. -->
-  <a href="../index.html#/course/''' + cid + '''">→ חזרה לעמוד הקורס בארכיון</a>
+  <a href="../index.html#/course/''' + cid + (f"/{sj['key']}" if sj else "") + '''">→ חזרה לעמוד הקורס בארכיון</a>
 </footer>
 ''')
 
     out = (head + "\n".join(nav) + chrome + "\n".join(body) + "\n" + scripts + "\n</body>\n</html>\n")
-    dest = Path(out_path) if out_path else ROOT / "guides" / f"{cid}-full.html"
+    dest = Path(out_path) if out_path else ROOT / "guides" / (f"{cid}-{sj['key']}.html" if sj else f"{cid}-full.html")
     dest.write_text(out, encoding="utf-8")
     n_traps = len(re.findall(r'class="trap"', out))
     print(f"✅ {dest} — {n_units} יחידות, {n_traps} שלדי מלכודות, {out.count('TODO')} TODO")
@@ -219,5 +234,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("course")
     ap.add_argument("--out")
+    ap.add_argument("--subject", help="מבחן בלוק: מפתח המקצוע מ-subjects")
     a = ap.parse_args()
-    build(a.course, a.out)
+    build(a.course, a.out, a.subject)

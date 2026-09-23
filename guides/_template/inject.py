@@ -42,6 +42,72 @@ DOCS = {
         "qa": "electro",
         "shinun": "electro",
     },
+    # עקרונות המדע א׳/ב׳ — לומדה לכל מקצוע (subjects), לא לכל מבחן. אותה תבנית
+    # כמו פיזיקה; qa נמשך מהמפה של הקורס כולו, שמכסה את כל נושאי המקצוע.
+    "ekronot-a-immuno.html": {
+        "id": "ekronot-a-immuno-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-a",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-a",
+    },
+    "ekronot-a-micro.html": {
+        "id": "ekronot-a-micro-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-a",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-a",
+    },
+    "ekronot-a-para.html": {
+        "id": "ekronot-a-para-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-a",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-a",
+    },
+    "ekronot-a-viro.html": {
+        "id": "ekronot-a-viro-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-a",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-a",
+    },
+    "ekronot-b-patho.html": {
+        "id": "ekronot-b-patho-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-b",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-b",
+    },
+    "ekronot-b-pharma.html": {
+        "id": "ekronot-b-pharma-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-b",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-b",
+    },
+    "ekronot-b-physio.html": {
+        "id": "ekronot-b-physio-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-b",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-b",
+    },
+    "ekronot-b-genetics.html": {
+        "id": "ekronot-b-genetics-doc",
+        "gate": ".trap",
+        "maplinks": "ekronot-b",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "ekronot-b",
+    },
 }
 
 START = "<!-- dockit:start -->"

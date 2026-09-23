@@ -202,6 +202,9 @@ i❤️Shinun, כרטיסיות, מקרים מתגלגלים, דף נוסחאו�
 - `studyDoc` של מקצוע גובר על זה של הקורס בכל קישור לפרק (`studyDocFor`).
 - `sync.js` חוסם: part בלי מבחנים, block שאינו בסימולציה, נושא ששויך
   פעמיים או לא שויך בכלל, studyDoc שהקובץ שלו חסר.
+- **המפה נכתבת מקצוע-מקצוע** (`subject-guide.py`): כל מקצוע כותב פרגמנט
+  ב-`exams/_staging/fragments/`, `check` מאמת qid-ים ו-related, `merge` מאחד
+  ומחשב freq, `publish` מעלה לאוויר. לומדה למקצוע: `build.py <id> --subject <key>`.
 
 ### חפיסת אנקי לקורס
 
