@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-23",
-  "version": "01265799",
+  "version": "5af55f9e",
   "assets": {
     "tokens": "67607727",
     "components": "8eca9228",
@@ -225,7 +225,7 @@
       "order": 6,
       "year": 2,
       "semester": "א",
-      "status": "soon",
+      "status": "active",
       "strict": true,
       "accent": {
         "light": [
@@ -239,8 +239,17 @@
           "#083344"
         ]
       },
-      "dates": [],
-      "about": "הקורס הראשון של שנה ב׳, ובו ארבעה מקצועות שנבחנים במבחן אחד: אימונולוגיה, מיקרוביולוגיה, פרזיטולוגיה ווירולוגיה. זו תוכנית חדשה — מחזור נ״א היה הראשון שלמד בה, ולכן רוב השחזורים בארכיון מגיעים מהקורסים הנפרדים שקדמו לה.\n\nהמבחן: 80 שאלות, שלוש שעות, וחמש תשובות לכל שאלה (כולל מסיחים כמו \"תשובות 2+3 נכונות\"). רוב השאלות הן תיאורי מקרה קליניים ולא שליפת עובדות, ובפרזיטולוגיה יש שאלות זיהוי תמונה. במחזור נ״א החלוקה בפועל הייתה מיקרו 25 שאלות, אימונו 24, פרזיטו 20 ווירו 10 — כלומר פרזיטולוגיה לוקחת רבע מהמבחן על שישה שיעורים בלבד, ווירולוגיה נותנת 10 שאלות על ארבעה שיעורים.\n\nהמבחן הוא 60% מהציון. השאר: מעבדות מיקרו 15%, תרגולים ומעבדות אימונו 15%, ומעבדת וירולוגיה 10%. בפרזיטולוגיה יש בוחן בתחילת כל תרגול.",
+      "dates": [
+        {
+          "moed": "א",
+          "at": "2026-12-25T09:00"
+        },
+        {
+          "moed": "ב",
+          "at": "2027-01-07T09:00"
+        }
+      ],
+      "about": "הקורס הראשון של שנה ב׳, ובו ארבעה מקצועות שנבחנים במבחן אחד: אימונולוגיה, מיקרוביולוגיה, פרזיטולוגיה ווירולוגיה. זו תוכנית חדשה — מחזור נ״א היה הראשון שלמד בה, ולכן רוב השחזורים בארכיון מגיעים מהקורסים הנפרדים שקדמו לה.\n\nהמבחן: 80 שאלות, שלוש שעות, וחמש תשובות לכל שאלה (כולל מסיחים כמו \"תשובות 2+3 נכונות\"). רוב השאלות הן תיאורי מקרה קליניים ולא שליפת עובדות, ובפרזיטולוגיה יש שאלות זיהוי תמונה. במחזור נ״א החלוקה בפועל הייתה מיקרו 25 שאלות, אימונו 24, פרזיטו 20 ווירו 10 — כלומר פרזיטולוגיה לוקחת רבע מהמבחן על שישה שיעורים בלבד, ווירולוגיה נותנת 10 שאלות על ארבעה שיעורים.\n\nהמבחן הוא 60% מהציון. השאר: מעבדות מיקרו 15%, תרגולים ומעבדות אימונו 15%, ומעבדת וירולוגיה 10%. בפרזיטולוגיה יש בוחן בתחילת כל תרגול.\n\nלוח הזמנים של נ״ב: הבלוק נלמד מ-18/10/2026 עד 18/12/2026 — תשעה שבועות לשמונה מקצועות. מועד א׳ ב-25/12, מועד ב׳ ב-7/1. שימו לב שחלק ב׳ נבחן שבוע בלבד אחרי חלק א׳ (1/1), כך שאי אפשר להתחיל ללמוד אותו רק אחרי המבחן הראשון.",
       "topics": [
         "חיסון מולד וריריות",
         "הצגת אנטיגן ו-MHC",
@@ -292,7 +301,7 @@
       "order": 7,
       "year": 2,
       "semester": "א",
-      "status": "soon",
+      "status": "active",
       "strict": true,
       "accent": {
         "light": [
@@ -306,8 +315,17 @@
           "#451a03"
         ]
       },
-      "dates": [],
-      "about": "הקורס השני של שנה ב׳: פתולוגיה, פרמקולוגיה, פיזיולוגיה של הלב וגנטיקה, במבחן בלוק אחד.\n\nאין עדיין שחזור של המבחן הזה במתכונת החדשה — מחזור נ״א הוא הראשון, ורק חלק א׳ שוחזר. לכן התרגול כאן בנוי מהשחזורים של הקורסים הנפרדים, מסוננים לפי מה שנלמד בפועל בתוכנית החדשה: בפתולוגיה כל החומר של פתולוגיה א׳ חוץ משיעור הרפואה המותאמת אישית, ומפתולוגיה ב׳ רק נאופלסיה ומחלות זיהומיות; בפרמקולוגיה קינטיקה, דינמיקה והמערכת האוטונומית עד היסטמין, בלי אנטיביוטיקה ובלי תרופות אנטי-סרטניות; בפיזיולוגיה אלקטרופיזיולוגיה של הלב בלבד.\n\nשני מקורות כאן הם רשמיים ולא שחזורים: מאגר שאלות המאסטר של קורס האלקטרופיזיולוגיה (2021–2025, עם התשובות הרשמיות), והדפסת חשיפה בפתולוגיה. שאר השאלות הן שחזורי סטודנטים, ורמת האימות מסומנת בכל מבחן.",
+      "dates": [
+        {
+          "moed": "א",
+          "at": "2027-01-01T09:00"
+        },
+        {
+          "moed": "ב",
+          "at": "2027-01-12T09:00"
+        }
+      ],
+      "about": "הקורס השני של שנה ב׳: פתולוגיה, פרמקולוגיה, פיזיולוגיה של הלב וגנטיקה, במבחן בלוק אחד.\n\nאין עדיין שחזור של המבחן הזה במתכונת החדשה — מחזור נ״א הוא הראשון, ורק חלק א׳ שוחזר. לכן התרגול כאן בנוי מהשחזורים של הקורסים הנפרדים, מסוננים לפי מה שנלמד בפועל בתוכנית החדשה: בפתולוגיה כל החומר של פתולוגיה א׳ חוץ משיעור הרפואה המותאמת אישית, ומפתולוגיה ב׳ רק נאופלסיה ומחלות זיהומיות; בפרמקולוגיה קינטיקה, דינמיקה והמערכת האוטונומית עד היסטמין, בלי אנטיביוטיקה ובלי תרופות אנטי-סרטניות; בפיזיולוגיה אלקטרופיזיולוגיה של הלב בלבד.\n\nשני מקורות כאן הם רשמיים ולא שחזורים: מאגר שאלות המאסטר של קורס האלקטרופיזיולוגיה (2021–2025, עם התשובות הרשמיות), והדפסת חשיפה בפתולוגיה. שאר השאלות הן שחזורי סטודנטים, ורמת האימות מסומנת בכל מבחן.\n\nלוח הזמנים של נ״ב: הבלוק נלמד מ-18/10/2026 עד 18/12/2026 במקביל לחלק א׳ — שני הקורסים נלמדים יחד ולא בזה אחר זה. מועד א׳ ב-1/1/2027, מועד ב׳ ב-12/1. בין מועד א׳ של חלק א׳ (25/12) ובין מועד א׳ כאן יש שבוע אחד בלבד.",
       "topics": [
         "הסתגלות תאית",
         "נזק תאי, נמק ואפופטוזיס",
@@ -635,7 +653,79 @@
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 13
+      "count": 15
+    },
+    {
+      "id": "ekronot-a-immuno-lab1-nun",
+      "file": "ekronot-a-immuno-lab1-nun.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "בוחן כניסה 1 באימונולוגיה — מחזור נ׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 50,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "unverified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 8
+    },
+    {
+      "id": "ekronot-a-immuno-lab2-nun",
+      "file": "ekronot-a-immuno-lab2-nun.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "בוחן כניסה 2 באימונולוגיה — מחזור נ׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 50,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 8
+    },
+    {
+      "id": "ekronot-a-immuno-lab3-nun",
+      "file": "ekronot-a-immuno-lab3-nun.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "בוחן כניסה לתרגול 3 באימונולוגיה — מחזור נ׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 50,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 8
+    },
+    {
+      "id": "ekronot-a-immuno-lab4-nun",
+      "file": "ekronot-a-immuno-lab4-nun.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "בוחן כניסה לתרגול 4 באימונולוגיה — מחזור נ׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 50,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 8
     },
     {
       "id": "ekronot-a-immuno-mem-het",
@@ -672,6 +762,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
+    },
+    {
+      "id": "ekronot-a-immuno-nun-alef-quiz",
+      "file": "ekronot-a-immuno-nun-alef-quiz.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "בוחן אימונולוגיה — מחזור נ״א, שיעורים 1–4",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 51,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 8
     },
     {
       "id": "ekronot-a-immuno-nun",
@@ -782,6 +890,114 @@
       "count": 11
     },
     {
+      "id": "ekronot-a-para-lab1-2018",
+      "file": "ekronot-a-para-lab1-2018.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 1 בפרזיטולוגיה — לישמניה, טריפנוזומה ומלריה (2018)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 18
+    },
+    {
+      "id": "ekronot-a-para-lab1-mem-tet",
+      "file": "ekronot-a-para-lab1-mem-tet.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 1 בפרזיטולוגיה — מחזור מ״ט (טריפנוזומה, לישמניה ומלריה)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 49,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 10
+    },
+    {
+      "id": "ekronot-a-para-lab2-2018",
+      "file": "ekronot-a-para-lab2-2018.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 2 בפרזיטולוגיה — פרוטוזואה של המעי, אופורטוניסטים ונמטודות (2018)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 18
+    },
+    {
+      "id": "ekronot-a-para-lab2-mem-tet",
+      "file": "ekronot-a-para-lab2-mem-tet.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 2 בפרזיטולוגיה — מחזור מ״ט (אופורטוניסטים, פרוטוזואה של המעי ונמטודות)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 49,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 10
+    },
+    {
+      "id": "ekronot-a-para-lab3-2018",
+      "file": "ekronot-a-para-lab3-2018.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 3 בפרזיטולוגיה — תולעים: נמטודות, צסטודות וטרמטודות (2018)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 16
+    },
+    {
+      "id": "ekronot-a-para-lab3-mem-tet",
+      "file": "ekronot-a-para-lab3-mem-tet.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן מעבדה 3 בפרזיטולוגיה — מחזור מ״ט (תולעי רקמות, צסטודות, טרמטודות ואקטופרזיטים)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 49,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 9
+    },
+    {
       "id": "ekronot-a-para-mem-tet-a",
       "file": "ekronot-a-para-mem-tet-a.json",
       "course": "ekronot-a",
@@ -798,6 +1014,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 46
+    },
+    {
+      "id": "ekronot-a-para-nun-alef-quiz",
+      "file": "ekronot-a-para-nun-alef-quiz.json",
+      "course": "ekronot-a",
+      "part": "פרזיטולוגיה",
+      "title": "בוחן פרזיטולוגיה — מחזור נ״א, שיעורים 1–3",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 51,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 10
     },
     {
       "id": "ekronot-a-para-nun",
@@ -840,7 +1074,7 @@
       "file": "ekronot-a-viro-practice.json",
       "course": "ekronot-a",
       "part": "וירולוגיה",
-      "title": "תרגול וירולוגיה — ארבעת שיעורי המבוא",
+      "title": "תרגול וירולוגיה — שיעורי המבוא",
       "kind": "practice",
       "year": 2026,
       "cycle": null,
@@ -959,7 +1193,25 @@
       "spotlight": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 13
+      "count": 21
+    },
+    {
+      "id": "ekronot-b-patho-bet-nun",
+      "file": "ekronot-b-patho-bet-nun.json",
+      "course": "ekronot-b",
+      "part": "פתולוגיה",
+      "title": "שחזור פתולוגיה ב׳ — מחזור נ׳ (הנושאים שבסילבוס בלבד)",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 50,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 16
     },
     {
       "id": "ekronot-b-patho-exposure",
@@ -1052,6 +1304,24 @@
       "count": 28
     },
     {
+      "id": "ekronot-b-pharma-mem-het-b",
+      "file": "ekronot-b-pharma-mem-het-b.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "שחזור פרמקולוגיה — מחזור מ״ח, מועד ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 48,
+      "moed": "ב",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 30
+    },
+    {
       "id": "ekronot-b-pharma-mem-het",
       "file": "ekronot-b-pharma-mem-het.json",
       "course": "ekronot-b",
@@ -1070,6 +1340,24 @@
       "count": 50
     },
     {
+      "id": "ekronot-b-pharma-mem-hey",
+      "file": "ekronot-b-pharma-mem-hey.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "שחזור פרמקולוגיה — מחזור מ״ה, מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 45,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 55
+    },
+    {
       "id": "ekronot-b-pharma-mem-tet",
       "file": "ekronot-b-pharma-mem-tet.json",
       "course": "ekronot-b",
@@ -1086,6 +1374,24 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "ekronot-b-pharma-mem-zayin",
+      "file": "ekronot-b-pharma-mem-zayin.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "שחזור פרמקולוגיה — מחזור מ״ז, מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 47,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 70
     },
     {
       "id": "ekronot-b-pharma-nun",
