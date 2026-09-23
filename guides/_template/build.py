@@ -149,9 +149,8 @@ def build(cid, out_path=None, subject=None):
         sj = next((s for s in c.get("subjects", []) if s["key"] == subject), None)
         if not sj:
             sys.exit(f"❌ אין מקצוע '{subject}' ב-subjects של {cid}")
-        # מקצוע = בלוק אחד. כל נושא הופך ל"בלוק" משלו, כדי שהניווט יהיה לפי נושא.
-        blocks = [{"key": f"t{i + 1:02d}", "title": t, "icon": "", "topics": [t]}
-                  for i, t in enumerate(sj["topics"])]
+        # מקצוע = בלוק אחד, בסדר הנושאים של הכרטיס. הניווט (למטה) הוא לפי נושא.
+        blocks = [{"key": sj["key"], "title": sj["name"], "icon": sj.get("icon", ""), "topics": list(sj["topics"])}]
 
     name = c.get("name", cid) if not sj else sj["name"]
     doc_title = f"{name} — הסיכום המלא"
@@ -159,14 +158,19 @@ def build(cid, out_path=None, subject=None):
     scripts = scripts.replace("physRate", f"{cid}Rate").replace("physFont", f"{cid}Font")
 
     nav = ['<nav class="navbar" aria-label="ניווט לפי בלוק">']
-    for b in blocks:
-        nav.append(f'  <a href="#b-{b["key"]}">{b.get("icon", "")} {b["title"]}</a>')
+    if sj:
+        # לומדת מקצוע: בלוק אחד, ולכן הניווט הוא לפי נושא (העוגנים u-tNN של היחידות)
+        for i, t in enumerate(sj["topics"]):
+            nav.append(f'  <a href="#u-t{i + 1:02d}">{t}</a>')
+    else:
+        for b in blocks:
+            nav.append(f'  <a href="#b-{b["key"]}">{b.get("icon", "")} {b["title"]}</a>')
     nav.append('  <a href="#last">⏱️ הרגע האחרון</a>\n</nav>')
 
     n_units = sum(len(b.get("topics", [])) for b in blocks)
     body = [f'''<div class="cover">
   <div class="eyebrow">ארכיון השחזורים · {c.get("name", cid) if sj else name}</div>
-  <h1>הסיכום המלא</h1>
+  <h1>{name + " — הסיכום המלא" if sj else "הסיכום המלא"}</h1>
   <div class="sub"><!-- TODO: משפט אחד — מה יש בפנים --></div>
   <div class="st">
     <div><b>{n_units}</b><span>נושאים</span></div>
@@ -188,7 +192,10 @@ def build(cid, out_path=None, subject=None):
 ''']
 
     body.append('<div class="toc">\n<h2>מה יש כאן</h2>\n<ol>')
-    for b in blocks:
+    if sj:
+        for i, t in enumerate(sj["topics"]):
+            body.append(f'<li><a href="#u-t{i + 1:02d}">{t}</a></li>')
+    for b in ([] if sj else blocks):
         n = len(b.get("topics", []))
         body.append(f'<li><a href="#b-{b["key"]}">{b["title"]}</a> — {n} נושאים</li>')
     body.append('<li><a href="#last">הרגע האחרון — השורה התחתונה של כל נושא</a></li>')
