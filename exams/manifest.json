@@ -1,6 +1,6 @@
 {
-  "updated": "2026-09-22",
-  "version": "f726697a",
+  "updated": "2026-09-23",
+  "version": "bf38cccc",
   "assets": {
     "tokens": "67607727",
     "components": "8eca9228",
@@ -271,7 +271,17 @@
         "הפטיטיס",
         "HIV ורטרווירוסים",
         "וירוסים נשימתיים ומתעוררים"
-      ]
+      ],
+      "simExam": {
+        "questions": 80,
+        "minutes": 180,
+        "blocks": {
+          "מיקרוביולוגיה": 25,
+          "אימונולוגיה": 24,
+          "פרזיטולוגיה": 20,
+          "וירולוגיה": 10
+        }
+      }
     },
     {
       "id": "ekronot-b",
@@ -325,7 +335,17 @@
         "גנטיקה של אוכלוסיות",
         "תורשה מנדלית ולא-מנדלית",
         "ציטוגנטיקה ומושגי יסוד"
-      ]
+      ],
+      "simExam": {
+        "questions": 80,
+        "minutes": 180,
+        "blocks": {
+          "פתולוגיה": 28,
+          "פרמקולוגיה": 24,
+          "פיזיולוגיה של הלב": 16,
+          "גנטיקה": 12
+        }
+      }
     }
   ],
   "exams": [
@@ -609,7 +629,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-22",
+      "added": "2026-09-23",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -915,7 +935,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-22",
+      "added": "2026-09-23",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -1477,7 +1497,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-22",
+      "added": "2026-09-23",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -1621,7 +1641,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-22",
+      "added": "2026-09-23",
       "official": null,
       "trust": null,
       "spotlight": null,

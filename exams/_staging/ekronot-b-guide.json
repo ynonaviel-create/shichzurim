@@ -1,298 +1,354 @@
 {
-  "id": "ekronot-b-guide",
-  "course": "ekronot-b",
-  "part": null,
-  "title": "מפת החומרים",
-  "kind": "guide",
-  "added": "2026-09-20",
-  "method": "TODO: איך המפה הזאת נבנתה — מאילו מקורות ומה נספר.",
-  "noDayPlan": true,
-  "units": [
-    {
-      "topic": "הסתגלות תאית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "נזק תאי, נמק ואפופטוזיס",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "הצטברויות, פיגמנטים והסתיידות",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "דלקת חריפה ומתווכים",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "דלקת כרונית, גרנולומה וריפוי",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "הפרעות המודינמיות",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "נאופלזיה",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "מחלות זיהומיות בפתולוגיה",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "ספיגה ודרכי מתן",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "פיזור, מטבוליזם ופינוי",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "פרמקודינמיקה",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "המערכת הכולינרגית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "המערכת האדרנרגית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "מערכת העצבים האוטונומית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "היסטמין ופרוסטגלנדינים",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "תעלות יונים וזרמים בלב",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "רקמות מהירות מול איטיות",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "פוטנציאל פעולה ותקופה רפרקטורית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "אק\"ג",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "הפרעות קצב",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "מחזור הלב והמודינמיקה",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "שיטות אבחון מולקולריות",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "תאחיזה ומיפוי גנים",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "גנטיקה של אוכלוסיות",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "תורשה מנדלית ולא-מנדלית",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    },
-    {
-      "topic": "ציטוגנטיקה ומושגי יסוד",
-      "lecturers": [],
-      "freq": 0,
-      "certainty": "unknown",
-      "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
-      "main": {
-        "src": "TODO: המקור הראשי ללמידה"
-      },
-      "points": []
-    }
-  ]
+ "id": "ekronot-b-guide",
+ "course": "ekronot-b",
+ "part": null,
+ "title": "מפת החומרים",
+ "kind": "guide",
+ "added": "2026-09-20",
+ "method": "TODO: איך המפה הזאת נבנתה — מאילו מקורות ומה נספר.",
+ "noDayPlan": true,
+ "units": [
+  {
+   "topic": "הסתגלות תאית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "נזק תאי, נמק ואפופטוזיס",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "הצטברויות, פיגמנטים והסתיידות",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "דלקת חריפה ומתווכים",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "דלקת כרונית, גרנולומה וריפוי",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "הפרעות המודינמיות",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "נאופלזיה",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "מחלות זיהומיות בפתולוגיה",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "ספיגה ודרכי מתן",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "פיזור, מטבוליזם ופינוי",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "פרמקודינמיקה",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "המערכת הכולינרגית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "המערכת האדרנרגית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "מערכת העצבים האוטונומית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "היסטמין ופרוסטגלנדינים",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "תעלות יונים וזרמים בלב",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "רקמות מהירות מול איטיות",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "פוטנציאל פעולה ותקופה רפרקטורית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "אק\"ג",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "הפרעות קצב",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "מחזור הלב והמודינמיקה",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "שיטות אבחון מולקולריות",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "תאחיזה ומיפוי גנים",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "גנטיקה של אוכלוסיות",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "תורשה מנדלית ולא-מנדלית",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  },
+  {
+   "topic": "ציטוגנטיקה ומושגי יסוד",
+   "lecturers": [],
+   "freq": 0,
+   "certainty": "unknown",
+   "what": "TODO: תמצית פסקה-שתיים — מה הנושא ולמה הוא במבחן.",
+   "main": {
+    "src": "TODO: המקור הראשי ללמידה"
+   },
+   "points": []
+  }
+ ],
+ "blocks": [
+  {
+   "key": "patho",
+   "title": "פתולוגיה",
+   "icon": "🔬",
+   "topics": [
+    "הסתגלות תאית",
+    "נזק תאי, נמק ואפופטוזיס",
+    "הצטברויות, פיגמנטים והסתיידות",
+    "דלקת חריפה ומתווכים",
+    "דלקת כרונית, גרנולומה וריפוי",
+    "הפרעות המודינמיות",
+    "נאופלזיה",
+    "מחלות זיהומיות בפתולוגיה"
+   ]
+  },
+  {
+   "key": "pharma",
+   "title": "פרמקולוגיה",
+   "icon": "💊",
+   "topics": [
+    "ספיגה ודרכי מתן",
+    "פיזור, מטבוליזם ופינוי",
+    "פרמקודינמיקה",
+    "המערכת הכולינרגית",
+    "המערכת האדרנרגית",
+    "מערכת העצבים האוטונומית",
+    "היסטמין ופרוסטגלנדינים"
+   ]
+  },
+  {
+   "key": "physio",
+   "title": "פיזיולוגיה של הלב",
+   "icon": "❤️",
+   "topics": [
+    "תעלות יונים וזרמים בלב",
+    "רקמות מהירות מול איטיות",
+    "פוטנציאל פעולה ותקופה רפרקטורית",
+    "אק\"ג",
+    "הפרעות קצב",
+    "מחזור הלב והמודינמיקה"
+   ]
+  },
+  {
+   "key": "genetics",
+   "title": "גנטיקה",
+   "icon": "🧬",
+   "topics": [
+    "שיטות אבחון מולקולריות",
+    "תאחיזה ומיפוי גנים",
+    "גנטיקה של אוכלוסיות",
+    "תורשה מנדלית ולא-מנדלית",
+    "ציטוגנטיקה ומושגי יסוד"
+   ]
+  }
+ ]
 }
