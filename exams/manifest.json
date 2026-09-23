@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-23",
-  "version": "798597fe",
+  "version": "ea1db94b",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1023,7 +1023,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 33
+      "count": 38
     },
     {
       "id": "ekronot-a-immuno-lab1-nun",
@@ -1157,6 +1157,44 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
+    },
+    {
+      "id": "ekronot-a-immuno-mem-zayin-b",
+      "file": "ekronot-a-immuno-mem-zayin-b.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "אימונולוגיה · מבחן · מחזור מ״ז · מועד ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 47,
+      "moed": "ב",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 22
+    },
+    {
+      "id": "ekronot-a-immuno-mem-zayin",
+      "file": "ekronot-a-immuno-mem-zayin.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "אימונולוגיה · מבחן · מחזור מ״ז · מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 47,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 37
     },
     {
       "id": "ekronot-a-immuno-nun-alef-quiz",
