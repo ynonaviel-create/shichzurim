@@ -740,6 +740,43 @@ const examsOf = (courseId) =>
 const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
 const quizzesOf = (courseId) => examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind));
 
+/* ---------- תתי-קורסים: מקצועות בתוך מבחן בלוק ----------
+
+   עקרונות המדע א׳/ב׳ הם מבחן אחד כל אחד, אבל ארבעה מקצועות נלמדים בו
+   במקביל. ינון (23/09/2026): „לפתוח קורסי משנה לכל אחד מהקורסים, ולא
+   שהכל יהיה ביחד — אבל שתהיה אופציה לתרגול ׳מבחן׳ של כל הבלוק”.
+
+   ההכרעה: הקורס נשאר יחידת הדאטה (מועדים, סימולציה, חזרות, היסטוריה),
+   והמקצוע הוא *תצוגה* עליו — `subjects[]` בכרטיס. מקצוע = כל המבחנים
+   שה-`part` שלהם הוא המקצוע, וכל הנושאים שב-`topics` שלו. אף שאלה לא זזה
+   ואף qid לא משתנה, ולכן ההתקדמות של כולם שורדת כמו שהיא.
+
+   בראוטים של כלים (תרגול, טעויות, סימולציה, מפה) היקף מקצוע נכתב כ-`@key`
+   בפרמטר השני — שם יכול לשבת גם שם נושא, וה-@ מבדיל ביניהם. */
+const subjectsOf = (c) => (c && c.subjects) || [];
+const subjectOf = (courseId, key) =>
+  (key && subjectsOf(courseOf(courseId)).find((s) => s.key === key)) || null;
+const subjectOfTopic = (courseId, topic) =>
+  subjectsOf(courseOf(courseId)).find((s) => (s.topics || []).includes(topic)) || null;
+/* '@immuno' → 'immuno'; כל דבר אחר (נושא, ריק) → null */
+const scopeKey = (sub) => (sub && sub.startsWith('@') ? decodeURIComponent(sub.slice(1)) : null);
+const examsOfSubject = (courseId, s) => examsOf(courseId).filter((e) => e.part === s.part);
+/* חלקו של המקצוע בסימולציית הבלוק: המכסה שלו, וזמן יחסי לזמן המבחן. */
+function subjectSim(c, s) {
+  const se = c && c.simExam;
+  const n = se && se.blocks && se.blocks[s.block];
+  if (!n) return null;
+  return { questions: n, minutes: Math.round((se.minutes * n) / se.questions), blocks: { [s.block]: n } };
+}
+/* הלומדה של נושא: של המקצוע שלו, אם יש לו לומדה משלו; אחרת של הקורס.
+   כך טעות בתרגול, תוצאת חיפוש ועץ הידע קופצים לפרק בלומדה הנכונה. */
+function studyDocFor(courseId, topic) {
+  const s = subjectOfTopic(courseId, topic);
+  if (s && s.studyDoc) return s.studyDoc;
+  const c = courseOf(courseId);
+  return (c && c.studyDoc) || null;
+}
+
 /* ---------- ספירה לאחור למבחנים ---------- */
 const MS = { min: 60000, hour: 3600000, day: 86400000 };
 
@@ -874,9 +911,13 @@ function quickScore(meta) {
 }
 
 function courseProgress(courseId) {
+  return progressOf(quizzesOf(courseId));
+}
+/* אותה ספירה על רשימה כלשהי — משמשת גם את עמוד המקצוע בתוך בלוק. */
+function progressOf(metas) {
   let answered = 0, correct = 0, total = 0;
   // כרטיסיות קריאה אינן שאלות — לא נספרות בהתקדמות ובאחוז ההצלחה.
-  quizzesOf(courseId).forEach((e) => {
+  metas.filter((e) => !NOT_QUIZ.has(e.kind)).forEach((e) => {
     const s = quickScore(e);
     answered += s.answered; correct += s.correct; total += e.count;
   });
@@ -918,7 +959,8 @@ function router() {
   if (route === 'admin') return renderAdmin();
   if (route === 'account') return renderAccount();
   if (route === 'survey') return renderSurvey();
-  if (route === 'course' && param) return renderCourse(param);
+  // #/course/<id>/<מקצוע> — עמוד מקצוע בתוך מבחן בלוק (subjects בכרטיס)
+  if (route === 'course' && param) return renderCourse(param, sub ? decodeURIComponent(sub) : null);
   // #/guide/<course>/<topic> — קופץ ישר ליחידה (מגיע מכפתור "איפה ללמוד" שבמשוב)
   if (route === 'guide' && param) return renderGuide(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'cards' && param) return renderCards(param);
@@ -928,7 +970,7 @@ function router() {
   if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
   // #/simexam/<course> — סימולציית מבחן מלאה: N שאלות, טיימר, משוב רק בסוף
-  if (route === 'simexam' && param) return renderSimExam(param);
+  if (route === 'simexam' && param) return renderSimExam(param, scopeKey(sub));
   if (route === 'drills' && param) return renderDrills(param);
   if (route === 'drill' && param) return renderDrill(param);
   if (route === 'formulas' && param) return renderFormulas(param, sub ? decodeURIComponent(sub) : null);
@@ -940,7 +982,7 @@ function router() {
   if (route === 'exam' && param) return renderExam(param, sub != null ? Number(sub) : null);
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
-  if (route === 'review' && param) return renderReview(param);
+  if (route === 'review' && param) return renderReview(param, scopeKey(sub));
   if (route === 'traps' && param) return renderTraps(param);
   if (route === 'tree' && param) return renderTree(param);
   if (route === 'semester' && param) return renderSemester(param);
@@ -1108,8 +1150,22 @@ function courseCard(c) {
   }
   a.append(top);
 
-  const verbs = courseVerbs(c);
-  if (verbs.length) {
+  const subs = subjectsOf(c);
+  const verbs = subs.length ? [] : courseVerbs(c);
+  if (subs.length) {
+    /* מבחן בלוק: ארבעה צ׳יפים — קיצור ישר לכל מקצוע. הכרטיס עצמו מוביל
+       לעמוד המבחן. (הכרעת ינון, 23/09: „שני כרטיסים עם קיצורים”.) */
+    const chips = el('div', 'ccard-subj');
+    subs.forEach((sj) => {
+      const ch = el('a', 'ccard-subj-chip');
+      ch.href = '#/course/' + c.id + '/' + encodeURIComponent(sj.key);
+      ch.title = `ישר אל ${sj.name}`;
+      ch.append(el('span', null, sj.icon || '📘'));
+      ch.append(el('span', null, sj.short || sj.name));
+      chips.append(ch);
+    });
+    a.append(chips);
+  } else if (verbs.length) {
     const acts = el('div', 'ccard-acts');
     verbs.forEach((v, i) => acts.append(el('span', 'pill ' + (i === 0 ? 'pill-accent' : 'pill-muted'), v)));
     a.append(acts);
@@ -1126,7 +1182,17 @@ function courseCard(c) {
     cd.title = `${fmtDate(nd.ts)} ${fmtTime(nd.ts)}`;
     a.append(cd);
   }
-  return a;
+  if (!subs.length) return a;
+  /* קישור בתוך קישור אסור, ולכן כרטיס עם צ׳יפים הוא div: הקישור הראשי
+     נמתח על כל הכרטיס (::after ב-CSS), והצ׳יפים יושבים מעליו. */
+  const card = el('div', 'ccard ccard-block');
+  card.dataset.tour = 'course';
+  card.dataset.course = c.id;
+  const main = el('a', 'ccard-main');
+  main.href = a.href;
+  main.setAttribute('aria-label', `${c.name} — עמוד המבחן`);
+  card.append(main, ...a.childNodes);
+  return card;
 }
 
 function stat(value, label, cls) {
@@ -1178,7 +1244,35 @@ function emptyState(icon, title, text) {
 }
 
 /* ================= דף מקצוע ================= */
-function renderCourse(courseId) {
+/* הסבר על הקורס — פסקאות מופרדות בשורה ריקה. */
+function aboutBox(text, title) {
+  const box = el('div', 'course-about');
+  box.append(el('div', 'course-about-title', title || 'על הקורס והמבחנים'));
+  const body = el('div', 'course-about-body');
+  String(text).split('\n\n').forEach((para) => body.append(el('p', null, para)));
+  box.append(body);
+  return box;
+}
+
+/* לוח המועדים של המקצוע — כולם, גם מה שכבר עבר */
+function moadimRow(c) {
+  if (!(c.dates || []).length) return null;
+  const row = el('div', 'moadim');
+  c.dates
+    .map((d) => ({ ...d, ts: new Date(d.at).getTime() }))
+    .sort((a, b) => a.ts - b.ts)
+    .forEach((d) => {
+      const u = urgency(d.ts);
+      const card = el('div', 'moed u-' + u);
+      card.append(el('div', 'moed-label', `מועד ${d.moed}׳`));
+      card.append(el('div', 'moed-date', `${fmtDate(d.ts)} · ${fmtTime(d.ts)}`));
+      card.append(el('div', 'moed-cd', countdownText(d.ts)));
+      row.append(card);
+    });
+  return row;
+}
+
+function renderCourse(courseId, subKey = null) {
   setNav('home');
   const c = courseOf(courseId);
   view.innerHTML = '';
@@ -1191,41 +1285,38 @@ function renderCourse(courseId) {
 
   view.dataset.course = courseId;  // מפעיל את --course-accent על כל העמוד
 
-  view.append(crumb('כל המקצועות', '#/'));
+  /* מבחן בלוק: בלי מקצוע — עמוד המבחן; עם מקצוע — אותו עמוד, מסונן אליו. */
+  const s = subjectOf(courseId, subKey);
+  if (subKey && !s) {
+    view.append(crumb(c.name, '#/course/' + courseId));
+    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
+    toTop();
+    return;
+  }
+  if (!s && subjectsOf(c).length) return renderBlockHub(c);
+  const sfx = s ? '/@' + encodeURIComponent(s.key) : '';   // היקף המקצוע בכל הכלים
+  const sim = s ? subjectSim(c, s) : c.simExam;
+
+  view.append(s ? crumb(c.name, '#/course/' + courseId) : crumb('כל המקצועות', '#/'));
 
   const head = el('div', 'page-head');
-  head.append(el('h1', null, `${c.icon || ''} ${c.name}`.trim()));
-  head.append(el('p', null, [c.blurb, c.code].filter(Boolean).join(' · ')));
+  if (s) {
+    head.append(el('h1', null, `${s.icon || ''} ${s.name}`.trim()));
+    head.append(el('p', null, `חלק מ${c.name}` + (sim ? ` · כ-${sim.questions} מתוך ${c.simExam.questions} השאלות במבחן` : '')));
+  } else {
+    head.append(el('h1', null, `${c.icon || ''} ${c.name}`.trim()));
+    head.append(el('p', null, [c.blurb, c.code].filter(Boolean).join(' · ')));
+  }
   view.append(head);
 
   // הסבר על הקורס והמבחנים — הקשר ומקורות. מוצג רק אם הוגדר about ב-courses.json.
-  if (c.about) {
-    const box = el('div', 'course-about');
-    box.append(el('div', 'course-about-title', 'על הקורס והמבחנים'));
-    const body = el('div', 'course-about-body');
-    String(c.about).split('\n\n').forEach((para) => body.append(el('p', null, para)));
-    box.append(body);
-    view.append(box);
-  }
+  const about = s ? s.about : c.about;
+  if (about) view.append(aboutBox(about, s ? `על ${s.name} במבחן` : null));
 
-  // לוח המועדים של המקצוע — כולם, גם מה שכבר עבר
-  if ((c.dates || []).length) {
-    const row = el('div', 'moadim');
-    c.dates
-      .map((d) => ({ ...d, ts: new Date(d.at).getTime() }))
-      .sort((a, b) => a.ts - b.ts)
-      .forEach((d) => {
-        const u = urgency(d.ts);
-        const card = el('div', 'moed u-' + u);
-        card.append(el('div', 'moed-label', `מועד ${d.moed}׳`));
-        card.append(el('div', 'moed-date', `${fmtDate(d.ts)} · ${fmtTime(d.ts)}`));
-        card.append(el('div', 'moed-cd', countdownText(d.ts)));
-        row.append(card);
-      });
-    view.append(row);
-  }
+  const moadim = moadimRow(c);
+  if (moadim) view.append(moadim);
 
-  const list = examsOf(courseId);
+  const list = s ? examsOfSubject(courseId, s) : examsOf(courseId);
   if (!list.length) {
     view.append(emptyState('📭', 'עוד אין מבחנים במקצוע הזה', 'ברגע שיתווסף שחזור ראשון, הוא יופיע כאן.'));
     toTop();
@@ -1233,7 +1324,7 @@ function renderCourse(courseId) {
     return;
   }
 
-  const p = courseProgress(courseId);
+  const p = s ? progressOf(list) : courseProgress(courseId);
   const pct = p.answered ? Math.round((p.correct / p.answered) * 100) : 0;
 
   /* NOT_QUIZ ולא רשימה ידנית: הספירה הזו החריגה 'cards' בלבד, ולכן מפת החומרים
@@ -1259,7 +1350,8 @@ function renderCourse(courseId) {
   const caseDecks = list.filter((e) => e.kind === 'case');
   const cardDecks = list.filter((e) => e.kind === 'cards');
   const shinunDeck = list.find((e) => e.kind === 'shinun');
-  const hasGuide = list.some((e) => e.kind === 'guide');
+  /* המפה שייכת לקורס כולו (בלי part), ולכן בעמוד מקצוע היא לא ברשימה המסוננת. */
+  const hasGuide = !!guideOf(courseId);
 
   /* צ'יפי הניווט — גלילה חלקה לסקשן (עוגן, לא מסנן). */
   const nav = el('div', 'verbnav');
@@ -1273,7 +1365,7 @@ function renderCourse(courseId) {
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
   /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
      רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
-  if (hasAnkiDeck(courseId)) {
+  if (!s && hasAnkiDeck(courseId)) {
     const a = el('a', 'verb-chip');
     a.href = '#/anki/' + courseId;
     a.textContent = '🃏 אנקי';
@@ -1292,19 +1384,21 @@ function renderCourse(courseId) {
   const pr = el('a', 'btn primary', '🏋️ בחרו ותרגלו');
   pr.title = 'בחירת נושאים, כמות ומה להציג — ותרגול מותאם אישית';
   pr.dataset.tour = 'practice';
-  pr.href = '#/practice/' + courseId;
+  pr.href = '#/practice/' + courseId + sfx;
   lRow.append(pr);
   const rv = el('a', 'btn', '🎯 הטעויות שלי');
   rv.title = 'סבב חוזר על כל השאלות שטעית בהן';
   rv.dataset.tour = 'review';
-  rv.href = '#/review/' + courseId;
+  rv.href = '#/review/' + courseId + sfx;
   lRow.append(rv);
   /* סימולציית מבחן — רק למקצוע שהגדיר simExam ב-courses.json (כרגע פיזיקה:
      אין שחזורים, אז חוויית "מבחן אמיתי" חסרה — וזה התחליף). */
-  if (c.simExam) {
-    const sx = el('a', 'btn', '🎓 סימולציית מבחן');
-    sx.href = '#/simexam/' + courseId;
-    sx.title = `${c.simExam.questions} שאלות · ${Math.round(c.simExam.minutes / 60)} שעות · בתנאי אמת`;
+  if (sim) {
+    const sx = el('a', 'btn', s ? `🎓 סימולציה — ${s.name}` : '🎓 סימולציית מבחן');
+    sx.href = '#/simexam/' + courseId + sfx;
+    sx.title = s
+      ? `${sim.questions} שאלות · ${sim.minutes} דקות — החלק של ${s.name} במבחן, בתנאי אמת`
+      : `${sim.questions} שאלות · ${Math.round(sim.minutes / 60)} שעות · בתנאי אמת`;
     lRow.append(sx);
   }
   /* המלכודות — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. בקליני ובביוכימיה
@@ -1381,12 +1475,13 @@ function renderCourse(courseId) {
     return a;
   };
   const lg = el('div', 'learn-grid');
-  if (c.studyDoc) {
+  const studyDoc = s ? s.studyDoc : c.studyDoc;
+  if (studyDoc) {
     /* הלומדה — הכניסה הראשית ללמידה, עם שלושת מצבי הקריאה כקישורים נפרדים.
        div ולא <a> כמו שאר הקלפים: קישור בתוך קישור אסור, וכאן המצבים הם
        שלושה יעדים אמיתיים. מסמך ישן שלא הוזרק לו מנוע המצבים פשוט יתעלם
        מהפרמטר — ולכן אין צורך בדגל בדאטה. */
-    const sd = c.studyDoc;
+    const sd = studyDoc;
     const card = el('div', 'learn-card learn-card-doc');
     card.append(el('span', 'learn-card-ico', '📖'));
     const t = el('div');
@@ -1415,7 +1510,7 @@ function renderCourse(courseId) {
       '#/semester/' + courseId));
   }
   if (hasGuide) {
-    const gcard = learnCard('🗺️', 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId);
+    const gcard = learnCard('🗺️', s ? `מפת החומרים — ${s.name}` : 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId + sfx);
     gcard.dataset.tour = 'guide';   // עוגן לסיור
     lg.append(gcard);
   }
@@ -1454,6 +1549,162 @@ function renderCourse(courseId) {
   updateFooter();
 }
 
+
+/* ================= עמוד מבחן בלוק =================
+   כרטיס של קורס עם subjects מוביל לכאן: המבחן עצמו (מועדים, סימולציה של
+   הבלוק כולו, השחזורים שחוצים מקצועות) ומעליו ארבעה אריחים — אחד לכל
+   מקצוע, עם המוכנות שלך בו. כך רואים במבט אחד איזה מקצוע מפגר, ונכנסים
+   אליו בלחיצה. כל השאר (שחזורים לפי מקצוע, מפה, לומדה) גר בעמוד המקצוע. */
+function renderBlockHub(c) {
+  const courseId = c.id;
+  const subs = subjectsOf(c);
+  view.append(crumb('כל המקצועות', '#/'));
+
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `${c.icon || ''} ${c.name}`.trim()));
+  head.append(el('p', null, [c.blurb, c.code].filter(Boolean).join(' · ')));
+  view.append(head);
+
+  const moadim = moadimRow(c);
+  if (moadim) view.append(moadim);
+
+  const p = courseProgress(courseId);
+  if (p.answered) {
+    const pct = Math.round((p.correct / p.answered) * 100);
+    const dash = el('div', 'dash');
+    dash.append(stat(subs.length, 'מקצועות', 'accent'));
+    dash.append(stat(p.total, 'שאלות'));
+    dash.append(stat(p.answered, 'שאלות שענית'));
+    dash.append(stat(pct + '%', 'אחוז הצלחה', pct >= 70 ? 'good' : 'bad'));
+    view.append(dash);
+  } else {
+    view.append(el('div', 'dash-slim',
+      `${plural(subs.length, 'מקצוע', 'מקצועות')} · ${p.total} שאלות — המספרים שלך יופיעו כאן אחרי שתתחיל לענות`));
+  }
+
+  /* 1) המקצועות — הדרך הראשית פנימה */
+  const zone = el('section', 'verb-zone');
+  zone.id = 'sec-subjects';
+  const zh = el('div', 'zone-head');
+  zh.append(el('span', 'zone-head-t', '📚 המקצועות'));
+  zh.append(el('span', 'zone-head-line'));
+  zone.append(zh);
+  const grid = el('div', 'subj-grid');
+  subs.forEach((s) => {
+    const list = examsOfSubject(courseId, s);
+    const sp = progressOf(list);
+    const nQ = list.filter((e) => !NOT_QUIZ.has(e.kind)).length;
+    const sim = subjectSim(c, s);
+    const a = el('a', 'subj-tile');
+    a.href = '#/course/' + courseId + '/' + encodeURIComponent(s.key);
+    a.title = `כל מה שיש ב${s.name}: שחזורים, תרגול, סימולציה, מפה ולומדה`;
+    const txt = el('div', 'subj-tile-txt');
+    const nm = el('div', 'subj-tile-name');
+    nm.append(el('span', 'subj-tile-ico', s.icon || '📘'));
+    nm.append(el('span', null, s.name));
+    txt.append(nm);
+    txt.append(el('div', 'subj-tile-sub', `${plural(nQ, 'מבחן', 'מבחנים')} · ${sp.total} שאלות`));
+    if (sim) txt.append(el('div', 'subj-tile-q', `כ-${sim.questions} שאלות במבחן`));
+    a.append(txt);
+    const rw = el('div', 'ccard-ring');
+    rw.append(ring(sp.total ? Math.round((sp.correct / sp.total) * 100) : 0, 46));
+    rw.append(el('div', 'ccard-ring-l', 'מוכנוּת'));
+    a.append(rw);
+    grid.append(a);
+  });
+  zone.append(grid);
+  view.append(zone);
+
+  /* 2) מבחן הבלוק — כל המקצועות יחד, כמו ביום המבחן */
+  const hero = el('div', 'practice-hero');
+  hero.id = 'sec-practice';
+  hero.append(el('h2', null, '🎓 מבחן הבלוק — הכול יחד'));
+  hero.append(el('p', null,
+    'כשרוצים לבדוק את עצמכם על כל החומר: סימולציה בתנאי אמת, תרגול מעורב מכל המקצועות, והטעויות מכל הבלוק במקום אחד.'));
+  const row = el('div', 'btn-row');
+  if (c.simExam) {
+    const sx = el('a', 'btn primary', '🎓 סימולציה של המבחן המלא');
+    sx.href = '#/simexam/' + courseId;
+    sx.title = `${c.simExam.questions} שאלות · ${Math.round(c.simExam.minutes / 60)} שעות · בחלוקה של המבחן האמיתי`;
+    row.append(sx);
+  }
+  const pr = el('a', 'btn', '🏋️ תרגול מעורב');
+  pr.href = '#/practice/' + courseId;
+  pr.title = 'בחירת נושאים מכל המקצועות, כמות ומה להציג';
+  row.append(pr);
+  const rv = el('a', 'btn', '🎯 הטעויות שלי');
+  rv.href = '#/review/' + courseId;
+  rv.title = 'סבב חוזר על כל השאלות שטעית בהן, מכל ארבעת המקצועות';
+  row.append(rv);
+  if (guideOf(courseId)) {
+    const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.href = '#/tree/' + courseId;
+    kt.title = 'כל נושא בבלוק נצבע לפי כמה אתה יודע אותו עכשיו';
+    row.append(kt);
+  }
+  const nd = nextDate(c);
+  if (nd && nd.ts - Date.now() < 8 * MS.day) {
+    const tn = el('a', 'btn', '🌙 הלילה לפני');
+    tn.href = '#/tonight/' + courseId;
+    tn.title = 'מסלול חזרה מרוכז לערב שלפני המבחן — לפי הזמן שנשאר לך';
+    row.append(tn);
+  }
+  if (Object.keys(flags.read()).length) {
+    const fg = el('a', 'btn', '🔖 מה שסימנתי');
+    fg.href = '#/flagged/' + courseId;
+    fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
+    row.append(fg);
+  }
+  hero.append(row);
+  view.append(hero);
+
+  /* 3) מה שחוצה מקצועות: שחזור מבחן הבלוק עצמו, ו-High Yield */
+  const ownParts = new Set(subs.map((s) => s.part));
+  const cross = examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind) && !ownParts.has(e.part));
+  if (cross.length) {
+    const sec = el('section', 'verb-zone');
+    sec.id = 'sec-test';
+    const h = el('div', 'zone-head');
+    h.append(el('span', 'zone-head-t', '📝 שחזורים של המבחן כולו'));
+    h.append(el('span', 'zone-head-line'));
+    sec.append(h);
+    sec.append(examListFrag(cross, c));
+    view.append(sec);
+  }
+
+  /* 4) ללמוד — מה ששייך לבלוק כולו */
+  const lg = el('div', 'learn-grid');
+  const card = (ico, ttl, sub, href) => {
+    const a = el('a', 'learn-card');
+    a.href = href;
+    a.append(el('span', 'learn-card-ico', ico));
+    const t = el('div');
+    t.append(el('div', 'learn-card-ttl', ttl));
+    t.append(el('div', 'learn-card-sub', sub));
+    a.append(t);
+    return a;
+  };
+  if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length)
+    lg.append(card('🗓️', 'השבוע בבלוק', 'מה נלמד השבוע בכל המקצועות, ומה אתה אמור כבר לדעת', '#/semester/' + courseId));
+  if (guideOf(courseId))
+    lg.append(card('🗺️', 'מפת החומרים — כל הבלוק', 'כל הנושאים של כל המקצועות, לפי כמה הם נשאלים', '#/guide/' + courseId));
+  if (lg.children.length) {
+    const sec = el('section', 'verb-zone');
+    sec.id = 'sec-learn';
+    const h = el('div', 'zone-head');
+    h.append(el('span', 'zone-head-t', '📖 ללמוד'));
+    h.append(el('span', 'zone-head-line'));
+    sec.append(h);
+    sec.append(lg);
+    view.append(sec);
+  }
+
+  /* ההקשר בסוף: קודם עושים, אחר כך קוראים על המבחן. */
+  if (c.about) view.append(aboutBox(c.about, 'על המבחן'));
+
+  toTop();
+  updateFooter();
+}
 
 /* רשימת מבחנים מקובצת (flat / לפי חלק) — משותפת לזונת "נבחנים" ולזונת
    "מתרגלים", כדי ששחזורים ובנקי-תרגול יוצגו באותה שפה. */
@@ -4673,12 +4924,23 @@ async function renderPractice(courseId, seedTopic = null) {
       pool.push({ ...q, part: m.part || '', origin: loaded[mi].title, examId: m.id, idx: i })
     );
   });
+  /* #/practice/<course>/@<מקצוע> — המאגר מצטמצם לנושאי המקצוע. לפי נושא ולא
+     לפי part: כך גם שאלות המקצוע שבשחזור מבחן הבלוק נכנסות. */
+  const scope = subjectOf(courseId, scopeKey(seedTopic));
+  if (scope) {
+    seedTopic = null;
+    const ts = new Set(scope.topics || []);
+    for (let i = pool.length - 1; i >= 0; i--) if (!ts.has(pool[i].topic)) pool.splice(i, 1);
+  }
+  const scopeName = scope ? scope.name : c.name;
 
   view.innerHTML = '';
-  view.append(crumb(c.name, '#/course/' + courseId));
+  view.append(scope
+    ? crumb(scope.name, '#/course/' + courseId + '/' + encodeURIComponent(scope.key))
+    : crumb(c.name, '#/course/' + courseId));
 
   const head = el('div', 'page-head');
-  head.append(el('h1', null, `תרגול חופשי — ${c.name}`));
+  head.append(el('h1', null, `תרגול חופשי — ${scopeName}`));
   head.append(el('p', null,
     'בנה לעצמך תרגול. כברירת מחדל תקבל רק שאלות שעוד לא ראית — כדי שתתקדם דרך הארכיון ולא תסתובב במעגל.'));
   view.append(head);
@@ -4970,7 +5232,7 @@ async function renderPractice(courseId, seedTopic = null) {
   resetLink.title = 'איפוס סימון „נצפתה” לכל שאלות המקצוע — הציונים במבחנים נשארים';
   resetLink.style.fontSize = '13px';
   resetLink.onclick = () => {
-    if (!confirm(`לאפס את הסימון של כל השאלות שראית ב${c.name}?\nהציונים במבחנים עצמם יישארו.`)) return;
+    if (!confirm(`לאפס את הסימון של כל השאלות שראית ב${scopeName}?\nהציונים במבחנים עצמם יישארו.`)) return;
     const map = seen.read();
     /* המחיקה חייבת לנסוע גם לענן. בלעדיה האיפוס ביטל את עצמו: המפתח נמחק
        מקומית בלבד, ובמיזוג הבא `l === undefined` והשורה שנשארה בענן חוזרת
@@ -5069,14 +5331,14 @@ async function renderPractice(courseId, seedTopic = null) {
     playQuestions({
       key: 'practice',
       courseId,
-      title: `תרגול חופשי — ${c.name}`,
+      title: `תרגול חופשי — ${scopeName}`,
       subtitle: `${picked.length} שאלות · ${bits.join(' · ')}`,
       questions: picked,
       persist: false,
-      back: { text: 'תרגול חדש', href: '#/practice/' + courseId },
+      back: { text: 'תרגול חדש', href: '#/practice/' + courseId + (scope ? '/@' + encodeURIComponent(scope.key) : '') },
       /* אבן דרך "כיסית את כל המקצוע" — נמדדת מול כל בריכת השאלות, לא רק
          תת-הקבוצה שנבחרה לסבב הזה. */
-      milestone: { courseId, courseName: c.name, total: pool.length, qids: pool.map(qKey) },
+      milestone: { courseId, courseName: scopeName, total: pool.length, qids: pool.map(qKey) },
       /* אותה בחירה בדיוק, הגרלה חדשה — הבורר עדיין חי בקלוז׳ר הזה, כולל
          `selTopics`, `mode`, `count` וכל השאר. */
       reroll: () => go.onclick(),
@@ -5139,10 +5401,16 @@ function shuffle(arr) {
 
    הסבב שנדגם נשמר (רשימת qids + שעת התחלה), כך שרענון בטעות באמצע שלוש
    השעות לא מוחק כלום — חוזרים לאותן שאלות ולאותו שעון. */
-async function renderSimExam(courseId) {
+async function renderSimExam(courseId, subKey = null) {
   setNav('home');
   const c = courseOf(courseId);
-  const se = c?.simExam;
+  /* #/simexam/<course>/@<מקצוע> — החלק של המקצוע במבחן הבלוק: המכסה שלו,
+     וזמן יחסי. אותו מנגנון בדיוק, מאגר מצומצם לנושאים שלו. */
+  const scope = subjectOf(courseId, subKey);
+  const se = scope ? subjectSim(c, scope) : c?.simExam;
+  const scopeName = scope ? scope.name : c?.name;
+  const home = '#/course/' + courseId + (scope ? '/' + encodeURIComponent(scope.key) : '');
+  const dur = (m) => (m >= 120 ? `${Math.round(m / 60)} שעות` : `${m} דקות`);
   if (!se) {
     view.innerHTML = '';
     view.append(emptyState('⚠️', 'אין סימולציה למקצוע הזה', 'הקישור כנראה שגוי.'));
@@ -5159,6 +5427,7 @@ async function renderSimExam(courseId) {
   metas.forEach((m, mi) => {
     loaded[mi].questions.forEach((q, i) => {
       if (q.offSyllabus) return;   // במבחן אמיתי אין שאלות מחוץ לחומר
+      if (scope && !(scope.topics || []).includes(q.topic)) return;
       pool.push({ ...q, part: m.part || '', origin: loaded[mi].title, examId: m.id, idx: i });
     });
   });
@@ -5168,9 +5437,12 @@ async function renderSimExam(courseId) {
      הכיתה, הניסויים) נכנסות דרך מכסת classBanks או דרך ההשלמה. */
   const blockOf = {};
   (g?.blocks || []).forEach((b) => (b.topics || []).forEach((t) => { blockOf[t] = b.title; }));
+  /* במבחן בלוק המקצועות עצמם מגדירים את הבלוקים — גם לפני שהמפה עלתה.
+     בלי זה המכסות לא נאכפו, והסימולציה נבנתה מהשלמה אקראית בלבד. */
+  subjectsOf(c).forEach((sj) => (sj.topics || []).forEach((t) => { blockOf[t] ??= sj.block; }));
 
-  const KEY = 'simexam-' + courseId;
-  const META_KEY = 'simexam-meta-' + courseId;
+  const KEY = 'simexam-' + courseId + (scope ? '-' + scope.key : '');
+  const META_KEY = 'simexam-meta-' + courseId + (scope ? '-' + scope.key : '');
   const meta = (() => { try { return JSON.parse(localStorage.getItem(META_KEY)); } catch { return null; } })();
   const savedQs = (meta?.qids || []).map((id) => byQid.get(id)).filter(Boolean);
   const rec = store.exam(KEY);
@@ -5201,36 +5473,45 @@ async function renderSimExam(courseId) {
     playQuestions({
       key: KEY,
       courseId,
-      title: `🎓 סימולציית מבחן — ${c.name}`,
-      subtitle: `${questions.length} שאלות · ${Math.round(se.minutes / 60)} שעות · התשובות נחשפות בהגשה`,
+      title: `🎓 סימולציית מבחן — ${scopeName}`,
+      subtitle: `${questions.length} שאלות · ${dur(se.minutes)} · התשובות נחשפות בהגשה`,
       note: 'כמו במבחן: אין משוב תוך כדי. עונים על הכול, והציון וההסברים מחכים בסוף. ' +
         'אפשר לצאת ולחזור — השאלות והשעון נשמרים.',
       persist: true,
       allowExam: true,
       startExam: true,
       timer: { minutes: se.minutes, startedAt },
-      back: { text: c.name, href: '#/course/' + courseId },
+      back: { text: scopeName, href: home },
       questions,
     });
   }
 
   /* --- מסך פתיחה --- */
   view.innerHTML = '';
-  view.append(crumb(c.name, '#/course/' + courseId));
+  view.append(crumb(scopeName, home));
   const head = el('div', 'page-head');
-  head.append(el('h1', null, `🎓 סימולציית מבחן — ${c.name}`));
-  head.append(el('p', null, 'הדבר הכי קרוב למבחן האמיתי: אותו מספר שאלות, אותו זמן, אותו פיזור נושאים — ובלי משוב עד ההגשה.'));
+  head.append(el('h1', null, `🎓 סימולציית מבחן — ${scopeName}`));
+  head.append(el('p', null, scope
+    ? `החלק של ${scope.name} במבחן ${c.name}: אותו מספר שאלות שהוא מקבל במבחן האמיתי, בזמן היחסי שלו — ובלי משוב עד ההגשה.`
+    : 'הדבר הכי קרוב למבחן האמיתי: אותו מספר שאלות, אותו זמן, אותו פיזור נושאים — ובלי משוב עד ההגשה.'));
   view.append(head);
 
   const box = el('div', 'form');
   const dash = el('div', 'dash');
   dash.append(stat(se.questions, 'שאלות'));
-  dash.append(stat(Math.round(se.minutes / 60), 'שעות'));
-  dash.append(stat(Object.keys(se.blocks || {}).length, 'בלוקים בפיזור אמיתי'));
+  if (se.minutes >= 120) dash.append(stat(Math.round(se.minutes / 60), 'שעות'));
+  else dash.append(stat(se.minutes, 'דקות'));
+  if (!scope) dash.append(stat(Object.keys(se.blocks || {}).length, subjectsOf(c).length ? 'מקצועות בפיזור אמיתי' : 'בלוקים בפיזור אמיתי'));
   box.append(dash);
+  const mix = scope
+    ? `כל נושאי ${scope.name}, בלי שאלות מחוץ לחומר.`
+    : se.classQuota
+      ? `${se.classQuota} משאלות הכיתה (המרצה אמר שייקח מהן), והשאר לפי משקל הבלוקים במבחן.`
+      : subjectsOf(c).length
+        ? 'כל מקצוע מקבל את מספר השאלות שהוא מקבל במבחן האמיתי.'
+        : 'לפי משקל הבלוקים במבחן.';
   box.append(el('p', 'bd-sub',
-    'ההרכב: ' + (se.classQuota ? `${se.classQuota} משאלות הכיתה (המרצה אמר שייקח מהן), ` : '') +
-    'והשאר לפי משקל הבלוקים במבחן. שאלות שטרם ראית מקבלות עדיפות — כל סימולציה מרחיבה את הכיסוי.'));
+    `ההרכב: ${mix} שאלות שטרם ראית מקבלות עדיפות — כל סימולציה מרחיבה את הכיסוי.`));
 
   const row = el('div', 'btn-row');
   if (unfinished) {
@@ -5267,7 +5548,7 @@ async function renderSimExam(courseId) {
 }
 
 /* ================= הטעויות שלי (בתוך מקצוע) ================= */
-async function renderReview(courseId) {
+async function renderReview(courseId, subKey = null) {
   setNav('home');
   const c = courseOf(courseId);
   if (!c) {
@@ -5297,9 +5578,14 @@ async function renderReview(courseId) {
      אחרון מ-19 באלקטרו). ה-HY של ביוכימיה נכתב ביד ולא נבנה משחזור, ולכן
      יש לו qid משלו וממילא אין מה לאחד. */
   const shown = new Set();
+  const scope = subjectOf(courseId, subKey);
+  const scopeTopics = scope ? new Set(scope.topics || []) : null;
+  const scopeName = scope ? scope.name : c.name;
+  const home = '#/course/' + courseId + (scope ? '/' + encodeURIComponent(scope.key) : '');
   metas.forEach((m, mi) => {
     loaded[mi].questions.forEach((q, i) => {
       const item = { ...q, origin: loaded[mi].title, examId: m.id, idx: i };
+      if (scopeTopics && !scopeTopics.has(q.topic)) return;   // היקף מקצוע
       const k = qKey(item);
       /* עד היום: `map[k] !== 0` — כלומר נכונה אחת הורידה שאלה מהרשימה לנצח,
          גם אם היא הייתה לפני שלושה שבועות. זה ה-leech שבורח. עכשיו הגמילה
@@ -5313,9 +5599,9 @@ async function renderReview(courseId) {
   view.innerHTML = '';
 
   if (!wrong.length) {
-    view.append(crumb(c.name, '#/course/' + courseId));
+    view.append(crumb(scopeName, home));
     const head = el('div', 'page-head');
-    head.append(el('h1', null, `הטעויות שלי — ${c.name}`));
+    head.append(el('h1', null, `הטעויות שלי — ${scopeName}`));
     view.append(head);
     view.append(emptyState('🎯', 'אין טעויות לחזור עליהן',
       'או שעוד לא ענית על שאלות במקצוע הזה, או שענית נכון על הכול. כל שאלה שתטעה בה תופיע כאן אוטומטית.'));
@@ -5328,13 +5614,13 @@ async function renderReview(courseId) {
   playQuestions({
     key: 'review',
     courseId,
-    title: `הטעויות שלי — ${c.name}`,
+    title: `הטעויות שלי — ${scopeName}`,
     subtitle: `${wrong.length} שאלות שטעית בהן`,
     note: 'תענה נכון פעמיים ברצף — והשאלה תרד מהרשימה. תטעה — היא מתאפסת. ' +
           'פעם אחת לא מספיקה: זה בדיוק מה שגרם לשאלות לברוח מהרשימה בלי שידעת אותן.',
     questions: wrong,
     persist: false,
-    back: { text: c.name, href: '#/course/' + courseId },
+    back: { text: scopeName, href: home },
   });
 }
 
@@ -5365,10 +5651,11 @@ async function buildSearchIndex() {
           (d.units || []).forEach((u) => {
             /* פרק בלומדה — תוצאה שקופצת ישר לפרק הנכון דרך עוגן #top-.
                ה-hay כולל את התמצית והסיכום, כי המונח שמחפשים חי לרוב שם. */
-            if (c.studyDoc) rows.push({
+            const sdu = studyDocFor(c.id, u.topic);
+            if (sdu) rows.push({
               kind: 'doc', course: c, icon: '📖',
               title: u.topic, body: 'פרק בלומדה — ' + (u.what || '').slice(0, 70),
-              href: c.studyDoc.href + '#top-' + encodeURIComponent(u.topic),
+              href: sdu.href + '#top-' + encodeURIComponent(u.topic),
               newTab: true,
               hay: searchNorm([u.topic, u.what, u.summary].filter(Boolean).join(' ')),
             });
@@ -5948,7 +6235,6 @@ async function renderTree(courseId) {
   const groups = (g.blocks && g.blocks.length)
     ? g.blocks.map((b) => ({ title: `${b.icon || ''} ${b.title}`, topics: b.topics || [] }))
     : [{ title: '📖 כל הנושאים', topics: ranked.map((r) => r.u.topic) }];
-  const sd = c.studyDoc;
   groups.forEach((grp) => {
     const sec = el('section', 'tree-block');
     sec.append(el('h3', null, grp.title));
@@ -5972,6 +6258,7 @@ async function renderTree(courseId) {
         `<span class="tree-topic">${t}</span>` +
         `<span class="tree-meta">${r.u.freq}% מהמבחן</span>`;
       cell.append(node);
+      const sd = studyDocFor(c.id, t);
       if (sd) {
         /* קישור משני, קטן, ללומדה — התרגול הוא הראשי. */
         const doc = el('a', 'tree-doc', '📖');
@@ -6055,9 +6342,10 @@ async function renderSemester(courseId) {
     row.innerHTML = `<b>${topic}</b><span class="sem-pct">${pct}</span>`;
     if (extra) row.append(el('span', 'sem-note', extra));
     const acts = el('span', 'sem-acts');
-    if (c.studyDoc) {
+    const sdt = studyDocFor(courseId, topic);
+    if (sdt) {
       const a = el('a', null, '📖');
-      a.href = c.studyDoc.href + '#top-' + encodeURIComponent(topic);
+      a.href = sdt.href + '#top-' + encodeURIComponent(topic);
       a.target = '_blank'; a.rel = 'noopener';
       a.title = 'הפרק בלומדה';
       acts.append(a);
@@ -9736,7 +10024,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
   }
   /* קישור לפרק הנכון בסיכום המלא — אותו עוגן נושא קנוני (top-<topic>),
      בדיוק כמו שהמסמך עצמו מחזיר קישור "במפה". חינם, מונע-דאטה. */
-  const sd = courseOf(courseId) && courseOf(courseId).studyDoc;
+  const sd = studyDocFor(courseId, u.topic);
   if (sd) {
     const da = el('a', 'btn btn-sm g-study');
     da.href = sd.href + '#top-' + encodeURIComponent(u.topic);
@@ -9755,6 +10043,9 @@ function unitCard(courseId, g, r, focus, collapsible) {
 
 async function renderGuide(courseId, focusTopic = null) {
   setNav('home');
+  /* #/guide/<course>/@<מקצוע> — נפתח על הבלוק של המקצוע */
+  const focusSubject = subjectOf(courseId, scopeKey(focusTopic));
+  if (focusSubject) focusTopic = null;
   view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
   const c = courseOf(courseId);
   if (!c) {
@@ -9824,6 +10115,10 @@ async function renderGuide(courseId, focusTopic = null) {
     // --- תצוגה: לפי סדר הלימוד (בלוקים בלשוניות) ---
     const studyView = el('div');
     let activeKey = g.blocks[0].key;
+    if (focusSubject) {
+      const fb = g.blocks.find((bl) => bl.title === focusSubject.block);
+      if (fb) activeKey = fb.key;
+    }
     if (focusTopic) {
       const fb = g.blocks.find((bl) => (bl.topics || []).includes(focusTopic));
       if (fb) activeKey = fb.key;
@@ -9988,7 +10283,7 @@ function guideButton(topic) {
   const a = el('a', 'fb-guide');
   a.href = `#/guide/${hit.course}/${encodeURIComponent(topic)}`;
   a.textContent = `📚 איפה ללמוד את ${topic}`;
-  const sd = courseOf(hit.course) && courseOf(hit.course).studyDoc;
+  const sd = studyDocFor(hit.course, topic);
   if (!sd) return a;
   const frag = document.createDocumentFragment();
   frag.append(a);

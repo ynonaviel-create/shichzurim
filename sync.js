@@ -424,10 +424,18 @@ try {
    כותרת אחרת, הקישור נוחת בראש המסמך בלי להתלונן — וזה בדיוק מה שקרה
    ודווח בסקר. הבדיקה הזאת תופסת את הפער לפני שהוא מגיע לסטודנט. */
 const anchorGaps = [];
+/* לומדה לכל קורס, ובמבחן בלוק גם לומדה לכל מקצוע (subjects[].studyDoc) —
+   כל מסמך נבדק מול הנושאים שהוא אחראי עליהם. */
+const docTargets = [];
 guides.forEach((g) => {
   const course = courses.find((c) => c.id === g.course);
-  const doc = course && course.studyDoc && course.studyDoc.href;
-  if (!doc) return;
+  if (!course) return;
+  if (course.studyDoc && course.studyDoc.href) docTargets.push({ g, doc: course.studyDoc.href, only: null });
+  (course.subjects || []).forEach((sj) => {
+    if (sj.studyDoc && sj.studyDoc.href) docTargets.push({ g, doc: sj.studyDoc.href, only: new Set(sj.topics || []) });
+  });
+});
+docTargets.forEach(({ g, doc, only }) => {
   let html;
   try { html = fs.readFileSync(path.join(__dirname, doc), 'utf8'); } catch { return; }
 
@@ -451,6 +459,7 @@ guides.forEach((g) => {
     .replace(/\s+/g, ' ').trim();
   const have = new Set([...titles].map(norm));
   (g.units || []).forEach((u) => {
+    if (only && !only.has(u.topic)) return;
     if (u.topic && !have.has(norm(u.topic)))
       anchorGaps.push(`${doc} · "${u.topic}" — אין פרק בכותרת הזאת; הקישור ינחת בראש המסמך`);
   });
@@ -512,6 +521,42 @@ quizFiles.forEach((e) => {
     if (!fits(byPos) && !fits(byDis))
       explainSink(e.course, `${at}: המספור בפסילות לא מתיישב עם ${q.opts.length} התשובות (a=${q.a}) — ` +
         `"המסיח השני" = התשובה השנייה בשאלה, כולל הנכונה`);
+  });
+});
+
+/* --- מקצועות בתוך מבחן בלוק (subjects) ---
+   ינון (23/09/2026): כל מבחן בלוק מתפצל לעמודי מקצוע. המקצוע הוא תצוגה
+   על הקורס: part של המבחנים שלו, נושאים מתוך topics, ובלוק בסימולציה.
+   כל אחד מהם שגוי = עמוד מקצוע ריק, או סימולציה שמתעלמת ממנו בשקט. */
+courses.forEach((c) => {
+  const subs = c.subjects;
+  if (subs == null) return;
+  const at = `courses.json · ${c.id} · subjects`;
+  if (!Array.isArray(subs) || !subs.length) { problems.push(`${at}: חייב להיות מערך לא ריק`); return; }
+  const parts = new Set(exams.filter((e) => e.course === c.id).map((e) => e.part).filter(Boolean));
+  const keys = new Set();
+  const seenT = new Map();
+  subs.forEach((sj, k) => {
+    const w = `${at}[${sj.key || k}]`;
+    ['key', 'name', 'part', 'block'].forEach((f) => { if (!sj[f]) problems.push(`${w}: אין "${f}"`); });
+    if (keys.has(sj.key)) problems.push(`${w}: key כפול`);
+    keys.add(sj.key);
+    if (sj.part && !parts.has(sj.part))
+      problems.push(`${w}: part="${sj.part}" — אין אף מבחן בקורס עם החלק הזה; עמוד המקצוע ייפתח ריק`);
+    if (sj.block && c.simExam && c.simExam.blocks && !(sj.block in c.simExam.blocks))
+      problems.push(`${w}: block="${sj.block}" לא מופיע ב-simExam.blocks — למקצוע לא תהיה סימולציה`);
+    if (!Array.isArray(sj.topics) || !sj.topics.length) problems.push(`${w}: אין topics`);
+    (sj.topics || []).forEach((t) => {
+      if (seenT.has(t)) problems.push(`${w}: הנושא "${t}" משויך גם ל-${seenT.get(t)}`);
+      seenT.set(t, sj.key);
+      if (Array.isArray(c.topics) && !c.topics.includes(t))
+        problems.push(`${w}: הנושא "${t}" אינו ברשימת topics של הקורס`);
+    });
+    if (sj.studyDoc && sj.studyDoc.href && !fs.existsSync(path.join(__dirname, sj.studyDoc.href)))
+      problems.push(`${w}: studyDoc.href="${sj.studyDoc.href}" — הקובץ לא קיים`);
+  });
+  (c.topics || []).forEach((t) => {
+    if (!seenT.has(t)) problems.push(`${at}: הנושא "${t}" לא שויך לאף מקצוע — הוא ייעלם מעמודי המקצוע`);
   });
 });
 

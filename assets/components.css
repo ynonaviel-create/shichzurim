@@ -74,6 +74,41 @@
 .ccard-cd.u-far{ color:var(--muted); }
 .ccard-cd.u-past{ color:var(--dim); }
 
+/* כרטיס מבחן בלוק — div עם קישור ראשי שנמתח על כל הכרטיס, וצ׳יפים של
+   המקצועות מעליו (קישור בתוך קישור אסור ב-HTML). */
+.ccard-block{ cursor:pointer; }
+.ccard-main{ position:absolute; inset:0; z-index:0; border-radius:inherit; }
+.ccard-main:focus-visible{ outline:2px solid var(--course-accent); outline-offset:-2px; }
+.ccard-block > :not(.ccard-main){ position:relative; pointer-events:none; }
+.ccard-subj{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px; margin-top:12px; }
+.ccard-subj-chip{
+  pointer-events:auto; z-index:1;
+  display:flex; align-items:center; gap:6px; min-width:0;
+  padding:7px 10px; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface-2, var(--surface)); color:inherit; text-decoration:none;
+  font-size:13px; font-weight:700; line-height:1.2;
+  transition:border-color .15s ease, background .15s ease;
+}
+.ccard-subj-chip span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ccard-subj-chip:hover{ border-color:var(--course-accent); background:color-mix(in srgb, var(--course-accent) 10%, transparent); }
+.ccard-subj-chip:focus-visible{ outline:2px solid var(--course-accent); outline-offset:1px; }
+
+/* עמוד מבחן בלוק — אריח לכל מקצוע */
+.subj-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+.subj-tile{
+  position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 16px 14px 18px; color:inherit; text-decoration:none; box-shadow:var(--shadow);
+  transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.subj-tile::before{ content:""; position:absolute; inset-inline-start:0; top:0; bottom:0; width:4px; background:var(--course-accent); }
+.subj-tile:hover{ transform:translateY(-2px); border-color:var(--course-accent); box-shadow:var(--shadow-lg); }
+.subj-tile-txt{ min-width:0; }
+.subj-tile-name{ display:flex; align-items:center; gap:8px; font-size:16px; font-weight:800; }
+.subj-tile-ico{ font-size:22px; line-height:1; }
+.subj-tile-sub{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+.subj-tile-q{ font-size:12px; color:var(--dim); margin-top:2px; }
+
 /* ארכיון סמסטרים קודמים — accordion אחד, מקופל כברירת-מחדל */
 .shelf-arch{ margin-top:8px; border-top:1px dashed var(--line); padding-top:18px; }
 .shelf-arch > summary{
