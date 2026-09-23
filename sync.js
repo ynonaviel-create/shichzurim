@@ -114,7 +114,8 @@ const exams = [];
 const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
 const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
 const topicsUsed = {};              // course → Map(נושא → הקובץ הראשון שכתב אותו)
-const qidTopic = {};                // course → Map(qid → topic). מאמת את ה-points שבמפה
+const qidTopic = {};
+const offQid = {};                  // course → Set(qid) של שאלות offSyllabus — מחוץ למכנה הכיסוי                // course → Map(qid → topic). מאמת את ה-points שבמפה
 
 for (const file of files) {
   let data;
@@ -297,6 +298,10 @@ for (const file of files) {
     if (data.kind !== 'highyield' && data.guideEvidence !== false) {
       const map = (qidTopic[data.course] ??= new Map());
       items.forEach((q) => q.qid && map.set(q.qid, q.topic || null));
+      /* שאלה מחוץ לסילבוס חוקית ב-points, אבל אינה חובה במכנה של הכיסוי:
+         היא לא „מה באמת נשאל” בתוכנית של היום. */
+      const off = (offQid[data.course] ??= new Set());
+      items.forEach((q) => q.qid && q.offSyllabus && off.add(q.qid));
     }
   }
 
@@ -387,9 +392,10 @@ guides.forEach((g) => {
   (g.units || []).forEach((u) => {
     if (!u.points) return;
     const mapped = new Set(u.points.flatMap((p) => p.qids || []));
+    const off = offQid[g.course] ?? new Set();
     let total = 0;
-    qmap.forEach((t) => { if (t === u.topic) total++; });
-    const miss = total - [...mapped].filter((q) => qmap.get(q) === u.topic).length;
+    qmap.forEach((t, q) => { if (t === u.topic && !off.has(q)) total++; });
+    const miss = total - [...mapped].filter((q) => qmap.get(q) === u.topic && !off.has(q)).length;
     if (miss > 0) coverage.push(`${g.file} · ${u.topic}: ${miss} מתוך ${total} השאלות לא ממופות לאף נקודה`);
   });
 });

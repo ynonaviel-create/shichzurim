@@ -72,12 +72,17 @@ def banks(cid):
     return out
 
 
-def qindex(cid):
+def qindex(cid, evidence_only=True):
+    """qid → מטא. ברירת המחדל כמו sync.js: בנק עם guideEvidence:false (שאלות שנכתבו
+    כאן) אינו ראיה ל"מה באמת נשאל" — ה-qid שלו לא חוקי ב-points ולא נספר בכיסוי."""
     idx = {}
     for d in banks(cid):
+        home = d.get("guideEvidence") is False
+        if evidence_only and home:
+            continue
         for i, q in enumerate(d["questions"]):
             if q.get("qid"):
-                idx[q["qid"]] = {"topic": q.get("topic"), "off": bool(q.get("offSyllabus")),
+                idx[q["qid"]] = {"topic": q.get("topic"), "off": bool(q.get("offSyllabus")), "home": home,
                                  "trust": d.get("trust"), "exam": d["id"], "title": d.get("title"), "i": i + 1, "q": q}
     return idx
 
@@ -105,21 +110,23 @@ def frag_path(cid, key):
 def cmd_dump(cid, key):
     c = course_of(cid)
     s = subject_of(c, key)
-    idx = qindex(cid)
+    idx = qindex(cid, evidence_only=False)
     by = defaultdict(list)
     for qid, m in idx.items():
         if m["topic"] in s["topics"]:
             by[m["topic"]].append((qid, m))
     DUMPS.mkdir(parents=True, exist_ok=True)
     out = [f"# {s['name']} — כל השאלות לפי נושא ({cid})\n",
-           "ה-qid הוא מה שנכנס ל-points[].qids. ⚠️ = מפתח שלא אומת (partial/unverified). 🚫 = offSyllabus.\n"]
+           "ה-qid הוא מה שנכנס ל-points[].qids. ⚠️ = מפתח שלא אומת (partial/unverified). 🚫 = offSyllabus. "
+           "🏠 = שאלה שנכתבה כאן (guideEvidence:false) — טובה ללומדה, אבל **אינה ראיה** ואסור לה ב-points.\n"]
     for t in s["topics"]:
         rows = sorted(by[t], key=lambda r: (r[1]["exam"], r[1]["i"]))
-        n_in = sum(1 for _, m in rows if not m["off"])
-        out.append(f"\n\n## {t} — {n_in} בסילבוס, {len(rows) - n_in} מחוץ\n")
+        n_in = sum(1 for _, m in rows if not m["off"] and not m["home"])
+        n_home = sum(1 for _, m in rows if m["home"])
+        out.append(f"\n\n## {t} — {n_in} ראיות בסילבוס, {n_home} שנכתבו כאן, {sum(1 for _, m in rows if m['off'])} מחוץ\n")
         for qid, m in rows:
             q = m["q"]
-            flag = ("" if m["trust"] == "verified" else " ⚠️") + (" 🚫" if m["off"] else "")
+            flag = ("" if m["trust"] == "verified" else " ⚠️") + (" 🚫" if m["off"] else "") + (" 🏠" if m["home"] else "")
             out.append(f"\n### `{qid}`{flag} — {m['title']} · שאלה {m['i']}\n")
             out.append(q["q"] + "\n")
             for j, o in enumerate(q.get("opts", [])):
@@ -181,6 +188,8 @@ def check_units(c, s, units, idx, anywhere):
             pa = f"{at} נקודה {k + 1}"
             if not p.get("point") or not p.get("trap"):
                 errs.append(f"{pa}: חייבים point וגם trap")
+            if "<" in (p.get("point") or ""):
+                errs.append(f"{pa}: point מוצג כטקסט פשוט — בלי HTML (ב-trap וב-gap מותר)")
             qids = p.get("qids") or []
             if not qids:
                 errs.append(f"{pa}: אין qids — נקודה בלי שאלה שבדקה אותה היא טענה בלי ראיה")
@@ -337,7 +346,7 @@ def cmd_status():
         if not c.get("subjects"):
             continue
         idx = qindex(c["id"])
-        n_in = Counter(m["topic"] for m in idx.values() if not m["off"])
+        n_in = Counter(m["topic"] for m in qindex(c["id"], evidence_only=False).values() if not m["off"])
         weeks = {t for w in (c.get("teaching") or {}).get("weeks", []) for t in w.get("topics", [])}
         quotas = (c.get("simExam") or {}).get("blocks") or {}
         print(f"\n══ {c['name']} ══")
