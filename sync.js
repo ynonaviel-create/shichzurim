@@ -560,6 +560,29 @@ courses.forEach((c) => {
   });
 });
 
+/* --- ליווי הסמסטר (teaching) ---
+   נושא בלוח שאינו ברשימה הרשמית = שורה שמד השליטה שלה תמיד ריק, והקישורים
+   שלה מובילים לתרגול ריק. est (משוער) חייב להיות נושא של אותו שבוע. */
+courses.forEach((c) => {
+  const t = c.teaching;
+  if (!t || !Array.isArray(c.topics) || !c.topics.length) return;
+  const at = `courses.json · ${c.id} · teaching`;
+  if (!t.start || Number.isNaN(Date.parse(t.start))) problems.push(`${at}: start חסר או לא תאריך (YYYY-MM-DD)`);
+  const inPlan = new Set();
+  (t.weeks || []).forEach((w, i) => {
+    (w.topics || []).forEach((x) => {
+      inPlan.add(x);
+      if (!c.topics.includes(x)) problems.push(`${at}: שבוע ${i + 1} — "${x}" אינו ברשימת topics`);
+    });
+    (w.est || []).forEach((x) => {
+      if (!(w.topics || []).includes(x)) problems.push(`${at}: שבוע ${i + 1} — est "${x}" אינו בנושאי השבוע`);
+    });
+  });
+  c.topics.forEach((x) => {
+    if (!inPlan.has(x)) courseNotes.push(`${at}: הנושא "${x}" לא משובץ באף שבוע`);
+  });
+});
+
 /* --- הרשימה הרשמית של הנושאים --- ראו NEW-COURSE.md
    `topics` בכרטיס המקצוע היא הרשימה הסגורה. תגית הנושא מפעילה את הסינון
    בתרגול, את הפילוח בסוף המבחן, את "איפה ללמוד" ואת החיבור למפה — ולכן שם

@@ -1505,8 +1505,9 @@ function renderCourse(courseId, subKey = null) {
   (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
   /* ליווי הסמסטר — רק לקורס שהוגדרה לו תוכנית הוראה (teaching). */
   if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) {
-    lg.append(learnCard('🗓️', 'השבוע בקורס',
-      'איפה ההוראה עומדת, מה אתה אמור לדעת כבר, ומה נשאר לסגור',
+    lg.append(learnCard('🗓️', s ? 'השבוע בבלוק' : 'השבוע בקורס',
+      s ? `מה נלמד השבוע ב${s.name} ובשאר המקצועות, ומה אתה אמור כבר לדעת`
+        : 'איפה ההוראה עומדת, מה אתה אמור לדעת כבר, ומה נשאר לסגור',
       '#/semester/' + courseId));
   }
   if (hasGuide) {
@@ -6324,7 +6325,8 @@ async function renderSemester(courseId) {
   view.append(crumb(c.name, '#/course/' + courseId));
 
   const startTs = new Date(t.start + 'T00:00').getTime();
-  const weekIdx = Math.floor((Date.now() - startTs) / (7 * MS.day));
+  /* ימים שלמים (עיגול) ואז שבועות — שעת שעון החורף לא מזיזה את יום ראשון לשבוע הקודם. */
+  const weekIdx = Math.floor(Math.floor((Date.now() - startTs + MS.hour) / MS.day) / 7);
   const nd = nextDate(c);
   const examSoon = nd && nd.ts - Date.now() < 14 * MS.day;
   const over = weekIdx >= t.weeks.length;
@@ -6335,8 +6337,11 @@ async function renderSemester(courseId) {
   (g && g.units || []).forEach((u) => { byTopic[u.topic] = u; });
 
   /* שורת פעולות לנושא — אותו עוגן קנוני בכל היעדים. */
+  /* מבחן בלוק: נושא שמיקומו בלוח משוער (אין לו תאריך באף סיכום) מסומן. */
+  const estSet = new Set(t.weeks.flatMap((w) => w.est || []));
   const topicRow = (topic, extra) => {
     const row = el('div', 'sem-topic');
+    if (!extra && estSet.has(topic)) extra = 'משוער';
     const m = mastery(topic);
     const pct = m.total ? Math.round(m.strength * 100) + '%' : '—';
     row.innerHTML = `<b>${topic}</b><span class="sem-pct">${pct}</span>`;
@@ -6385,22 +6390,59 @@ async function renderSemester(courseId) {
       view.append(list);
     }
   } else {
-    head.append(el('h1', null, '🗓️ ' + c.name + ' — השבוע בקורס'));
-    head.append(el('p', null,
-      `שבוע ${Math.max(weekIdx + 1, 1)} מתוך ${t.weeks.length}. הצבע ליד כל נושא — כמה אתה שולט בו עכשיו.`));
+    const subs = subjectsOf(c);
+    head.append(el('h1', null, '🗓️ ' + c.name + (subs.length ? ' — השבוע בבלוק' : ' — השבוע בקורס')));
+    head.append(el('p', null, weekIdx < 0
+      ? `ההוראה מתחילה ב-${fmtDate(startTs)}. ${t.weeks.length} שבועות, והאחוז ליד כל נושא — כמה אתה שולט בו.`
+      : `שבוע ${weekIdx + 1} מתוך ${t.weeks.length}. הצבע ליד כל נושא — כמה אתה שולט בו עכשיו.`));
     view.append(head);
+    if (t.basis) view.append(el('p', 'sem-basis', t.basis));
+
+    /* מבחן בלוק שנלמד במקביל לבלוק אחר (עקרונות א׳ ו-ב׳): באותו שבוע
+       מציגים גם מה נלמד שם, עם קישור — הסטודנט לומד את שניהם יחד. */
+    const sib = COURSES.find((x) => x.id !== courseId && subjectsOf(x).length &&
+      x.teaching && x.teaching.start === t.start);
+    const dm = (ts) => new Date(ts).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+
     t.weeks.forEach((w, i) => {
       const state = i < weekIdx ? 'past' : i === weekIdx ? 'now' : 'future';
       const sec = el(state === 'now' ? 'section' : 'details', 'sem-week is-' + state);
-      const title = `שבוע ${i + 1}` + (state === 'now' ? ' — אתם כאן' : '') +
-        (w.note ? ` · ${w.note}` : '');
+      /* לפי ימים בלוח השנה ולא לפי מילישניות: שעון החורף (25/10) מזיז
+         חיבור של 7×24 שעות בשעה, והשבוע השני הוצג כ-25.10–30.10. */
+      const day = (n) => { const x = new Date(startTs); x.setDate(x.getDate() + n); return x.getTime(); };
+      const title = `שבוע ${i + 1}` + ` (${dm(day(i * 7))}–${dm(day(i * 7 + 6))})` +
+        (state === 'now' ? ' — אתם כאן' : '') + (w.note ? ` · ${w.note}` : '');
       if (state === 'now') sec.append(el('h2', 'g-h2', '📍 ' + title));
       else {
         const s = el('summary', null, (state === 'past' ? '✓ ' : '') + title);
         sec.append(s);
         if (state === 'past') sec.open = false;
+        if (weekIdx < 0 && i === 0) sec.open = true;   // לפני הפתיחה — השבוע הראשון פתוח
       }
-      (w.topics || []).forEach((topic) => sec.append(topicRow(topic)));
+      if (subs.length) {
+        /* קיבוץ לפי מקצוע — שמונה מקצועות במקביל נקראים רק כך. */
+        subs.forEach((sj) => {
+          const tops = (w.topics || []).filter((x) => (sj.topics || []).includes(x));
+          if (!tops.length) return;
+          const h = el('a', 'sem-subj', `${sj.icon || ''} ${sj.name}`.trim());
+          h.href = '#/course/' + courseId + '/' + encodeURIComponent(sj.key);
+          h.title = `עמוד המקצוע — ${sj.name}`;
+          sec.append(h);
+          tops.forEach((topic) => sec.append(topicRow(topic)));
+        });
+      } else {
+        (w.topics || []).forEach((topic) => sec.append(topicRow(topic)));
+      }
+      const sw = sib && sib.teaching.weeks[i];
+      if (sw && (sw.topics || []).length) {
+        const par = el('a', 'sem-sib');
+        par.href = '#/semester/' + sib.id;
+        par.title = `השבוע הזה ב${sib.name}`;
+        const names = subjectsOf(sib).filter((sj) => sw.topics.some((x) => (sj.topics || []).includes(x)))
+          .map((sj) => `${sj.icon || ''} ${sj.short || sj.name}`.trim());
+        par.textContent = `במקביל ב${sib.name}: ${names.join(' · ')} ←`;
+        sec.append(par);
+      }
       view.append(sec);
     });
   }
