@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-23",
-  "version": "ea1db94b",
+  "version": "14364bbe",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1954,7 +1954,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 22
+      "count": 30
     },
     {
       "id": "ekronot-b-patho-bet-nun",
@@ -2164,6 +2164,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "ekronot-b-pharma-mem-vav",
+      "file": "ekronot-b-pharma-mem-vav.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״ו · מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 46,
+      "moed": "א",
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 34
     },
     {
       "id": "ekronot-b-pharma-mem-zayin",
