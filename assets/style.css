@@ -2671,3 +2671,9 @@ body:has(.lightbox) .bnav{display:none;}
 .ecg-vrow.ok b{ color:var(--good); } .ecg-vrow.no b{ color:var(--bad); }
 .ecg-vrow .dim, .drill-fb .dim{ color:var(--muted); font-size:0.9em; }
 .ecg-why{ margin:8px 0 6px; line-height:1.6; }
+.ecg-tabs{ display:flex; gap:6px; margin:0 0 10px; }
+.ecg-tabs a{ text-decoration:none; }
+.ecg-tabs .verb-chip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+.ecg-tabs{ display:flex; gap:6px; margin:0 0 10px; }
+.ecg-tabs a{ text-decoration:none; }
+.ecg-tabs .verb-chip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }

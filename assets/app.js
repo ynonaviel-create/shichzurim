@@ -972,7 +972,7 @@ function router() {
   if (route === 'keyer' && param) return renderKeyer(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
   // #/ecg/<mode> — מעבדת אק״ג (זיהוי; מעבדה ומדידה יתווספו)
-  if (route === 'ecg') return renderEcgLab(param || 'id');
+  if (route === 'ecg') return param === 'lab' ? renderSim('ecg-lab') : renderEcgLab(param || 'id');
   // #/simexam/<course> — סימולציית מבחן מלאה: N שאלות, טיימר, משוב רק בסוף
   if (route === 'simexam' && param) return renderSimExam(param, scopeKey(sub));
   if (route === 'drills' && param) return renderDrills(param);
@@ -3471,36 +3471,54 @@ function ecgTrace(model) {
     let v = model.bg ? model.bg(t) : 0;
     for (const b of beats) {
       if (Math.abs(t - b.t) > 0.9) continue;
-      if (b.hasP) v += ecgG(t, b.t - (b.pr || 0.16) + 0.045, 0.022, 0.15);
+      if (b.hasP) v += ecgG(t, b.t - (b.pr || 0.16) + 0.045, 0.022, b.pAmp ?? 0.15);
       if (b.pOnly || b.dropped) continue;
+      const qt = b.qt ?? 0.36, tAmp = b.tAmp ?? 0.28, qw = b.qw ?? 0.0075;
       if (b.wide) { v += ecgG(t, b.t, 0.03, 1.15) - ecgG(t, b.t + 0.05, 0.02, 0.35); v -= ecgG(t, b.t + 0.34, 0.06, 0.45); }
-      else { v += -ecgG(t, b.t - 0.014, 0.005, 0.12) + ecgG(t, b.t, 0.0075, 1.0) - ecgG(t, b.t + 0.016, 0.006, 0.25); v += ecgG(t, b.t + 0.27, 0.045, 0.28); }
+      else {
+        v += -ecgG(t, b.t - 0.014, 0.005, 0.12) + ecgG(t, b.t, qw, 1.0) - ecgG(t, b.t + 0.016 + (qw - 0.0075), 0.006, 0.25);
+        v += ecgG(t, b.t + qt - 0.09, 0.045 * (b.tW ?? 1), tAmp);
+        if (b.st) v += b.st * ecgG(t, b.t + 0.12, 0.075, 1);            // הרמת ST — בין ה-QRS ל-T
+        if (b.u) v += ecgG(t, b.t + qt + 0.12, 0.04, b.u);               // גל U (היפוקלמיה)
+      }
     }
     return v + 0.008 * Math.sin(37 * t) + 0.006 * Math.sin(53 * t + 1);
   };
 }
 /* נייר אק״ג: 25 מ״מ לשנייה, 10 מ״מ ל-mV. 4 פיקסלים למ״מ → 10.4 שניות = 1040px. */
 const ECG_PX_MM = 4, ECG_W = Math.round(ECG_DUR * 25 * ECG_PX_MM), ECG_H = 220;
-function drawEcgStrip(cv, model, showMarks) {
-  const { ctx, w, h } = fitCanvas(cv);
+/* נייר אק״ג גנרי: pxmm = פיקסלים למ״מ (25 מ״מ = שנייה). calipers = [tA, tB] בשניות. */
+function drawEcgPaper(ctx, w, h, model, pxmm, opts = {}) {
   ctx.direction = 'ltr';
   ctx.fillStyle = '#fff8f6'; ctx.fillRect(0, 0, w, h);
-  for (let x = 0; x <= w; x += ECG_PX_MM) { ctx.strokeStyle = (x / ECG_PX_MM) % 5 === 0 ? '#f0aeae' : '#f8d6d6'; ctx.lineWidth = (x / ECG_PX_MM) % 5 === 0 ? 1 : 0.5; ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, h); ctx.stroke(); }
-  for (let y = 0; y <= h; y += ECG_PX_MM) { ctx.strokeStyle = (y / ECG_PX_MM) % 5 === 0 ? '#f0aeae' : '#f8d6d6'; ctx.lineWidth = (y / ECG_PX_MM) % 5 === 0 ? 1 : 0.5; ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(w, y + 0.5); ctx.stroke(); }
-  const base = h * 0.62, mv = 10 * ECG_PX_MM;
+  const line = (x0, y0, x1, y1, big) => { ctx.strokeStyle = big ? '#f0aeae' : '#f8d6d6'; ctx.lineWidth = big ? 1 : 0.5; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); };
+  for (let i = 0; i * pxmm <= w; i++) line(Math.round(i * pxmm) + 0.5, 0, Math.round(i * pxmm) + 0.5, h, i % 5 === 0);
+  for (let i = 0; i * pxmm <= h; i++) line(0, Math.round(i * pxmm) + 0.5, w, Math.round(i * pxmm) + 0.5, i % 5 === 0);
+  const base = h * (opts.baseFrac ?? 0.62), mv = 10 * pxmm, pxs = 25 * pxmm;
   const f = ecgTrace(model);
-  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.beginPath();
-  for (let i = 0; i <= w; i++) { const t = i / (25 * ECG_PX_MM); const y = base - f(t) * mv; i ? ctx.lineTo(i, y) : ctx.moveTo(i, y); }
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = Math.max(1.4, pxmm * 0.45); ctx.lineJoin = 'round'; ctx.beginPath();
+  for (let i = 0; i <= w; i++) { const t = i / pxs; const y = base - f(t) * mv; i ? ctx.lineTo(i, y) : ctx.moveTo(i, y); }
   ctx.stroke();
-  // ציר זמן — שנייה בכל 25 מ״מ
   ctx.fillStyle = '#9a6b6b'; ctx.font = '600 11px ' + FONT; ctx.textAlign = 'center';
-  for (let s = 1; s <= 10; s++) ctx.fillText(s + ' ש׳', s * 25 * ECG_PX_MM, h - 5);
-  if (showMarks) {
+  for (let s = 1; s * pxs < w - 10; s++) ctx.fillText(s + ' ש׳', s * pxs, h - 5);
+  if (opts.marks) {
     ctx.fillStyle = '#2f6db5'; ctx.font = '700 12px ' + FONT;
-    model.beats.forEach((b) => { if (b.hasP) { const x = (b.t - (b.pr || 0.16) + 0.045) * 25 * ECG_PX_MM; ctx.fillText('P', x, base - 0.15 * mv - 8); } });
+    model.beats.forEach((b) => { if (b.hasP) ctx.fillText('P', (b.t - (b.pr || 0.16) + 0.045) * pxs, base - (b.pAmp ?? 0.15) * mv - 8); });
     ctx.fillStyle = '#b5472f';
-    model.beats.forEach((b) => { if (!b.pOnly && !b.dropped) { const x = b.t * 25 * ECG_PX_MM; ctx.fillText(b.wide ? 'V' : 'R', x, base - 1.15 * mv - 6); } });
+    model.beats.forEach((b) => { if (!b.pOnly && !b.dropped) ctx.fillText(b.wide ? 'V' : 'R', b.t * pxs, base - 1.15 * mv - 6); });
   }
+  /* קליפרים: שני קווים אנכיים והמרחק ביניהם במילישניות ובמשבצות */
+  const cal = (opts.calipers || []).filter((t) => t != null);
+  cal.forEach((t) => { ctx.strokeStyle = '#1f7a4d'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(t * pxs, 6); ctx.lineTo(t * pxs, h - 16); ctx.stroke(); ctx.setLineDash([]); });
+  if (cal.length === 2) {
+    const [a, b] = cal.slice().sort((x, y) => x - y); const ms = Math.round((b - a) * 1000);
+    ctx.fillStyle = '#1f7a4d'; ctx.font = '800 12px ' + FONT; ctx.textAlign = 'center';
+    ctx.fillText(`${ms} ms · ${(ms / 40).toFixed(1)} משבצות`, ((a + b) / 2) * pxs, 18);
+  }
+}
+function drawEcgStrip(cv, model, showMarks, calipers) {
+  const { ctx, w, h } = fitCanvas(cv);
+  drawEcgPaper(ctx, w, h, model, ECG_PX_MM, { marks: showMarks, calipers });
 }
 
 async function renderEcgLab(mode = 'id') {
@@ -3534,10 +3552,21 @@ async function renderEcgLab(mode = 'id') {
   updScore(); view.append(score);
 
   const card = el('div', 'drill-card ecg-card');
+  const tabs = el('div', 'ecg-tabs');
+  const t1 = el('span', 'verb-chip on', '🔍 זיהוי'); t1.title = 'המצב הנוכחי — לזהות הפרעת קצב מרישום';
+  const t2 = el('a', 'verb-chip', '🎛️ מעבדה'); t2.href = '#/sim/ecg-lab'; t2.title = 'סליידרים של סימפתטי, ואגוס, חסימה, אשלגן ואיסכמיה — והרישום משתנה חי';
+  tabs.append(t1, t2); card.append(tabs);
   const wrap = el('div', 'ecg-wrap');
   const cv = el('canvas', 'ecg-strip'); cv.style.width = ECG_W + 'px'; cv.style.height = ECG_H + 'px';
+  cv.title = 'לחיצה על הרישום מציבה קליפר; לחיצה שנייה — הקליפר השני, והמרחק ביניהם נמדד';
   wrap.append(cv); card.append(wrap);
-  card.append(el('div', 'ecg-hint', 'נייר אק״ג: משבצת קטנה = 40 מילישניות, גדולה = 200. גררו לצדדים בטלפון.'));
+  card.append(el('div', 'ecg-hint', 'נייר אק״ג: משבצת קטנה = 40 מילישניות, גדולה = 200. לחצו פעמיים על הרישום כדי למדוד מרווח (PR, R-R). גררו לצדדים בטלפון.'));
+  let calipers = [];
+  cv.addEventListener('click', (e) => {
+    const r = cv.getBoundingClientRect(); const t = (e.clientX - r.left) / (25 * ECG_PX_MM);
+    calipers = calipers.length >= 2 ? [t] : [...calipers, t];
+    drawEcgStrip(cv, model, marks, calipers);
+  });
 
   const axes = el('div', 'ecg-axes');
   const chosen = { loc: null, rate: null, mech: null, name: null };
@@ -3578,7 +3607,7 @@ async function renderEcgLab(mode = 'id') {
   let model, rhythm, answered, marks = false;
   const syncCheck = () => { checkBtn.disabled = answered || Object.values(chosen).some((v) => v == null); };
   function fresh() {
-    rhythm = dpick(ECG_RHYTHMS); model = rhythm.gen(); answered = false; marks = false;
+    rhythm = dpick(ECG_RHYTHMS); model = rhythm.gen(); answered = false; marks = false; calipers = [];
     Object.keys(chosen).forEach((k) => (chosen[k] = null)); sel.value = ''; paint(); syncCheck();
     fb.className = 'drill-fb'; fb.innerHTML = '';
     drawEcgStrip(cv, model, false);
@@ -3610,13 +3639,13 @@ async function renderEcgLab(mode = 'id') {
     fb.append(grid);
     const why = el('p', 'ecg-why'); why.textContent = model.why; fb.append(why);
     if (model.bpm < 300) fb.append(el('div', 'dim', `קצב חדרי ברישום: ${model.bpm} לדקה (ספרו ${model.beats.filter((b) => !b.pOnly && !b.dropped).length} קומפלקסים בעשר שניות וכפלו ב-6).`));
-    marks = true; drawEcgStrip(cv, model, true);
+    marks = true; drawEcgStrip(cv, model, true, calipers);
     nextBtn.focus();
   }
   checkBtn.onclick = check;
   nextBtn.onclick = fresh;
-  marksBtn.onclick = () => { marks = !marks; drawEcgStrip(cv, model, marks); };
-  const ro = new ResizeObserver(() => drawEcgStrip(cv, model, marks));
+  marksBtn.onclick = () => { marks = !marks; drawEcgStrip(cv, model, marks, calipers); };
+  const ro = new ResizeObserver(() => drawEcgStrip(cv, model, marks, calipers));
   ro.observe(wrap);
   simTeardown = () => ro.disconnect();
   fresh();
@@ -9817,7 +9846,7 @@ const SIMS = [
     icon: '📉',
     title: 'הדיפול של האק״ג — למה השיא הוא בחצי הדרך',
     blurb: 'גל האקסיטציה מתפשט בסינציטיום, והרישום הוא ההפרש בין מה שכבר עבר למה שעוד לא',
-    topics: ['אק"ג', 'הפרעות קצב'],
+    topics: ['אק"ג'],
     insight: 'גררו את ההתקדמות ל-50%: הרישום בשיא. ל-100%: אפס — כל הרקמה באותו מצב, וזה מקטע ST האיזואלקטרי. ' +
              'הפעילו איסכמיה: בזמן ה-ST נשאר הפרש בין הרקמה הבריאה בפלאטו לאזור הפגוע — ST elevation. ' +
              'ומה אם הרפולריזציה הייתה מתחילה מהאנדוקרד? ה-T היה מתהפך.',
@@ -9889,6 +9918,83 @@ const SIMS = [
               { x: 400, y: r.isch ? 0.42 : 0.06, color: C.warn, label: 'ST' },
             ],
           });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'ecg-lab',
+    course: 'ekronot-b',
+    icon: '🎛️',
+    title: 'מעבדת אק״ג — מה יקרה לרישום אם…',
+    blurb: 'סימפתטי, ואגוס, חסימת AV, אשלגן ואיסכמיה — והרישום משתנה חי, עם PR, QRS, QT וקצב',
+    topics: ['הפרעות קצב'],
+    insight: 'הגבירו את הסימפתטי: הקצב עולה, PR מתקצר, ו-QT מתקצר — אבל פחות מה-R-R. ' +
+             'אפסו, והגבירו ואגוס: PR מתארך, ומעבר ל-200 מילישניות זו כבר חסימה מדרגה ראשונה. ' +
+             'העלו אשלגן ל-7: T מחודד וגבוה, QRS מתרחב, P נעלם. ואיסכמיה — ST עולה בלי ששום גל אחר זז.',
+    params: [
+      { k: 'symp', label: 'טונוס סימפתטי (קטכולאמינים)', unit: '', min: 0, max: 1, step: 0.05, val: 0, group: 'המערכת האוטונומית' },
+      { k: 'vagus', label: 'טונוס ואגלי (ACh)', unit: '', min: 0, max: 1, step: 0.05, val: 0, group: 'המערכת האוטונומית' },
+      { k: 'K', label: 'אשלגן חוץ-תאי', unit: 'mM', min: 2.5, max: 7.5, step: 0.25, val: 4.5, group: 'הסביבה' },
+      { k: 'isch', label: 'איסכמיה בדופן החדר', unit: '', min: 0, max: 1, step: 0.1, val: 0, group: 'הסביבה' },
+    ],
+    togglesTitle: 'הפרעות הולכה ומוקדים',
+    toggles: [
+      { k: 'avb1', label: 'חסימת AV מדרגה ראשונה (ההשהיה ב-AV node כפולה)' },
+      { k: 'wenck', label: 'מוביץ 1 (ונקבך) — PR מתארך עד פעימה חסרה' },
+      { k: 'avb3', label: 'חסימה מלאה — קצב מילוט חדרי' },
+      { k: 'pvc', label: 'מוקד אקטופי בחדר — PVC כל פעימה רביעית' },
+      { k: 'af', label: 'פרפור עליות' },
+    ],
+    run: (p) => {
+      const dur = 6.4;
+      const hr = Math.max(28, Math.min(185, 70 * (1 + 0.65 * p.symp) * (1 - 0.45 * p.vagus)));
+      const pr = 0.16 * (1 - 0.25 * p.symp) * (1 + 0.55 * p.vagus) * (p.avb1 ? 1.9 : 1);
+      const rr = 60 / hr;
+      const qt = Math.min(0.5, 0.40 * Math.sqrt(rr));                     // QT ∝ √RR — מתקצר עם הקצב, פחות מה-R-R
+      const hiK = Math.max(0, p.K - 5), loK = Math.max(0, 4 - p.K);
+      const morph = { qt, tAmp: 0.28 * (1 + 0.9 * hiK / 2.5) * (1 - 0.55 * loK / 1.5), tW: 1 - 0.35 * hiK / 2.5, qw: 0.0075 * (1 + 0.9 * hiK / 2.5), pAmp: 0.15 * (1 - 0.8 * hiK / 2.5), st: 0.28 * p.isch, u: loK > 0 ? 0.08 * loK / 1.5 : 0 };
+      const beats = []; let notes = '';
+      if (p.af) {
+        let t = 0.3; while (t < dur) { beats.push({ t, hasP: false, ...morph }); t += Math.max(0.3, rr + (Math.sin(t * 7.3) * 0.22 + Math.sin(t * 3.1) * 0.12)); }
+        notes = 'פרפור: אין P, R-R לא סדיר.';
+      } else if (p.avb3) {
+        let tP = 0.2; while (tP < dur) { beats.push({ t: tP, hasP: true, pr: 0, pOnly: true, pAmp: morph.pAmp }); tP += rr; }
+        let tV = 0.5; while (tV < dur) { beats.push({ t: tV, hasP: false, wide: true }); tV += 60 / 36; }
+        notes = 'חסימה מלאה: P סדירים בקצב הסינוס, QRS רחבים ב-36 לדקה, בלי קשר ביניהם.';
+      } else if (p.wenck) {
+        const prs = [pr, pr + 0.06, pr + 0.11, pr + 0.16]; let tP = 0.3, k = 0;
+        while (tP < dur) { const i = k % 5; beats.push(i < 4 ? { t: tP + prs[i], hasP: true, pr: prs[i], ...morph } : { t: tP + pr, hasP: true, pr, dropped: true, pAmp: morph.pAmp }); tP += rr; k++; }
+        notes = 'ונקבך: PR מתארך ארבע פעימות, החמישית נופלת.';
+      } else {
+        let t = 0.35, k = 0;
+        while (t < dur) {
+          beats.push({ t, hasP: true, pr, ...morph });
+          if (p.pvc && (k + 1) % 4 === 0) beats.push({ t: t + rr * 0.6, hasP: false, wide: true, pvc: true });
+          t += rr; k++;
+        }
+      }
+      const qrsMs = Math.round(80 * (1 + 0.9 * hiK / 2.5));
+      const model = { beats, bg: p.af ? ((x) => 0.035 * Math.sin(2 * Math.PI * 6 * x) + 0.03 * Math.sin(2 * Math.PI * 7.3 * x + 1)) : null };
+      return { model, dur, hr, prMs: Math.round(pr * 1000), qtMs: Math.round(qt * 1000), rrMs: Math.round(rr * 1000), qrsMs, notes,
+               pq: p.af ? 'אין P' : p.avb3 ? 'יותר P מ-QRS (בלי קשר)' : p.wenck ? '5 P על 4 QRS' : 'P לכל QRS' };
+    },
+    readouts: (p, r) => [
+      { v: num(r.hr, 0) + ' /min', label: 'קצב (סינוס)', cls: r.hr > 100 || r.hr < 60 ? 'bad' : 'good' },
+      { v: (p.avb3 || p.af ? '—' : r.prMs + ' ms'), label: 'PR (תקין עד 200)', cls: r.prMs > 200 && !p.avb3 && !p.af ? 'bad' : '' },
+      { v: r.qrsMs + ' ms', label: 'רוחב QRS (תקין עד 120)', cls: r.qrsMs > 120 ? 'bad' : '' },
+      { v: r.qtMs + ' ms', label: 'QT ≈ 400·√RR', cls: '' },
+      { v: r.rrMs + ' ms', label: 'R-R', cls: '' },
+      { v: r.pq, label: 'P מול QRS', cls: 'accent' },
+    ],
+    panels: [
+      {
+        label: 'הרישום — שש שניות, נייר אק״ג (משבצת קטנה 40 ms)',
+        h: 230,
+        draw: (g, p, C, st, r) => {
+          const pxmm = g.w / (r.dur * 25);
+          drawEcgPaper(g.ctx, g.w, g.h, r.model, pxmm, { marks: false, baseFrac: 0.6 });
         },
       },
     ],
