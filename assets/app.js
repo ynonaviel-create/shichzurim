@@ -1352,7 +1352,8 @@ function renderCourse(courseId, subKey = null) {
   const caseDecks = list.filter((e) => e.kind === 'case');
   const keyerDecks = list.filter((e) => e.kind === 'keyer');
   const cardDecks = list.filter((e) => e.kind === 'cards');
-  const shinunDeck = list.find((e) => e.kind === 'shinun');
+  /* חפיסת השינון היא של הקורס כולו (בלי part); בעמוד מקצוע היא מוצגת בהיקף המקצוע. */
+  const shinunDeck = list.find((e) => e.kind === 'shinun') || (s ? EXAMS.find((e) => e.course === courseId && e.kind === 'shinun') : null);
   /* המפה שייכת לקורס כולו (בלי part), ולכן בעמוד מקצוע היא לא ברשימה המסוננת. */
   const hasGuide = !!guideOf(courseId);
 
@@ -1469,7 +1470,7 @@ function renderCourse(courseId, subKey = null) {
   };
   keyerDecks.forEach((d) => playCards.push(playCard('🔑', d.title, d.heroSub || `${plural(d.count, 'תיק', 'תיקים')} — לזהות מרמזים, בכמה שפחות בדיקות`, '#/keyer/' + d.id, '✨ חדש')));
   caseDecks.forEach((d) => playCards.push(playCard('🩺', d.title, d.heroSub || `${plural(d.count, 'מקרה', 'מקרים')} — תיק שמתפתח, החלטה אחרי החלטה`, '#/case/' + d.id)));
-  if (shinunDeck) playCards.push(playCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה — היפוך, כסה-וגלה, מבחן`, '#/shinun/' + courseId));
+  if (shinunDeck) playCards.push(playCard('🧠', 'i❤️Shinun', s ? 'עובדות לבעל־פה במקצוע הזה — היפוך, כסה-וגלה, מבחן' : `${shinunDeck.count} עובדות לבעל־פה — היפוך, כסה-וגלה, מבחן`, '#/shinun/' + courseId + (s ? '/@' + encodeURIComponent(s.key) : '')));
   /* בעמוד מקצוע הסימולציות והחישובים הם כרטיסים כאן, בין שאר הכלים — ולא
      אקורדיון „מעבדות” נפרד בתחתית (זה נשאר לקורס בלי מקצועות, כמו אלקטרו). */
   const subSims = s ? simsOf(courseId, s) : [];
@@ -2352,11 +2353,17 @@ async function renderShinun(courseId, topicFilter) {
 
   const c = courseOf(deck.course);
   if (deck.course) view.dataset.course = deck.course;
+  /* '@pharma' — היקף מקצוע בתוך חפיסת הקורס (בלוק): רק הפריטים שהנושא שלהם
+     שייך למקצוע. המפתח של ההתקדמות לא משתנה, אז מה שנלמד נשאר. */
+  const sKey = scopeKey(topicFilter);
+  const subj = sKey ? subjectOf(courseId, sKey) : null;
+  if (sKey) topicFilter = null;
 
   /* השטחה: כל פריט נושא את הקבוצה שלו ומפתח יציב לפי front. */
   const all = [];
   (deck.groups || []).forEach((g) => (g.items || []).forEach((it) => {
     if (!it.front || !it.back) return;
+    if (subj && !(subj.topics || []).includes(it.topic)) return;
     all.push({ ...it, group: g.label, key: id + '#' + shinunNorm(it.front) });
   }));
   const groupLabels = [...new Set(all.map((it) => it.group))];
@@ -2368,10 +2375,11 @@ async function renderShinun(courseId, topicFilter) {
   all.forEach((it) => { if (it.family) (fam[it.family] ||= []).push(it); });
 
   view.innerHTML = '';
-  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+  view.append(crumb(subj ? `${c.name} · ${subj.name}` : c ? c.name : 'חזרה', '#/course/' + deck.course + (subj ? '/' + encodeURIComponent(subj.key) : '')));
   const head = el('div', 'page-head');
-  head.append(el('h1', null, '🧠 ' + (deck.title || 'i❤️Shinun')));
-  if (deck.heroSub) head.append(el('p', null, deck.heroSub));
+  head.append(el('h1', null, '🧠 ' + (deck.title || 'i❤️Shinun') + (subj ? ` — ${subj.name}` : '')));
+  if (deck.heroSub && !subj) head.append(el('p', null, deck.heroSub));
+  if (subj) head.append(el('p', null, `${all.length} עובדות לבעל-פה במקצוע הזה — היפוך, כסה-וגלה, מבחן`));
   view.append(head);
   if (deck.draft) {
     const d = el('div', 'cards-note');
