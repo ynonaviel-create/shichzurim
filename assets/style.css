@@ -2649,3 +2649,8 @@ body:has(.lightbox) .bnav{display:none;}
 .keyer-none{ font-size:13.5px; color:var(--muted); font-weight:700; }
 .keyer-result{ border-inline-start-color:var(--warn); }
 .keyer-next{ margin-top:14px; }
+
+/* ---- תרגילי חישוב: צ'יפי „עוד תרגילים” מתחת לכפתורי הפעולה ---- */
+.drill-sibs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 14px; }
+.drill-sibs .lbl { font-size: 0.85rem; color: var(--muted); margin-inline-end: 2px; }
+.drill-sibs .verb-chip { text-decoration: none; }

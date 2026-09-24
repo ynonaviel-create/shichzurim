@@ -1365,7 +1365,7 @@ function renderCourse(courseId, subKey = null) {
     nav.append(ch);
   };
   addChip('sec-practice', '🏋️ תרגול');
-  if (keyerDecks.length || caseDecks.length || shinunDeck) addChip('sec-play', '🎮 לשחק');
+  if (keyerDecks.length || caseDecks.length || shinunDeck || (s && (simsOf(courseId, s).length || drillsOf(courseId, s).length))) addChip('sec-play', '🎮 לשחק');
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
   /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
      רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
@@ -1470,6 +1470,16 @@ function renderCourse(courseId, subKey = null) {
   keyerDecks.forEach((d) => playCards.push(playCard('🔑', d.title, d.heroSub || `${plural(d.count, 'תיק', 'תיקים')} — לזהות מרמזים, בכמה שפחות בדיקות`, '#/keyer/' + d.id, '✨ חדש')));
   caseDecks.forEach((d) => playCards.push(playCard('🩺', d.title, d.heroSub || `${plural(d.count, 'מקרה', 'מקרים')} — תיק שמתפתח, החלטה אחרי החלטה`, '#/case/' + d.id)));
   if (shinunDeck) playCards.push(playCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה — היפוך, כסה-וגלה, מבחן`, '#/shinun/' + courseId));
+  /* בעמוד מקצוע הסימולציות והחישובים הם כרטיסים כאן, בין שאר הכלים — ולא
+     אקורדיון „מעבדות” נפרד בתחתית (זה נשאר לקורס בלי מקצועות, כמו אלקטרו). */
+  const subSims = s ? simsOf(courseId, s) : [];
+  const subDrills = s ? drillsOf(courseId, s) : [];
+  subSims.forEach((x) => playCards.push(playCard(x.icon, x.title, x.blurb, '#/sim/' + x.id, '🎛️ סימולציה')));
+  if (subDrills.length) {
+    const sub = subDrills.length === 1 ? subDrills[0].title : subDrills.map((d) => d.title).slice(0, 3).join(' · ') + (subDrills.length > 3 ? ` ועוד ${subDrills.length - 3}` : '');
+    playCards.push(playCard('🧮', `${plural(subDrills.length, 'תרגיל חישוב', 'תרגילי חישוב')} — מספרים חדשים בכל פעם`, sub, '#/drill/' + subDrills[0].id));
+    playCards.push(playCard('📖', 'כרטיס הנוסחאות', `${plural(formulasOf(courseId, s).length, 'נוסחה', 'נוסחאות')} עם מחשבון-הצבה חי`, `#/formulas/${courseId}/@${encodeURIComponent(s.key)}`));
+  }
   if (playCards.length) {
     const sec = el('section', 'verb-zone');
     sec.id = 'sec-play';
@@ -1563,8 +1573,8 @@ function renderCourse(courseId, subKey = null) {
   }
 
   /* 4) מעבדות — הכי פחות בשימוש: accordion מקופל בתחתית, שלא יפריע לעיקר. */
-  const sh = simsHero(courseId);
-  const dh = drillsHero(courseId);
+  const sh = s ? null : simsHero(courseId);
+  const dh = s ? null : drillsHero(courseId);
   if (sh || dh) {
     const acc = el('details', 'labs-acc');
     acc.dataset.tour = 'sim';   // עוגן לסיור — על האקורדיון (גלוי), לא על התוכן המקופל
@@ -3237,7 +3247,8 @@ async function renderKeyer(id, itemId = null) {
 
 /* בורר התיקים — הדף שרואים כשנכנסים לחפיסה בלי תיק מסוים. */
 function keyerPicker(deck, c) {
-  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+  const sj = deck.items.map((it) => subjectOfTopic(deck.course, it.topic)).find(Boolean);
+  view.append(crumb(sj ? `${c.name} · ${sj.name}` : c ? c.name : 'חזרה', '#/course/' + deck.course + (sj ? '/' + encodeURIComponent(sj.key) : '')));
   const head = el('div', 'page-head');
   head.append(el('h1', null, '🔑 ' + deck.title));
   const doneN = deck.items.filter((it) => (keyerProg.get(deck.id, it.id) || {}).done).length;
@@ -3713,6 +3724,13 @@ function playQuestions(cfg) {
         const a = el('a', 'bd-sim bd-drill', '🧮 תרגל חישוב');
         a.href = '#/drill/' + dr.id;
         a.title = dr.title;
+        r.append(a);
+      }
+      const ky = keyerFor(courseId, name);
+      if (ky) {
+        const a = el('a', 'bd-sim bd-drill', '🔑 לזהות מרמזים');
+        a.href = '#/keyer/' + ky.id;
+        a.title = ky.title;
         r.append(a);
       }
       box.append(r);
@@ -8459,13 +8477,14 @@ function plot(g, o) {
   // רשת
   ctx.strokeStyle = C.lineSoft; ctx.lineWidth = 1;
   ctx.fillStyle = C.dim;
-  ticks(o.yMin, o.yMax).forEach((t) => {
+  /* noYTicks / noXTicks — לגרף קטגוריאלי (עמודות עם שמות) המספרים על הציר רק מבלבלים. */
+  if (!o.noYTicks) ticks(o.yMin, o.yMax).forEach((t) => {
     const y = Math.round(sy(t)) + 0.5;
     ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
     ctx.textAlign = 'right';
     ctx.fillText(num(t), x0 - 8, y);
   });
-  ticks(o.xMin, o.xMax).forEach((t) => {
+  if (!o.noXTicks) ticks(o.xMin, o.xMax).forEach((t) => {
     const x = Math.round(sx(t)) + 0.5;
     ctx.beginPath(); ctx.moveTo(x, yT); ctx.lineTo(x, yB); ctx.stroke();
     ctx.textAlign = 'center';
@@ -8634,6 +8653,17 @@ function runHH({ dur = 30, dt = 0.01, I = 0, tOn = 5, tOff = 5.5, ttx = false, t
     else V += ((Iinj - INa - IK - IL) / H.Cm) * dt;
   }
   return out;
+}
+
+/* מלבן מעוגל בקנבס — roundRect לא קיים בכל הדפדפנים שהסטודנטים מביאים. */
+function rrect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y); ctx.lineTo(x + w - rr, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+  ctx.lineTo(x + w, y + h - rr); ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+  ctx.lineTo(x + rr, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+  ctx.lineTo(x, y + rr); ctx.quadraticCurveTo(x, y, x + rr, y);
+  ctx.closePath();
 }
 
 /* ---------- הסימולציות ---------- */
@@ -9126,6 +9156,477 @@ const SIMS = [
       },
     ],
   },
+  /* ═══════════ עקרונות המדע ב׳ — פרמקולוגיה ═══════════ */
+  {
+    id: 'pk-curve',
+    course: 'ekronot-b',
+    icon: '💊',
+    title: 'עקומת ריכוז-זמן — מנה, פינוי ומצב יציב',
+    blurb: 'מנה, F, נפח התפזרות ופינוי — ואיך מגיעים למצב יציב בארבעה זמני מחצית חיים',
+    topics: ['פיזור, מטבוליזם ופינוי', 'ספיגה ודרכי מתן'],
+    insight: 'הורידו את הפינוי בחצי (כשל כליות): זמן מחצית החיים מוכפל, הריכוז במצב יציב מוכפל — וגם הזמן להגיע אליו. ' +
+             'עכשיו הכפילו את המנה במקום: המצב היציב עולה, אבל הזמן להגיע אליו לא זז. זו בדיוק ההבחנה שהמאגר שואל עליה.',
+    params: [
+      { k: 'D', label: 'מנה', unit: 'mg', min: 25, max: 1000, step: 25, val: 200, group: 'המתן' },
+      { k: 'F', label: 'זמינות ביולוגית F (פומי)', unit: '', min: 0.1, max: 1, step: 0.05, val: 0.6, group: 'המתן' },
+      { k: 'tau', label: 'מרווח בין מנות τ', unit: 'h', min: 4, max: 48, step: 2, val: 12, group: 'המתן' },
+      { k: 'ka', label: 'קצב ספיגה ka (פומי)', unit: '1/h', min: 0.2, max: 3, step: 0.1, val: 1, group: 'המתן' },
+      { k: 'V', label: 'נפח התפזרות V', unit: 'L', min: 5, max: 300, step: 5, val: 40, group: 'המטופל' },
+      { k: 'CL', label: 'פינוי CL', unit: 'L/h', min: 0.5, max: 40, step: 0.5, val: 4, group: 'המטופל' },
+      { k: 'winLo', label: 'סף החלון התרפויטי', unit: 'mg/L', min: 0.5, max: 20, step: 0.5, val: 2, group: 'החלון התרפויטי' },
+      { k: 'winHi', label: 'סף הרעילות', unit: 'mg/L', min: 1, max: 40, step: 0.5, val: 8, group: 'החלון התרפויטי' },
+    ],
+    togglesTitle: 'דרך המתן',
+    toggles: [
+      { k: 'iv', label: 'מתן תוך-ורידי (בולוס: F=1, בלי שלב ספיגה)' },
+      { k: 'load', label: 'מנת העמסה במנה הראשונה' },
+    ],
+    run: (p) => {
+      const k = p.CL / p.V;                                // קבוע הפינוי
+      const t12 = Math.LN2 / k;
+      const F = p.iv ? 1 : p.F;
+      const css = (F * p.D) / (p.CL * p.tau);              // ריכוז ממוצע במצב יציב
+      const loadDose = (css * p.V) / F;                    // D* = Css·V (מתוקן ל-F)
+      const one = (t) => {                                 // מנה בודדת, t בשעות
+        if (t < 0) return 0;
+        if (p.iv || Math.abs(p.ka - k) < 1e-6) return (F * p.D / p.V) * Math.exp(-k * t);
+        return ((F * p.D * p.ka) / (p.V * (p.ka - k))) * (Math.exp(-k * t) - Math.exp(-p.ka * t));
+      };
+      const conc = (t) => {                                // סופרפוזיציה של כל המנות עד t
+        let c = 0;
+        for (let n = 0; n * p.tau <= t; n++) {
+          const d = one(t - n * p.tau);
+          c += p.load && n === 0 ? d * (loadDose / p.D) : d;
+        }
+        return c;
+      };
+      const T = Math.min(240, Math.max(48, 6 * t12));
+      const pts = [];
+      for (let i = 0; i <= 480; i++) { const t = (i / 480) * T; pts.push([t, conc(t)]); }
+      const T1 = Math.min(T, 5 * t12 + 12);
+      const single = [];
+      for (let i = 0; i <= 240; i++) { const t = (i / 240) * T1; single.push([t, one(t)]); }
+      const peak = single.reduce((a, b) => (b[1] > a[1] ? b : a), single[0]);
+      return { k, t12, css, pts, single, T, peak, tss: 3.3 * t12, auc: (F * p.D) / p.CL, loadDose, F };
+    },
+    readouts: (p, r) => [
+      { v: num(r.t12) + ' h', label: 't½ = 0.693·V/CL', cls: 'accent' },
+      { v: num(r.tss) + ' h', label: 'זמן ל-90% מצב יציב (≈3.3·t½)', cls: '' },
+      { v: num(r.css) + ' mg/L', label: 'Css ממוצע = F·D/(CL·τ)', cls: r.css > p.winHi || r.css < p.winLo ? 'bad' : 'good' },
+      { v: num(r.auc) + ' mg·h/L', label: 'AUC למנה = F·D/CL', cls: '' },
+      { v: num(r.loadDose) + ' mg', label: 'מנת העמסה = Css·V/F', cls: '' },
+    ],
+    panels: [
+      {
+        label: 'מנה בודדת — פומי (עלייה ואז ירידה) מול ורידי (ירידה מיידית), ואיפה Cmax',
+        h: 220,
+        draw: (g, p, C, st, r) => {
+          const yMax = Math.max(r.peak[1] * 1.2, p.winHi * 1.1, 1);
+          plot(g, {
+            C, xMin: 0, xMax: r.single[r.single.length - 1][0], yMin: 0, yMax, xLabel: 'זמן (שעות)', yLabel: 'ריכוז (mg/L)',
+            series: [{ pts: r.single, color: C.accent, width: 2.4 }],
+            marks: [{ y: p.winLo, color: C.good, label: 'סף תרפויטי' }, { y: p.winHi, color: C.bad, label: 'רעילות' }],
+            dots: p.iv ? [] : [{ x: r.peak[0], y: r.peak[1], color: C.warn, label: 'Cmax' }],
+          });
+        },
+      },
+      {
+        label: 'מנות חוזרות — הצטברות עד מצב יציב',
+        h: 260,
+        draw: (g, p, C, st, r) => {
+          const yMax = Math.max(...r.pts.map((q) => q[1]), p.winHi) * 1.15;
+          plot(g, {
+            C, xMin: 0, xMax: r.T, yMin: 0, yMax, xLabel: 'זמן (שעות)', yLabel: 'ריכוז (mg/L)',
+            series: [{ pts: r.pts, color: C.accent, width: 2.2 }],
+            marks: [
+              { y: p.winLo, color: C.good, label: 'סף תרפויטי' },
+              { y: p.winHi, color: C.bad, label: 'רעילות' },
+              { y: r.css, color: C.warn, dash: [2, 3], label: 'Css ממוצע' },
+            ],
+            dots: [{ x: Math.min(r.tss, r.T), y: r.css, color: C.warn, label: '≈90% מצב יציב' }],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'dose-response',
+    course: 'ekronot-b',
+    icon: '📈',
+    title: 'עקומת מינון-תגובה — אגוניסטים ואנטגוניסטים',
+    blurb: 'מי מזיז את העקומה ימינה ומי מוריד את התקרה — פוטנטיות מול יעילות',
+    topics: ['פרמקודינמיקה'],
+    insight: 'הוסיפו אנטגוניסט תחרותי: העקומה זזה ימינה אבל התקרה נשארת (אפשר להתגבר עם עוד אגוניסט). ' +
+             'אפסו, וחסמו 50% מהרצפטורים לא-תחרותית: התקרה יורדת. עכשיו הוסיפו „רצפטורים עודפים” — התקרה חוזרת, ' +
+             'כי מספיק חלק מהרצפטורים כדי לקבל תגובה מלאה. ואגוניסט חלקי? הורידו את הפעילות הפנימית.',
+    params: [
+      { k: 'ec50', label: 'EC50 של האגוניסט', unit: 'µM', min: 0.1, max: 30, step: 0.1, val: 3, group: 'האגוניסט' },
+      { k: 'alpha', label: 'פעילות פנימית α (1 = אגוניסט מלא, פחות = חלקי)', unit: '', min: 0.1, max: 1, step: 0.05, val: 1, group: 'האגוניסט' },
+      { k: 'nH', label: 'תלילות (מקדם היל)', unit: '', min: 0.5, max: 3, step: 0.1, val: 1, group: 'האגוניסט' },
+      { k: 'B', label: 'אנטגוניסט תחרותי [B]', unit: 'µM', min: 0, max: 30, step: 0.5, val: 0, group: 'אנטגוניסטים' },
+      { k: 'KB', label: 'זיקת האנטגוניסט KB', unit: 'µM', min: 0.2, max: 10, step: 0.2, val: 2, group: 'אנטגוניסטים' },
+      { k: 'nc', label: 'חסימה לא-תחרותית (% מהרצפטורים)', unit: '%', min: 0, max: 90, step: 5, val: 0, group: 'אנטגוניסטים' },
+      { k: 'spare', label: 'רצפטורים עודפים (% שאפשר לאבד ועדיין לקבל Emax)', unit: '%', min: 0, max: 80, step: 5, val: 0, group: 'המערכת' },
+    ],
+    run: (p) => {
+      const ratio = 1 + p.B / p.KB;                                          // יחס המינון של שילד
+      const f = p.nc / 100, r = p.spare / 100;
+      /* חסימה לא-תחרותית מורידה תקרה — אלא אם יש רזרבת רצפטורים שסופגת אותה;
+         כל עוד הרזרבה סופגת, העקומה רק זזה ימינה. */
+      const emax = 100 * p.alpha * Math.min(1, (1 - f) / (1 - r));
+      const ec50app = p.ec50 * ratio * (r > 0 ? 1 / (1 - Math.min(f, r)) : 1);
+      const curve = (E, ec, n) => {
+        const pts = [];
+        for (let i = 0; i <= 160; i++) { const x = -2 + (i / 160) * 5; const c = Math.pow(10, x); pts.push([x, (E * Math.pow(c, n)) / (Math.pow(ec, n) + Math.pow(c, n))]); }
+        return pts;
+      };
+      return { ec50app, emax, ratio, base: curve(100, p.ec50, p.nH), cur: curve(emax, ec50app, p.nH) };
+    },
+    readouts: (p, r) => [
+      { v: num(r.ec50app) + ' µM', label: 'EC50 נראה — פוטנטיות (שמאלה = פוטנטי יותר)', cls: 'accent' },
+      { v: num(r.emax, 0) + '%', label: 'Emax נראה — יעילות (התקרה)', cls: r.emax < 99 ? 'bad' : 'good' },
+      { v: num(r.ratio), label: 'יחס מינון 1 + [B]/KB', cls: '' },
+    ],
+    panels: [
+      {
+        label: 'תגובה כנגד log הריכוז — מקווקו: אגוניסט מלא לבדו',
+        h: 280,
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: -2, xMax: 3, yMin: 0, yMax: 105, xLabel: 'log₁₀ ריכוז האגוניסט (µM)', yLabel: 'תגובה (% מהמרבי)',
+            series: [{ pts: r.base, color: C.dim, width: 1.8, dash: [5, 4] }, { pts: r.cur, color: C.accent, width: 2.6 }],
+            marks: [{ y: 50, color: C.lineSoft, dash: [2, 4] }],
+            dots: [{ x: Math.log10(r.ec50app), y: r.emax / 2, color: C.warn, label: 'EC50' }],
+            legend: [{ color: C.dim, label: 'אגוניסט מלא לבדו' }, { color: C.accent, label: 'המצב שבחרת' }],
+          });
+        },
+      },
+    ],
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — גנטיקה ═══════════ */
+  {
+    id: 'hardy-weinberg',
+    course: 'ekronot-b',
+    icon: '🧬',
+    title: 'הרדי-ויינברג — משכיחות המחלה לסיכון בייעוץ',
+    blurb: 'שכיחות המחלה ← שורש ← כפול שתיים = נשאים; ואז הסיכון לזוג, לפי מי במשפחה חולה',
+    topics: ['גנטיקה של אוכלוסיות'],
+    insight: 'קבעו מחלה של 1:2,500 (CF): הנשאים הם 1:25. עכשיו „אח חולה”: בן הזוג נשא ב-2/3 ולא ב-1/2 — ' +
+             'כי האפשרות שהוא חולה בעצמו כבר ירדה. הסיכון לילד: 2/3 × 1/25 × 1/4 = 1:150. ' +
+             'הזיזו את השכיחות פי 100 וראו: הנשאים זזים רק פי 10, כי זה שורש.',
+    params: [
+      { k: 'logN', label: 'שכיחות המחלה 1:N (סליידר לוגריתמי: 2 = 1:100 … 6 = 1:1,000,000)', unit: '', min: 2, max: 6, step: 0.05, val: 3.4, group: 'האוכלוסייה' },
+    ],
+    togglesTitle: 'מי במשפחה',
+    toggles: [
+      { k: 'sib', label: 'לבן/בת הזוג הראשון יש אח או אחות חולים (נשא ב-2/3)' },
+      { k: 'child', label: 'בן/בת הזוג הראשון הם ילד של חולה (נשא ודאי)' },
+      { k: 'sib2', label: 'גם לשני יש אח או אחות חולים' },
+    ],
+    run: (p) => {
+      const N = Math.pow(10, p.logN);
+      const q2 = 1 / N, q = Math.sqrt(q2), pp = 1 - q, carriers = 2 * pp * q;
+      const c1 = p.child ? 1 : p.sib ? 2 / 3 : carriers;
+      const c2 = p.sib2 ? 2 / 3 : carriers;
+      return { N, q, pp, q2, carriers, c1, c2, risk: c1 * c2 * 0.25 };
+    },
+    readouts: (p, r) => {
+      const inv = (x) => '1:' + Math.round(1 / x).toLocaleString('en-US');
+      return [
+        { v: inv(r.q2), label: 'שכיחות המחלה q²', cls: '' },
+        { v: inv(r.q), label: 'שכיחות האלל q = √(q²)', cls: 'accent' },
+        { v: inv(r.carriers), label: 'נשאים 2pq ≈ 2q', cls: 'good' },
+        { v: inv(r.risk), label: 'סיכון לילד חולה = c₁ · c₂ · ¼', cls: 'bad' },
+      ];
+    },
+    panels: [
+      {
+        label: '100 אנשים מהאוכלוסייה — הנשאים בכתום (חולה יש בערך אחד על כל N)',
+        h: 150,
+        draw: (g, p, C, st, r) => {
+          const { ctx, w, h } = g;
+          ctx.clearRect(0, 0, w, h); ctx.direction = 'ltr';
+          const cols = 25, rows = 4, cell = Math.min((w - 40) / cols, (h - 44) / rows);
+          const x0 = (w - cols * cell) / 2, y0 = 10;
+          const nCar = Math.round(r.carriers * 100);
+          for (let i = 0; i < 100; i++) {
+            const cx = x0 + (i % cols) * cell, cy = y0 + Math.floor(i / cols) * cell;
+            ctx.fillStyle = i < nCar ? C.warn : C.surface2; ctx.strokeStyle = C.line;
+            rrect(ctx, cx + 2, cy + 2, cell - 4, cell - 4, 3); ctx.fill(); ctx.stroke();
+          }
+          ctx.fillStyle = C.muted; ctx.font = '700 12px ' + FONT; ctx.textAlign = 'center';
+          ctx.fillText(`${nCar} נשאים מתוך 100 · חולה אחד על כל ${Math.round(r.N).toLocaleString('en-US')} אנשים`, w / 2, h - 10);
+        },
+      },
+      {
+        label: 'הסיכון לילד חולה — לפי מי במשפחה חולה (סקאלה לוגריתמית: כל מדרגה = פי 10)',
+        h: 240,
+        draw: (g, p, C, st, r) => {
+          const bars = [
+            ['שני', 'זרים', (r.carriers * r.carriers) / 4],
+            ['אח/ות של', 'חולה + זר', ((2 / 3) * r.carriers) / 4],
+            ['ילד של', 'חולה + זר', r.carriers / 4],
+            ['שניהם', 'אחים של חולים', (2 / 3) * (2 / 3) / 4],
+            ['המצב', 'שבחרת', r.risk],
+          ];
+          /* 1:9 לצד 1:2,600 — בסקאלה ליניארית העמודות הקטנות נעלמות. לוג שומר על הסדר וגם על הנראות. */
+          const lg = (v) => Math.log10(1 / v);
+          const yMax = Math.max(...bars.map((b) => lg(b[2]))) + 0.8;
+          const o = plot(g, {
+            C, xMin: 0, xMax: bars.length, yMin: 0, yMax, padL: 24, padR: 10, noXTicks: true, noYTicks: true,
+            bars: bars.map((b, i) => ({ x: i + 0.5, w: 0.62, y: yMax - lg(b[2]), color: i === bars.length - 1 ? C.accent : C.dim })),
+          });
+          const { ctx } = g;
+          ctx.font = '700 10.5px ' + FONT; ctx.textAlign = 'center';
+          bars.forEach((b, i) => {
+            const top = o.sy(yMax - lg(b[2]));
+            ctx.fillStyle = C.text; ctx.fillText('1:' + Math.round(1 / b[2]).toLocaleString('en-US'), o.sx(i + 0.5), top - 8);
+            ctx.fillStyle = C.muted; ctx.fillText(b[0], o.sx(i + 0.5), o.yB + 12); ctx.fillText(b[1], o.sx(i + 0.5), o.yB + 25);
+          });
+        },
+      },
+    ],
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — פיזיולוגיה של הלב ═══════════ */
+  {
+    id: 'cardiac-ap',
+    course: 'ekronot-b',
+    icon: '🫀',
+    title: 'פוטנציאל הפעולה בלב — חוסמים על הפאזות, מתווכים על הקוצב',
+    blurb: 'TTX, נימודיפין, אמיודרון ולידוקאין על סיב פורקינייה; קטכולאמינים ו-ACh על שיפוע הקוצב',
+    topics: ['תעלות יונים וזרמים בלב', 'פוטנציאל פעולה ותקופה רפרקטורית', 'רקמות מהירות מול איטיות'],
+    insight: 'חסמו 60% מ-IKs (אמיודרון): הפלאטו מתארך, וגם התקופה הרפרקטורית ו-QT. אפסו, וחסמו 60% מתעלות הסידן (נימודיפין): ' +
+             'הפלאטו מתקצר. ואז חסמו נתרן (TTX): ה-upstroke נחלש ומהירות ההולכה יורדת — הפלאטו כמעט לא זז. ' +
+             'בקוצב: גררו את ה-cAMP לצד הקטכולאמינים — שיפוע פאזה 4 תלול יותר, הסף מגיע מהר יותר, הקצב עולה.',
+    params: [
+      { k: 'na', label: 'חסימת תעלות נתרן מהירות (TTX)', unit: '%', min: 0, max: 90, step: 5, val: 0, group: 'חוסמים — סיב פורקינייה' },
+      { k: 'ca', label: 'חסימת תעלות סידן L (נימודיפין)', unit: '%', min: 0, max: 90, step: 5, val: 0, group: 'חוסמים — סיב פורקינייה' },
+      { k: 'ks', label: 'חסימת IKs (אמיודרון)', unit: '%', min: 0, max: 90, step: 5, val: 0, group: 'חוסמים — סיב פורקינייה' },
+      { k: 'late', label: 'חסימת זרם הנתרן המתמשך (לידוקאין)', unit: '%', min: 0, max: 100, step: 5, val: 0, group: 'חוסמים — סיב פורקינייה' },
+      { k: 'camp', label: 'cAMP בקוצב: −1 = ואגוס/ACh … +1 = קטכולאמינים', unit: '', min: -1, max: 1, step: 0.1, val: 0, group: 'הקוצב (SA node)' },
+    ],
+    run: (p) => {
+      /* מודל פנומנולוגי, לא הודג׳קין-האקסלי: כל פאזה נבנית מהמוליכות שנשארה.
+         מספיק כדי לראות מי מאריך, מי מקצר ומי מחליש — וזה מה שהמאגר שואל. */
+      const gNa = 1 - p.na / 100, gCa = 1 - p.ca / 100, gKs = 1 - p.ks / 100, gLate = 1 - p.late / 100;
+      /* הקוצב: שיפוע פאזה 4 ∝ cAMP (If + ICa-T). הקצב נגזר מכמה זמן לוקח להגיע לסף. */
+      const slope = 0.0314 * (1 + 0.45 * p.camp);                    // mV/ms
+      const rise = 20 / slope;                                        // מ-−60 ל-−40
+      const clSA = rise + 220;
+      const hr = 60000 / clSA;
+      const sa = [];
+      for (let i = 0; i <= 500; i++) {
+        const t = (i / 500) * 2 * clSA, u = t % clSA;
+        let v;
+        if (u < rise) v = -60 + slope * u;
+        else if (u < rise + 120) v = -40 + 55 * Math.sin((Math.PI * (u - rise)) / 120);   // upstroke איטי (סידן), לא חד
+        else v = -40 - 20 * ((u - rise - 120) / 100);
+        sa.push([t, v]);
+      }
+      /* פורקינייה */
+      const build = (gNa, gCa, gKs, gLate) => {
+        const dvdt = 1500 * gNa;                                      // V/s — פאזה 0
+        const peak = -90 + 120 * Math.sqrt(gNa);
+        const rate = Math.max(0.6, Math.min(1, 1 - (hr - 70) / 250)); // בקצב מהיר פוטנציאל הפעולה מתקצר
+        const up = 120 / dvdt;                                        // ms
+        const pl = 180 * (0.55 + 0.45 * gCa) * (0.8 + 0.2 * gLate) / (0.45 + 0.55 * gKs) * rate;
+        const p3 = (60 / (0.4 + 0.6 * gKs)) * rate;
+        const V = (t) => {
+          if (t < 0) return -90;
+          if (t < up) return -90 + (peak + 90) * (t / up);
+          const t1 = t - up;
+          if (t1 < 15) return peak - 20 * (t1 / 15);                  // פאזה 1 — Ito
+          const t2 = t1 - 15;
+          if (t2 < pl) return peak - 20 - 20 * (t2 / pl);             // פאזה 2 — הפלאטו יורד לאט
+          const t3 = t2 - pl;
+          return -90 + (peak - 40 + 90) * Math.exp((-3 * t3) / p3);   // פאזה 3
+        };
+        let erp = 0;
+        for (let t = up + 15; t < clSA; t += 1) { if (V(t) <= -60) { erp = t; break; } }
+        return { V, dvdt, peak, apd: up + 15 + pl + p3, erp };
+      };
+      const cur = build(gNa, gCa, gKs, gLate), base = build(1, 1, 1, 1);
+      const T = 2 * clSA, pts = [], bpts = [];
+      for (let i = 0; i <= 700; i++) { const t = (i / 700) * T; pts.push([t, cur.V(t % clSA)]); bpts.push([t, base.V(t % clSA)]); }
+      return { hr, cl: clSA, sa, pts, bpts, ...cur, qt: cur.apd * 1.15, T };
+    },
+    readouts: (p, r) => [
+      { v: num(r.dvdt, 0) + ' V/s', label: 'מהירות פאזה 0 — קובעת את מהירות ההולכה', cls: 'accent' },
+      { v: num(r.apd, 0) + ' ms', label: 'משך פוטנציאל הפעולה', cls: '' },
+      { v: num(r.erp, 0) + ' ms', label: 'תקופה רפרקטורית (עד −60 mV, כשתעלות הנתרן חוזרות)', cls: r.erp > 320 ? 'bad' : 'good' },
+      { v: num(r.qt, 0) + ' ms', label: 'QT משוער', cls: r.qt > 380 ? 'bad' : '' },
+      { v: num(r.hr, 0) + ' /min', label: 'קצב הקוצב', cls: '' },
+    ],
+    panels: [
+      {
+        label: 'סיב פורקינייה — שתי פעימות (מקווקו: ברירת המחדל, בלי חוסמים)',
+        h: 280,
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: r.T, yMin: -100, yMax: 50, xLabel: 'זמן (ms)', yLabel: 'Vm (mV)',
+            series: [{ pts: r.bpts, color: C.dim, width: 1.6, dash: [5, 4] }, { pts: r.pts, color: C.accent, width: 2.4 }],
+            marks: [{ y: -60, color: C.warn, label: '−60: תעלות הנתרן חוזרות להיות זמינות' }, { y: 0, color: C.lineSoft, dash: [2, 4] }],
+          });
+        },
+      },
+      {
+        label: 'SA node — פוטנציאל הקוצב: שיפוע פאזה 4 קובע מתי מגיעים לסף, ולכן את הקצב',
+        h: 220,
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: r.sa[r.sa.length - 1][0], yMin: -70, yMax: 30, xLabel: 'זמן (ms)', yLabel: 'Vm (mV)',
+            series: [{ pts: r.sa, color: C.good, width: 2.4 }],
+            marks: [{ y: -40, color: C.warn, label: 'סף — נפתחות תעלות סידן' }, { y: -60, color: C.dim, label: 'הנקודה השלילית ביותר (אין מנוחה אמיתית)' }],
+          });
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'ecg-dipole',
+    course: 'ekronot-b',
+    icon: '📉',
+    title: 'הדיפול של האק״ג — למה השיא הוא בחצי הדרך',
+    blurb: 'גל האקסיטציה מתפשט בסינציטיום, והרישום הוא ההפרש בין מה שכבר עבר למה שעוד לא',
+    topics: ['אק"ג', 'הפרעות קצב'],
+    insight: 'גררו את ההתקדמות ל-50%: הרישום בשיא. ל-100%: אפס — כל הרקמה באותו מצב, וזה מקטע ST האיזואלקטרי. ' +
+             'הפעילו איסכמיה: בזמן ה-ST נשאר הפרש בין הרקמה הבריאה בפלאטו לאזור הפגוע — ST elevation. ' +
+             'ומה אם הרפולריזציה הייתה מתחילה מהאנדוקרד? ה-T היה מתהפך.',
+    params: [
+      { k: 'prog', label: 'התקדמות גל האקסיטציה בסינציטיום', unit: '%', min: 0, max: 100, step: 1, val: 50, group: 'הגל' },
+      { k: 'isch', label: 'אזור איסכמי (% מהדופן)', unit: '%', min: 0, max: 40, step: 5, val: 0, group: 'איסכמיה' },
+    ],
+    togglesTitle: 'ניסוי מחשבתי',
+    toggles: [{ k: 'endo', label: 'רפולריזציה מהאנדוקרד (במקום מהאפיקרד) — מה היה קורה ל-T' }],
+    run: (p) => {
+      const x = p.prog / 100;
+      const dip = 4 * x * (1 - x);                                    // הדיפול מקסימלי כשחצי בדפולריזציה
+      const isch = p.isch / 100;
+      const T = 800, pts = [];
+      for (let i = 0; i <= 400; i++) {
+        const t = (i / 400) * T;
+        const bump = (c, w, a) => a * Math.exp(-((t - c) * (t - c)) / (2 * w * w));
+        let v = bump(120, 22, 0.18);                                    // P
+        v += -bump(288, 5, 0.12) + bump(300, 7, 1) - bump(314, 5, 0.25); // QRS
+        v += (p.endo ? -1 : 1) * bump(520, 40, 0.3);                    // T
+        if (isch > 0 && t > 320 && t < 470) v += (0.35 * isch) / 0.4;   // ST elevation
+        if (isch > 0 && (t < 280 || t > 600)) v -= (0.1 * isch) / 0.4;  // TP מונמך
+        pts.push([t, v]);
+      }
+      return { x, dip, isch, pts, T };
+    },
+    readouts: (p, r) => [
+      { v: num(r.dip * 100, 0) + '%', label: 'עוצמת הדיפול הנרשם', cls: 'accent' },
+      { v: r.x < 0.02 ? 'הכול במנוחה' : r.x > 0.98 ? 'הכול בפלאטו' : 'גל בתנועה', label: 'מצב הסינציטיום', cls: '' },
+      { v: r.isch ? 'ST elevation' : 'איזואלקטרי', label: 'מקטע ST', cls: r.isch ? 'bad' : 'good' },
+    ],
+    panels: [
+      {
+        label: 'הסינציטיום (משמאל: כבר עבר, מימין: עוד במנוחה) — והמתח שהאלקטרודה רואה',
+        h: 180,
+        draw: (g, p, C, st, r) => {
+          const { ctx, w, h } = g;
+          ctx.clearRect(0, 0, w, h); ctx.direction = 'ltr';
+          const x0 = 30, x1 = w - 30, y0 = 22, bh = 54;
+          ctx.fillStyle = C.surface2; ctx.strokeStyle = C.line;
+          rrect(ctx, x0, y0, x1 - x0, bh, 10); ctx.fill(); ctx.stroke();
+          const xf = x0 + (x1 - x0) * r.x;
+          if (r.x > 0) { ctx.fillStyle = C.accent; rrect(ctx, x0, y0, xf - x0, bh, 10); ctx.fill(); }
+          if (r.isch) { ctx.fillStyle = C.bad; rrect(ctx, x1 - (x1 - x0) * r.isch, y0, (x1 - x0) * r.isch, bh, 10); ctx.fill(); }
+          ctx.font = '700 11.5px ' + FONT;
+          ctx.fillStyle = C.accent; ctx.textAlign = 'left'; ctx.fillText('◼ דפולריזציה (−)', x0, y0 + bh + 16);
+          ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.fillText('מנוחה (+) ◻', x1, y0 + bh + 16);
+          if (r.isch) { ctx.fillStyle = C.bad; ctx.textAlign = 'center'; ctx.fillText('◼ איסכמי — תקוע', (x0 + x1) / 2, y0 + bh + 16); }
+          const my = y0 + bh + 44;
+          ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(x0, my); ctx.lineTo(x1, my); ctx.stroke();
+          const mx = x0 + (x1 - x0) * r.dip;
+          ctx.fillStyle = C.good; ctx.beginPath(); ctx.arc(mx, my, 7, 0, 7); ctx.fill();
+          ctx.fillStyle = C.text; ctx.font = '800 12px ' + FONT;
+          ctx.fillText(`מתח נרשם: ${num(r.dip * 100, 0)}% מהמרבי`, w / 2, my + 24);
+        },
+      },
+      {
+        label: 'הרישום — P, PQ, QRS, ST, T',
+        h: 220,
+        draw: (g, p, C, st, r) => {
+          plot(g, {
+            C, xMin: 0, xMax: r.T, yMin: -0.5, yMax: 1.2, xLabel: 'זמן (ms)', yLabel: 'mV',
+            series: [{ pts: r.pts, color: r.isch ? C.bad : C.accent, width: 2.4 }],
+            marks: [{ y: 0, color: C.lineSoft, dash: [2, 4] }],
+            dots: [
+              { x: 120, y: 0.22, color: C.dim, label: 'P' }, { x: 300, y: 1.05, color: C.dim, label: 'R' },
+              { x: 520, y: p.endo ? -0.34 : 0.34, color: C.dim, label: 'T' },
+              { x: 400, y: r.isch ? 0.42 : 0.06, color: C.warn, label: 'ST' },
+            ],
+          });
+        },
+      },
+    ],
+  },
+
+  /* ═══════════ עקרונות המדע א׳ — אימונולוגיה ═══════════ */
+  {
+    id: 'clonal',
+    course: 'ekronot-a',
+    icon: '🛡️',
+    title: 'הסלקציה בתימוס — רפרטואר מול אוטואימוניות',
+    blurb: 'הזיזו את סף הסלקציה השלילית וראו מה קורה לתאי ה-T הנאיביים, ל-Tregs ולסיכון לאוטואימוניות',
+    topics: ['הפעלת תאי T וסבילות'],
+    insight: 'העלו את סף הסלקציה השלילית („עכבר סלחן”): יותר תאים שקושרים עצמי חזק בורחים לפריפריה — אוטואימוניות. ' +
+             'הורידו אותו: בטוח יותר, אבל הרפרטואר מצטמק וגם ה-Tregs נעלמים. ' +
+             'והעלו את סף הסלקציה החיובית: תאים שלא מזהים MHC בכלל מתים מהזנחה — לא מאפופטוזיס מכוון.',
+    params: [
+      { k: 'lo', label: 'סף הסלקציה החיובית (זיקה מינימלית ל-MHC — מתחתיה: מוות מהזנחה)', unit: '', min: 0.5, max: 3, step: 0.1, val: 1.2, group: 'הספים' },
+      { k: 'hi', label: 'סף הסלקציה השלילית (זיקה לעצמי שמעליה — אפופטוזיס)', unit: '', min: 2, max: 8, step: 0.1, val: 5, group: 'הספים' },
+      { k: 'treg', label: 'רוחב חלון ה-Tregs (ממש מתחת לסף השלילי)', unit: '', min: 0, max: 2, step: 0.1, val: 0.8, group: 'הספים' },
+    ],
+    run: (p) => {
+      const pdf = (a) => Math.exp(-Math.pow(Math.log(a / 2.2), 2) / (2 * 0.55 * 0.55)) / a;   // התפלגות זיקה סכמטית
+      let tot = 0, neglect = 0, naive = 0, tregs = 0, deleted = 0, esc = 0;
+      const bars = [];
+      for (let a = 0.1; a <= 10; a += 0.1) {
+        const m = pdf(a) * 0.1; tot += m;
+        if (a < p.lo) neglect += m;
+        else if (a >= p.hi) deleted += m;
+        else if (a >= p.hi - p.treg) tregs += m;
+        else naive += m;
+        if (a >= 3.5 && a < p.hi - p.treg) esc += m;                    // קושרי-עצמי חזקים שיצאו כנאיביים
+        bars.push([a, pdf(a)]);
+      }
+      return { neglect: neglect / tot, naive: naive / tot, tregs: tregs / tot, deleted: deleted / tot, esc: esc / tot, bars };
+    },
+    readouts: (p, r) => [
+      { v: num(r.naive * 100, 0) + '%', label: 'תאי T נאיביים — הרפרטואר שיוצא לפריפריה', cls: 'good' },
+      { v: num(r.tregs * 100, 0) + '%', label: 'Tregs — כמעט-עצמי שהופנה לבלימה', cls: 'accent' },
+      { v: num(r.deleted * 100, 0) + '%', label: 'נמחקו בסלקציה שלילית', cls: '' },
+      { v: num(r.neglect * 100, 0) + '%', label: 'מתו מהזנחה (לא זיהו MHC)', cls: '' },
+      { v: num(r.esc * 100, 1) + '%', label: 'קושרי-עצמי חזקים שיצאו כנאיביים — הסיכון לאוטואימוניות', cls: r.esc > 0.1 ? 'bad' : 'good' },
+    ],
+    panels: [
+      {
+        label: 'התפלגות הזיקה לעצמי/MHC של התימוציטים — ומה קורה לכל אזור',
+        h: 260,
+        draw: (g, p, C, st, r) => {
+          const o = plot(g, {
+            C, xMin: 0, xMax: 10, yMin: 0, yMax: Math.max(...r.bars.map((b) => b[1])) * 1.25, xLabel: 'זיקה ל-MHC + פפטיד עצמי', yLabel: 'מספר תאים',
+            bars: r.bars.map(([a, y]) => ({ x: a, w: 0.1, y, color: a < p.lo ? C.lineSoft : a >= p.hi ? C.bad : a >= p.hi - p.treg ? C.accent : C.good })),
+            legend: [{ color: C.lineSoft, label: 'הזנחה' }, { color: C.good, label: 'נאיביים' }, { color: C.accent, label: 'Tregs' }, { color: C.bad, label: 'נמחקו' }],
+          });
+          const { ctx } = g;
+          [[p.lo, 'סף חיובי'], [p.hi, 'סף שלילי']].forEach(([x, lb]) => {
+            ctx.save(); ctx.strokeStyle = C.warn; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(o.sx(x), o.yT + 34); ctx.lineTo(o.sx(x), o.yB); ctx.stroke(); ctx.restore();
+            ctx.fillStyle = C.warn; ctx.font = '700 11px ' + FONT; ctx.textAlign = 'center'; ctx.fillText(lb, o.sx(x), o.yT + 27);
+          });
+        },
+      },
+    ],
+  },
 ];
 
 /* הסתברות שחרור מסידן — היל בחזקת 4. השיתופיות היא העיקר:
@@ -9143,7 +9644,9 @@ function quantalDraw(st, p, times) {
 }
 
 const simOf = (id) => SIMS.find((s) => s.id === id);
-const simsOf = (courseId) => SIMS.filter((s) => s.course === courseId);
+/* עם מקצוע (s) — רק הסימולציות שנוגעות בנושאים שלו. כך עמוד הפרמקו לא מציג
+   את פוטנציאל הפעולה של הלב, ולהפך. */
+const simsOf = (courseId, s = null) => SIMS.filter((x) => x.course === courseId && (!s || (x.topics || []).some((t) => (s.topics || []).includes(t))));
 
 /* topic → סימולציה. זה כל מנגנון הקישור מהשאלות: אין שדה חדש בקבצי
    המבחן, ואין הזנת דאטה. שאלה שמתויגת בנושא מקבלת כפתור בחינם. */
@@ -9176,7 +9679,8 @@ function renderSim(id) {
   if (s.course) view.dataset.course = s.course;
   const c = courseOf(s.course);
   view.innerHTML = '';
-  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + s.course));
+  const subj = (s.topics || []).map((t) => subjectOfTopic(s.course, t)).find(Boolean);
+  view.append(crumb(subj ? `${c.name} · ${subj.name}` : c ? c.name : 'חזרה', '#/course/' + s.course + (subj ? '/' + encodeURIComponent(subj.key) : '')));
 
   const head = el('div', 'page-head');
   head.append(el('h1', null, `${s.icon} ${s.title}`));
@@ -9600,10 +10104,203 @@ const DRILLS = [
       `משרעת ממוצעת = m · q = ${num(v.n * v.p)} × ${v.q} mV = <b>${num(ans)} mV</b>`,
     ],
   },
+  /* ═══════════ עקרונות המדע ב׳ — פרמקוקינטיקה ═══════════
+     שבעת החישובים של הבלוק. כולם נגזרים משלוש זהויות: k = CL/V,
+     t½ = 0.693/k, ו-Css = קצב כניסה / CL. הסליידרים בסימולציית pk-curve
+     משתמשים באותן נוסחאות בדיוק. */
+  {
+    id: 'f-auc', course: 'ekronot-b', topic: 'ספיגה ודרכי מתן', icon: '📊',
+    title: 'זמינות ביולוגית F מ-AUC', unit: '%', floor: 0.5,
+    blurb: 'משווים את השטח מתחת לעקומה פומי מול ורידי — ומתקנים למנה',
+    gen: () => ({ Div: dpick([100, 200, 250, 500]), Dpo: dpick([200, 250, 400, 500, 1000]), AUCiv: drnd(20, 80, 1), F: drnd(0.2, 0.9, 0.05) }),
+    solve: (v) => v.F * 100,
+    prompt: (v) => `תרופה ניתנה תוך-ורידית במנה <b>${v.Div} mg</b> ונמדד AUC של <b>${v.AUCiv} mg·h/L</b>. אותה תרופה ניתנה פומית במנה <b>${v.Dpo} mg</b> ונמדד AUC של <b>${num((v.AUCiv * v.Dpo / v.Div) * v.F)} mg·h/L</b>.<br>מהי הזמינות הביולוגית (באחוזים)?`,
+    steps: (v, ans) => [
+      `F = (AUC<sub>פומי</sub> / AUC<sub>ורידי</sub>) × (D<sub>ורידי</sub> / D<sub>פומי</sub>) — השטח משקף כמה תרופה הגיעה לדם, אבל צריך לנרמל למנה.`,
+      `יחס השטחים: ${num((v.AUCiv * v.Dpo / v.Div) * v.F)} / ${v.AUCiv} = <b>${num((v.Dpo / v.Div) * v.F, 3)}</b>`,
+      `תיקון המנה: × ${v.Div}/${v.Dpo} = × ${num(v.Div / v.Dpo, 3)}`,
+      `F = <b>${num(ans)}%</b> — מלכודת: אם המנות שוות, יחס השטחים לבדו הוא F; אם לא — חובה לתקן.`,
+    ],
+  },
+  {
+    id: 'vd', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '🫙',
+    title: 'נפח התפזרות V', unit: 'L', floor: 0.5,
+    blurb: 'כמה „נפח” היה צריך כדי שהמנה תיתן את הריכוז שנמדד — נפח מדומה, לא אנטומי',
+    gen: () => ({ D: dpick([50, 100, 200, 250, 500]), C0: drnd(0.5, 12, 0.25) }),
+    solve: (v) => v.D / v.C0,
+    prompt: (v) => `מנה של <b>${v.D} mg</b> ניתנה בבולוס תוך-ורידי. הריכוז בפלזמה, מוחזר לזמן אפס (אקסטרפולציה), הוא <b>${v.C0} mg/L</b>.<br>מהו נפח ההתפזרות?`,
+    steps: (v, ans) => [
+      `V = D / C₀ — המנה חלקי הריכוז שהיה מתקבל אילו התפזרה מיד.`,
+      `V = ${v.D} / ${v.C0} = <b>${num(ans)} L</b>`,
+      `אם V גדול בהרבה מנפח הפלזמה (~3 L) או מנוזלי הגוף (~42 L) — התרופה יושבת ברקמות (שומן, קשירה לרקמה), לא בדם.`,
+    ],
+  },
+  {
+    id: 'cl', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '🚿', formula: 'cl',
+    title: 'פינוי CL מ-V ומ-t½', unit: 'L/h', floor: 0.05,
+    blurb: 'הפינוי הוא נפח הפלזמה שמנוקה ליחידת זמן — נגזר מקבוע הפינוי ומהנפח',
+    gen: () => ({ V: dpick([10, 20, 35, 40, 50, 70, 100, 140]), t12: dpick([1, 2, 3, 4, 6, 8, 12, 24]) }),
+    solve: (v) => (Math.LN2 * v.V) / v.t12,
+    prompt: (v) => `נפח ההתפזרות של תרופה הוא <b>${v.V} L</b> וזמן מחצית החיים שלה <b>${v.t12} שעות</b>.<br>מהו הפינוי (CL)?`,
+    steps: (v, ans) => [
+      `k = 0.693 / t½ = 0.693 / ${v.t12} = <b>${num(Math.LN2 / v.t12, 3)} 1/h</b> — קבוע הפינוי (איזה חלק מהתרופה מתפנה בשעה).`,
+      `CL = k · V = ${num(Math.LN2 / v.t12, 3)} × ${v.V} = <b>${num(ans)} L/h</b>`,
+      `מלכודת: t½ תלוי גם ב-V וגם ב-CL. תרופה עם V ענק יכולה להיות עם t½ ארוך למרות פינוי מהיר.`,
+    ],
+  },
+  {
+    id: 'thalf', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '⏳', formula: 'thalf',
+    title: 'זמן מחצית חיים t½', unit: 'h', floor: 0.05,
+    blurb: 'מ-V ומ-CL — ומכאן כמה זמן עד מצב יציב, וכמה זמן עד שהתרופה נעלמת',
+    gen: () => ({ V: dpick([10, 20, 35, 40, 50, 70, 100, 140, 200]), CL: dpick([0.5, 1, 2, 2.5, 4, 5, 7, 10, 20]) }),
+    solve: (v) => (Math.LN2 * v.V) / v.CL,
+    prompt: (v) => `נפח ההתפזרות <b>${v.V} L</b>, פינוי <b>${v.CL} L/h</b>.<br>מהו זמן מחצית החיים?`,
+    steps: (v, ans) => [
+      `t½ = 0.693 · V / CL`,
+      `t½ = 0.693 × ${v.V} / ${v.CL} = <b>${num(ans)} h</b>`,
+      `ומכאן: ~90% ממצב יציב אחרי 3.3·t½ (≈${num(3.3 * ans)} h), ~97% אחרי 5·t½. הזמן למצב יציב לא תלוי במנה — רק ב-t½.`,
+    ],
+  },
+  {
+    id: 'k0', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '💉', formula: 'k0',
+    title: 'קצב הזלפה למצב יציב', unit: 'mg/h', floor: 0.05,
+    blurb: 'במצב יציב קצב הכניסה שווה לקצב הפינוי — ולכן k₀ = Css · CL',
+    gen: () => ({ Css: drnd(0.5, 20, 0.5), CL: dpick([1, 2, 2.5, 3, 4, 5, 6, 8, 10, 12]) }),
+    solve: (v) => v.Css * v.CL,
+    prompt: (v) => `רוצים להגיע לריכוז יציב של <b>${v.Css} mg/L</b> בהזלפה רציפה. הפינוי של התרופה <b>${v.CL} L/h</b>.<br>מהו קצב ההזלפה הדרוש?`,
+    steps: (v, ans) => [
+      `במצב יציב: קצב כניסה = קצב יציאה. קצב היציאה = CL · C.`,
+      `k₀ = Css · CL = ${v.Css} × ${v.CL} = <b>${num(ans)} mg/h</b>`,
+      `שימו לב מה לא בנוסחה: V. הנפח קובע רק כמה זמן ייקח להגיע לשם (דרך t½) — לא את הקצב.`,
+    ],
+  },
+  {
+    id: 'load', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '🚀', formula: 'load',
+    title: 'מנת העמסה', unit: 'mg', floor: 0.5,
+    blurb: 'כשאין זמן לחכות ארבעה זמני מחצית חיים — ממלאים את הנפח בבת אחת',
+    gen: () => ({ Css: drnd(1, 20, 0.5), V: dpick([10, 20, 35, 40, 50, 70, 100, 140]), F: dpick([1, 1, 0.5, 0.8, 0.6]) }),
+    solve: (v) => (v.Css * v.V) / v.F,
+    prompt: (v) => `ריכוז המטרה <b>${v.Css} mg/L</b>, נפח ההתפזרות <b>${v.V} L</b>${v.F < 1 ? `, והתרופה ניתנת פומית עם F=<b>${v.F}</b>` : ', מתן תוך-ורידי'}.<br>מהי מנת ההעמסה?`,
+    steps: (v, ans) => [
+      `מנת העמסה = Css · V — כמה תרופה צריך כדי „למלא” את נפח ההתפזרות לריכוז המטרה.`,
+      `${v.Css} × ${v.V} = <b>${num(v.Css * v.V)} mg</b>` + (v.F < 1 ? ` — אבל רק F=${v.F} מהמנה הפומית מגיע לדם, ולכן מחלקים ב-F: ${num(v.Css * v.V)} / ${v.F} = <b>${num(ans)} mg</b>` : ''),
+      `מלכודת: מנת ההעמסה תלויה ב-V ולא ב-CL. הפינוי קובע את מנת ה<b>אחזקה</b>.`,
+    ],
+  },
+  {
+    id: 'maint', course: 'ekronot-b', topic: 'פיזור, מטבוליזם ופינוי', icon: '🔁', formula: 'maint',
+    title: 'מנת אחזקה פומית', unit: 'mg', floor: 0.5,
+    blurb: 'כמה לתת בכל מרווח מתן כדי להחזיק ריכוז ממוצע — עם תיקון ל-F',
+    gen: () => ({ Css: drnd(1, 15, 0.5), CL: dpick([1, 2, 2.5, 3, 4, 5, 6, 8]), tau: dpick([6, 8, 12, 24]), F: dpick([0.4, 0.5, 0.6, 0.75, 0.8, 0.9]) }),
+    solve: (v) => (v.Css * v.CL * v.tau) / v.F,
+    prompt: (v) => `רוצים ריכוז ממוצע במצב יציב של <b>${v.Css} mg/L</b>. פינוי <b>${v.CL} L/h</b>, מתן פומי כל <b>${v.tau} שעות</b>, זמינות ביולוגית F=<b>${v.F}</b>.<br>מהי מנת האחזקה לכל מתן?`,
+    steps: (v, ans) => [
+      `במצב יציב: F · D / τ = Css · CL (מה שנכנס בממוצע לשעה = מה שמתפנה).`,
+      `לכן D = Css · CL · τ / F`,
+      `כמות שמתפנה במרווח: ${v.Css} × ${v.CL} × ${v.tau} = <b>${num(v.Css * v.CL * v.tau)} mg</b>`,
+      `תיקון ל-F: / ${v.F} = <b>${num(ans)} mg</b> לכל מתן`,
+    ],
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — גנטיקה של אוכלוסיות ═══════════ */
+  {
+    id: 'hw-carriers', course: 'ekronot-b', topic: 'גנטיקה של אוכלוסיות', icon: '🧬', formula: 'hw-carriers',
+    title: 'שכיחות נשאים משכיחות המחלה', unit: '(1 ל-…)', floor: 0.5,
+    blurb: 'מחלה רצסיבית: שכיחות המחלה = q², הנשאים ≈ 2q — שורש ואז כפול שתיים',
+    gen: () => ({ N: dpick([400, 900, 1600, 2500, 3600, 10000, 40000, 90000, 250000]) }),
+    solve: (v) => 1 / (2 * Math.sqrt(1 / v.N)),
+    prompt: (v) => `מחלה אוטוזומלית רצסיבית מופיעה בשכיחות של <b>1 ל-${v.N.toLocaleString('en-US')}</b> לידות.<br>מהי שכיחות הנשאים באוכלוסייה? (הזינו את N בביטוי „1 ל-N”)`,
+    steps: (v, ans) => [
+      `q² = 1/${v.N.toLocaleString('en-US')} → q = √(1/${v.N.toLocaleString('en-US')}) = <b>1/${num(Math.sqrt(v.N), 0)}</b>`,
+      `נשאים = 2pq ≈ 2q (כי p ≈ 1) = 2/${num(Math.sqrt(v.N), 0)} = <b>1 ל-${num(ans, 0)}</b>`,
+      `מלכודת: הנשאים שכיחים הרבה יותר מהחולים — במחלה של 1:${v.N.toLocaleString('en-US')}, אחד מכל ${num(ans, 0)} הוא נשא.`,
+    ],
+  },
+  {
+    id: 'hw-risk', course: 'ekronot-b', topic: 'גנטיקה של אוכלוסיות', icon: '👨‍👩‍👧', formula: 'hw-risk',
+    title: 'סיכון לזוג — אח בריא של חולה', unit: '(1 ל-…)', floor: 0.5,
+    blurb: 'הסיכון שהילד יחלה = (סיכוי שהראשון נשא) × (סיכוי שהשנייה נשאית) × ¼',
+    gen: () => ({ N: dpick([400, 900, 1600, 2500, 3600, 10000, 40000]) }),
+    solve: (v) => 1 / ((2 / 3) * 2 * Math.sqrt(1 / v.N) * 0.25),
+    prompt: (v) => `גבר בריא שאחיו חולה במחלה אוטוזומלית רצסיבית (שכיחות <b>1 ל-${v.N.toLocaleString('en-US')}</b>) מתחתן עם אישה בריאה ללא היסטוריה משפחתית.<br>מה הסיכון שילדם יחלה? (הזינו N בביטוי „1 ל-N”)`,
+    steps: (v, ans) => [
+      `הגבר: אח של חולה — הוריו שניהם נשאים. הוא <b>בריא</b>, ולכן מבין 3 האפשרויות שנותרו (AA, Aa, aA) הוא נשא ב-<b>2/3</b> — לא 1/2.`,
+      `האישה: מהאוכלוסייה — נשאית ב-2q = 2·√(1/${v.N.toLocaleString('en-US')}) = <b>1/${num(Math.sqrt(v.N) / 2, 0)}</b>`,
+      `סיכון לילד חולה: 2/3 × 1/${num(Math.sqrt(v.N) / 2, 0)} × 1/4 = <b>1 ל-${num(ans, 0)}</b>`,
+    ],
+  },
+  {
+    id: 'hw-multi', course: 'ekronot-b', topic: 'גנטיקה של אוכלוסיות', icon: '🎲', formula: 'hw-multi',
+    title: 'הטרוזיגוטים עם אללים מרובים', unit: '%', floor: 0.5,
+    blurb: 'עם שלושה אללים — כל ההטרוזיגוטים = 1 פחות סכום ריבועי השכיחויות',
+    gen: () => { const a = drnd(0.2, 0.6, 0.05), b = drnd(0.1, 1 - a - 0.1, 0.05); return { a, b, c: +(1 - a - b).toFixed(2) }; },
+    solve: (v) => 100 * (1 - (v.a * v.a + v.b * v.b + v.c * v.c)),
+    prompt: (v) => `בלוקוס מסוים שלושה אללים בשכיחויות <b>${v.a}</b>, <b>${v.b}</b> ו-<b>${v.c}</b>.<br>איזה אחוז מהאוכלוסייה הטרוזיגוטי בלוקוס הזה (בהנחת שיווי משקל הרדי-ויינברג)?`,
+    steps: (v, ans) => [
+      `הומוזיגוטים = p² + q² + r² = ${v.a}² + ${v.b}² + ${v.c}² = <b>${num(v.a * v.a + v.b * v.b + v.c * v.c, 3)}</b>`,
+      `הטרוזיגוטים = 1 − הומוזיגוטים = <b>${num(ans)}%</b>`,
+      `(אפשר גם לסכום 2pq + 2pr + 2qr — אותו מספר, יותר עבודה.)`,
+    ],
+  },
+  {
+    id: 'abo', course: 'ekronot-b', topic: 'גנטיקה של אוכלוסיות', icon: '🩸', formula: 'abo',
+    title: 'שכיחות סוג דם A מהאללים', unit: '%', floor: 0.5,
+    blurb: 'סוג דם A = הומוזיגוטים AA + הטרוזיגוטים AO — כי O רצסיבי',
+    gen: () => { const a = drnd(0.15, 0.4, 0.01), b = drnd(0.05, 0.2, 0.01); return { a, b, o: +(1 - a - b).toFixed(2) }; },
+    solve: (v) => 100 * (v.a * v.a + 2 * v.a * v.o),
+    prompt: (v) => `שכיחות האללים במערכת ABO: I<sup>A</sup>=<b>${v.a}</b>, I<sup>B</sup>=<b>${v.b}</b>, i (O)=<b>${v.o}</b>.<br>איזה אחוז מהאוכלוסייה בעל סוג דם A?`,
+    steps: (v, ans) => [
+      `סוג דם A מתקבל משני גנוטיפים: AA ו-AO (O רצסיבי; AB הוא סוג דם AB).`,
+      `AA = p² = ${v.a}² = <b>${num(v.a * v.a, 4)}</b> · AO = 2pr = 2·${v.a}·${v.o} = <b>${num(2 * v.a * v.o, 4)}</b>`,
+      `סוג A = <b>${num(ans)}%</b>`,
+    ],
+  },
+  {
+    id: 'bayes', course: 'ekronot-b', topic: 'תורשה מנדלית ולא-מנדלית', icon: '🔮', formula: 'bayes',
+    title: 'בייס — בריא בגיל X במחלה מאוחרת', unit: '%', floor: 0.5,
+    blurb: 'ילד של חולה הנטינגטון שעדיין בריא — כמה הסיכון שלו ירד עם הגיל',
+    gen: () => ({ pen: dpick([30, 40, 50, 60, 70, 80, 90]), age: dpick([40, 45, 50, 55, 60]) }),
+    solve: (v) => 100 * (0.5 * (1 - v.pen / 100)) / (0.5 * (1 - v.pen / 100) + 0.5),
+    prompt: (v) => `אדם בן <b>${v.age}</b> הוא ילד של חולה במחלה אוטוזומלית דומיננטית מאוחרת. בגיל ${v.age}, <b>${v.pen}%</b> מנושאי הגן כבר חולים. הוא עצמו בריא.<br>מה הסיכוי שהוא נושא את הגן?`,
+    steps: (v, ans) => [
+      `לפני המידע: ילד של חולה דומיננטי — נשא ב-<b>1/2</b>.`,
+      `הראיה: „בריא בגיל ${v.age}”. אם נשא — הסיכוי להיות בריא בגיל זה הוא 1 − ${v.pen}% = <b>${100 - v.pen}%</b>. אם לא נשא — 100%.`,
+      `בייס: (½ × ${(100 - v.pen) / 100}) / (½ × ${(100 - v.pen) / 100} + ½ × 1) = ${num(0.5 * (1 - v.pen / 100), 3)} / ${num(0.5 * (1 - v.pen / 100) + 0.5, 3)} = <b>${num(ans)}%</b>`,
+      `ככל שהוא מבוגר יותר ובריא — הסיכון יורד. זה ההיגיון של „הבריא בגיל 70 כנראה לא נשא”.`,
+    ],
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — מכניקת הלב ═══════════ */
+  {
+    id: 'ef', course: 'ekronot-b', topic: 'צימוד חשמלי-מכני ומכניקת הכיווץ', icon: '🫀', formula: 'ef',
+    title: 'מקטע פליטה EF', unit: '%', floor: 0.5,
+    blurb: 'איזה חלק מהנפח הסוף-דיאסטולי נפלט בכל פעימה — המדד של תפקוד החדר',
+    gen: () => { const EDV = dpick([100, 110, 120, 130, 140, 160, 180]); return { EDV, ESV: dpick([40, 50, 55, 60, 70, 80].filter((x) => x < EDV)) }; },
+    solve: (v) => (100 * (v.EDV - v.ESV)) / v.EDV,
+    prompt: (v) => `נפח סוף-דיאסטולי (EDV) <b>${v.EDV} mL</b>, נפח סוף-סיסטולי (ESV) <b>${v.ESV} mL</b>.<br>מהו מקטע הפליטה?`,
+    steps: (v, ans) => [
+      `נפח פעימה SV = EDV − ESV = ${v.EDV} − ${v.ESV} = <b>${v.EDV - v.ESV} mL</b>`,
+      `EF = SV / EDV = ${v.EDV - v.ESV} / ${v.EDV} = <b>${num(ans)}%</b>`,
+      `תקין ≈ 55–70%. מלכודת: מחלקים ב-EDV, לא ב-ESV.`,
+    ],
+  },
+  {
+    id: 'co', course: 'ekronot-b', topic: 'צימוד חשמלי-מכני ומכניקת הכיווץ', icon: '💓', formula: 'co',
+    title: 'תפוקת לב CO', unit: 'L/min', floor: 0.05,
+    blurb: 'קצב הלב כפול נפח הפעימה — ולמה טכיקרדיה קיצונית דווקא מורידה אותה',
+    gen: () => ({ HR: dpick([50, 60, 70, 80, 90, 100, 120]), EDV: dpick([100, 120, 130, 140, 160]), ESV: dpick([40, 50, 60, 70]) }),
+    solve: (v) => (v.HR * (v.EDV - v.ESV)) / 1000,
+    prompt: (v) => `קצב לב <b>${v.HR} לדקה</b>, EDV <b>${v.EDV} mL</b>, ESV <b>${v.ESV} mL</b>.<br>מהי תפוקת הלב (בליטרים לדקה)?`,
+    steps: (v, ans) => [
+      `SV = EDV − ESV = <b>${v.EDV - v.ESV} mL</b>`,
+      `CO = HR × SV = ${v.HR} × ${v.EDV - v.ESV} = ${v.HR * (v.EDV - v.ESV)} mL/min = <b>${num(ans)} L/min</b>`,
+      `מלכודת: בקצב מהיר מאוד הדיאסטולה מתקצרת, EDV יורד — ו-CO יכול לרדת למרות ש-HR עלה.`,
+    ],
+  },
 ];
 
 const drillOf = (id) => DRILLS.find((d) => d.id === id);
-const drillsOf = (courseId) => DRILLS.filter((d) => d.course === courseId);
+const drillsOf = (courseId, s = null) => DRILLS.filter((d) => d.course === courseId && (!s || (s.topics || []).includes(d.topic)));
 
 /* נושא → תרגיל, בדיוק כמו SIM_BY_TOPIC. נותן חיבור דו-כיווני בחינם:
    מפילוח-לפי-נושא ומעמוד הסימולציה ישר לתרגיל החישוב של אותו נושא. */
@@ -9672,7 +10369,8 @@ function renderDrill(id) {
   const c = courseOf(d.course);
   if (c) view.dataset.course = d.course;
   view.innerHTML = '';
-  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + d.course));
+  const subj = subjectOfTopic(d.course, d.topic);   // בבלוק — חזרה לעמוד המקצוע, לא לעמוד הבלוק
+  view.append(crumb(subj ? `${c.name} · ${subj.name}` : c ? c.name : 'חזרה', '#/course/' + d.course + (subj ? '/' + encodeURIComponent(subj.key) : '')));
 
   const head = el('div', 'page-head');
   head.append(el('h1', null, `${d.icon} ${d.title}`));
@@ -9726,6 +10424,20 @@ function renderDrill(id) {
   pa.href = `#/practice/${d.course}/${encodeURIComponent(d.topic)}`;
   acts.append(pa);
   view.append(acts);
+
+  /* שאר התרגילים של המקצוע — צ'יפים, כדי לעבור ביניהם בלי לחזור לעמוד. */
+  const sibs = drillsOf(d.course, subj).filter((x) => x.id !== d.id);
+  if (sibs.length) {
+    const row = el('div', 'drill-sibs');
+    row.append(el('span', 'lbl', 'עוד תרגילים:'));
+    sibs.forEach((x) => {
+      const a = el('a', 'verb-chip', `${x.icon} ${x.title}`);
+      a.title = x.blurb;
+      a.href = '#/drill/' + x.id;
+      row.append(a);
+    });
+    view.append(row);
+  }
 
   let v, answered;
   function fresh() {
@@ -9870,19 +10582,137 @@ const FORMULAS = [
     ],
     compute: (v) => v.n * v.p * v.q,
   },
+  /* ═══════════ עקרונות המדע ב׳ — פרמקוקינטיקה ═══════════ */
+  {
+    id: 'f-auc', course: 'ekronot-b', sheet: null, title: 'זמינות ביולוגית F', unit: '%',
+    expr: 'F = (AUCpo / AUCiv) · (Div / Dpo)',
+    note: 'איזה חלק מהמנה הפומית מגיע למחזור הדם. השטח מתחת לעקומה משקף חשיפה — ומנרמלים למנה.',
+    vars: [
+      { k: 'AUCpo', label: 'AUC פומי', unit: 'mg·h/L', default: 30, step: 1 }, { k: 'AUCiv', label: 'AUC ורידי', unit: 'mg·h/L', default: 50, step: 1 },
+      { k: 'Div', label: 'מנה ורידית', unit: 'mg', default: 100, step: 10 }, { k: 'Dpo', label: 'מנה פומית', unit: 'mg', default: 100, step: 10 },
+    ],
+    compute: (v) => 100 * (v.AUCpo / v.AUCiv) * (v.Div / v.Dpo),
+  },
+  {
+    id: 'vd', course: 'ekronot-b', sheet: null, title: 'נפח התפזרות V', unit: 'L',
+    expr: 'V = D / C₀',
+    note: 'נפח מדומה: כמה נפח היה דרוש כדי שהמנה תיתן את הריכוז שנמדד. גדול = התרופה ברקמות, לא בדם.',
+    vars: [{ k: 'D', label: 'מנה (בולוס IV)', unit: 'mg', default: 200, step: 10 }, { k: 'C0', label: 'ריכוז בזמן 0', unit: 'mg/L', default: 5, step: 0.5 }],
+    compute: (v) => v.D / v.C0,
+  },
+  {
+    id: 'cl', course: 'ekronot-b', sheet: null, title: 'פינוי CL', unit: 'L/h',
+    expr: 'CL = k · V = 0.693 · V / t½',
+    note: 'נפח הפלזמה שמנוקה מהתרופה ליחידת זמן. הפינוי (לא t½) הוא מה שקובע את מנת האחזקה.',
+    vars: [{ k: 'V', label: 'נפח התפזרות', unit: 'L', default: 40, step: 5 }, { k: 't12', label: 'זמן מחצית חיים', unit: 'h', default: 7, step: 0.5 }],
+    compute: (v) => (Math.LN2 * v.V) / v.t12,
+  },
+  {
+    id: 'thalf', course: 'ekronot-b', sheet: null, title: 'זמן מחצית חיים t½', unit: 'h',
+    expr: 't½ = 0.693 · V / CL',
+    note: 'תלוי בשניהם: נפח גדול מאריך, פינוי מהיר מקצר. קובע את הזמן למצב יציב (≈4·t½) — לא את גובהו.',
+    vars: [{ k: 'V', label: 'נפח התפזרות', unit: 'L', default: 40, step: 5 }, { k: 'CL', label: 'פינוי', unit: 'L/h', default: 4, step: 0.5 }],
+    compute: (v) => (Math.LN2 * v.V) / v.CL,
+  },
+  {
+    id: 'k0', course: 'ekronot-b', sheet: null, title: 'קצב הזלפה למצב יציב', unit: 'mg/h',
+    expr: 'k₀ = Css · CL',
+    note: 'במצב יציב כניסה = יציאה. V לא בנוסחה — הוא קובע רק כמה זמן ייקח להגיע.',
+    vars: [{ k: 'Css', label: 'ריכוז המטרה', unit: 'mg/L', default: 5, step: 0.5 }, { k: 'CL', label: 'פינוי', unit: 'L/h', default: 4, step: 0.5 }],
+    compute: (v) => v.Css * v.CL,
+  },
+  {
+    id: 'load', course: 'ekronot-b', sheet: null, title: 'מנת העמסה', unit: 'mg',
+    expr: 'D* = Css · V / F',
+    note: 'ממלאים את נפח ההתפזרות בבת אחת במקום לחכות ארבעה זמני מחצית חיים. תלוי ב-V, לא ב-CL.',
+    vars: [{ k: 'Css', label: 'ריכוז המטרה', unit: 'mg/L', default: 5, step: 0.5 }, { k: 'V', label: 'נפח התפזרות', unit: 'L', default: 40, step: 5 }, { k: 'F', label: 'זמינות ביולוגית', default: 1, step: 0.05 }],
+    compute: (v) => (v.Css * v.V) / v.F,
+  },
+  {
+    id: 'maint', course: 'ekronot-b', sheet: null, title: 'מנת אחזקה', unit: 'mg',
+    expr: 'D = Css · CL · τ / F',
+    note: 'כמה לתת בכל מרווח כדי להחליף את מה שהתפנה. תלוי ב-CL, לא ב-V. במתן פומי מחלקים ב-F.',
+    vars: [
+      { k: 'Css', label: 'ריכוז ממוצע רצוי', unit: 'mg/L', default: 5, step: 0.5 }, { k: 'CL', label: 'פינוי', unit: 'L/h', default: 4, step: 0.5 },
+      { k: 'tau', label: 'מרווח מתן', unit: 'h', default: 12, step: 1 }, { k: 'F', label: 'זמינות ביולוגית', default: 0.6, step: 0.05 },
+    ],
+    compute: (v) => (v.Css * v.CL * v.tau) / v.F,
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — גנטיקה ═══════════ */
+  {
+    id: 'hw-carriers', course: 'ekronot-b', sheet: null, title: 'נשאים משכיחות המחלה (רצסיבי)', unit: '(1 ל-…)',
+    expr: 'q = √(1/N) ;  נשאים ≈ 2q',
+    note: 'שכיחות המחלה q² = 1/N. שורש → q. כפול 2 → נשאים (p≈1). התוצאה: אחד מכל כמה הוא נשא.',
+    vars: [{ k: 'N', label: 'שכיחות המחלה 1 ל-', default: 2500, step: 100 }],
+    compute: (v) => 1 / (2 * Math.sqrt(1 / v.N)),
+  },
+  {
+    id: 'hw-risk', course: 'ekronot-b', sheet: null, title: 'סיכון לזוג (רצסיבי)', unit: '(1 ל-…)',
+    expr: 'סיכון = c₁ · c₂ · ¼',
+    note: 'c = הסיכוי של כל בן זוג להיות נשא: אח בריא של חולה 2/3; ילד של חולה 1; מהאוכלוסייה 2q.',
+    vars: [
+      { k: 'c1', label: 'בן זוג 1 — סיכוי נשאות', default: 0.667, step: 0.01, options: [{ label: 'אח/ות בריאים של חולה — 2/3', val: 2 / 3 }, { label: 'ילד של חולה — 1', val: 1 }, { label: 'הורה של חולה — 1', val: 1 }, { label: 'מהאוכלוסייה — 2q (1:25)', val: 0.04 }, { label: 'מהאוכלוסייה — 2q (1:50)', val: 0.02 }] },
+      { k: 'c2', label: 'בן זוג 2 — סיכוי נשאות', default: 0.04, step: 0.01, options: [{ label: 'מהאוכלוסייה — 2q (1:25)', val: 0.04 }, { label: 'מהאוכלוסייה — 2q (1:50)', val: 0.02 }, { label: 'אח/ות בריאים של חולה — 2/3', val: 2 / 3 }, { label: 'ילד של חולה — 1', val: 1 }] },
+    ],
+    compute: (v) => 1 / (v.c1 * v.c2 * 0.25),
+  },
+  {
+    id: 'hw-multi', course: 'ekronot-b', sheet: null, title: 'הטרוזיגוטים — אללים מרובים', unit: '%',
+    expr: 'Het = 1 − Σ(pᵢ²)',
+    note: 'הומוזיגוטים הם סכום ריבועי השכיחויות; כל השאר הטרוזיגוטים. השכיחויות חייבות להסתכם ל-1.',
+    vars: [{ k: 'a', label: 'אלל 1', default: 0.5, step: 0.05 }, { k: 'b', label: 'אלל 2', default: 0.3, step: 0.05 }, { k: 'c', label: 'אלל 3', default: 0.2, step: 0.05 }],
+    compute: (v) => 100 * (1 - (v.a * v.a + v.b * v.b + v.c * v.c)),
+  },
+  {
+    id: 'abo', course: 'ekronot-b', sheet: null, title: 'סוג דם A במערכת ABO', unit: '%',
+    expr: 'A = p² + 2pr',
+    note: 'p = שכיחות I^A, r = שכיחות i (O). סוג דם A = AA + AO. באותו אופן B = q² + 2qr, AB = 2pq, O = r².',
+    vars: [{ k: 'a', label: 'I^A', default: 0.3, step: 0.01 }, { k: 'o', label: 'i (O)', default: 0.6, step: 0.01 }],
+    compute: (v) => 100 * (v.a * v.a + 2 * v.a * v.o),
+  },
+  {
+    id: 'bayes', course: 'ekronot-b', sheet: null, title: 'בייס — בריא בגיל X (דומיננטי מאוחר)', unit: '%',
+    expr: 'P = ½·(1−pen) / (½·(1−pen) + ½)',
+    note: 'pen = חלק הנשאים שכבר חולים בגיל הזה. ככל שהאדם מבוגר יותר ובריא, הסיכוי שהוא נשא יורד מ-50%.',
+    vars: [{ k: 'pen', label: 'חדירות עד הגיל הזה', unit: '%', default: 60, step: 5 }],
+    compute: (v) => (100 * (0.5 * (1 - v.pen / 100))) / (0.5 * (1 - v.pen / 100) + 0.5),
+  },
+
+  /* ═══════════ עקרונות המדע ב׳ — מכניקת הלב ═══════════ */
+  {
+    id: 'ef', course: 'ekronot-b', sheet: null, title: 'מקטע פליטה EF', unit: '%',
+    expr: 'EF = (EDV − ESV) / EDV',
+    note: 'איזה חלק מהדם שבחדר בסוף הדיאסטולה נפלט. תקין ≈ 55–70%.',
+    vars: [{ k: 'EDV', label: 'נפח סוף-דיאסטולי', unit: 'mL', default: 120, step: 5 }, { k: 'ESV', label: 'נפח סוף-סיסטולי', unit: 'mL', default: 50, step: 5 }],
+    compute: (v) => (100 * (v.EDV - v.ESV)) / v.EDV,
+  },
+  {
+    id: 'co', course: 'ekronot-b', sheet: null, title: 'תפוקת לב CO', unit: 'L/min',
+    expr: 'CO = HR · SV = HR · (EDV − ESV)',
+    note: 'כ-5 ליטר לדקה במנוחה. טכיקרדיה קיצונית מקצרת דיאסטולה, מורידה EDV — ו-CO יכול לרדת.',
+    vars: [{ k: 'HR', label: 'קצב לב', unit: '/min', default: 70, step: 5 }, { k: 'EDV', label: 'EDV', unit: 'mL', default: 120, step: 5 }, { k: 'ESV', label: 'ESV', unit: 'mL', default: 50, step: 5 }],
+    compute: (v) => (v.HR * (v.EDV - v.ESV)) / 1000,
+  },
 ];
 
-const formulasOf = (courseId) => FORMULAS.filter((f) => f.course === courseId);
+/* לנוסחה אין topic משלה — היא יורשת אותו מתרגיל החישוב שמצביע עליה. */
+const formulaTopic = (f) => { const d = DRILLS.find((d) => d.course === f.course && (d.formula || d.id) === f.id); return d ? d.topic : null; };
+const formulasOf = (courseId, s = null) => FORMULAS.filter((f) => f.course === courseId && (!s || (s.topics || []).includes(formulaTopic(f))));
 
 function renderFormulas(courseId, focusId = null) {
   setNav('home');
   const c = courseOf(courseId);
   if (c) view.dataset.course = courseId;
-  const list = formulasOf(courseId);
+  /* '@pharma' — היקף מקצוע (כמו בשאר הכלים); כל דבר אחר — נוסחה להתמקד בה. */
+  const sKey = scopeKey(focusId);
+  const s = sKey ? subjectOf(courseId, sKey) : null;
+  if (sKey) focusId = null;
+  const list = formulasOf(courseId, s);
   view.innerHTML = '';
-  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + courseId));
+  view.append(crumb(s ? `${c.name} · ${s.name}` : c ? c.name : 'חזרה', '#/course/' + courseId + (s ? '/' + encodeURIComponent(s.key) : '')));
   const head = el('div', 'page-head');
-  head.append(el('h1', null, '📖 כרטיס הנוסחאות'));
+  head.append(el('h1', null, s ? `📖 הנוסחאות — ${s.name}` : '📖 כרטיס הנוסחאות'));
   head.append(el('p', null, 'כל נוסחה עם מחשבון־הצבה חי — הציבו ערכים וראו את התוצאה משתנה. אלה בדיוק הנוסחאות של תרגילי החישוב.'));
   view.append(head);
 
@@ -9988,6 +10818,9 @@ async function loadGuide(courseId) {
    לפני playQuestions — אחרת כניסה ישירה ל-#/exam/... לא תראה את הכפתור. */
 const GUIDE_BY_TOPIC = {};
 const guideOf = (courseId) => EXAMS.find((e) => e.course === courseId && e.kind === 'guide');
+/* חפיסת „מפתח ההגדרה” שנוגעת בנושא — מהמניפסט (sync כותב topics לחפיסות keyer),
+   ולכן הקישור מיחידת המפה קיים בלי לטעון את החפיסה. */
+const keyerFor = (courseId, topic) => EXAMS.find((e) => e.kind === 'keyer' && e.course === courseId && (e.topics || []).includes(topic)) || null;
 
 /* כמה מהנושא אתה כבר יודע. שאלה שלא נענתה נספרת כלא-נשלטת — זו לא החמרה,
    זה בדיוק המצב: לא ידוע אם אתה יודע אותה. */
@@ -10463,6 +11296,14 @@ function unitCard(courseId, g, r, focus, collapsible) {
     sa.textContent = `${sim.icon} ${sim.title}`;
     sa.title = sim.blurb;
     acts.append(sa);
+  }
+  const ky = keyerFor(courseId, u.topic);
+  if (ky) {
+    const ka = el('a', 'btn btn-sm g-sim');
+    ka.href = '#/keyer/' + ky.id;
+    ka.textContent = `🔑 ${ky.title}`;
+    ka.title = ky.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
+    acts.append(ka);
   }
   /* קישור לפרק הנכון בסיכום המלא — אותו עוגן נושא קנוני (top-<topic>),
      בדיוק כמו שהמסמך עצמו מחזיר קישור "במפה". חינם, מונע-דאטה. */

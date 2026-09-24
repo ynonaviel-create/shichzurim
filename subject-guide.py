@@ -22,6 +22,7 @@
 הנושא בשאלות המקצוע. `related` (קישור לנושא במקצוע אחר) נבדק שהיעד קיים.
 """
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -332,8 +333,28 @@ def lomda_todos(cid, key):
     return out
 
 
+def play_topics(cid):
+    """הדלת השביעית — נושאים שיש להם כלי שבו *עושים* משהו: סימולציה או תרגיל חישוב
+    (קשיחים ב-assets/app.js — נקראים משם ברגקס), או חפיסת מפתח-הגדרה (exams/*-keyer.json)."""
+    app = (ROOT / "assets" / "app.js").read_text(encoding="utf-8")
+    out = set()
+    for name in ("SIMS", "DRILLS"):
+        m = re.search(r"const %s = \[(.*?)\n\];" % name, app, re.S)
+        if not m:
+            continue
+        for obj in re.split(r"\n  \{\n", m.group(1)):
+            if "course: '%s'" % cid not in obj:
+                continue
+            out.update(re.findall(r"topic: '([^']+)'", obj))
+            for lst in re.findall(r"topics: \[([^\]]*)\]", obj):
+                out.update(re.findall(r"'([^']+)'", lst))
+    for f in EXAMS.glob(f"{cid}-*-keyer.json"):
+        out.update(it.get("topic") for it in json.loads(f.read_text(encoding="utf-8")).get("items", []))
+    return out
+
+
 def cmd_status():
-    """שש הדלתות לכל נושא — ינון: „הקפיות והדדיות”. ✅ קיים · ◐ חלקי · ✗ חסר."""
+    """שבע הדלתות לכל נושא — ינון: „הקפיות והדדיות”. ✅ קיים · ◐ חלקי · ✗ חסר."""
     anywhere = topics_anywhere()
     rel_count = Counter()
     for c in courses():
@@ -355,7 +376,8 @@ def cmd_status():
         weeks = {t for w in (c.get("teaching") or {}).get("weeks", []) for t in w.get("topics", [])}
         quotas = (c.get("simExam") or {}).get("blocks") or {}
         print(f"\n══ {c['name']} ══")
-        print("   שאלות  מפה   נקודות   לומדה  שבוע  סימ׳  קשור   נושא")
+        play = play_topics(c["id"])
+        print("   שאלות  מפה   נקודות   לומדה  שבוע  סימ׳  קשור  🎮    נושא")
         for s in c["subjects"]:
             fp = frag_path(c["id"], s["key"])
             units = {u["topic"]: u for u in (json.loads(fp.read_text(encoding="utf-8")) if fp.exists() else [])}
@@ -377,13 +399,14 @@ def cmd_status():
                     " ✅ " if t in weeks else " ✗ ",
                     " ✅ " if quotas.get(s["block"]) and n else " ✗ ",
                     f"{rel_count[(c['id'], t)]:>3}",
+                    " ✅ " if t in play else " ✗ ",
                 ]
-                done = sum([n >= 8, filled, cov >= 0.999, ld == 0, t in weeks, bool(quotas.get(s["block"]) and n)])
+                done = sum([n >= 8, filled, cov >= 0.999, ld == 0, t in weeks, bool(quotas.get(s["block"]) and n), t in play])
                 tot["doors"] += done
-                tot["all"] += 6
+                tot["all"] += 7
                 print("  " + "  ".join(cells) + f"   {t}")
     print(f"\n  סה״כ: {tot['doors']}/{tot['all']} דלתות פתוחות ({round(100 * tot['doors'] / max(tot['all'], 1))}%)")
-    print("  ✅ קיים · ◐ חלקי · ✗ חסר. „קשור” = מספר הקישורים הרוחביים (בשני הכיוונים).")
+    print("  ✅ קיים · ◐ חלקי · ✗ חסר. „קשור” = מספר הקישורים הרוחביים (בשני הכיוונים). 🎮 = סימולציה / תרגיל חישוב / מפתח הגדרה.")
 
 
 def main():

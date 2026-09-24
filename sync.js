@@ -362,6 +362,9 @@ for (const file of files) {
     heroSub: data.heroSub ?? null,     // מפה/כרטיסיות: הטקסט בבאנר שבעמוד המקצוע, לפני שהקובץ עצמו נטען
     heroEyebrow: data.heroEyebrow ?? null,   // כרטיסיות: מי מסר את החומר — מרצה או מתרגלים
     count: items.length,
+    /* מפתח הגדרה: הנושאים שהתיקים נוגעים בהם — כדי שיחידת המפה תקשר לחפיסה
+       בלי לטעון אותה (undefined נשמט מה-JSON בקבצים אחרים). */
+    topics: isKeyer ? [...new Set(items.map((x) => x.topic))] : undefined,
   });
   /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
      exams נכתב כמו שהוא ל-manifest.json. */
