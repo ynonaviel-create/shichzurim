@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "64bbc617",
+  "version": "8d433be8",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1432,6 +1432,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 13
+    },
+    {
+      "id": "ekronot-a-micro-lab2",
+      "file": "ekronot-a-micro-lab2.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "מיקרוביולוגיה · בוחן כניסה למעבדה 2 · סטאפילוקוקים וסטרפטוקוקים",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "series": "quiz",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 15
     },
     {
       "id": "ekronot-a-micro-lab3",
