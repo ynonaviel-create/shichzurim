@@ -2637,3 +2637,15 @@ body:has(.lightbox) .bnav{display:none;}
 .about-step span{font-size:13px; color:var(--muted); line-height:1.55;}
 .about-toc{margin:0 0 24px;}
 .about-zone .about-card{margin-bottom:12px;}
+
+/* ===== מפתח ההגדרה =====
+   יושב על ה-CSS של המקרים (case-layout, case-story, case-stage, opts) — אותה
+   אנטומיה: תיק שמתגלגל + לוח בצד. כאן רק מה שייחודי: הניקוד והפעולות. */
+.keyer-score{ display:flex; align-items:baseline; gap:8px; margin:2px 0 8px; }
+.keyer-score b{ font-size:34px; font-weight:900; color:var(--accent-dk); line-height:1; }
+.keyer-score span{ font-size:12px; font-weight:700; color:var(--muted); }
+.keyer-acts{ display:flex; flex-wrap:wrap; gap:8px; }
+.keyer-acts .btn{ font-size:13.5px; }
+.keyer-none{ font-size:13.5px; color:var(--muted); font-weight:700; }
+.keyer-result{ border-inline-start-color:var(--warn); }
+.keyer-next{ margin-top:14px; }

@@ -1,12 +1,12 @@
 {
   "updated": "2026-09-24",
-  "version": "35adc396",
+  "version": "9af636be",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
-    "css": "02432e16",
-    "js": "03c55450",
-    "cloud": "8bc020be"
+    "css": "8a8e8296",
+    "js": "2b89e1e7",
+    "cloud": "084f112a"
   },
   "courses": [
     {
@@ -1441,6 +1441,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 7
+    },
+    {
+      "id": "ekronot-a-micro-keyer",
+      "file": "ekronot-a-micro-keyer.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "מעגל האבחון — זהה את החיידק",
+      "kind": "keyer",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": "14 תיקים: משטח, תרבית, ותוצאה אחת בכל פעם — לבחור את הבדיקה הבאה, כמו במעבדה, ולזהות בכמה שפחות בדיקות",
+      "heroEyebrow": null,
+      "count": 14
     },
     {
       "id": "ekronot-a-micro-lab1",

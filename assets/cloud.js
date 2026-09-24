@@ -31,6 +31,7 @@
     seen:       'shichzurim.seen',
     cardsRead:  'shichzurim.cardsRead',
     caseProg:   'shichzurim.caseProg',
+    keyerProg:  'shichzurim.keyerProg',   // מפתח ההגדרה — התקדמות לפי תיק
     shinunProg: 'shichzurim.shinunProg',
     seenH:      'shichzurim.seenH',
     flag:       'shichzurim.flag',   // הותר במיגרציה 0004
@@ -250,6 +251,10 @@
     if (ns === 'caseProg') {                                    // מי שהתקדם יותר במקרה מנצח
       const cnt = (a) => (Array.isArray(a) ? a.filter((x) => x != null).length : 0);
       return cnt(l) >= cnt(r) ? l : r;
+    }
+    if (ns === 'keyerProg') {                                   // תיק שזוהה מנצח; אחרת מי שהתקדם יותר
+      const sc = (a) => (a && typeof a === 'object' ? (a.done ? 1000 : 0) + (a.clues || 0) + (a.tests || []).length + (a.wrong || []).length : 0);
+      return sc(l) >= sc(r) ? l : r;
     }
     return l;
   }

@@ -737,7 +737,7 @@ const examsOf = (courseId) =>
   );
 /* רק מה שבאמת מבחן. כרטיסיות קריאה ומפת החומרים אין להן opts/a — הן לא נספרות
    בציון ולא נשאבות לתרגול החופשי או לרשימת הטעויות. */
-const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
+const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun', 'keyer']);
 const quizzesOf = (courseId) => examsOf(courseId).filter((e) => !NOT_QUIZ.has(e.kind));
 
 /* ---------- תתי-קורסים: מקצועות בתוך מבחן בלוק ----------
@@ -949,7 +949,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','formulas','sheet','simexam','survey'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','keyer','formulas','sheet','simexam','survey'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   /* חזרה לכתובת שממנה נפתח סבב חי — מנגנים אותו מחדש במקום לצייר את הבורר
@@ -968,6 +968,8 @@ function router() {
   if (route === 'shinun' && param) return renderShinun(param, sub ? decodeURIComponent(sub) : null);
   // #/case/<id>/<caseId> — קופץ ישר למקרה מסוים בתוך הדק
   if (route === 'case' && param) return renderCase(param, sub ? decodeURIComponent(sub) : null);
+  // #/keyer/<id>/<itemId> — מפתח ההגדרה: משחק זיהוי ברמזים; עם itemId קופץ לתיק מסוים
+  if (route === 'keyer' && param) return renderKeyer(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
   // #/simexam/<course> — סימולציית מבחן מלאה: N שאלות, טיימר, משוב רק בסוף
   if (route === 'simexam' && param) return renderSimExam(param, scopeKey(sub));
@@ -1118,7 +1120,7 @@ function courseVerbs(c) {
   const has = (k) => list.some((e) => e.kind === k);
   const out = [];
   if (has('shichzur')) out.push('שחזורים');
-  if (has('practice') || has('highyield') || has('case') || simsOf(c.id).length) out.push('תרגול');
+  if (has('practice') || has('highyield') || has('case') || has('keyer') || simsOf(c.id).length) out.push('תרגול');
   if (has('guide') || has('cards') || has('shinun') || c.studyDoc) out.push('ללמוד');
   return out;
 }
@@ -1348,6 +1350,7 @@ function renderCourse(courseId, subKey = null) {
   const practiceExams = list.filter((e) => e.kind === 'practice' || e.kind === 'highyield');
   const testExams = list.filter((e) => e.kind === 'shichzur');
   const caseDecks = list.filter((e) => e.kind === 'case');
+  const keyerDecks = list.filter((e) => e.kind === 'keyer');
   const cardDecks = list.filter((e) => e.kind === 'cards');
   const shinunDeck = list.find((e) => e.kind === 'shinun');
   /* המפה שייכת לקורס כולו (בלי part), ולכן בעמוד מקצוע היא לא ברשימה המסוננת. */
@@ -1362,6 +1365,7 @@ function renderCourse(courseId, subKey = null) {
     nav.append(ch);
   };
   addChip('sec-practice', '🏋️ תרגול');
+  if (keyerDecks.length || caseDecks.length || shinunDeck) addChip('sec-play', '🎮 לשחק');
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
   /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
      רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
@@ -1431,13 +1435,11 @@ function renderCourse(courseId, subKey = null) {
     lRow.append(fg);
   }
   hero.append(lRow);
-  /* בנקי-תרגול ומקרים — כקישורים קומפקטיים בתוך הבאנר, לא כבלוקים נפרדים. */
-  if (practiceExams.length || caseDecks.length) {
+  /* בנקי-תרגול — כקישורים קומפקטיים בתוך הבאנר, לא כבלוקים נפרדים.
+     (מקרים ומפתחות הגדרה עברו לאזור „לשחק עם זה” — הם דלת בפני עצמה.) */
+  if (practiceExams.length) {
     const extra = el('div', 'practice-hero-extra');
     extra.append(el('span', 'lbl', 'גם:'));
-    caseDecks.forEach((d) => {
-      const a = el('a', null, `🩺 ${d.title}`); a.href = '#/case/' + d.id; extra.append(a);
-    });
     practiceExams.forEach((m) => {
       const a = el('a', null, `🔁 ${m.title}`); a.dataset.tour = 'exam'; a.href = '#/exam/' + m.id;
       /* בנק תרגול מוצג כאן כקישור קומפקטי בלי מטא — ולכן מבחן חריג היה נבלע
@@ -1448,6 +1450,38 @@ function renderCourse(courseId, subKey = null) {
     hero.append(extra);
   }
   view.append(hero);
+
+  /* 1ב) לשחק עם זה — הדלת השביעית של הנושא: כלים שבהם *עושים* משהו עם החומר
+     (מזהים חיידק מרמזים, פותרים מקרה, משננים) ולא רק עונים על שאלה. כולם
+     מונעי-דאטה; מקצוע בלי אף אחד מהם פשוט לא מציג את האזור. */
+  const playCards = [];
+  const playCard = (ico, ttl, sub, href, badge) => {
+    const a = el('a', 'learn-card');
+    a.href = href;
+    a.append(el('span', 'learn-card-ico', ico));
+    const t = el('div');
+    const ttlRow = el('div', 'learn-card-ttl', ttl);
+    if (badge) ttlRow.append(el('span', 'learn-card-badge', badge));
+    t.append(ttlRow);
+    if (sub) t.append(el('div', 'learn-card-sub', sub));
+    a.append(t);
+    return a;
+  };
+  keyerDecks.forEach((d) => playCards.push(playCard('🔑', d.title, d.heroSub || `${plural(d.count, 'תיק', 'תיקים')} — לזהות מרמזים, בכמה שפחות בדיקות`, '#/keyer/' + d.id, '✨ חדש')));
+  caseDecks.forEach((d) => playCards.push(playCard('🩺', d.title, d.heroSub || `${plural(d.count, 'מקרה', 'מקרים')} — תיק שמתפתח, החלטה אחרי החלטה`, '#/case/' + d.id)));
+  if (shinunDeck) playCards.push(playCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה — היפוך, כסה-וגלה, מבחן`, '#/shinun/' + courseId));
+  if (playCards.length) {
+    const sec = el('section', 'verb-zone');
+    sec.id = 'sec-play';
+    const h = el('div', 'zone-head');
+    h.append(el('span', 'zone-head-t', '🎮 לשחק עם זה'));
+    h.append(el('span', 'zone-head-line'));
+    sec.append(h);
+    const g = el('div', 'learn-grid');
+    playCards.forEach((x) => g.append(x));
+    sec.append(g);
+    view.append(sec);
+  }
 
   /* 2) שחזורים — הרשימה הכי בשימוש, מיד מתחת לתרגול. */
   if (testExams.length) {
@@ -1516,7 +1550,6 @@ function renderCourse(courseId, subKey = null) {
     lg.append(gcard);
   }
   cardDecks.forEach((d) => lg.append(learnCard('🎓', d.title, plural(d.count, 'כרטיסייה', 'כרטיסיות'), '#/cards/' + d.id)));
-  if (shinunDeck) lg.append(learnCard('🧠', 'i❤️Shinun', `${shinunDeck.count} עובדות לבעל־פה`, '#/shinun/' + courseId, '✨ חדש'));
   if (lg.children.length) {
     addChip('sec-learn', '📖 ללמוד');
     const sec = el('section', 'verb-zone');
@@ -2993,6 +3026,264 @@ function casePicker(deck, c) {
     grid.append(a);
   });
   view.append(grid);
+  toTop();
+  updateFooter();
+}
+
+/* ================= מפתח ההגדרה =================
+   המשחק החסר בכל מקצועות הבלוק: לא „מה התשובה” אלא „מה תבדוק עכשיו”. תיק
+   נפתח ברמז אחד, וכל צעד עולה נקודות — רמז נוסף, בדיקה, או ניחוש שגוי.
+   מי שמזהה מוקדם ובזול לומד בדיוק את מה שהמבחן בודק: איזה רמז מכריע.
+   מונע-דאטה (kind:'keyer', items[]): רמזים, בדיקות, ומסיחי זיהוי מאותה family
+   — בדיוק כמו מצב המבחן בשננת. ההתקדמות נשמרת לפי תיק, כמו במקרים. */
+const KEYER_KEY = 'shichzurim.keyerProg';
+const KEYER_COST = { clue: 10, test: 15, wrong: 20, min: 10 };
+const keyerProg = {
+  read() { try { return JSON.parse(localStorage.getItem(KEYER_KEY)) || {}; } catch { return {}; } },
+  write(d) { localStorage.setItem(KEYER_KEY, JSON.stringify(d)); },
+  get(deck, it) { return this.read()[`${deck}#${it}`] || null; },
+  /* הענן: ns 'keyerProg' נכנס ל-user_kv במיגרציה 0010. עד שתרוץ, Postgres דוחה
+     את השורה ו-flush() זורק אותה (הקשחת 0003) — ההתקדמות נשארת מקומית ותו לא. */
+  set(deck, it, st) { const d = this.read(); d[`${deck}#${it}`] = st; this.write(d); window.Cloud?.queue('keyerProg', `${deck}#${it}`, st); },
+  clear(deck, it) { const d = this.read(); delete d[`${deck}#${it}`]; this.write(d); window.Cloud?.queueDelete('keyerProg', `${deck}#${it}`); },
+};
+const keyerScore = (it, st) => {
+  const cost = (arr, i, def) => (arr && arr[i] && arr[i].cost != null ? arr[i].cost : def);
+  let sc = 100;
+  for (let i = 1; i < (st.clues || 1); i++) sc -= cost(it.clues, i, KEYER_COST.clue);
+  (st.tests || []).forEach((ti) => { sc -= cost(it.tests, ti, KEYER_COST.test); });
+  sc -= (st.wrong || []).length * KEYER_COST.wrong;
+  return Math.max(KEYER_COST.min, sc);
+};
+/* מסיחי הזיהוי: options מפורשות אם יש, אחרת כל התשובות מאותה family (עד 5).
+   הסדר נקבע פעם אחת ונשמר בהתקדמות — כדי שהרשימה לא תתערבב מתחת לידיים. */
+function keyerOptions(deck, it, st) {
+  if (st.order) return st.order;
+  let pool = Array.isArray(it.options) && it.options.length ? it.options.slice()
+    : [...new Set(deck.items.filter((x) => x.family === it.family && x.answer !== it.answer).map((x) => x.answer))];
+  pool = shuffle(pool).slice(0, 4);
+  st.order = shuffle([it.answer, ...pool]);
+  return st.order;
+}
+
+async function renderKeyer(id, itemId = null) {
+  setNav('home');
+  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>טוען…</b></div>';
+  let deck;
+  try { deck = await loadExam(id); }
+  catch (err) { view.innerHTML = ''; view.append(emptyState('⚠️', 'לא הצלחתי לטעון', String(err.message))); return; }
+  const c = courseOf(deck.course);
+  if (deck.course) view.dataset.course = deck.course;
+  const it = itemId ? deck.items.find((x) => x.id === itemId) : null;
+  view.innerHTML = '';
+  if (!it) return keyerPicker(deck, c);
+
+  const sj = subjectOfTopic(deck.course, it.topic);
+  view.append(crumb('כל התיקים', '#/keyer/' + deck.id));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, `${it.icon || '🔑'} ${it.title || 'תיק ' + (deck.items.indexOf(it) + 1)}`));
+  head.append(el('p', null, [it.topic, sj ? sj.name : null].filter(Boolean).join(' · ')));
+  view.append(head);
+
+  const layout = el('div', 'case-layout');
+  const main = el('div', 'case-main');
+  const side = el('div', 'case-side');
+  layout.append(main, side);
+  view.append(layout);
+
+  let st = keyerProg.get(deck.id, it.id) || { clues: 1, tests: [], wrong: [], done: false };
+  const save = () => keyerProg.set(deck.id, it.id, st);
+  const opts = keyerOptions(deck, it, st);
+  if (!keyerProg.get(deck.id, it.id)) save();   // הסדר של המסיחים נקבע — לשמור
+
+  const nextUnfinished = () => {
+    const i = deck.items.indexOf(it);
+    const rest = deck.items.slice(i + 1).concat(deck.items.slice(0, i));
+    return rest.find((x) => !(keyerProg.get(deck.id, x.id) || {}).done) || null;
+  };
+
+  function paint() {
+    /* --- לוח הניקוד --- */
+    side.innerHTML = '';
+    const board = el('div', 'ddx-board');
+    board.append(el('div', 'ddx-title', 'התיק'));
+    const sc = keyerScore(it, st);
+    const big = el('div', 'keyer-score');
+    big.append(el('b', null, String(sc)));
+    big.append(el('span', null, 'נקודות'));
+    board.append(big);
+    const rows = [
+      ['💡', 'רמזים שנחשפו', `${st.clues}/${it.clues.length}`],
+      ['🧪', 'בדיקות שהרצת', `${st.tests.length}/${(it.tests || []).length}`],
+      ['✗', 'ניחושים שגויים', String(st.wrong.length)],
+    ];
+    rows.forEach(([ico, lbl, val]) => {
+      const r = el('div', 'ddx-row');
+      r.append(el('span', 'ddx-ico', ico)); r.append(el('span', 'ddx-name', lbl)); r.append(el('span', 'ddx-st', val));
+      board.append(r);
+    });
+    board.append(el('div', 'ddx-foot', st.done ? '✓ זוהה' : `רמז −${KEYER_COST.clue} · בדיקה −${KEYER_COST.test} · טעות −${KEYER_COST.wrong}`));
+    side.append(board);
+    if (st.clues > 1 || st.tests.length || st.wrong.length || st.done) {
+      const rst = el('button', 'btn-ghost case-reset', 'התחל את התיק מחדש');
+      rst.title = 'מחיקת ההתקדמות בתיק הזה והתחלה מהרמז הראשון';
+      rst.onclick = () => { keyerProg.clear(deck.id, it.id); st = { clues: 1, tests: [], wrong: [], done: false }; st.order = null; keyerOptions(deck, it, st); save(); paint(); toTop(); };
+      side.append(rst);
+    }
+
+    /* --- התיק: פתיח, רמזים ותוצאות --- */
+    main.innerHTML = '';
+    const story = el('div', 'case-story');
+    story.append(el('p', null, it.intro));
+    it.clues.slice(0, st.clues).forEach((cl, i) => {
+      const p = el('p', 'case-reveal');
+      p.append(el('b', null, `רמז ${i + 1}: `));
+      p.append(document.createTextNode(cl.text));
+      story.append(p);
+    });
+    st.tests.forEach((ti) => {
+      const t = it.tests[ti]; if (!t) return;
+      const p = el('p', 'case-reveal keyer-result');
+      p.append(el('b', null, `🧪 ${t.name}: `));
+      p.append(document.createTextNode(t.result));
+      story.append(p);
+    });
+    main.append(story);
+
+    if (!st.done) {
+      /* --- מה תעשה עכשיו --- */
+      const act = el('div', 'case-stage');
+      act.append(el('div', 'case-phase', 'מה תעשה עכשיו?'));
+      const row = el('div', 'keyer-acts');
+      if (st.clues < it.clues.length) {
+        const b = el('button', 'btn', `💡 רמז נוסף (−${it.clues[st.clues].cost ?? KEYER_COST.clue})`);
+        b.title = 'חשיפת הרמז הבא בתיק — עולה נקודות';
+        b.onclick = () => { st.clues += 1; save(); paint(); };
+        row.append(b);
+      }
+      (it.tests || []).forEach((t, ti) => {
+        if (st.tests.includes(ti)) return;
+        const b = el('button', 'btn', `🧪 ${t.name} (−${t.cost ?? KEYER_COST.test})`);
+        b.title = 'הרצת הבדיקה וקריאת התוצאה — עולה נקודות';
+        b.onclick = () => { st.tests.push(ti); save(); paint(); };
+        row.append(b);
+      });
+      if (!row.children.length) row.append(el('span', 'keyer-none', 'אין עוד מה לבדוק — לזהות.'));
+      act.append(row);
+      main.append(act);
+    }
+
+    /* --- הזיהוי --- */
+    const idc = el('div', 'case-stage' + (st.done ? ' done' : ''));
+    idc.id = 'keyer-id';
+    idc.append(el('div', 'case-phase', 'מה זה?'));
+    idc.append(el('div', 'case-ask', it.ask || 'בחר את הזיהוי — ניחוש שגוי עולה נקודות, אבל התיק ממשיך.'));
+    const box = el('div', 'opts');
+    opts.forEach((name, oi) => {
+      const o = el('div', 'opt');
+      o.append(el('span', 'key', String(oi + 1)));
+      o.append(el('span', null, name));
+      const isAns = name === it.answer;
+      if (st.wrong.includes(oi)) { o.classList.add('locked', 'wrong', 'chosen'); }
+      if (st.done) {
+        o.classList.add('locked');
+        if (isAns) o.classList.add('correct', 'chosen');
+      } else if (!st.wrong.includes(oi)) {
+        o.onclick = () => {
+          if (isAns) st.done = true; else st.wrong.push(oi);
+          save(); paint();
+          requestAnimationFrame(() => document.getElementById('keyer-id')?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+        };
+      }
+      box.append(o);
+    });
+    idc.append(box);
+    if (st.done) {
+      const fb = el('div', 'fb show ok');
+      fb.append(el('div', null, `✓ ${it.answer} — ${keyerScore(it, st)} נקודות`));
+      fb.append(explainBox(it.why, { q: it.intro, opts, a: opts.indexOf(it.answer), explain: it.why, topic: it.topic }, null));
+      const gb = guideButton(it.topic);
+      if (gb) fb.append(gb);
+      idc.append(fb);
+      const nav = el('div', 'btn-row keyer-next');
+      const nx = nextUnfinished();
+      if (nx) {
+        const a = el('a', 'btn primary', '🔑 התיק הבא');
+        a.href = '#/keyer/' + deck.id + '/' + encodeURIComponent(nx.id);
+        a.title = 'התיק הבא שעוד לא זיהית';
+        nav.append(a);
+      } else {
+        const a = el('a', 'btn primary', '🏁 כל התיקים זוהו — חזרה לרשימה');
+        a.href = '#/keyer/' + deck.id;
+        nav.append(a);
+      }
+      const pr = el('a', 'btn', `🏋️ שאלות אמת על ${it.topic}`);
+      pr.title = 'תרגול השאלות מהמבחנים על הנושא של התיק';
+      pr.href = '#/practice/' + deck.course + '/' + encodeURIComponent(it.topic);
+      nav.append(pr);
+      idc.append(nav);
+    } else if (st.wrong.length) {
+      const fb = el('div', 'fb show no');
+      fb.append(el('div', null, '✗ לא זה. יש עוד רמזים ובדיקות — או לנחש שוב.'));
+      idc.append(fb);
+    }
+    main.append(idc);
+  }
+
+  paint();
+  toTop();
+  updateFooter();
+}
+
+/* בורר התיקים — הדף שרואים כשנכנסים לחפיסה בלי תיק מסוים. */
+function keyerPicker(deck, c) {
+  view.append(crumb(c ? c.name : 'חזרה', '#/course/' + deck.course));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '🔑 ' + deck.title));
+  const doneN = deck.items.filter((it) => (keyerProg.get(deck.id, it.id) || {}).done).length;
+  head.append(el('p', null, `${c ? c.name : ''} · ${plural(deck.items.length, 'תיק', 'תיקים')}` + (doneN ? ` · זוהו ${doneN}` : '')));
+  view.append(head);
+  if (deck.note) { const n = el('div', 'cards-note'); n.textContent = deck.note; view.append(n); }
+
+  const row = el('div', 'btn-row');
+  const first = deck.items.find((it) => !(keyerProg.get(deck.id, it.id) || {}).done);
+  if (first) {
+    const go = el('a', 'btn primary', doneN ? '▶️ להמשיך — התיק הבא' : '▶️ להתחיל');
+    go.href = '#/keyer/' + deck.id + '/' + encodeURIComponent(first.id);
+    go.title = 'התיק הראשון שעוד לא זוהה';
+    row.append(go);
+  }
+  view.append(row);
+
+  /* מקובץ לפי נושא — כמו כל השאר באתר, כדי שהתיקים ידברו עם המפה והתרגול. */
+  const byTopic = new Map();
+  deck.items.forEach((it) => { (byTopic.get(it.topic) || byTopic.set(it.topic, []).get(it.topic)).push(it); });
+  byTopic.forEach((items, topic) => {
+    const sec = el('section', 'verb-zone');
+    const h = el('div', 'zone-head');
+    h.append(el('span', 'zone-head-t', topic));
+    h.append(el('span', 'zone-head-line'));
+    sec.append(h);
+    const grid = el('div', 'case-grid keyer-grid');
+    items.forEach((it) => {
+      const st = keyerProg.get(deck.id, it.id) || null;
+      const a = el('a', 'case-card');
+      a.href = '#/keyer/' + deck.id + '/' + encodeURIComponent(it.id);
+      a.append(el('div', 'case-card-ico', it.icon || '🔑'));
+      const b = el('div', 'case-card-body');
+      b.append(el('h3', null, it.title || (st && st.done ? it.answer : 'תיק ' + (deck.items.indexOf(it) + 1))));
+      b.append(el('p', null, it.intro));
+      const meta = el('div', 'card-meta');
+      meta.append(el('span', 'tag', `${it.clues.length} רמזים · ${(it.tests || []).length} בדיקות`));
+      if (st && st.done) meta.append(el('span', 'tag good', `✓ ${keyerScore(it, st)} נק׳`));
+      else if (st && (st.clues > 1 || st.tests.length || st.wrong.length)) meta.append(el('span', 'tag', 'באמצע'));
+      b.append(meta);
+      a.append(b);
+      grid.append(a);
+    });
+    sec.append(grid);
+    view.append(sec);
+  });
   toTop();
   updateFooter();
 }
@@ -5731,7 +6022,7 @@ async function buildSearchIndex() {
           })));
           return;
         }
-        if (m.kind === 'case') return;
+        if (m.kind === 'case' || m.kind === 'keyer') return;
         /* שאלות. ה-HY מוחרג — הוא עותק, והיה מכפיל כל תוצאה. */
         if (m.kind === 'highyield') return;
         (d.questions || []).forEach((q, i) => rows.push({
@@ -7739,6 +8030,7 @@ function prettyTarget(target, type) {
   if (kind === 'shinun')   return '🧠 שינון: ' + cName(id);
   if (kind === 'cards')    return '📇 כרטיסיות: ' + eTitle(id);
   if (kind === 'case')     return '🩺 מקרים: ' + eTitle(id);
+  if (kind === 'keyer')    return '🔑 מפתח ההגדרה: ' + eTitle(id);
   if (kind === 'formulas') return '🧾 נוסחאות: ' + cName(id);
   if (kind === 'sheet')    return '📄 דף נוסחאות: ' + cName(id);
   return target;
@@ -10533,7 +10825,7 @@ document.getElementById('searchBtn')?.addEventListener('click', openSearch);
   const courseFromHash = () => {
     const [route, param] = location.hash.replace(/^#\/?/, '').split('/');
     if (param && COURSE_ROUTES.has(route) && courseOf(param)) return param;
-    if (param && ['exam', 'q', 'cards', 'case', 'sheet'].includes(route)) {
+    if (param && ['exam', 'q', 'cards', 'case', 'keyer', 'sheet'].includes(route)) {
       const e = EXAMS.find((v) => v.id === param);
       if (e) return e.course;
     }

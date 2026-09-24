@@ -17,7 +17,7 @@ const REQUIRED = ['id', 'course', 'title', 'kind'];   // questions / cards / uni
 /* case = מקרה מתגלגל (לא מבחן): cases[] במקום questions[]. כל מקרה נפרש בשלבים
    (אנמנזה → בדיקה → בירור → אבחנה → טיפול), וכל שלב מעדכן לוח אבחנה מבדלת חי.
    זה הפורמט של המבחן עצמו בעימות קליני — שאלה בודדת לא מתרגלת רצף. */
-const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide', 'case', 'shinun'];
+const KINDS = ['shichzur', 'practice', 'highyield', 'cards', 'guide', 'case', 'shinun', 'keyer'];
 const DDX_STATUS = ['open', 'likely', 'unlikely', 'ruled_out', 'confirmed'];
 /* עד כמה ידוע מה המרצה שואל: known = הדליף/מסר גבולות גזרה (קוקס), unknown = לא ידוע,
    mixed = חלק מהנושא ידוע, new = נושא שעבר למרצה השנה ואין עליו היסטוריה.
@@ -25,7 +25,7 @@ const DDX_STATUS = ['open', 'likely', 'unlikely', 'ruled_out', 'confirmed'];
 const CERTAINTY = ['known', 'mixed', 'unknown', 'new'];
 /* מה שאינו מבחן — כרטיסיות, מפת חומרים ומקרים. הפריטים שלהם אינם שאלות, ולכן
    הם לא נספרים בסיכומי ה"שאלות" (כמו NOT_QUIZ ב-app.js). */
-const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun']);
+const NOT_QUIZ = new Set(['cards', 'guide', 'case', 'shinun', 'keyer']);
 const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e) => a + e.count, 0);
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json', 'anki-index.json']);
 
@@ -113,6 +113,7 @@ const files = fs
 
 const exams = [];
 const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
+const keyers = [];                  // מפתחות הגדרה — ה-qids שלהם נבדקים אחרי הלולאה, כמו points
 const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
 const topicsUsed = {};              // course → Map(נושא → הקובץ הראשון שכתב אותו)
 const qidTopic = {};
@@ -154,12 +155,13 @@ for (const file of files) {
   const isGuide = data.kind === 'guide';
   const isCase = data.kind === 'case';
   const isShinun = data.kind === 'shinun';
+  const isKeyer = data.kind === 'keyer';
   /* שננת: הפריטים מקובצים ל-groups[].items — משטחים לרשימה אחת לספירה ולוולידציה. */
   const items = isCards ? data.cards : isGuide ? data.units : isCase ? data.cases
-    : isShinun ? (data.groups || []).flatMap((g) => g.items || []) : data.questions;
+    : isShinun ? (data.groups || []).flatMap((g) => g.items || []) : isKeyer ? data.items : data.questions;
   if (!Array.isArray(items) || !items.length) {
     problems.push(
-      `${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : isCase ? 'אין מקרים' : isShinun ? 'אין פריטי שינון' : 'אין שאלות'}`
+      `${file}: ${isCards ? 'אין כרטיסיות' : isGuide ? 'אין יחידות' : isCase ? 'אין מקרים' : isShinun ? 'אין פריטי שינון' : isKeyer ? 'אין פריטים (items)' : 'אין שאלות'}`
     );
     continue;
   }
@@ -238,6 +240,35 @@ for (const file of files) {
         });
       });
     });
+  } else if (isKeyer) {
+    /* מפתח ההגדרה: כל פריט הוא „תיק” — רמזים שנחשפים, בדיקות שמריצים, וזיהוי.
+       מסיחי הזיהוי נשלפים מאותה family (כמו במבחן השינון), ולכן family חובה. */
+    const seen = new Set();
+    items.forEach((it, i) => {
+      const at = `${file} · פריט ${i + 1}`;
+      if (!it.id) problems.push(`${at}: אין מזהה (id)`);
+      else if (seen.has(it.id)) problems.push(`${at}: מזהה כפול "${it.id}"`);
+      else seen.add(it.id);
+      if (!it.answer) problems.push(`${at}: אין תשובה (answer)`);
+      if (!it.family) problems.push(`${at}: אין family — ממנה נשלפים מסיחי הזיהוי`);
+      if (!it.topic) problems.push(`${at}: אין topic — בלעדיו אין קישור לתרגול ולמפה`);
+      if (!it.intro) problems.push(`${at}: אין פתיח (intro)`);
+      if (!it.why) problems.push(`${at}: אין הסבר (why) — „למה כל רמז חשוב” הוא הלמידה`);
+      if (!Array.isArray(it.clues) || it.clues.length < 2)
+        problems.push(`${at}: צריך לפחות שני רמזים (clues)`);
+      (it.clues || []).forEach((cl, j) => { if (!cl || !cl.text) problems.push(`${at} · רמז ${j + 1}: אין text`); });
+      (it.tests || []).forEach((t, j) => {
+        if (!t || !t.name) problems.push(`${at} · בדיקה ${j + 1}: אין name`);
+        if (!t || !t.result) problems.push(`${at} · בדיקה ${j + 1}: אין result`);
+      });
+    });
+    const fam = {};
+    items.forEach((it) => { if (it.family) (fam[it.family] ||= []).push(it.answer); });
+    Object.entries(fam).forEach(([f, arr]) => {
+      if (new Set(arr).size < 3 && !items.some((it) => it.family === f && Array.isArray(it.options) && it.options.length >= 3))
+        problems.push(`${file}: ל-family "${f}" יש פחות מ-3 תשובות שונות ואין options — אין ממה לבנות מסיחי זיהוי`);
+    });
+    keyers.push({ file, course: data.course, items });
   } else if (isShinun) {
     if (!Array.isArray(data.groups) || !data.groups.length)
       problems.push(`${file}: אין groups`);
@@ -286,7 +317,7 @@ for (const file of files) {
     });
   }
 
-  if (!isGuide && !isCards && !isCase && !isShinun) {
+  if (!isGuide && !isCards && !isCase && !isShinun && !isKeyer) {
     const set = (topicsByCourse[data.course] ??= new Set());
     items.forEach((q) => q.topic && set.add(q.topic));
 
@@ -334,13 +365,28 @@ for (const file of files) {
   });
   /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
      exams נכתב כמו שהוא ל-manifest.json. */
-  if (!isGuide && !isCards && !isCase && !isShinun)
+  if (!isGuide && !isCards && !isCase && !isShinun && !isKeyer)
     quizFiles.push({ file, items, course: data.course, kind: data.kind, official: data.official ?? null, generated: data.generated ?? null });
 }
 
 /* יחידה במפה נתלית על נושא קנוני, ומשם מגיע הקישור לתרגול ולשאלות. נושא שלא
    קיים באף שאלה = צ׳יפ שמוביל לרשימה ריקה. נבדק כאן ולא בלולאה, כי הטקסונומיה
    נאספת מכל קבצי המקצוע וחלקם עוד לא נקראו כשהמפה נקראת. */
+/* מפתחות ההגדרה: הנושא של כל פריט חייב להתקיים בשאלות (הקישור לתרגול), וכל
+   qid שמצורף כראיה חייב להתקיים — אותו עיקרון של points. */
+keyers.forEach((k) => {
+  const known = topicsByCourse[k.course] ?? new Set();
+  const qmap = qidTopic[k.course] ?? new Map();
+  k.items.forEach((it, i) => {
+    const at = `${k.file} · ${it.answer || 'פריט ' + (i + 1)}`;
+    if (it.topic && !known.has(it.topic))
+      problems.push(`${at}: הנושא "${it.topic}" לא קיים באף שאלה של ${k.course}`);
+    (it.qids || []).forEach((qid) => {
+      if (!qmap.has(qid)) problems.push(`${at}: ה-qid "${qid}" לא קיים באף שאלה של ${k.course}`);
+    });
+  });
+});
+
 guides.forEach((g) => {
   const known = topicsByCourse[g.course] ?? new Set();
   /* יוצא מן הכלל מתועד: נושא שסומן במפה כ-"new" בלי אף נקודה — נושא שנלמד
@@ -583,7 +629,7 @@ courses.forEach((c) => {
 const SERIES = ['exam', 'quiz', 'official', 'bank'];
 courses.forEach((c) => {
   if (!c.subjects) return;
-  exams.filter((e) => e.course === c.id && !['guide', 'highyield', 'cards', 'case', 'shinun'].includes(e.kind))
+  exams.filter((e) => e.course === c.id && !['guide', 'highyield', 'cards', 'case', 'shinun', 'keyer'].includes(e.kind))
     .forEach((e) => {
       if (!SERIES.includes(e.series))
         problems.push(`${e.file}: series="${e.series}" — בקורס עם subjects חובה אחד מ: ${SERIES.join(' / ')}`);
