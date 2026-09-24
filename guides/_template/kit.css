@@ -226,3 +226,15 @@ body:not(:has(#ed-prog)) details.dk-qa{
   background:color-mix(in srgb, var(--panel) 60%, var(--bg));
   border-color:color-mix(in srgb, var(--brand) 18%, transparent);
 }
+
+/* ניווט בין נושאים (kit.js בונה מה-DOM) */
+.dk-unitnav{display:flex;justify-content:space-between;gap:.8rem;margin-top:1.4rem;padding-top:1rem;
+  border-top:1px dashed var(--line,#d8dee7);font-family:'Heebo';}
+.dk-unitnav a{flex:1;display:flex;flex-direction:column;gap:.15rem;text-decoration:none;color:var(--dim,#6b7785);
+  padding:.55rem .8rem;border-radius:12px;border:1px solid transparent;min-width:0;}
+.dk-unitnav a span{font-size:.72rem;font-weight:700;}
+.dk-unitnav a b{font-size:.9rem;color:var(--ink,#1c2733);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-unitnav a:hover{border-color:var(--line,#d8dee7);color:var(--brand,#0f6cbd);}
+.dk-unitnav a:hover b{color:var(--brand,#0f6cbd);}
+.dk-unitnav-next{text-align:left;align-items:flex-end;}
+@media print{.dk-unitnav{display:none}}

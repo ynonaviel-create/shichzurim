@@ -747,3 +747,46 @@ if (CFG.qa) {
   new MutationObserver(follow).observe(nav, { attributes: true, subtree: true, attributeFilter: ['class'] });
   follow();
 })();
+
+/* ── ניווט בין נושאים בתוך הלומדה ──
+   בסוף כל נושא: „הנושא הקודם / הנושא הבא”, נבנה מה-DOM (סדר ה-section.unit
+   ושם ה-h3) — ולכן לא יכול להיפרד מהמסמך. בלי זה, מי שסיים פרק חוזר לסרגל
+   או גולל בעצמו; עם זה, הלומדה נקראת כמו ספר. */
+(function () {
+  var units = [].slice.call(document.querySelectorAll('section.unit'));
+  if (units.length < 2) return;
+  var nameOf = function (u) {
+    var h = u.querySelector('h3');
+    if (!h) return '';
+    var t = '';
+    [].forEach.call(h.childNodes, function (n) { if (n.nodeType === 3) t += n.textContent; });
+    return t.trim() || h.textContent.trim();
+  };
+  units.forEach(function (u, i) {
+    if (u.querySelector('.dk-unitnav')) return;
+    var nav = document.createElement('nav');
+    nav.className = 'dk-unitnav';
+    nav.setAttribute('aria-label', 'ניווט בין נושאים');
+    var prev = units[i - 1], next = units[i + 1];
+    if (prev) {
+      var a = document.createElement('a');
+      a.href = '#' + prev.id; a.className = 'dk-unitnav-prev';
+      a.innerHTML = '<span>← הנושא הקודם</span><b></b>';
+      a.querySelector('b').textContent = nameOf(prev);
+      nav.appendChild(a);
+    }
+    if (next) {
+      var b = document.createElement('a');
+      b.href = '#' + next.id; b.className = 'dk-unitnav-next';
+      b.innerHTML = '<span>הנושא הבא →</span><b></b>';
+      b.querySelector('b').textContent = nameOf(next);
+      nav.appendChild(b);
+    } else {
+      var l = document.createElement('a');
+      l.href = '#last'; l.className = 'dk-unitnav-next';
+      l.innerHTML = '<span>סיימת את כל הנושאים →</span><b>⏱️ הרגע האחרון</b>';
+      nav.appendChild(l);
+    }
+    u.appendChild(nav);
+  });
+})();
