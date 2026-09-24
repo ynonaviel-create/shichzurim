@@ -729,3 +729,21 @@ if (CFG.qa) {
   }, { passive: true });
 })();
 })();
+
+/* ── סרגל הנושאים הדביק גולל לנושא הפעיל ──
+   בלומדת מקצוע הסרגל הוא רצועה אופקית של 7–8 נושאים שגולשת מעבר לרוחב המסך
+   (בכוונה — פס גלילה מוסתר). בלי זה, מי שקורא את הנושא השישי רואה למעלה סרגל
+   שהשבב המודגש בו מחוץ למסך. הסקריפט של המסמך מסמן .on; כאן רק מגלגלים אליו. */
+(function () {
+  var nav = document.querySelector('.navbar');
+  if (!nav || !('MutationObserver' in window)) return;
+  var last = null;
+  var follow = function () {
+    var on = nav.querySelector('a.on');
+    if (!on || on === last) return;
+    last = on;
+    try { on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (e) { on.scrollIntoView(); }
+  };
+  new MutationObserver(follow).observe(nav, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  follow();
+})();

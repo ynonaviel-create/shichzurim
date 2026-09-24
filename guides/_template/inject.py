@@ -194,7 +194,13 @@ def validate(name, html, cfg):
     if errs:
         for e in errs:
             print(f"   ❌ {name}: {e}")
-        sys.exit(1)
+        # מסמך שבור לא עוצר את שאר המסמכים: מדלגים עליו, ובסוף הריצה יוצאים עם שגיאה
+        FAILED.append(name)
+        return False
+    return True
+
+
+FAILED = []
 
 
 def inject(name, cfg, check=True):
@@ -211,7 +217,8 @@ def inject(name, cfg, check=True):
     if check:
         # על התוכן בלבד: הערכה עצמה מכילה דוגמאות קוד (ex-match בהערות
         # kit.js) שמפעילות את הבדיקות בטעות.
-        validate(name, html.replace("<<<DOCKIT>>>", ""), cfg)
+        if not validate(name, html.replace("<<<DOCKIT>>>", ""), cfg):
+            return
     html = html.replace("<<<DOCKIT>>>", build_block(cfg))
     path.write_text(html, encoding="utf-8")
     print(f"✅ {name}")
@@ -225,3 +232,6 @@ if __name__ == "__main__":
         if only and only not in name:
             continue
         inject(name, cfg, check=check)
+    if FAILED:
+        print(f"❌ לא הוטמעו (שבורים): {', '.join(FAILED)}")
+        sys.exit(1)
