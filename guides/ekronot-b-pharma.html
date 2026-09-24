@@ -1414,7 +1414,7 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-b-pharma-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b"};</script>
+<script>window.DOCKIT={"id": "ekronot-b-pharma-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
@@ -1780,6 +1780,31 @@ if (CFG.qa) {
           else sec.appendChild(det);
         }
         if (document.body.dataset.dkMode === 'focus') det.open = true;
+      });
+    }).catch(function () {});
+
+    /* „🎮 לשחק עם זה” מהלומדה: חפיסת מפתח-ההגדרה שנוגעת בנושא הפרק — מהמניפסט
+       (sync כותב topics לחפיסות keyer), ולכן קיים בלי לטעון את החפיסה. הקישור
+       נכנס ליד „לתרגל את הנושא” בסוף הפרק, באותו סגנון. */
+    fetch('../exams/manifest.json', { cache: 'no-cache' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (m) {
+      if (!m || !m.exams) return;
+      var decks = m.exams.filter(function (e) { return e.kind === 'keyer' && e.course === CFG.qa && e.topics; });
+      if (!decks.length) return;
+      [].forEach.call(document.querySelectorAll(unitSel), function (sec) {
+        var t = titleOf(sec);
+        var deck = null;
+        decks.forEach(function (d) { if (!deck && d.topics.some(function (x) { return norm(x) === t; })) deck = d; });
+        if (!deck) return;
+        var a = document.createElement('a');
+        a.className = 'drill dk-play';
+        a.href = '../index.html#/keyer/' + deck.id;
+        a.target = '_blank'; a.rel = 'noopener';
+        a.title = deck.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
+        a.textContent = '🔑 לזהות מרמזים — ' + deck.title;
+        var drill = sec.querySelector('.drill');
+        if (drill) drill.after(a); else sec.appendChild(a);
       });
     }).catch(function () {});
   })();

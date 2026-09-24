@@ -51,6 +51,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
+        "shinun": "ekronot-a",
     },
     "ekronot-a-micro.html": {
         "id": "ekronot-a-micro-doc",
@@ -59,6 +60,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
+        "shinun": "ekronot-a",
     },
     "ekronot-a-para.html": {
         "id": "ekronot-a-para-doc",
@@ -67,6 +69,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
+        "shinun": "ekronot-a",
     },
     "ekronot-a-viro.html": {
         "id": "ekronot-a-viro-doc",
@@ -75,6 +78,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
+        "shinun": "ekronot-a",
     },
     "ekronot-b-patho.html": {
         "id": "ekronot-b-patho-doc",
@@ -83,6 +87,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
+        "shinun": "ekronot-b",
     },
     "ekronot-b-pharma.html": {
         "id": "ekronot-b-pharma-doc",
@@ -91,6 +96,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
+        "shinun": "ekronot-b",
     },
     "ekronot-b-physio.html": {
         "id": "ekronot-b-physio-doc",
@@ -99,6 +105,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
+        "shinun": "ekronot-b",
     },
     "ekronot-b-genetics.html": {
         "id": "ekronot-b-genetics-doc",
@@ -107,6 +114,7 @@ DOCS = {
         "modes": {"unit": "section.unit",
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
+        "shinun": "ekronot-b",
     },
 }
 
