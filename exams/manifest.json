@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "9cef8422",
+  "version": "f1760822",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1070,7 +1070,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 56
+      "count": 58
     },
     {
       "id": "ekronot-a-immuno-lab1-nun",
@@ -1451,6 +1451,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 23
+    },
+    {
+      "id": "ekronot-a-micro-mem-hey",
+      "file": "ekronot-a-micro-mem-hey.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "מיקרוביולוגיה · מבחן · מחזור מ״ה",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 45,
+      "moed": null,
+      "added": "2026-09-23",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 26
     },
     {
       "id": "ekronot-a-micro-mem-tet",

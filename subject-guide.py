@@ -259,6 +259,11 @@ def compute_freq(c, idx):
 def cmd_merge(cid, need_all=False):
     c = course_of(cid)
     gp = STAGING / f"{cid}-guide.json"
+    published = EXAMS / f"{cid}-guide.json"
+    if not gp.exists() and published.exists():
+        # מפה שכבר עלתה לאוויר: המיזוג נזרע ממנה, כדי שאפשר יהיה לפרסם מחדש אחרי עדכון פרגמנטים
+        gp.write_text(published.read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"· {gp.name} נזרע מהמפה שפורסמה ({published.name})")
     if not gp.exists():
         die(f"אין {gp}")
     g = json.loads(gp.read_text(encoding="utf-8"))
