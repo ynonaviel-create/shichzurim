@@ -250,7 +250,7 @@ python3 guides/_template/inject.py <course>-<key>.html
 - **hotspot** — `type:'hotspot'`, `image` (SVG ב-`assets/img/`), `regions:[{x,y,w,h,label}]`
   באחוזים מהתמונה, `a` = אינדקס האזור; `opts` = תוויות האזורים (sync דורש). ה-SVG חייב
   להיות רחב (≥1600) כדי שיימתח לרוחב הכרטיס, אחרת האזורים לא יושבים על התמונה.
-- **איור בשאלה** — `image` + מסיחים רגילים (אילנות יוחסין: `scratchpad/make_pedigrees.py`).
+- **איור בשאלה** — `image` + מסיחים רגילים (אילנות יוחסין: `tools/ekronot/make_pedigrees.py`).
 בלי `generated:true` — אחרת repeats.js לא מטביע qid, והמפה לא יכולה להצביע על השאלה.
 
 ---

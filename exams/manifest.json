@@ -1,11 +1,11 @@
 {
   "updated": "2026-09-24",
-  "version": "679ec843",
+  "version": "b3afd5bc",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
     "css": "a5f49b43",
-    "js": "41623af9",
+    "js": "5cd086f5",
     "cloud": "084f112a"
   },
   "courses": [
@@ -1997,6 +1997,25 @@
       "count": 44
     },
     {
+      "id": "ekronot-a-shinun",
+      "file": "ekronot-a-shinun.json",
+      "course": "ekronot-a",
+      "part": null,
+      "title": "i❤️Shinun — עקרונות המדע א׳: מה שצריך בעל-פה",
+      "kind": "shinun",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": "292 עובדות יבשות שאי אפשר להסיק, רק לזכור — לפי מקצוע. היפוך, כסה-וגלה, ומבחן שמסיחיו באים מאותה משפחה.",
+      "heroEyebrow": null,
+      "count": 292
+    },
+    {
       "id": "ekronot-a-viro-arch-mem-dalet",
       "file": "ekronot-a-viro-arch-mem-dalet.json",
       "course": "ekronot-a",
@@ -2538,6 +2557,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 16
+    },
+    {
+      "id": "ekronot-b-patho-cases",
+      "file": "ekronot-b-patho-cases.json",
+      "course": "ekronot-b",
+      "part": "פתולוגיה",
+      "title": "מקרים מתגלגלים — פתולוגיה",
+      "kind": "case",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 3
     },
     {
       "id": "ekronot-b-patho-exposure",
@@ -3183,6 +3221,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 83
+    },
+    {
+      "id": "ekronot-b-shinun",
+      "file": "ekronot-b-shinun.json",
+      "course": "ekronot-b",
+      "part": null,
+      "title": "i❤️Shinun — עקרונות המדע ב׳: מה שצריך בעל-פה",
+      "kind": "shinun",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": "423 עובדות יבשות שאי אפשר להסיק, רק לזכור — לפי מקצוע. היפוך, כסה-וגלה, ומבחן שמסיחיו באים מאותה משפחה.",
+      "heroEyebrow": null,
+      "count": 423
     },
     {
       "id": "electro-2021-boch1",

@@ -2379,7 +2379,7 @@ async function renderShinun(courseId, topicFilter) {
   view.innerHTML = '';
   view.append(crumb(subj ? `${c.name} · ${subj.name}` : c ? c.name : 'חזרה', '#/course/' + deck.course + (subj ? '/' + encodeURIComponent(subj.key) : '')));
   const head = el('div', 'page-head');
-  head.append(el('h1', null, '🧠 ' + (deck.title || 'i❤️Shinun') + (subj ? ` — ${subj.name}` : '')));
+  head.append(el('h1', null, subj ? `🧠 i❤️Shinun — ${subj.name}` : '🧠 ' + (deck.title || 'i❤️Shinun')));
   if (deck.heroSub && !subj) head.append(el('p', null, deck.heroSub));
   if (subj) head.append(el('p', null, `${all.length} עובדות לבעל-פה במקצוע הזה — היפוך, כסה-וגלה, מבחן`));
   view.append(head);
