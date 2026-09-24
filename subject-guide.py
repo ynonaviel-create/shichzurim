@@ -350,6 +350,8 @@ def play_topics(cid):
                 out.update(re.findall(r"'([^']+)'", lst))
     for f in EXAMS.glob(f"{cid}-*-keyer.json"):
         out.update(it.get("topic") for it in json.loads(f.read_text(encoding="utf-8")).get("items", []))
+    for f in EXAMS.glob(f"{cid}-*-cases.json"):
+        out.update(c.get("topic") for c in json.loads(f.read_text(encoding="utf-8")).get("cases", []))
     return out
 
 
@@ -406,7 +408,7 @@ def cmd_status():
                 tot["all"] += 7
                 print("  " + "  ".join(cells) + f"   {t}")
     print(f"\n  סה״כ: {tot['doors']}/{tot['all']} דלתות פתוחות ({round(100 * tot['doors'] / max(tot['all'], 1))}%)")
-    print("  ✅ קיים · ◐ חלקי · ✗ חסר. „קשור” = מספר הקישורים הרוחביים (בשני הכיוונים). 🎮 = סימולציה / תרגיל חישוב / מפתח הגדרה.")
+    print("  ✅ קיים · ◐ חלקי · ✗ חסר. „קשור” = מספר הקישורים הרוחביים (בשני הכיוונים). 🎮 = סימולציה / תרגיל חישוב / מפתח הגדרה / מקרה מתגלגל.")
 
 
 def main():
