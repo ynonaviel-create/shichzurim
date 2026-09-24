@@ -11,6 +11,7 @@
    "year": 1,
    "semester": "ב",
    "status": "done",
+   "strict": true,
    "accent": {
     "light": [
      "#0d8b84",
@@ -58,6 +59,7 @@
    "year": 1,
    "semester": "ב",
    "status": "done",
+   "strict": true,
    "accent": {
     "light": [
      "#6b62d6",
@@ -106,6 +108,7 @@
    "year": 1,
    "semester": "ב",
    "status": "active",
+   "strict": true,
    "accent": {
     "light": [
      "#d98a12",
@@ -161,6 +164,7 @@
    "year": 1,
    "semester": "ב",
    "status": "active",
+   "strict": true,
    "accent": {
     "light": [
      "#2f7ed0",
@@ -251,6 +255,7 @@
    "year": 1,
    "semester": "ב",
    "status": "done",
+   "strict": true,
    "accent": {
     "light": [
      "#5a8a1f",

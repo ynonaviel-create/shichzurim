@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "c379e252",
+  "version": "c00fe5a2",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -19,6 +19,7 @@
       "year": 1,
       "semester": "ב",
       "status": "done",
+      "strict": true,
       "accent": {
         "light": [
           "#0d8b84",
@@ -66,6 +67,7 @@
       "year": 1,
       "semester": "ב",
       "status": "done",
+      "strict": true,
       "accent": {
         "light": [
           "#6b62d6",
@@ -114,6 +116,7 @@
       "year": 1,
       "semester": "ב",
       "status": "active",
+      "strict": true,
       "accent": {
         "light": [
           "#d98a12",
@@ -169,6 +172,7 @@
       "year": 1,
       "semester": "ב",
       "status": "active",
+      "strict": true,
       "accent": {
         "light": [
           "#2f7ed0",
@@ -259,6 +263,7 @@
       "year": 1,
       "semester": "ב",
       "status": "done",
+      "strict": true,
       "accent": {
         "light": [
           "#5a8a1f",
@@ -873,7 +878,7 @@
       "moed": null,
       "added": "2026-07-14",
       "official": null,
-      "trust": null,
+      "trust": "partial",
       "spotlight": null,
       "series": null,
       "heroSub": null,
@@ -911,7 +916,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
-      "trust": null,
+      "trust": "partial",
       "spotlight": null,
       "series": null,
       "heroSub": null,
@@ -930,7 +935,7 @@
       "moed": "א",
       "added": "2026-07-14",
       "official": null,
-      "trust": null,
+      "trust": "partial",
       "spotlight": null,
       "series": null,
       "heroSub": null,
@@ -3968,7 +3973,7 @@
       "moed": "א",
       "added": "2026-07-15",
       "official": null,
-      "trust": null,
+      "trust": "partial",
       "spotlight": null,
       "series": null,
       "heroSub": null,
@@ -4063,7 +4068,7 @@
       "moed": "ב",
       "added": "2026-07-15",
       "official": null,
-      "trust": null,
+      "trust": "verified",
       "spotlight": null,
       "series": null,
       "heroSub": null,
