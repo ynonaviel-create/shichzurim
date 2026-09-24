@@ -338,7 +338,7 @@ def play_topics(cid):
     (קשיחים ב-assets/app.js — נקראים משם ברגקס), או חפיסת מפתח-הגדרה (exams/*-keyer.json)."""
     app = (ROOT / "assets" / "app.js").read_text(encoding="utf-8")
     out = set()
-    for name in ("SIMS", "DRILLS"):
+    for name in ("SIMS", "DRILLS", "LABS"):
         m = re.search(r"const %s = \[(.*?)\n\];" % name, app, re.S)
         if not m:
             continue

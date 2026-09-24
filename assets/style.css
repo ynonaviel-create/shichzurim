@@ -2654,3 +2654,20 @@ body:has(.lightbox) .bnav{display:none;}
 .drill-sibs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 14px; }
 .drill-sibs .lbl { font-size: 0.85rem; color: var(--muted); margin-inline-end: 2px; }
 .drill-sibs .verb-chip { text-decoration: none; }
+
+/* ---- מעבדת אק״ג ---- */
+.ecg-how{ margin:0 0 14px; padding:10px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.ecg-how summary{ cursor:pointer; font-weight:800; }
+.ecg-how ol{ margin:8px 0 0; padding-inline-start:22px; line-height:1.6; }
+.ecg-card{ padding:14px; }
+.ecg-wrap{ overflow-x:auto; border-radius:10px; border:1px solid var(--line); background:#fff8f6; -webkit-overflow-scrolling:touch; direction:ltr; }
+.ecg-strip{ display:block; }
+.ecg-hint{ font-size:12px; color:var(--muted); margin:6px 2px 12px; }
+.ecg-axes{ display:flex; flex-direction:column; gap:8px; margin:6px 0 12px; }
+.ecg-axis{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.ecg-axis .lbl{ font-weight:800; min-width:64px; color:var(--muted); font-size:0.9rem; }
+.ecg-axis .verb-chip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+.ecg-verdict{ display:grid; gap:4px; margin:8px 0; }
+.ecg-vrow.ok b{ color:var(--good); } .ecg-vrow.no b{ color:var(--bad); }
+.ecg-vrow .dim, .drill-fb .dim{ color:var(--muted); font-size:0.9em; }
+.ecg-why{ margin:8px 0 6px; line-height:1.6; }

@@ -949,7 +949,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','keyer','formulas','sheet','simexam','survey'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','keyer','formulas','sheet','simexam','survey','ecg'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   /* חזרה לכתובת שממנה נפתח סבב חי — מנגנים אותו מחדש במקום לצייר את הבורר
@@ -971,6 +971,8 @@ function router() {
   // #/keyer/<id>/<itemId> — מפתח ההגדרה: משחק זיהוי ברמזים; עם itemId קופץ לתיק מסוים
   if (route === 'keyer' && param) return renderKeyer(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'sim' && param) return renderSim(param);
+  // #/ecg/<mode> — מעבדת אק״ג (זיהוי; מעבדה ומדידה יתווספו)
+  if (route === 'ecg') return renderEcgLab(param || 'id');
   // #/simexam/<course> — סימולציית מבחן מלאה: N שאלות, טיימר, משוב רק בסוף
   if (route === 'simexam' && param) return renderSimExam(param, scopeKey(sub));
   if (route === 'drills' && param) return renderDrills(param);
@@ -1120,7 +1122,7 @@ function courseVerbs(c) {
   const has = (k) => list.some((e) => e.kind === k);
   const out = [];
   if (has('shichzur')) out.push('שחזורים');
-  if (has('practice') || has('highyield') || has('case') || has('keyer') || simsOf(c.id).length) out.push('תרגול');
+  if (has('practice') || has('highyield') || has('case') || has('keyer') || simsOf(c.id).length || labsOf(c.id).length) out.push('תרגול');
   if (has('guide') || has('cards') || has('shinun') || c.studyDoc) out.push('ללמוד');
   return out;
 }
@@ -1366,7 +1368,7 @@ function renderCourse(courseId, subKey = null) {
     nav.append(ch);
   };
   addChip('sec-practice', '🏋️ תרגול');
-  if (keyerDecks.length || caseDecks.length || shinunDeck || list.some((e) => e.kind === 'practice' && e.play) || (s && (simsOf(courseId, s).length || drillsOf(courseId, s).length))) addChip('sec-play', '🎮 לשחק');
+  if (keyerDecks.length || caseDecks.length || shinunDeck || list.some((e) => e.kind === 'practice' && e.play) || (s && (simsOf(courseId, s).length || drillsOf(courseId, s).length || labsOf(courseId, s).length))) addChip('sec-play', '🎮 לשחק');
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
   /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
      רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
@@ -1477,6 +1479,7 @@ function renderCourse(courseId, subKey = null) {
      אקורדיון „מעבדות” נפרד בתחתית (זה נשאר לקורס בלי מקצועות, כמו אלקטרו). */
   const subSims = s ? simsOf(courseId, s) : [];
   const subDrills = s ? drillsOf(courseId, s) : [];
+  (s ? labsOf(courseId, s) : []).forEach((l) => playCards.push(playCard(l.icon, l.title, l.blurb, l.route, '✨ חדש')));
   subSims.forEach((x) => playCards.push(playCard(x.icon, x.title, x.blurb, '#/sim/' + x.id, '🎛️ סימולציה')));
   if (subDrills.length) {
     const sub = subDrills.length === 1 ? subDrills[0].title : subDrills.map((d) => d.title).slice(0, 3).join(' · ') + (subDrills.length > 3 ? ` ועוד ${subDrills.length - 3}` : '');
@@ -3305,6 +3308,318 @@ function keyerPicker(deck, c) {
     sec.append(grid);
     view.append(sec);
   });
+  toTop();
+  updateFooter();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   מעבדת אק״ג — מצב זיהוי
+   ═══════════════════════════════════════════════════════════════════
+   הבעיה שזה פותר: „באק״ג שלפניך, הפרעת הקצב יכולה להיות מסווגת כ…” חוזרת
+   בארבעה מחזורים, ואת הרישומים עצמם אין לנו. כאן הקוד מצייר רישום חדש בכל
+   פעם — עשר שניות על נייר אק״ג — והסטודנט מסווג על שלושת הצירים של הקורס
+   (מיקום · תדירות · מנגנון) ונותן שם. הרישומים פרוצדורליים (לא תמונות של
+   חולים), ולכן יש אינסוף וריאציות, אבל הם סכמטיים במתכוון.
+
+   LABS הוא רישום של „מעבדות” — כלים אינטראקטיביים שאינם סימולציית סליידרים
+   ואינם מונעי-דאטה. כמו SIMS, הקישור לנושא אוטומטי דרך topics. */
+const LABS = [
+  {
+    id: 'ecg', course: 'ekronot-b', icon: '📈', route: '#/ecg/id',
+    title: 'מעבדת אק״ג — זיהוי הפרעות קצב',
+    blurb: 'רישום חדש בכל פעם: לסווג על שלושת הצירים (מיקום · תדירות · מנגנון) ולתת שם',
+    topics: ['הפרעות קצב', 'אק"ג'],
+  },
+];
+const labsOf = (courseId, s = null) => LABS.filter((x) => x.course === courseId && (!s || x.topics.some((t) => (s.topics || []).includes(t))));
+const LAB_BY_TOPIC = (() => { const m = {}; LABS.forEach((l) => l.topics.forEach((t) => (m[t] = l))); return m; })();
+
+const ECG_KEY = 'shichzurim.ecgLab';
+const ecgStats = {
+  read() { try { return JSON.parse(localStorage.getItem(ECG_KEY) || '{}'); } catch { return {}; } },
+  write(d) { try { localStorage.setItem(ECG_KEY, JSON.stringify(d)); } catch { /* מצב פרטי */ } },
+};
+
+/* ---------- הצירים של הקורס ---------- */
+const ECG_AXES = {
+  loc: { label: 'מיקום', opts: ['על-חדרי', 'חדרי'] },
+  rate: { label: 'תדירות', opts: ['ברדי (פחות מ-60)', 'תקין (60–100)', 'טכי (מעל 100)'] },
+  mech: { label: 'מנגנון', opts: ['תקין — אין הפרעה', 'אוטומטיות', 'הולכה (חסימה)', 're-entry'] },
+};
+const rateClass = (bpm) => (bpm < 60 ? 0 : bpm <= 100 ? 1 : 2);
+
+/* ---------- מחולל הרישומים ----------
+   כל קצב מחזיר: beats — רשימת פעימות (זמן R, יש P?, PR, רחב?), bg — פונקציית
+   רקע (פרפור, רפרוף, VF), ו-notes — מה שמבדיל אותו, למשוב. */
+const rnd = (a, b) => a + Math.random() * (b - a);
+const rndi = (a, b) => Math.floor(rnd(a, b + 1));
+const ECG_DUR = 10.4;
+const ECG_RHYTHMS = [
+  {
+    id: 'sinus', name: 'קצב סינוס תקין', loc: 0, mech: 0,
+    gen() { const bpm = rndi(62, 96); return { beats: sinusBeats(bpm, rnd(0.13, 0.18)), bg: null, bpm,
+      why: `גל P לפני כל QRS, R-R סדיר, PR קצר מ-200 מילישניות ו-QRS צר — והקצב ${bpm} לדקה, בטווח התקין. זה לא הפרעת קצב, וגם זו תשובה שהמבחן מצפה שתדע לתת.` }; },
+  },
+  {
+    id: 'sinus-tachy', name: 'סינוס טכיקרדיה', loc: 0, mech: 1,
+    gen() { const bpm = rndi(106, 145); return { beats: sinusBeats(bpm, rnd(0.12, 0.16)), bg: null, bpm,
+      why: `כל המבנה תקין — P לפני כל QRS, סדיר, PR ו-QRS תקינים — רק מהר: ${bpm} לדקה. הקוצב עצמו יורה מהר מדי (כמו בפעילות יתר של בלוטת התריס), ולכן זו הפרעה על-חדרית באוטומטיות. המלכודת של המאגר: לסמן re-entry. לא — אין מעגל, יש קוצב מהיר.` }; },
+  },
+  {
+    id: 'sinus-brady', name: 'סינוס ברדיקרדיה', loc: 0, mech: 1,
+    gen() { const bpm = rndi(36, 54); return { beats: sinusBeats(bpm, rnd(0.14, 0.19)), bg: null, bpm,
+      why: `P לפני כל QRS, PR תקין, סדיר — ואיטי: ${bpm} לדקה. מספר ה-P שווה למספר ה-QRS (זה מה שמבדיל מחסימה). הקוצב יורה לאט — אוטומטיות מופחתת, למשל בטונוס ואגלי גבוה.` }; },
+  },
+  {
+    id: 'af', name: 'פרפור עליות', loc: 0, mech: 3,
+    gen() {
+      const beats = []; let t = rnd(0.2, 0.5); const mean = rnd(0.42, 0.8);
+      while (t < ECG_DUR) { beats.push({ t, hasP: false, pr: 0, wide: false }); t += Math.max(0.3, mean + rnd(-0.28, 0.28)); }
+      const ph = [rnd(0, 6), rnd(0, 6), rnd(0, 6)], fr = [rnd(5, 6.5), rnd(6.5, 8), rnd(8, 10)];
+      const bg = (x) => 0.035 * Math.sin(2 * Math.PI * fr[0] * x + ph[0]) + 0.03 * Math.sin(2 * Math.PI * fr[1] * x + ph[1]) + 0.02 * Math.sin(2 * Math.PI * fr[2] * x + ph[2]);
+      const bpm = Math.round(beats.length * 60 / ECG_DUR);
+      return { beats, bg, bpm, why: `אין גלי P — במקומם קו בסיס רועד (גלי f) — וה-R-R לא סדיר לחלוטין, בלי שום תבנית. QRS צר, כי ההולכה לחדרים דרך AV node תקינה. קצב חדרי ${bpm} לדקה. מעגלי re-entry רבים ולא מסודרים בעליות — על-חדרי, במנגנון re-entry.` };
+    },
+  },
+  {
+    id: 'flutter', name: 'רפרוף עליות', loc: 0, mech: 3,
+    gen() {
+      const ratio = dpick([2, 3, 4]); const f = 300 / 60; const t0 = rnd(0.1, 0.3);
+      const beats = []; for (let k = 0; ; k++) { const t = t0 + (k * ratio) / f + 0.12; if (t > ECG_DUR) break; beats.push({ t, hasP: false, pr: 0, wide: false }); }
+      const bg = (x) => 0.17 * (2 * ((((x - t0) * f) % 1 + 1) % 1) - 1) * -1;   // שיני מסור
+      const bpm = Math.round(300 / ratio);
+      return { beats, bg, bpm, why: `במקום P — גלי רפרוף בצורת שיני מסור, סדירים, כ-300 לדקה. ה-AV node מעביר אחד מכל ${ratio} (הולכה ${ratio}:1), ולכן ה-QRS סדיר ב-${bpm} לדקה. מעגל re-entry אחד וגדול בעלייה הימנית — על-חדרי, re-entry.` };
+    },
+  },
+  {
+    id: 'avb1', name: 'חסימת AV מדרגה ראשונה', loc: 0, mech: 2,
+    gen() { const bpm = rndi(58, 88); const pr = rnd(0.24, 0.34); return { beats: sinusBeats(bpm, pr), bg: null, bpm,
+      why: `כל P מלווה ב-QRS ומספריהם שווים — אבל ה-PR קבוע וארוך: ${Math.round(pr * 1000)} מילישניות, מעל 200. ההשהיה ב-AV node ארוכה מדי — הפרעה בהתפשטות (חסימה), לא באוטומטיות. הקצב עצמו ${bpm}, ${bpm < 60 ? 'ברדי' : 'תקין'}.` }; },
+  },
+  {
+    id: 'mobitz1', name: 'חסימת AV מדרגה שנייה — מוביץ 1 (ונקבך)', loc: 0, mech: 2,
+    gen() {
+      const pbpm = rndi(72, 92); const prr = 60 / pbpm; const n = dpick([3, 4, 5]);
+      const beats = []; let tP = rnd(0.2, 0.4); let k = 0;
+      const prs = { 3: [0.16, 0.24, 0.34], 4: [0.16, 0.22, 0.28, 0.36], 5: [0.15, 0.2, 0.25, 0.3, 0.37] }[n];
+      while (tP < ECG_DUR + 0.5) {
+        const i = k % (n + 1);
+        if (i < n) beats.push({ t: tP + prs[i], hasP: true, pr: prs[i], wide: false });
+        else beats.push({ t: tP + 0.16, hasP: true, pr: 0.16, wide: false, dropped: true });
+        tP += prr; k++;
+      }
+      const bpm = Math.round(beats.filter((b) => !b.dropped).length * 60 / ECG_DUR);
+      return { beats, bg: null, bpm, why: `גלי P סדירים, אבל ה-PR מתארך מפעימה לפעימה — עד ש-P אחד נשאר בלי QRS, ואז המחזור מתחיל מחדש (הולכה ${n + 1}:${n}). יותר P מ-QRS. זו הפרעת הולכה ב-AV node עצמו — QRS צר. קצב חדרי ${bpm}.` };
+    },
+  },
+  {
+    id: 'mobitz2', name: 'חסימת AV מדרגה שנייה — מוביץ 2', loc: 0, mech: 2,
+    gen() {
+      const pbpm = rndi(70, 90); const prr = 60 / pbpm; const k0 = dpick([3, 4]); const pr = rnd(0.15, 0.19); const wide = Math.random() < 0.5;
+      const beats = []; let tP = rnd(0.2, 0.4); let k = 0;
+      while (tP < ECG_DUR + 0.5) { beats.push({ t: tP + pr, hasP: true, pr, wide, dropped: k % k0 === k0 - 1 }); tP += prr; k++; }
+      const bpm = Math.round(beats.filter((b) => !b.dropped).length * 60 / ECG_DUR);
+      return { beats, bg: null, bpm, why: `גלי P סדירים, PR קבוע (${Math.round(pr * 1000)} מילישניות) — ופתאום P בלי QRS, בלי הארכה הדרגתית לפניו (הולכה ${k0}:${k0 - 1}). ${wide ? 'ה-QRS רחב, כי החסימה מתחת ל-AV node, בצרור או בענפים.' : 'כאן ה-QRS צר — אבל בדרך כלל במוביץ 2 הוא רחב, כי החסימה מתחת ל-AV node.'} הפרעת הולכה; יותר P מ-QRS. קצב חדרי ${bpm}.` };
+    },
+  },
+  {
+    id: 'avb3', name: 'חסימת AV מלאה (דרגה שלישית)', loc: 1, mech: 2,
+    gen() {
+      const pbpm = rndi(70, 95), vbpm = rndi(30, 42);
+      const beats = []; let tP = rnd(0.1, 0.4);
+      while (tP < ECG_DUR + 0.3) { beats.push({ t: tP, hasP: true, pr: 0, wide: false, pOnly: true }); tP += 60 / pbpm; }
+      let tV = rnd(0.3, 1.2); while (tV < ECG_DUR) { beats.push({ t: tV, hasP: false, pr: 0, wide: true }); tV += 60 / vbpm; }
+      return { beats, bg: null, bpm: vbpm, why: `שני קצבים שאינם קשורים זה לזה: גלי P סדירים ב-${pbpm} לדקה (מה-SA node), ו-QRS רחבים וסדירים ב-${vbpm} לדקה — קצב מילוט מסיבי פורקינייה. ה-PR משתנה באקראי כי שום P לא עובר. יותר P מ-QRS; ה-QRS מקורו בחדרים — ולכן הציר „מיקום” כאן חדרי, בקצב ברדי, במנגנון חסימה.` };
+    },
+  },
+  {
+    id: 'pvc', name: 'פעימות חדריות מוקדמות (PVC)', loc: 1, mech: 1,
+    gen() {
+      const bpm = rndi(64, 86); const rr = 60 / bpm; const every = dpick([3, 4, 5, 6]); const pr = rnd(0.14, 0.17);
+      const beats = []; let t = rnd(0.3, 0.6); let k = 0;
+      while (t < ECG_DUR) {
+        beats.push({ t, hasP: true, pr, wide: false });
+        if ((k + 1) % every === 0) { beats.push({ t: t + rr * rnd(0.55, 0.65), hasP: false, pr: 0, wide: true, pvc: true }); }
+        t += rr; k++;   // הפסקה מפצה: הסינוס הבא בזמנו המקורי
+      }
+      return { beats, bpm, bg: null, why: `קצב סינוס בסיסי ב-${bpm}, ובכל ${every} פעימות מופיעה פעימה מוקדמת, רחבה ומעוותת, בלי גל P לפניה, עם T הפוך — ואחריה הפסקה מפצה עד לפעימת הסינוס הבאה. מוקד בחדר שיורה מעצמו (DAD/EAD) — חדרי, אוטומטיות. הקצב הכללי נשאר בטווח התקין.` };
+    },
+  },
+  {
+    id: 'vt', name: 'טכיקרדיה חדרית (VT)', loc: 1, mech: 3,
+    gen() { const bpm = rndi(150, 200); const beats = []; let t = rnd(0.1, 0.3); while (t < ECG_DUR) { beats.push({ t, hasP: false, pr: 0, wide: true }); t += 60 / bpm; }
+      return { beats, bg: null, bpm, why: `QRS רחבים, סדירים ומהירים — ${bpm} לדקה — בלי גלי P. המקור בחדרים (ולכן רחב: ההולכה עוברת תא-לתא ולא בפורקינייה). VT מונומורפית סדירה היא בדרך כלל מעגל re-entry סביב צלקת או אזור הולכה איטית — חדרי, טכי, re-entry.` }; },
+  },
+  {
+    id: 'vf', name: 'פרפור חדרים (VF)', loc: 1, mech: 3,
+    gen() {
+      const fr = [rnd(3, 4.5), rnd(4.5, 6), rnd(6, 8)], ph = [rnd(0, 6), rnd(0, 6), rnd(0, 6)], am = [rnd(0.25, 0.45), rnd(0.15, 0.3), rnd(0.08, 0.18)];
+      const bg = (x) => am[0] * Math.sin(2 * Math.PI * fr[0] * x + ph[0] + 0.8 * Math.sin(0.7 * x)) + am[1] * Math.sin(2 * Math.PI * fr[1] * x + ph[1]) + am[2] * Math.sin(2 * Math.PI * fr[2] * x + ph[2]);
+      return { beats: [], bg, bpm: 400, why: `אין QRS, אין P, אין שום מבנה — רק גלים כאוטיים בגובה ובתדירות משתנים. אינספור מעגלי re-entry בחדרים; אין תפוקת לב. חדרי, „טכי” (אין קצב אמיתי), re-entry. זה הרישום היחיד שבו לא סופרים כלום — מטפלים.` };
+    },
+  },
+];
+function sinusBeats(bpm, pr) {
+  const beats = []; let t = rnd(0.25, 0.6); const rr = 60 / bpm;
+  while (t < ECG_DUR) { beats.push({ t, hasP: true, pr, wide: false }); t += rr + rnd(-0.012, 0.012); }
+  return beats;
+}
+const ecgG = (t, c, w, a) => a * Math.exp(-((t - c) * (t - c)) / (2 * w * w));
+function ecgTrace(model) {
+  const beats = model.beats;
+  return (t) => {
+    let v = model.bg ? model.bg(t) : 0;
+    for (const b of beats) {
+      if (Math.abs(t - b.t) > 0.9) continue;
+      if (b.hasP) v += ecgG(t, b.t - (b.pr || 0.16) + 0.045, 0.022, 0.15);
+      if (b.pOnly || b.dropped) continue;
+      if (b.wide) { v += ecgG(t, b.t, 0.03, 1.15) - ecgG(t, b.t + 0.05, 0.02, 0.35); v -= ecgG(t, b.t + 0.34, 0.06, 0.45); }
+      else { v += -ecgG(t, b.t - 0.014, 0.005, 0.12) + ecgG(t, b.t, 0.0075, 1.0) - ecgG(t, b.t + 0.016, 0.006, 0.25); v += ecgG(t, b.t + 0.27, 0.045, 0.28); }
+    }
+    return v + 0.008 * Math.sin(37 * t) + 0.006 * Math.sin(53 * t + 1);
+  };
+}
+/* נייר אק״ג: 25 מ״מ לשנייה, 10 מ״מ ל-mV. 4 פיקסלים למ״מ → 10.4 שניות = 1040px. */
+const ECG_PX_MM = 4, ECG_W = Math.round(ECG_DUR * 25 * ECG_PX_MM), ECG_H = 220;
+function drawEcgStrip(cv, model, showMarks) {
+  const { ctx, w, h } = fitCanvas(cv);
+  ctx.direction = 'ltr';
+  ctx.fillStyle = '#fff8f6'; ctx.fillRect(0, 0, w, h);
+  for (let x = 0; x <= w; x += ECG_PX_MM) { ctx.strokeStyle = (x / ECG_PX_MM) % 5 === 0 ? '#f0aeae' : '#f8d6d6'; ctx.lineWidth = (x / ECG_PX_MM) % 5 === 0 ? 1 : 0.5; ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, h); ctx.stroke(); }
+  for (let y = 0; y <= h; y += ECG_PX_MM) { ctx.strokeStyle = (y / ECG_PX_MM) % 5 === 0 ? '#f0aeae' : '#f8d6d6'; ctx.lineWidth = (y / ECG_PX_MM) % 5 === 0 ? 1 : 0.5; ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(w, y + 0.5); ctx.stroke(); }
+  const base = h * 0.62, mv = 10 * ECG_PX_MM;
+  const f = ecgTrace(model);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.beginPath();
+  for (let i = 0; i <= w; i++) { const t = i / (25 * ECG_PX_MM); const y = base - f(t) * mv; i ? ctx.lineTo(i, y) : ctx.moveTo(i, y); }
+  ctx.stroke();
+  // ציר זמן — שנייה בכל 25 מ״מ
+  ctx.fillStyle = '#9a6b6b'; ctx.font = '600 11px ' + FONT; ctx.textAlign = 'center';
+  for (let s = 1; s <= 10; s++) ctx.fillText(s + ' ש׳', s * 25 * ECG_PX_MM, h - 5);
+  if (showMarks) {
+    ctx.fillStyle = '#2f6db5'; ctx.font = '700 12px ' + FONT;
+    model.beats.forEach((b) => { if (b.hasP) { const x = (b.t - (b.pr || 0.16) + 0.045) * 25 * ECG_PX_MM; ctx.fillText('P', x, base - 0.15 * mv - 8); } });
+    ctx.fillStyle = '#b5472f';
+    model.beats.forEach((b) => { if (!b.pOnly && !b.dropped) { const x = b.t * 25 * ECG_PX_MM; ctx.fillText(b.wide ? 'V' : 'R', x, base - 1.15 * mv - 6); } });
+  }
+}
+
+async function renderEcgLab(mode = 'id') {
+  setNav('home');
+  killSim();
+  const lab = LABS.find((l) => l.id === 'ecg');
+  const c = courseOf(lab.course);
+  view.dataset.course = lab.course;
+  view.innerHTML = '';
+  const subj = subjectOfTopic(lab.course, lab.topics[0]);
+  view.append(crumb(subj ? `${c.name} · ${subj.name}` : c ? c.name : 'חזרה', '#/course/' + lab.course + (subj ? '/' + encodeURIComponent(subj.key) : '')));
+  const head = el('div', 'page-head');
+  head.append(el('h1', null, '📈 מעבדת אק״ג — זיהוי הפרעות קצב'));
+  head.append(el('p', null, 'רישום של עשר שניות, חדש בכל פעם. סווגו על שלושת הצירים של הקורס ותנו שם — ואז תראו למה.'));
+  view.append(head);
+
+  const how = el('details', 'ecg-how');
+  const sum = el('summary'); sum.textContent = '🔍 איך קוראים רישום — חמש שאלות בסדר הזה'; how.append(sum);
+  const ol = el('ol');
+  ['יש גל P לפני כל QRS? (אין P בכלל → פרפור/רפרוף/חדרי; יותר P מ-QRS → חסימה)',
+   'ה-R-R סדיר? (לא סדיר לחלוטין → פרפור עליות; לא סדיר עם תבנית → מוביץ / PVC)',
+   'ה-PR קבוע וקצר מ-200 מילישניות (5 משבצות קטנות)? (ארוך וקבוע → דרגה 1; מתארך → מוביץ 1; משתנה באקראי → דרגה 3)',
+   'ה-QRS צר (עד 3 משבצות קטנות)? (רחב → מקור בחדרים, או הולכה מתחת ל-AV node)',
+   'הקצב: ספרו QRS בעשר השניות וכפלו ב-6. פחות מ-60 ברדי, מעל 100 טכי.'].forEach((t) => ol.append(el('li', null, t)));
+  how.append(ol); view.append(how);
+
+  const stats = ecgStats.read();
+  const score = el('div', 'drill-score');
+  const updScore = () => { score.textContent = stats.n ? `${stats.n} רישומים · ${stats.ok4 || 0} מזוהים במלואם · דיוק: מיקום ${pct('loc')} · תדירות ${pct('rate')} · מנגנון ${pct('mech')} · שם ${pct('name')}` : 'עוד לא זיהית רישום — הראשון למטה.'; };
+  const pct = (k) => (stats.n ? Math.round(100 * ((stats.parts || {})[k] || 0) / stats.n) + '%' : '—');
+  updScore(); view.append(score);
+
+  const card = el('div', 'drill-card ecg-card');
+  const wrap = el('div', 'ecg-wrap');
+  const cv = el('canvas', 'ecg-strip'); cv.style.width = ECG_W + 'px'; cv.style.height = ECG_H + 'px';
+  wrap.append(cv); card.append(wrap);
+  card.append(el('div', 'ecg-hint', 'נייר אק״ג: משבצת קטנה = 40 מילישניות, גדולה = 200. גררו לצדדים בטלפון.'));
+
+  const axes = el('div', 'ecg-axes');
+  const chosen = { loc: null, rate: null, mech: null, name: null };
+  const chipRows = {};
+  const paint = () => Object.entries(chipRows).forEach(([k, row]) => row.querySelectorAll('.verb-chip').forEach((b, i) => b.classList.toggle('on', chosen[k] === i)));
+  Object.entries(ECG_AXES).forEach(([k, ax]) => {
+    const row = el('div', 'ecg-axis');
+    row.append(el('span', 'lbl', ax.label));
+    ax.opts.forEach((o, i) => { const b = el('button', 'verb-chip', o); b.type = 'button'; b.title = `${ax.label}: ${o}`; b.onclick = () => { if (answered) return; chosen[k] = i; paint(); syncCheck(); }; row.append(b); });
+    chipRows[k] = row; axes.append(row);
+  });
+  const nameRow = el('div', 'ecg-axis');
+  nameRow.append(el('span', 'lbl', 'השם'));
+  const sel = el('select', 'formula-select');
+  const o0 = el('option', null, 'בחרו…'); o0.value = ''; sel.append(o0);
+  ECG_RHYTHMS.forEach((r, i) => { const o = el('option', null, r.name); o.value = i; sel.append(o); });
+  sel.title = 'שם הפרעת הקצב';
+  sel.onchange = () => { if (answered) return; chosen.name = sel.value === '' ? null : +sel.value; syncCheck(); };
+  nameRow.append(sel); axes.append(nameRow);
+  card.append(axes);
+
+  const acts = el('div', 'btn-row');
+  const checkBtn = el('button', 'btn primary', '✔ בדוק'); checkBtn.type = 'button'; checkBtn.title = 'בדיקת הסיווג — אחרי שבחרתם בכל ארבעת השדות';
+  const nextBtn = el('button', 'btn', '🎲 רישום חדש'); nextBtn.type = 'button'; nextBtn.title = 'רישום אקראי חדש';
+  const marksBtn = el('button', 'btn ghost', '🏷️ סמן P ו-R'); marksBtn.type = 'button'; marksBtn.title = 'סימון גלי P ושיאי R על הרישום (עוזר לספור)';
+  acts.append(checkBtn, nextBtn, marksBtn); card.append(acts);
+  const fb = el('div', 'drill-fb'); card.append(fb);
+  view.append(card);
+
+  /* הקישורים הצידה — אותם נושאים קנוניים, אותו מנגנון כמו בסימולציות */
+  const links = el('div', 'btn-row');
+  const ky = keyerFor(lab.course, 'הפרעות קצב');
+  if (ky) { const a = el('a', 'btn', '🔑 אותן הפרעות — מתיאור במילים'); a.href = '#/keyer/' + ky.id; a.title = ky.title; links.append(a); }
+  const sim = simOf('ecg-dipole'); if (sim) { const a = el('a', 'btn', `${sim.icon} למה הרישום נראה ככה — הדיפול`); a.href = '#/sim/' + sim.id; a.title = sim.blurb; links.append(a); }
+  lab.topics.forEach((t) => { const a = el('a', 'btn ghost', `תרגלו את "${t}"`); a.href = `#/practice/${lab.course}/${encodeURIComponent(t)}`; a.title = 'שאלות אמת מהמאגר על הנושא'; links.append(a); });
+  view.append(links);
+
+  let model, rhythm, answered, marks = false;
+  const syncCheck = () => { checkBtn.disabled = answered || Object.values(chosen).some((v) => v == null); };
+  function fresh() {
+    rhythm = dpick(ECG_RHYTHMS); model = rhythm.gen(); answered = false; marks = false;
+    Object.keys(chosen).forEach((k) => (chosen[k] = null)); sel.value = ''; paint(); syncCheck();
+    fb.className = 'drill-fb'; fb.innerHTML = '';
+    drawEcgStrip(cv, model, false);
+    wrap.scrollLeft = 0;
+  }
+  function check() {
+    if (answered) return;
+    answered = true; syncCheck();
+    const truth = { loc: rhythm.loc, rate: rateClass(model.bpm), mech: rhythm.mech, name: ECG_RHYTHMS.indexOf(rhythm) };
+    const oks = Object.fromEntries(Object.keys(truth).map((k) => [k, chosen[k] === truth[k]]));
+    const nOk = Object.values(oks).filter(Boolean).length;
+    stats.n = (stats.n || 0) + 1; stats.parts = stats.parts || {};
+    Object.keys(oks).forEach((k) => { if (oks[k]) stats.parts[k] = (stats.parts[k] || 0) + 1; });
+    if (nOk === 4) stats.ok4 = (stats.ok4 || 0) + 1;
+    ecgStats.write(stats); updScore();
+    fb.className = 'drill-fb show ' + (nOk === 4 ? 'ok' : nOk >= 2 ? 'warn' : 'no');
+    const v = el('div', 'drill-verdict');
+    v.textContent = nOk === 4 ? `✓ זיהוי מלא — ${rhythm.name}` : `${nOk}/4 — הרישום: ${rhythm.name}`;
+    fb.append(v);
+    const grid = el('div', 'ecg-verdict');
+    const lbl = { loc: 'מיקום', rate: 'תדירות', mech: 'מנגנון', name: 'השם' };
+    Object.keys(truth).forEach((k) => {
+      const t = k === 'name' ? rhythm.name : ECG_AXES[k].opts[truth[k]];
+      const mine = chosen[k] == null ? '—' : k === 'name' ? ECG_RHYTHMS[chosen[k]].name : ECG_AXES[k].opts[chosen[k]];
+      const row = el('div', 'ecg-vrow ' + (oks[k] ? 'ok' : 'no'));
+      row.innerHTML = `<b>${oks[k] ? '✓' : '✗'} ${lbl[k]}:</b> ${t}` + (oks[k] ? '' : ` <span class="dim">(סימנת: ${mine})</span>`);
+      grid.append(row);
+    });
+    fb.append(grid);
+    const why = el('p', 'ecg-why'); why.textContent = model.why; fb.append(why);
+    if (model.bpm < 300) fb.append(el('div', 'dim', `קצב חדרי ברישום: ${model.bpm} לדקה (ספרו ${model.beats.filter((b) => !b.pOnly && !b.dropped).length} קומפלקסים בעשר שניות וכפלו ב-6).`));
+    marks = true; drawEcgStrip(cv, model, true);
+    nextBtn.focus();
+  }
+  checkBtn.onclick = check;
+  nextBtn.onclick = fresh;
+  marksBtn.onclick = () => { marks = !marks; drawEcgStrip(cv, model, marks); };
+  const ro = new ResizeObserver(() => drawEcgStrip(cv, model, marks));
+  ro.observe(wrap);
+  simTeardown = () => ro.disconnect();
+  fresh();
   toTop();
   updateFooter();
 }
@@ -11307,6 +11622,14 @@ function unitCard(courseId, g, r, focus, collapsible) {
     sa.title = sim.blurb;
     acts.append(sa);
   }
+  const lab = LAB_BY_TOPIC[u.topic];
+  if (lab && lab.course === courseId) {
+    const la = el('a', 'btn btn-sm g-sim');
+    la.href = lab.route;
+    la.textContent = `${lab.icon} ${lab.title}`;
+    la.title = lab.blurb;
+    acts.append(la);
+  }
   const ky = keyerFor(courseId, u.topic);
   if (ky) {
     const ka = el('a', 'btn btn-sm g-sim');
@@ -11676,6 +11999,7 @@ document.getElementById('searchBtn')?.addEventListener('click', openSearch);
   const courseFromHash = () => {
     const [route, param] = location.hash.replace(/^#\/?/, '').split('/');
     if (param && COURSE_ROUTES.has(route) && courseOf(param)) return param;
+    if (route === 'ecg') return courseOf(LABS[0].course) ? LABS[0].course : null;   // לפני שהמניפסט נטען — אין קורס
     if (param && ['exam', 'q', 'cards', 'case', 'keyer', 'sheet'].includes(route)) {
       const e = EXAMS.find((v) => v.id === param);
       if (e) return e.course;
