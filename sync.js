@@ -113,7 +113,8 @@ const files = fs
 
 const exams = [];
 const guides = [];                  // מפות חומרים — הנושאים שלהן נבדקים אחרי הלולאה
-const keyers = [];                  // מפתחות הגדרה — ה-qids שלהם נבדקים אחרי הלולאה, כמו points
+const keyers = [];
+const qidAny = {};                  // course → כל ה-qids, כולל בנקים שנכתבו כאן (לקישורי מפתח ההגדרה)                  // מפתחות הגדרה — ה-qids שלהם נבדקים אחרי הלולאה, כמו points
 const topicsByCourse = {};          // הנושאים שקיימים בפועל בשאלות, לכל מקצוע
 const topicsUsed = {};              // course → Map(נושא → הקובץ הראשון שכתב אותו)
 const qidTopic = {};
@@ -327,6 +328,12 @@ for (const file of files) {
        `guideEvidence: false` מחריג קובץ שהשאלות בו נכתבו כאן ולא נשאלו במבחן:
        הן שאלות תרגול לגיטימיות, אבל הן אינן ראיה ל"מה באמת נשאל", ולכן אסור
        להן להיכנס למכנה של הכיסוי — אחרת המד ידווח על פער שאינו קיים. */
+    /* כל qid של הקורס, כולל בנקים שנכתבו כאן (guideEvidence:false): מפתח ההגדרה
+       מקשר „שאלות על התיק”, לא ראיה למה שנשאל — ולכן מותר לו להצביע גם עליהם. */
+    if (data.kind !== 'highyield') {
+      const all = (qidAny[data.course] ??= new Set());
+      items.forEach((q) => q.qid && all.add(q.qid));
+    }
     if (data.kind !== 'highyield' && data.guideEvidence !== false) {
       const map = (qidTopic[data.course] ??= new Map());
       items.forEach((q) => q.qid && map.set(q.qid, q.topic || null));
@@ -365,6 +372,9 @@ for (const file of files) {
     /* מפתח הגדרה: הנושאים שהתיקים נוגעים בהם — כדי שיחידת המפה תקשר לחפיסה
        בלי לטעון אותה (undefined נשמט מה-JSON בקבצים אחרים). */
     topics: isKeyer ? [...new Set(items.map((x) => x.topic))] : undefined,
+    /* בנק תרגול שהוא „משחק” (hotspot על איור, אילנות מצוירים) — מוצג גם באזור
+       „🎮 לשחק עם זה” של המקצוע, לא רק ברשימת התרגול. */
+    play: data.play ? true : undefined,
   });
   /* השאלות עצמן נשמרות בצד לבדיקת תבנית ה-explain. לא נכנסות ל-exams, כי
      exams נכתב כמו שהוא ל-manifest.json. */
@@ -379,7 +389,7 @@ for (const file of files) {
    qid שמצורף כראיה חייב להתקיים — אותו עיקרון של points. */
 keyers.forEach((k) => {
   const known = topicsByCourse[k.course] ?? new Set();
-  const qmap = qidTopic[k.course] ?? new Map();
+  const qmap = qidAny[k.course] ?? new Set();
   k.items.forEach((it, i) => {
     const at = `${k.file} · ${it.answer || 'פריט ' + (i + 1)}`;
     if (it.topic && !known.has(it.topic))

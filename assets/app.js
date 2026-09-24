@@ -1366,7 +1366,7 @@ function renderCourse(courseId, subKey = null) {
     nav.append(ch);
   };
   addChip('sec-practice', '🏋️ תרגול');
-  if (keyerDecks.length || caseDecks.length || shinunDeck || (s && (simsOf(courseId, s).length || drillsOf(courseId, s).length))) addChip('sec-play', '🎮 לשחק');
+  if (keyerDecks.length || caseDecks.length || shinunDeck || list.some((e) => e.kind === 'practice' && e.play) || (s && (simsOf(courseId, s).length || drillsOf(courseId, s).length))) addChip('sec-play', '🎮 לשחק');
   if (testExams.length) addChip('sec-test', '📝 שחזורים');
   /* אנקי הוא „אופציה צדדית” לפי הכרעת ינון — קישור בסרגל, לא באנר. הוא מוצג
      רק כשיש חפיסה בפועל, כדי שלא יוביל לדף ריק. */
@@ -1469,6 +1469,8 @@ function renderCourse(courseId, subKey = null) {
     return a;
   };
   keyerDecks.forEach((d) => playCards.push(playCard('🔑', d.title, d.heroSub || `${plural(d.count, 'תיק', 'תיקים')} — לזהות מרמזים, בכמה שפחות בדיקות`, '#/keyer/' + d.id, '✨ חדש')));
+  /* בנקי תרגול מסומנים play (hotspot על רישום, אילנות יוחסין) — משחק על איור. */
+  list.filter((e) => e.kind === 'practice' && e.play).forEach((d) => playCards.push(playCard('🖱️', d.title, d.heroSub || `${plural(d.count, 'שאלה', 'שאלות')} על איור`, '#/exam/' + d.id)));
   caseDecks.forEach((d) => playCards.push(playCard('🩺', d.title, d.heroSub || `${plural(d.count, 'מקרה', 'מקרים')} — תיק שמתפתח, החלטה אחרי החלטה`, '#/case/' + d.id)));
   if (shinunDeck) playCards.push(playCard('🧠', 'i❤️Shinun', s ? 'עובדות לבעל־פה במקצוע הזה — היפוך, כסה-וגלה, מבחן' : `${shinunDeck.count} עובדות לבעל־פה — היפוך, כסה-וגלה, מבחן`, '#/shinun/' + courseId + (s ? '/@' + encodeURIComponent(s.key) : '')));
   /* בעמוד מקצוע הסימולציות והחישובים הם כרטיסים כאן, בין שאר הכלים — ולא
