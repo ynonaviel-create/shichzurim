@@ -10147,11 +10147,20 @@ function unitCard(courseId, g, r, focus, collapsible) {
   }
 
   const acts = el('div', 'g-acts');
-  const p = el('a', 'btn btn-sm');
-  p.href = `#/practice/${courseId}/${encodeURIComponent(u.topic)}`;
-  p.textContent = `🏋️ תרגל ${u.topic}`;
-  p.title = 'תרגול שאלות אמת בנושא הזה בלבד';
-  acts.append(p);
+  /* נושא חדש בלי אף שאלה בארכיון (certainty:new, בלי points) — כפתור תרגול
+     היה מוביל לרשימה ריקה. אומרים את זה במקום להעמיד פנים. */
+  const nQ = new Set((u.points || []).flatMap((p) => p.qids || [])).size;
+  if (!nQ && u.certainty === 'new') {
+    const none = el('span', 'btn btn-sm is-disabled g-noq', '📭 אין עדיין שאלות על הנושא');
+    none.title = 'הנושא נלמד בנ״א, אבל עדיין אין עליו שאלה בארכיון';
+    acts.append(none);
+  } else {
+    const p = el('a', 'btn btn-sm');
+    p.href = `#/practice/${courseId}/${encodeURIComponent(u.topic)}`;
+    p.textContent = `🏋️ תרגל ${u.topic}`;
+    p.title = 'תרגול שאלות אמת בנושא הזה בלבד';
+    acts.append(p);
+  }
   /* ליחידה ולסימולציה יש בדיוק אותו עוגן — הנושא הקנוני — ולכן החיבור בחינם,
      בדיוק כמו הכפתור ההפוך שכבר קיים במשוב. "קרא את זה" ו"שחק עם זה" הם שתי
      תשובות לגיטימיות לאותו נושא, וכאן הן עומדות זו לצד זו. */

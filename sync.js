@@ -30,6 +30,7 @@ const qCount = (list) => list.filter((e) => !NOT_QUIZ.has(e.kind)).reduce((a, e)
 const NOT_EXAMS = new Set(['manifest.json', 'courses.json', 'repeats-ledger.json', 'anki-index.json']);
 
 const problems = [];
+const guideEmptyNew = [];   // נושאי מפה חדשים בלי שאלות — אזהרה בלבד
 const quizFiles = [];   // {file, items} לכל קובץ שאלות — לבדיקת תבנית ה-explain
 
 /* מזהה שאלות שחוזרות בין מחזורים, מסמן אותן בקבצי השחזור, ובונה את מבחן
@@ -342,7 +343,16 @@ for (const file of files) {
    נאספת מכל קבצי המקצוע וחלקם עוד לא נקראו כשהמפה נקראת. */
 guides.forEach((g) => {
   const known = topicsByCourse[g.course] ?? new Set();
+  /* יוצא מן הכלל מתועד: נושא שסומן במפה כ-"new" בלי אף נקודה — נושא שנלמד
+     בנ״א ועדיין אין לו שאלה בארכיון (למשל שריר חלק בפיזיולוגיה). הוא נשאר
+     במפה כדי שהמפה תשקף את הסילבוס, והאתר מציג לו "אין עדיין שאלות" במקום
+     כפתור תרגול ריק. אזהרה, לא שגיאה. */
+  const newEmpty = new Set((g.units || []).filter((u) => u.certainty === 'new' && !(u.points || []).length).map((u) => u.topic));
   g.topics.forEach((t) => {
+    if (t && !known.has(t) && newEmpty.has(t)) {
+      guideEmptyNew.push(`${g.file}: "${t}" — נושא חדש בלי שאלות בארכיון (certainty:new, בלי points)`);
+      return;
+    }
     if (t && !known.has(t))
       problems.push(
         `${g.file}: הנושא "${t}" לא קיים באף שאלה של ${g.course} — הקישור לתרגול יוביל לריק. ` +
@@ -766,6 +776,10 @@ html = html
 fs.writeFileSync(indexPath, html, 'utf8');
 
 if (anchorGaps.length) {
+if (guideEmptyNew.length) {
+  console.log('\n⚠️  נושאי מפה חדשים בלי שאלות (האתר מציג להם „אין עדיין שאלות”):');
+  guideEmptyNew.forEach((m) => console.log('   • ' + m));
+}
   console.log('\n⚠️  עוגני הסיכום המלא — נושאים שהקישור אליהם ינחת בראש המסמך:');
   anchorGaps.forEach((c) => console.log('   • ' + c));
 }
