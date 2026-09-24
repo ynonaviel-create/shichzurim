@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "5497b41f",
+  "version": "a2d1e28c",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -2096,7 +2096,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 60
+      "count": 63
     },
     {
       "id": "ekronot-b-patho-bet-mem-dalet",
@@ -2337,6 +2337,44 @@
       "cycle": null,
       "moed": "א",
       "added": "2026-09-22",
+      "official": null,
+      "trust": "partial",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 28
+    },
+    {
+      "id": "ekronot-b-pharma-mem-alef-b",
+      "file": "ekronot-b-pharma-mem-alef-b.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״א · מועד ב׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 41,
+      "moed": "ב",
+      "added": "2026-09-24",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 6
+    },
+    {
+      "id": "ekronot-b-pharma-mem-alef",
+      "file": "ekronot-b-pharma-mem-alef.json",
+      "course": "ekronot-b",
+      "part": "פרמקולוגיה",
+      "title": "פרמקולוגיה · מבחן · מחזור מ״א · מועד א׳",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 41,
+      "moed": "א",
+      "added": "2026-09-24",
       "official": null,
       "trust": "partial",
       "spotlight": null,
