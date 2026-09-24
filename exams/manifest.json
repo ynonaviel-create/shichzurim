@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "f1760822",
+  "version": "64bbc617",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1070,7 +1070,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 58
+      "count": 63
     },
     {
       "id": "ekronot-a-immuno-lab1-nun",
@@ -1185,6 +1185,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
+    },
+    {
+      "id": "ekronot-a-immuno-mem-hey",
+      "file": "ekronot-a-immuno-mem-hey.json",
+      "course": "ekronot-a",
+      "part": "אימונולוגיה",
+      "title": "אימונולוגיה · מבחן · מחזור מ״ה",
+      "kind": "shichzur",
+      "year": null,
+      "cycle": 45,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": "verified",
+      "spotlight": null,
+      "series": "exam",
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 40
     },
     {
       "id": "ekronot-a-immuno-mem-tet",
