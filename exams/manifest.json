@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-24",
-  "version": "b3afd5bc",
+  "version": "64dd4f47",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1411,6 +1411,25 @@
       "count": 37
     },
     {
+      "id": "ekronot-a-micro-cases",
+      "file": "ekronot-a-micro-cases.json",
+      "course": "ekronot-a",
+      "part": "מיקרוביולוגיה",
+      "title": "מקרים מתגלגלים — מיקרוביולוגיה",
+      "kind": "case",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 3
+    },
+    {
       "id": "ekronot-a-micro-gut-mem-het",
       "file": "ekronot-a-micro-gut-mem-het.json",
       "course": "ekronot-a",
@@ -2285,6 +2304,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 48
+    },
+    {
+      "id": "ekronot-b-genetics-cases",
+      "file": "ekronot-b-genetics-cases.json",
+      "course": "ekronot-b",
+      "part": "גנטיקה",
+      "title": "מקרים מתגלגלים — גנטיקה",
+      "kind": "case",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-24",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 3
     },
     {
       "id": "ekronot-b-genetics-kaufman-1",
@@ -3237,9 +3275,9 @@
       "trust": null,
       "spotlight": null,
       "series": null,
-      "heroSub": "423 עובדות יבשות שאי אפשר להסיק, רק לזכור — לפי מקצוע. היפוך, כסה-וגלה, ומבחן שמסיחיו באים מאותה משפחה.",
+      "heroSub": "378 עובדות יבשות שאי אפשר להסיק, רק לזכור — לפי מקצוע. היפוך, כסה-וגלה, ומבחן שמסיחיו באים מאותה משפחה.",
       "heroEyebrow": null,
-      "count": 423
+      "count": 378
     },
     {
       "id": "electro-2021-boch1",
