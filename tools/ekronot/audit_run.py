@@ -11,14 +11,16 @@ topic2key = {}
 for c in courses:
     for s in c.get('subjects', []):
         for t in s['topics']: topic2key[t] = s['key']
-sample = json.load(open(S + '/audit_sample.json', encoding='utf-8'))
+def arg(name, default):
+    return sys.argv[sys.argv.index(name) + 1] if name in sys.argv else default
+sample = json.load(open(arg('--sample', S + '/audit_sample.json'), encoding='utf-8'))
 for it in sample:
     m = re.match(r'ekronot-[ab]-([a-z]+)-(keyer|cases)', it['src'])
     it['key'] = m.group(1) if m else topic2key.get(it.get('topic'))
 sample = [it for it in sample if it.get('key') in NB]
 by = {}
 for it in sample: by.setdefault(it['key'], []).append(it)
-out_path = S + '/audit_results.jsonl'
+out_path = arg('--out', S + '/audit_results.jsonl')
 done = set()
 if os.path.exists(out_path):
     for line in open(out_path, encoding='utf-8'):

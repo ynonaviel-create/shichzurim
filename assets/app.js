@@ -2648,6 +2648,7 @@ async function renderShinun(courseId, topicFilter) {
       if (flipped) {
         card.append(el('div', 'shn-flip-back', it.back));
         if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
+        card.append(reportButton(courseId, 'shinun', id, shinunNorm(it.front), it.front + ' — ' + it.back));
       } else {
         card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · רווח / →ידעתי / ←עוד לא'));
       }
@@ -3006,6 +3007,7 @@ async function renderCase(id, caseId = null) {
       const gb = guideButton(topic);
       if (gb) fb.append(gb);
       fb.append(notebookButton({ q: s.ask || s.stem || '', opts: s.opts, a: s.a, explain: s.why, topic }, answers[i]));
+      fb.append(reportButton(deck.course, 'case', deck.id, `${cs.id}/${i + 1}`, s.ask || s.stem || ''));
       card.append(fb);
     }
     return card;
@@ -3106,6 +3108,7 @@ async function renderKeyer(id, itemId = null) {
   const head = el('div', 'page-head');
   head.append(el('h1', null, `${it.icon || '🔑'} ${it.title || 'תיק ' + (deck.items.indexOf(it) + 1)}`));
   head.append(el('p', null, [it.topic, sj ? sj.name : null].filter(Boolean).join(' · ')));
+  head.append(reportButton(deck.course, 'keyer', deck.id, it.id, [it.title, it.answer].filter(Boolean).join(' — ')));
   view.append(head);
 
   const layout = el('div', 'case-layout');
@@ -4961,6 +4964,18 @@ const REPORT_REASONS = [
   ['unclear',      'השאלה לא ברורה או חסר בה מידע'],
   ['other',        'משהו אחר'],
 ];
+
+/* כפתור דיווח לתוכן שאינו שאלה (תיק, שלב מקרה, כרטיס שינון): אותו חלון ואותה
+   טבלה, עם qid סינתטי „kind:deck#item” — כך הדיווח מגיע מובנה גם על התוכן החדש. */
+function reportButton(courseId, kind, deckId, itemId, preview) {
+  const b = el('button', 'nb-btn report-btn');
+  b.type = 'button';
+  b.append(el('span', 'nb-ico', '🚩'));
+  b.append(el('span', null, 'דיווח על טעות'));
+  b.title = 'משהו לא נכון כאן? דיווח קצר — נבדוק מול חומרי הקורס';
+  b.onclick = (e) => { e.stopPropagation(); openReport({ courseId, item: { examId: deckId, qid: `${kind}:${deckId}#${itemId}`, q: preview || '' }, chosen: null }); };
+  return b;
+}
 
 function openReport({ courseId, item, chosen }) {
   const overlay = el('div', 'lightbox report-lb');
@@ -7891,7 +7906,7 @@ async function renderAdmin() {
     }
 
     /* כותבים לפי namespace בשבוע. מרחב מוכר שצנח לאפס = דגל אדום. */
-    const KNOWN_NS = ['progress', 'seen', 'seenH', 'shinunProg', 'cardsRead', 'caseProg', 'flag'];
+    const KNOWN_NS = ['progress', 'seen', 'seenH', 'shinunProg', 'cardsRead', 'caseProg', 'flag', 'keyerProg'];
     const got = {};
     (o.ns_7d || []).forEach((r) => { got[r.ns] = r; });
     const nsWrap = el('div', 'adm-ns');

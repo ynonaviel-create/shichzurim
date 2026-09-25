@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json, re, os
 S = os.path.dirname(os.path.abspath(__file__))
-recs = [json.loads(l) for l in open(S + '/audit_results.jsonl', encoding='utf-8')]
+import sys
+recs = [json.loads(l) for l in open(sys.argv[1] if len(sys.argv) > 1 else S + '/audit_results.jsonl', encoding='utf-8')]
 tot = {'נתמך': 0, 'סותר': 0, 'לא נמצא': 0, '?': 0}; flagged = []
 for r in recs:
     ans = r['answer'] or ''

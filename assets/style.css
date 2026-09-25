@@ -2677,3 +2677,6 @@ body:has(.lightbox) .bnav{display:none;}
 .ecg-tabs{ display:flex; gap:6px; margin:0 0 10px; }
 .ecg-tabs a{ text-decoration:none; }
 .ecg-tabs .verb-chip.on{ background:var(--course-accent-sl); color:var(--course-accent-dk); border-color:var(--course-accent); }
+.report-btn{ margin-top:6px; }
+.page-head .report-btn{ margin-top:8px; }
+.shn-flip .report-btn{ margin-top:10px; font-size:12px; }
