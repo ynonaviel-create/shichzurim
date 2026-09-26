@@ -207,6 +207,7 @@ python3 guides/_template/inject.py <course>-<key>.html
 | 🩺 מקרה מתגלגל (`kind:'case'`) | `exams/<course>-<key>-cases.json` | סשן המקצוע |
 | 🧠 שינון (`kind:'shinun'`) | `exams/<course>-shinun.json` | סשן המקצוע (קבוצה לכל מקצוע) |
 | 🎛️ סימולציה | `SIMS` ב-`assets/app.js` (קוד) | המטה בלבד |
+| 📈 מעבדה (למשל מעבדת אק״ג, `#/ecg/id`) | `LABS` ב-`assets/app.js` (קוד; רישום מונחה-נושא כמו SIMS) | המטה בלבד |
 | 🧮 תרגיל חישוב + 📖 נוסחה | `DRILLS` / `FORMULAS` ב-`assets/app.js` (קוד) | המטה בלבד |
 
 **סימולציות ותרגילים קיימים (24/09):** פרמקו `pk-curve`, `dose-response` + 7 תרגילים
