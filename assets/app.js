@@ -328,7 +328,7 @@ function applyTheme(mode) {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
+  const saved = previewParam('theme') || localStorage.getItem(THEME_KEY);   // ?theme=light — תצוגה מקדימה/צילום; לא נשמר
   const mode = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : 'auto';
   applyTheme(mode);
   document.getElementById('themeBtn').onclick = () => {
@@ -1429,6 +1429,7 @@ function renderCourse(courseId, subKey = null) {
     lRow.append(tr);
     /* עץ הידע — אותו תנאי בדיוק: התוכן נגזר מהמפה. */
     const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.dataset.tour = 'tree';   // עוגן לסיור החידושים
     kt.title = 'מפת השליטה שלך — כל נושא נצבע לפי כמה אתה יודע אותו עכשיו, ובמה כדאי לגעת';
     kt.href = '#/tree/' + courseId;
     lRow.append(kt);
@@ -1503,6 +1504,7 @@ function renderCourse(courseId, subKey = null) {
     sec.id = 'sec-play';
     const h = el('div', 'zone-head');
     h.append(el('span', 'zone-head-t', '🎮 לשחק עם זה'));
+    h.dataset.tour = 'play';   // עוגן לסיור החידושים
     h.append(el('span', 'zone-head-line'));
     sec.append(h);
     const g = el('div', 'learn-grid');
@@ -1545,6 +1547,7 @@ function renderCourse(courseId, subKey = null) {
        מהפרמטר — ולכן אין צורך בדגל בדאטה. */
     const sd = studyDoc;
     const card = el('div', 'learn-card learn-card-doc');
+    card.dataset.tour = 'doc';   // עוגן לסיור החידושים
     card.append(el('span', 'learn-card-ico', '📖'));
     const t = el('div');
     t.append(el('div', 'learn-card-ttl', 'הלומדה — הסיכום המלא'));
@@ -1567,10 +1570,12 @@ function renderCourse(courseId, subKey = null) {
   (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
   /* ליווי הסמסטר — רק לקורס שהוגדרה לו תוכנית הוראה (teaching). */
   if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) {
-    lg.append(learnCard('🗓️', s ? 'השבוע בבלוק' : 'השבוע בקורס',
+    const semCard = learnCard('🗓️', s ? 'השבוע בבלוק' : 'השבוע בקורס',
       s ? `מה נלמד השבוע ב${s.name} ובשאר המקצועות, ומה אתה אמור כבר לדעת`
         : 'איפה ההוראה עומדת, מה אתה אמור לדעת כבר, ומה נשאר לסגור',
-      '#/semester/' + courseId));
+      '#/semester/' + courseId);
+    semCard.dataset.tour = 'semester';   // עוגן לסיור החידושים
+    lg.append(semCard);
   }
   if (hasGuide) {
     const gcard = learnCard('🗺️', s ? `מפת החומרים — ${s.name}` : 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId + sfx);
@@ -1700,6 +1705,7 @@ function renderBlockHub(c) {
   row.append(rv);
   if (guideOf(courseId)) {
     const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.dataset.tour = 'tree';   // עוגן לסיור החידושים
     kt.href = '#/tree/' + courseId;
     kt.title = 'כל נושא בבלוק נצבע לפי כמה אתה יודע אותו עכשיו';
     row.append(kt);
@@ -5006,6 +5012,7 @@ function reportButton(courseId, kind, deckId, itemId, preview) {
   b.append(el('span', 'nb-ico', '🚩'));
   b.append(el('span', null, 'דיווח על טעות'));
   b.title = 'משהו לא נכון כאן? דיווח קצר — נבדוק מול חומרי הקורס';
+  b.dataset.tour = 'report';   // עוגן לסיור החידושים
   b.onclick = (e) => { e.stopPropagation(); openReport({ courseId, item: { examId: deckId, qid: `${kind}:${deckId}#${itemId}`, q: preview || '' }, chosen: null }); };
   return b;
 }
@@ -7411,44 +7418,80 @@ function shinunHomePush() {
    ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
    כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
    לשמוע על פיצ׳ר ב׳. */
-/* באנר הסקר — גדול ובולט בראש עמוד הבית, בכוונה בלי כפתור סגירה קבוע:
-   הוא יורד לכולם רק כשנוריד אותו בקוד, ולמי שכבר מילא — מיד. "אחר כך"
-   מסתיר עד הביקור הבא (sessionStorage), לא לתמיד. */
-function whatsNewBanner() {
-  /* ── הסקר נסגר ב-09/08/2026, אחרי 57 תשובות ──
-     ינון: „אפשר להוריד אותו; אנשים כבר לא יענו עליו”. הבאנר יורד; עמוד
-     הסקר עצמו (#/survey) נשאר נגיש למי שיש לו קישור, וגם התשובות שנשמרו
-     מקומית בלי רשת עדיין יישלחו. הסקר הבא: להעלות את SURVEY_VERSION,
-     לכתוב את הנוסח החדש, ולהחזיר את השורה הזאת עם תאריך תפוגה. */
+const WHATS_NEW_ON = false;   // ← להדליק כשינון בוחר באופציה הזאת. עד אז: ?whatsnew=1 לתצוגה מקדימה בלבד
+const WHATS_NEW_KEY = 'shichzurim.whatsNew.v6';
+/* פרמטר תצוגה מקדימה בכתובת (?whatsnew=1, ?tour=v5) — לבדיקה לפני שמדליקים לכולם. */
+const previewParam = (name) => { try { return new URLSearchParams(location.search).get(name); } catch { return null; } };
+
+/* על איזה מקצוע מדגימים את החידושים: הראשון שיש לו מקצועות-משנה, לומדה וחפיסת
+   מפתח-הגדרה — בפועל עקרונות המדע. הכול נגזר מהדאטה, כדי שהבאנר והסיור לא
+   יצביעו על כלום אם קורס ישתנה. */
+function showcaseCourse() {
+  for (const c of COURSES) {
+    if (isArchived(c)) continue;
+    for (const s of subjectsOf(c)) {
+      const keyer = EXAMS.find((e) => e.kind === 'keyer' && e.course === c.id && e.part === s.name);
+      if (s.studyDoc && keyer) return { c, s, keyer, doc: s.studyDoc };
+    }
+  }
   return null;
-  try { if (localStorage.getItem(SURVEY_DONE_KEY)) return null; } catch { return null; }
-  try { if (sessionStorage.getItem('shichzurim.surveyHeroHide')) return null; } catch { /* מציגים */ }
+}
 
-  const b = el('div', 'survey-hero');
-  b.append(el('div', 'survey-hero-ico', '🎉'));
-  b.append(el('h2', null, 'דקה לפני קו הסיום של שנה א׳'));
-  b.append(el('p', 'survey-hero-sub',
-    'כל הכבוד על השנה הזאת 💪 ולפני שכולם מתפזרים לחופשה — יש לנו בקשה אחת קטנה: ' +
-    '5–10 דקות של משוב. מה עזר, מה חסר, ומה לבנות לכם עד מבחני דצמבר. ' +
-    'זה הזמן היחיד בשנה לשמוע אתכם — והתשובות באמת קובעות מה יהיה כאן.'));
+function whatsNewBanner() {
+  if (!WHATS_NEW_ON && !previewParam('whatsnew')) return null;
+  try { if (localStorage.getItem(WHATS_NEW_KEY)) return null; } catch { return null; }
+  if (!previewParam('whatsnew') && !localStorage.getItem(SEEN_KEY)) return null;   // חדש באתר: באנר הפתיחה והסיור קודמים ל„מה חדש”
+  const sc = showcaseCourse();
+  if (!sc) return null;
+  const { c, s, keyer, doc } = sc;
 
-  const acts = el('div', 'btn-row survey-hero-acts');
-  const go = el('a', 'btn primary survey-hero-cta', '💜 למילוי הסקר');
-  go.title = 'סקר המשוב — 5–10 דקות שקובעות את הגרסה הבאה';
-  go.href = '#/survey';
-  acts.append(go);
-  const later = el('button', 'btn ghost', 'אחר כך');
-  later.title = 'הסתרה לביקור הזה — הבאנר יחזור בפעם הבאה, והסקר תמיד זמין';
-  later.onclick = () => {
-    try { sessionStorage.setItem('shichzurim.surveyHeroHide', '1'); } catch { /* מסתירים */ }
-    b.remove();
+  const b = el('div', 'intro wn');
+  const head = el('div', 'wn-head');
+  head.append(el('b', null, '✨ מה חדש לשנה ב׳'));
+  head.append(el('span', null, 'בקיץ נבנו כמה דברים גדולים. כל כרטיס נפתח לדוגמה חיה.'));
+  b.append(head);
+
+  const x = el('button', 'intro-x', '✕');
+  x.type = 'button';
+  x.title = 'סגירה — הבאנר לא יופיע שוב';
+  x.setAttribute('aria-label', 'סגירה');
+  x.onclick = () => { try { localStorage.setItem(WHATS_NEW_KEY, '1'); } catch {} b.remove(); };
+  b.append(x);
+
+  const grid = el('div', 'wn-grid');
+  const card = (ico, ttl, sub, href, tip) => {
+    const a = el('a', 'learn-card wn-card');
+    a.href = href;
+    a.title = tip;
+    a.append(el('span', 'learn-card-ico', ico));
+    const t = el('div');
+    t.append(el('div', 'learn-card-ttl', ttl));
+    t.append(el('div', 'learn-card-sub', sub));
+    a.append(t);
+    grid.append(a);
   };
-  acts.append(later);
-  b.append(acts);
+  card('📖', 'הלומדה — שלושה מצבי קריאה', 'מלא, מרוכז (רק התמצית והמלכודות) ואינטראקטיבי (תרגילים). ובכל פרק: מה באמת נשאל.',
+    doc.href + '?m=focus', `לפתוח את לומדת ${s.name} במצב מרוכז`);
+  const firstItem = null;   // הקישור לחפיסה כולה — הבורר מציג את התיקים לפי נושא
+  card('🎮', 'לשחק עם זה', 'בכל מקצוע: מפתח ההגדרה (זיהוי מרמזים), מקרים מתגלגלים, שינון, סימולציות ומעבדת אק״ג.',
+    '#/keyer/' + keyer.id, `לנסות: ${keyer.title}`);
+  if (guideOf(c.id)) card('🌳', 'עץ הידע', 'כל נושא נצבע לפי כמה אתם יודעים אותו עכשיו — ובמה כדאי לגעת.',
+    '#/tree/' + c.id, `עץ הידע של ${c.name}`);
+  if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) card('🗓️', 'השבוע בבלוק', 'איפה ההוראה עומדת, מה כדאי כבר לדעת — ולקראת המבחן: מה נשאר לסגור.',
+    '#/semester/' + c.id, `ליווי הסמסטר של ${c.name}`);
+  if (EXAMS.some((e) => e.kind === 'shinun' && e.course === c.id)) card('🔁', 'חזרה מרווחת', 'מה שטעיתם חוזר מחר, מה שידעתם חוזר בעוד שבוע. „הטעויות שלי” והשינון עובדים ככה מאליהם.',
+    '#/shinun/' + c.id, `שינון ${c.name} — כרטיסי היפוך בקופסאות`);
+  card('🚩', 'דיווח על טעות', 'משהו לא נכון? בכל שאלה, תיק, מקרה וכרטיס יש כפתור דיווח. נבדוק מול חומרי הקורס.',
+    '#/keyer/' + keyer.id + '/' + encodeURIComponent((EXAMS.find((e) => e.id === keyer.id) || {}).first || firstItem || ''), 'דוגמה: כפתור הדיווח בראש תיק במפתח ההגדרה');
+  b.append(grid);
 
-  b.append(el('p', 'survey-hero-mail',
-    '📮 דרך אגב: הכתובת שאיתה נכנסת (מגוגל) שמורה אצלנו, ונשתמש בה מדי פעם לעדכונים חשובים — ' +
-    'חומרים חדשים ומבחנים קרבים. בלי ספאם. מעדיפים בלי? כתבו לנו ל-shichzurim52@gmail.com ונסיר מיד.'));
+  const acts = el('div', 'wn-acts');
+  const tour = el('button', 'btn ghost', '🧭 סיור של דקה על החידושים');
+  tour.type = 'button';
+  tour.title = 'סיור מודרך קצר שמצביע על כל חידוש במקום שבו הוא נמצא';
+  tour.onclick = () => startTour('v5');
+  acts.append(tour);
+  b.append(acts);
   return b;
 }
 
@@ -8629,6 +8672,49 @@ function tourSteps() {
   return steps;
 }
 
+/* v5 — סיור החידושים לפתיחת שנה ב׳ (27/09/2026). עובר על מה שנבנה בקיץ בעמוד
+   מקצוע אחד (showcaseCourse), ומסיים בתיק מפתח-הגדרה עם כפתור הדיווח. עוגנים
+   שחסרים נדלגים בשקט, כמו בכל סיור. עדיין לא ברירת המחדל: startTour('v5') מהבאנר
+   „מה חדש”, או ?tour=v5 לתצוגה מקדימה. להפעלה לכולם: ver='v5' כברירת מחדל
+   ו-TOUR_KEY → .v5 (יקפוץ פעם אחת גם למי שכבר ראה את v4). */
+function tourStepsV5() {
+  const sc = showcaseCourse();
+  if (!sc) return tourSteps();
+  const { c, s, keyer } = sc;
+  const courseRoute = `#/course/${c.id}/${encodeURIComponent(s.key)}`;
+  const firstItem = (EXAMS.find((e) => e.id === keyer.id) || {}).first || '';
+  return [
+    { route: '#/', center: true,
+      title: '✨ מה חדש לשנה ב׳',
+      body: 'בקיץ נבנו כמה דברים גדולים. דקה אחת — ונראה לכם איפה כל אחד מהם יושב, ' +
+            `על ${s.name} לדוגמה. אפשר לדלג בכל רגע.` },
+    { route: courseRoute, sel: '[data-tour="play"]',
+      title: '🎮 לשחק עם זה',
+      body: 'אזור חדש בכל מקצוע: <b>מפתח ההגדרה</b> (זיהוי מרמזים, כמו במעבדה), <b>מקרים מתגלגלים</b>, ' +
+            'שינון, סימולציות ומעבדת אק״ג. כאן עושים משהו עם החומר, לא רק עונים.' },
+    { route: courseRoute, sel: '[data-tour="doc"]',
+      title: '📖 הלומדה — שלושה מצבי קריאה',
+      body: '<b>מלא</b> לקריאה ראשונה, <b>מרוכז</b> — רק התמצית והמלכודות לחזרה מהירה, ו<b>אינטראקטיבי</b> ' +
+            'עם תרגילים. בכל פרק גם „מה באמת נשאל” מהמבחנים.' },
+    { route: courseRoute, sel: '[data-tour="semester"]',
+      title: '🗓️ השבוע בבלוק',
+      body: 'איפה ההוראה עומדת השבוע ומה כדאי כבר לדעת. לקראת המבחן זה מתהפך ל„מה נשאר לסגור”.' },
+    { route: courseRoute, sel: '[data-tour="tree"]',
+      title: '🌳 עץ הידע',
+      body: 'כל נושא נצבע לפי כמה אתם יודעים אותו <b>עכשיו</b> — כולל שכחה עם הזמן — ובמה כדאי לגעת.' },
+    { route: courseRoute, sel: '[data-tour="review"]',
+      title: '🔁 חזרה מרווחת',
+      body: 'מה שטעיתם חוזר מחר, מה שידעתם חוזר בעוד שבוע. „הטעויות שלי” והשינון עובדים ככה מאליהם — ' +
+            'בלי להגדיר כלום.' },
+    { route: `#/keyer/${keyer.id}/${encodeURIComponent(firstItem)}`, sel: '[data-tour="report"]',
+      title: '🚩 דיווח על טעות',
+      body: 'ראיתם משהו לא נכון? בכל שאלה, תיק, מקרה וכרטיס יש כפתור דיווח. נבדוק מול חומרי הקורס.' },
+    { route: '#/', center: true,
+      title: '✅ זהו — בהצלחה בשנה ב׳!',
+      body: 'הכול מחכה בעמוד המקצוע. והסיור הזה, כמו הקודם, זמין תמיד מעמוד „איך זה עובד”. 🚀' },
+  ];
+}
+
 /* ממתין שהאלמנט יופיע. הניווט בין דפים הוא אסינכרוני (הראוטר מרנדר מחדש, וחלק
    מהמסכים טוענים קבצים), ולכן אי אפשר פשוט למדוד מיד אחרי שינוי ה-hash. */
 /* פולינג ב-setTimeout ולא ב-requestAnimationFrame: rAF לא פועל כשהלשונית
@@ -8647,11 +8733,11 @@ function waitFor(sel, ms = 1200) {
 
 let tourStop = null;
 
-async function startTour() {
+async function startTour(ver = 'v4', startAt = 0) {   // startAt — צעד התחלה לתצוגה מקדימה (?tour=v5&step=3)
   if (tourStop) return;                       // כבר רץ
   localStorage.setItem(SEEN_KEY, '1');
   localStorage.setItem(TOUR_KEY, '1');        // מסומן כ"נראה" כבר עכשיו — קופץ פעם אחת, גם אם מדלגים באמצע
-  const steps = tourSteps();
+  const steps = ver === 'v5' ? tourStepsV5() : tourSteps();
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let i = 0;
   let curTarget = null;   // היעד שכבר אותר לשלב הנוכחי — place משתמש בו במקום לשאול שוב (מונע מרוץ)
@@ -8808,7 +8894,7 @@ async function startTour() {
     nx.focus();
   }
 
-  go(0);
+  go(Math.min(Math.max(0, startAt | 0), steps.length - 1));
 }
 
 /* ================= סימולציות =================
@@ -12269,4 +12355,7 @@ window.addEventListener('storage', (e) => {
   updateAccountBtn();
   appReady = true;
   router();
+  /* תצוגה מקדימה של סיור לפי גרסה (?tour=v5) — לבדיקה לפני שהוא נעשה ברירת המחדל. */
+  const tv = previewParam('tour');
+  if (tv) setTimeout(() => startTour(tv, Number(previewParam('step')) || 0), 900);
 })();

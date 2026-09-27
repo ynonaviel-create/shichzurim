@@ -369,6 +369,8 @@ for (const file of files) {
     heroSub: data.heroSub ?? null,     // מפה/כרטיסיות: הטקסט בבאנר שבעמוד המקצוע, לפני שהקובץ עצמו נטען
     heroEyebrow: data.heroEyebrow ?? null,   // כרטיסיות: מי מסר את החומר — מרצה או מתרגלים
     count: items.length,
+    /* מפתח הגדרה: התיק הראשון — כדי שקישור „דוגמה חיה” (באנר מה-חדש, סיור) יקפוץ ישר לתיק בלי לטעון את החפיסה */
+    first: data.kind === 'keyer' && items.length ? items[0].id : undefined,
     /* מפתח הגדרה: הנושאים שהתיקים נוגעים בהם — כדי שיחידת המפה תקשר לחפיסה
        בלי לטעון אותה (undefined נשמט מה-JSON בקבצים אחרים). */
     topics: isKeyer ? [...new Set(items.map((x) => x.topic))] : undefined,

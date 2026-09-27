@@ -1975,6 +1975,19 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   color:var(--dim); font-size:15px; cursor:pointer; line-height:1; padding:4px; border-radius:6px; }
 .intro-x:hover{ color:var(--text); background:var(--surface-2); }
 
+/* ===== „מה חדש” (v6) — באנר החידושים לפתיחת שנה ב׳ ===== */
+.intro.wn{ display:block; position:relative; }
+.wn-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding-inline-start:30px; }
+.wn-head b{ display:inline; font-size:17px; margin:0; }
+.wn-head span{ font-size:13.5px; }
+.wn-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; }
+.wn-card{ padding:12px 14px; gap:11px; background:var(--surface); }
+.wn-card .learn-card-ico{ font-size:22px; }
+.wn-card .learn-card-ttl{ font-size:14.5px; }
+.wn-card .learn-card-sub{ font-size:12px; }
+.wn-acts{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+@media (max-width:600px){ .wn-grid{ grid-template-columns:1fr; } .intro.wn{ padding:16px 14px; } }
+
 /* i❤️Shinun — שדרוגי חוכמה */
 .shn-chip.done{ background:var(--good-bg); border-color:var(--good); color:var(--good); }
 .shn-celeb{ min-height:0; }
