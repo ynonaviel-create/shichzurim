@@ -3709,8 +3709,18 @@ const rulingA = (item) => {
    הכלל מכאן: טקסט שנוקב בתשובה חי ב-`noteAfter` (או נגזר מ-`repeat.ruling`)
    ומגיע לכאן. `note` נשאר להקשר שבלעדיו אי אפשר לענות — תיאור גרף, מקרא
    קיצורים, הערת המרה — ו-189 מתוך 210 ההערות בארכיון הן בדיוק זה. */
+/* מתי מציגים את הערת השאלה. הסקר תפס את זה: הערות כמו „המפתח מאומת והוא אפשרות 4”
+   או „הפתרון של ארי בילר: נמק גבינתי” הופיעו *לפני* המענה וגילו את התשובה.
+   ברירת המחדל עכשיו: אחרי המענה. לפני — רק הערת מסגור שנחוצה כדי לענות (גרף
+   שלא שוחזר, שאלה שהומרה מפורמט אחר, מקרא קיצורים, נתוני טבלה), ורק אם אין בה
+   שום רמז לתשובה. ספק — אחרי. */
+const NOTE_EARLY = /הומר|בפורמט שאינו אמריקאי|מבוססת גרף|לא נכלל בשחזור|אינה ברשותנו|אינם ברשותנו|התמונה שוחזרה|שאלת תמונה|נתוני הטבלה|^גרף:|^בלוט|הודפסה בשחזור כתמונה|הודפסה בקובץ המקור בשורה מולבנת| = |מקוטע וקשה לקריאה|שאלה פתוחה|בחירה[- ]מרובה|לגרור|התמונה אותנטית|חולץ מה-PDF|איכות התמונה/;
+const NOTE_LEAK = /אפשרות \d|מסיח|תשוב|מפתח|נכונ|הסדר הנכון|סומנ|הוכרע|ערעור|בונוס|הפוך|היפוך|הפתרון|פתרון|ההסבר|הקריאה של|נפתרת|שגוי|הוא שלנו|היא שלנו|מאומת|מדובר ב|ניתן לראות|נראית|נראה |הנושא \(/;
+const noteIsEarly = (n) => NOTE_EARLY.test(String(n).trim()) && !NOTE_LEAK.test(String(n));
+
 function lateNotes(item) {
   const out = [];
+  if (item.note && !noteIsEarly(item.note)) out.push(el('div', 'q-note late', item.note));
   const r = item.repeat;
   if (r && r.conflict) {
     const rl = r.ruling;
@@ -4083,7 +4093,7 @@ function playQuestions(cfg) {
         a.title = dr.title;
         r.append(a);
       }
-      const ky = keyerFor(courseId, name);
+      const ky = keyerFor(cfg.courseId, name);
       if (ky) {
         const a = el('a', 'bd-sim bd-drill', '🔑 לזהות מרמזים');
         a.href = '#/keyer/' + ky.id;
@@ -4230,7 +4240,7 @@ function playQuestions(cfg) {
     const src = [item.source, item.origin].filter(Boolean).join(' · ');
     if (src) card.append(el('div', 'q-origin', src));
 
-    if (item.note) card.append(el('div', 'q-note', item.note));
+    if (item.note && noteIsEarly(item.note)) card.append(el('div', 'q-note', item.note));
 
     // גרף/תמונה שחולצו מה-PDF. שאלות רבות בביומול ובאלקטרו בלתי פתירות בלעדיהם.
     // באלקטרו הגרפים הם לב המבחן — לחיצה מגדילה אותם למסך מלא (זום).
