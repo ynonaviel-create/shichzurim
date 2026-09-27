@@ -11659,7 +11659,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
   const ttl = el('div', 'g-unit-ttl');
   ttl.append(el('h3', null, u.topic));
   const meta = el('div', 'g-unit-meta');
-  u.lecturers.forEach((l) => meta.append(el('span', 'lecturer', l)));
+  (u.lecturers || []).forEach((l) => meta.append(el('span', 'lecturer', l)));   // יחידה חדשה בלי מרצים (ביקורת 14/08) — לא מפילה את המפה
   const [tag, cls] = certaintyTag(g, u.certainty);
   meta.append(el('span', 'lecturer ' + cls, tag));
   meta.append(el('span', 'g-lessons', u.lessons));
