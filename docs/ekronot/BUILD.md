@@ -225,7 +225,7 @@ python3 guides/_template/inject.py <course>-<key>.html
 
 ```json
 { "id": "ekronot-a-micro-keyer", "course": "ekronot-a", "part": "מיקרוביולוגיה",
-  "title": "מעגל האבחון — זהה את החיידק", "kind": "keyer", "added": "2026-09-24",
+  "title": "זהה את החיידק — מעגל האבחון", "kind": "keyer", "added": "2026-09-24",
   "heroSub": "משפט לכרטיס בעמוד המקצוע", "note": "מאיפה נכתב; זה תרגול, לא שחזור",
   "items": [{
     "id": "aureus", "icon": "🟡",
