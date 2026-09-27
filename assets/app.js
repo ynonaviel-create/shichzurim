@@ -556,15 +556,22 @@ const seenH = {
    וההקשחה של flush זורקת את הפעולה — הסימון נשאר מקומי ושום סנכרון אחר
    לא נפגע. */
 const FLAG_KEY = 'shichzurim.flag';
+/* ── הסרה היא tombstone, לא מחיקה (ביקורת 14/08: „דגלון שהוסר קם לתחייה ממכשיר שני”) ──
+   המיזוג בענן מעלה כל מפתח שקיים רק מקומית. מכשיר א׳ הסיר דגלון ומחק את השורה;
+   מכשיר ב׳ עדיין החזיק אותו מקומית — והעלה אותו חזרה. בלי חותמת זמן אין דרך
+   לדעת שההסרה מאוחרת מהסימון. לכן שלוש צורות ערך: 1 (ישן — דלוק, זמן 0),
+   {on:1,t} דלוק, {on:0,t} הוסר. המנצח במיזוג הוא המאוחר (cloud.js, winner). */
+const flagOn = (v) => v === 1 || !!(v && typeof v === 'object' && v.on);
 const flags = {
   read() { try { return JSON.parse(localStorage.getItem(FLAG_KEY)) || {}; } catch { return {}; } },
   write(d) { try { localStorage.setItem(FLAG_KEY, JSON.stringify(d)); } catch {} },
-  has(k) { return !!this.read()[k]; },
+  has(k) { return flagOn(this.read()[k]); },
+  list() { const d = this.read(); return Object.keys(d).filter((k) => flagOn(d[k])); },   // הדלוקים בלבד
   toggle(k) {
     const d = this.read();
-    if (d[k]) { delete d[k]; this.write(d); window.Cloud?.queueDelete('flag', k); return false; }
-    d[k] = 1; this.write(d); window.Cloud?.queue('flag', k, 1);
-    return true;
+    const v = { on: flagOn(d[k]) ? 0 : 1, t: Date.now() };
+    d[k] = v; this.write(d); window.Cloud?.queue('flag', k, v);
+    return !!v.on;
   },
 };
 
@@ -1436,7 +1443,7 @@ function renderCourse(courseId, subKey = null) {
     lRow.append(tn);
   }
   /* המסומנות — רק אם יש מה להראות. */
-  if (Object.keys(flags.read()).length) {
+  if (flags.list().length) {
     const fg = el('a', 'btn', '🔖 מה שסימנתי');
     fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
     fg.href = '#/flagged/' + courseId;
@@ -1704,7 +1711,7 @@ function renderBlockHub(c) {
     tn.title = 'מסלול חזרה מרוכז לערב שלפני המבחן — לפי הזמן שנשאר לך';
     row.append(tn);
   }
-  if (Object.keys(flags.read()).length) {
+  if (flags.list().length) {
     const fg = el('a', 'btn', '🔖 מה שסימנתי');
     fg.href = '#/flagged/' + courseId;
     fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
@@ -6803,7 +6810,7 @@ async function renderFlagged(courseId) {
   metas.forEach((m, mi) => {
     if (!loaded[mi]) return;
     (loaded[mi].questions || []).forEach((q, i) => {
-      if (!q.qid || !f[q.qid] || shown.has(q.qid)) return;
+      if (!q.qid || !flagOn(f[q.qid]) || shown.has(q.qid)) return;
       shown.add(q.qid);
       picked.push({ ...q, origin: loaded[mi].title, examId: m.id, idx: i });
     });

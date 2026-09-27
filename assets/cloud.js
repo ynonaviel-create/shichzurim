@@ -248,6 +248,13 @@
       return ((L.t || 0) >= (R.t || 0)) ? L : R;
     }
     if (ns === 'cardsRead') return 1;                           // הערכים תמיד 1; איחוד
+    /* דגלונים: הפעולה המאוחרת מנצחת — גם כשהיא הסרה ({on:0,t} = tombstone).
+       בלי זה הסרה במכשיר אחד הייתה מפסידה לדגלון שעדיין דלוק מקומית במכשיר
+       השני, שהיה מעלה אותו חזרה. הצורה הישנה (1 חשוף) היא „דלוק בזמן 0”. */
+    if (ns === 'flag') {
+      const t = (x) => (x && typeof x === 'object' ? x.t || 0 : 0);
+      return t(l) >= t(r) ? l : r;
+    }
     if (ns === 'caseProg') {                                    // מי שהתקדם יותר במקרה מנצח
       const cnt = (a) => (Array.isArray(a) ? a.filter((x) => x != null).length : 0);
       return cnt(l) >= cnt(r) ? l : r;
