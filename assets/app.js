@@ -92,7 +92,11 @@ function speak(text) {
     try { speechSynthesis.speak(u); } catch { resolve(); }
   });
 }
-function stopSpeech() { try { if (speechOK()) speechSynthesis.cancel(); } catch {} }
+/* מונה-דור להקראה. cancel() מסיים רק את המשפט הנוכחי — ה-promise של speak נפתר,
+   ולולאת ההקראה בשינון הייתה ממשיכה למשפט הבא בעמוד אחר (ביקורת 14/08). כל
+   stopSpeech מעלה את המונה, ולולאה שנפתחה בדור קודם עוצרת בבדיקה הבאה שלה. */
+let speechEpoch = 0;
+function stopSpeech() { speechEpoch++; try { if (speechOK()) speechSynthesis.cancel(); } catch {} }
 
 /* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
    בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
@@ -2545,17 +2549,19 @@ async function renderShinun(courseId, topicFilter) {
     paint();
 
     async function loop() {
-      while (playing && i < items.length) {
+      const ep = speechEpoch;             // הדור שבו הלולאה נפתחה; stopSpeech (גם מה-router) משנה אותו
+      const alive = () => playing && ep === speechEpoch;
+      while (alive() && i < items.length) {
         const it = items[i];
         front.textContent = it.front;
         back.textContent = '';
         await speak(it.front);
-        if (!playing) break;
+        if (!alive()) break;
         await pause(900);                 // השהייה לשליפה — זה כל העניין
-        if (!playing) break;
+        if (!alive()) break;
         back.textContent = it.back;
         await speak(it.back);
-        if (!playing) break;
+        if (!alive()) break;
         await pause(500);
         i++;
         pos.textContent = `${Math.min(i + 1, items.length)} מתוך ${items.length}`;
