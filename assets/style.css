@@ -722,6 +722,8 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   border-radius:var(--radius); box-shadow:var(--shadow);
 }
 .result .grade{font-size:56px; font-weight:800; letter-spacing:-2.5px; line-height:1;}
+/* סבב שכולו מחוץ לחומר — שורה אחת במקום ציון (אין מה לחשב) */
+.result-off{text-align:center; padding:14px 16px; margin:12px 0; border-radius:var(--radius); background:var(--surface-2); color:var(--muted); font-size:14px; line-height:1.6;}
 .result .grade.good{color:var(--good);} .result .grade.mid{color:var(--warn);} .result .grade.bad{color:var(--bad);}
 .result .sub{color:var(--muted); font-size:15.5px; margin:12px 0 22px;}
 

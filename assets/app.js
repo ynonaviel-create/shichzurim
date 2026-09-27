@@ -273,6 +273,7 @@ function checkCourseMilestone(m) {
 
 /* חגיגת סיום סבב — נקראת ממסך התוצאה על ציון גבוה. */
 function celebrateResult(pct, scoredCount, name) {
+  if (!isFinite(pct) || !scoredCount) return;   // סבב בלי שאלות נספרות — אין מה לחגוג
   if (pct < 90) return;
   const perfect = pct === 100 && scoredCount >= 5;
   celebrate({
@@ -3992,8 +3993,17 @@ function playQuestions(cfg) {
     cGood.textContent = hideScore ? `נענו ${answered}` : `✓ ${good}`;
     cBad.textContent = hideScore ? '' : `✗ ${bad}`;
     cLeft.textContent = `נותרו ${scoredCount - answered}`;
-    fill.style.width = Math.round((answered / scoredCount) * 100) + '%';
+    fill.style.width = (scoredCount ? Math.round((answered / scoredCount) * 100) : 0) + '%';
     fill.className = hideScore ? '' : (answered ? (good / answered >= 0.7 ? 'good' : 'bad') : '');
+
+    /* סבב שכולו מחוץ לחומר (קישור ישיר #/q/ לשאלת offSyllabus): המכנה אפס —
+       היה מציג NaN% וטוסט חגיגה מיידי (ביקורת 14/08). אין ציון, ואומרים את זה. */
+    if (!scoredCount) {
+      toResult.style.display = 'none';
+      resultBox.innerHTML = '';
+      resultBox.append(el('div', 'result-off', '✦ השאלות כאן מחוץ לחומר — הן להעשרה, ולא נספרות בציון או בהתקדמות.'));
+      return;
+    }
 
     if (persist) {
       store.save(key, {
