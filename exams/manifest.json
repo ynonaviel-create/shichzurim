@@ -1,6 +1,6 @@
 {
-  "updated": "2026-09-27",
-  "version": "91ae40e9",
+  "updated": "2026-09-28",
+  "version": "406a973f",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -867,7 +867,6 @@
     {
       "id": "biostat",
       "name": "ביוסטטיסטיקה",
-      "code": "TODO",
       "icon": "📊",
       "blurb": "תיאור, הסתברות, בדיקת השערות ורגרסיה — עם מחשבון",
       "order": 8,
@@ -914,7 +913,6 @@
     {
       "id": "chem",
       "name": "כימיה כללית",
-      "code": "TODO",
       "icon": "⚗️",
       "blurb": "אטום, קשר כימי, סטוכיומטריה, חומצות-בסיסים ושיווי משקל",
       "order": 9,
@@ -958,7 +956,7 @@
     {
       "id": "physics-a",
       "name": "פיסיקה א׳",
-      "code": "TODO",
+      "code": "0-471-8-1001",
       "icon": "🧲",
       "blurb": "מכניקה: קינמטיקה, ניוטון, אנרגיה, גוף קשיח ונוזלים",
       "order": 10,
@@ -1001,7 +999,7 @@
     {
       "id": "organic",
       "name": "כימיה אורגנית",
-      "code": "TODO",
+      "code": "0-471-8-1003",
       "icon": "🧪",
       "blurb": "קבוצות פונקציונליות, סטריאוכימיה ומנגנוני תגובה",
       "order": 11,
@@ -1045,7 +1043,6 @@
     {
       "id": "histo",
       "name": "היסטולוגיה א׳",
-      "code": "TODO",
       "icon": "🔬",
       "blurb": "ארבע הרקמות מתחת למיקרוסקופ — עיוני ומעשי",
       "order": 12,
@@ -1084,7 +1081,6 @@
     {
       "id": "embryo",
       "name": "אמבריולוגיה",
-      "code": "TODO",
       "icon": "🥚",
       "blurb": "מהזיגוטה לעובר: גסטרולציה, שכבות הנבט והשליה",
       "order": 13,
@@ -1128,7 +1124,7 @@
     {
       "id": "epi",
       "name": "אפידמיולוגיה",
-      "code": "TODO",
+      "code": "0-471-8-1091",
       "icon": "📈",
       "blurb": "מדדי תחלואה, תוקף בדיקות, מחקרי עוקבה ומקרה-בקרה",
       "order": 14,
@@ -1175,7 +1171,6 @@
     {
       "id": "cellbio",
       "name": "ביולוגיה של התא",
-      "code": "TODO",
       "icon": "🧫",
       "blurb": "התא ומרכיביו: קרום, אברונים, גרעין ומחזור התא",
       "order": 15,
@@ -1220,7 +1215,6 @@
     {
       "id": "anatomy",
       "name": "אנטומיה",
-      "code": "TODO",
       "icon": "🦴",
       "blurb": "מבוא לאנטומיה: עצבים, נשימה, לב, בטן, רבייה ושלד",
       "order": 16,
@@ -1578,7 +1572,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-27",
+      "added": "2026-09-28",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -2941,7 +2935,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-27",
+      "added": "2026-09-28",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -4198,7 +4192,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-27",
+      "added": "2026-09-28",
       "official": null,
       "trust": null,
       "spotlight": null,
@@ -4350,7 +4344,7 @@
       "year": null,
       "cycle": null,
       "moed": null,
-      "added": "2026-09-27",
+      "added": "2026-09-28",
       "official": null,
       "trust": null,
       "spotlight": null,
