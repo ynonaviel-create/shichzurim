@@ -1447,7 +1447,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
    סביב באמצע הסיור והזרקור נשאר צמוד. */
 
 .tour-pop{
-  position:absolute; width:340px; max-width:calc(100vw - 24px);
+  position:absolute; width:340px; max-width:calc(100vw - 24px); box-sizing:border-box;   /* ה-padding בתוך ה-340 — אחרת הבועה חורגת מהמסך ב-375px */
   background:var(--surface); border:1px solid var(--line);
   border-radius:var(--radius); padding:18px 20px 15px;
   box-shadow:0 18px 50px rgba(0,0,0,.4);
@@ -2454,6 +2454,9 @@ a.adm-chip{text-decoration:none; display:inline-flex; align-items:center;}
              inset 0 -18px 34px -24px color-mix(in srgb, var(--course-accent) 30%, transparent),
              var(--shadow);
 }
+/* בועת הסיור ממוקמת ב-JS (left/top מוחלטים) — הזכוכית הפכה אותה ל-relative והבועה
+   זזה מהנקודה שחושבה לה (במובייל: חרגה מהמסך); overflow:hidden גם חתך את החץ. */
+.tour-pop{ position:absolute; overflow:visible; }
 /* פס-הברק הספקולרי: השתקפות אלכסונית שחוצה את הפינה העליונה של כל משטח.
    לא על חלוניות צפות (srch/tour/cheer) — שם הוא מסיח מתוכן קצר. */
 .card::after,.stat::after,.nextup::after,.sim-card::after,.learn-card::after,

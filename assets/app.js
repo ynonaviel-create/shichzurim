@@ -8866,7 +8866,14 @@ async function startTour(ver = 'v4', startAt = 0) {   // startAt — צעד הת
     place(step);
     /* מיקום שני אחרי שהפריסה נחה — תופס מקרים שבהם היעד (סרגל דביק, תוכן
        שנטען) קיבל את גודלו רק רגע אחרי הציור הראשון. */
-    if (step.sel) setTimeout(() => { if (i === n) place(step); }, 300);
+    if (step.sel) setTimeout(() => {
+      if (i !== n) return;
+      /* מרוץ עם toTop() של הרנדרר (rAF → scrollTo(0,0)) שרץ אחרי הגלילה שלנו ומשאיר
+         את היעד מחוץ למסך — גוללים אליו שוב לפני המיקום השני. */
+      const r = curTarget && curTarget.getBoundingClientRect();
+      if (r && !step.top && (r.top < 0 || r.bottom > window.innerHeight)) curTarget.scrollIntoView({ block: 'center', behavior: 'auto' });
+      place(step);
+    }, 300);
   }
 
   function draw(step) {
