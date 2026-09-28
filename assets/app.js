@@ -7418,7 +7418,7 @@ function shinunHomePush() {
    ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
    כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
    לשמוע על פיצ׳ר ב׳. */
-const WHATS_NEW_ON = false;   // ← להדליק כשינון בוחר באופציה הזאת. עד אז: ?whatsnew=1 לתצוגה מקדימה בלבד
+const WHATS_NEW_ON = true;   // ינון בחר באופציה הזאת (29/09/2026). לכבות: false. ?whatsnew=1 מציג גם כשכבוי (תצוגה מקדימה)
 const WHATS_NEW_KEY = 'shichzurim.whatsNew.v6';
 /* פרמטר תצוגה מקדימה בכתובת (?whatsnew=1, ?tour=v5) — לבדיקה לפני שמדליקים לכולם. */
 const previewParam = (name) => { try { return new URLSearchParams(location.search).get(name); } catch { return null; } };
