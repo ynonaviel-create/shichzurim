@@ -49,7 +49,8 @@
           "מ״ד"
         ],
         "span": 6,
-        "optsDiffer": true
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -451,7 +452,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 14
+        "span": 14,
+        "optsDiffer": true
       }
     },
     {
@@ -524,7 +526,8 @@
           "מ״ו",
           "מ׳"
         ],
-        "span": 10
+        "span": 10,
+        "optsDiffer": true
       }
     },
     {
@@ -601,7 +604,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 12
+        "span": 12,
+        "optsDiffer": true
       }
     },
     {
@@ -672,7 +676,9 @@
           "מ״ו",
           "מ״ד"
         ],
-        "span": 6
+        "span": 6,
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -745,7 +751,8 @@
           "ל״ו"
         ],
         "span": 12,
-        "optsDiffer": true
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -815,7 +822,8 @@
           "מ״ה",
           "מ״ד"
         ],
-        "span": 4
+        "span": 4,
+        "optsDiffer": true
       }
     },
     {
@@ -844,7 +852,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 14
+        "span": 14,
+        "optsDiffer": true
       }
     },
     {

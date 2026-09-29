@@ -36,7 +36,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 10
+        "span": 10,
+        "optsDiffer": true
       }
     },
     {
@@ -439,7 +440,8 @@
           "מ״א"
         ],
         "span": 4,
-        "optsDiffer": true
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -466,7 +468,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 10
+        "span": 10,
+        "conflict": true
       }
     },
     {
@@ -526,7 +529,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
@@ -551,7 +555,8 @@
           "מ״ז",
           "מ״ג"
         ],
-        "span": 8
+        "span": 8,
+        "optsDiffer": true
       }
     },
     {
@@ -743,7 +748,8 @@
           "מ״ז",
           "מ״ג"
         ],
-        "span": 4
+        "span": 4,
+        "optsDiffer": true
       }
     },
     {
@@ -793,7 +799,8 @@
           "מ״ג",
           "ל״ח"
         ],
-        "span": 13
+        "span": 13,
+        "optsDiffer": true
       }
     },
     {
@@ -824,7 +831,9 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 15
+        "span": 15,
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -847,7 +856,8 @@
           "מ״ז",
           "מ״ג"
         ],
-        "span": 4
+        "span": 4,
+        "optsDiffer": true
       }
     }
   ]

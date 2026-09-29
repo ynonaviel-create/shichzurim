@@ -122,7 +122,8 @@
           "מ״א"
         ],
         "span": 4,
-        "optsDiffer": true
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -162,7 +163,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 10
+        "span": 10,
+        "conflict": true
       }
     },
     {
@@ -217,7 +219,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 10
+        "span": 10,
+        "optsDiffer": true
       }
     },
     {
@@ -460,7 +463,8 @@
           "מ״ז",
           "מ״א"
         ],
-        "span": 10
+        "span": 10,
+        "optsDiffer": true
       }
     },
     {
@@ -607,7 +611,9 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 15
+        "span": 15,
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -655,7 +661,8 @@
           "מ״ג",
           "מ״א"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {

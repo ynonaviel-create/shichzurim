@@ -140,7 +140,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
@@ -639,7 +640,8 @@
           "מ״ג",
           "ל״ח"
         ],
-        "span": 13
+        "span": 13,
+        "optsDiffer": true
       }
     },
     {

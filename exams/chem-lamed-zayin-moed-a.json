@@ -541,7 +541,9 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 15
+        "span": 15,
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -585,7 +587,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 14
+        "span": 14,
+        "optsDiffer": true
       }
     },
     {
@@ -652,7 +655,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 12
+        "span": 12,
+        "optsDiffer": true
       }
     },
     {
@@ -699,7 +703,8 @@
           "ל״ו"
         ],
         "span": 12,
-        "optsDiffer": true
+        "optsDiffer": true,
+        "conflict": true
       }
     },
     {
@@ -791,7 +796,8 @@
           "ל״ז",
           "ל״ו"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
