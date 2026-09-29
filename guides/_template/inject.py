@@ -40,6 +40,14 @@ DOCS = {
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "cellbio",
     },
+    "chem-full.html": {
+        "id": "chem-doc",
+        "gate": ".trap",
+        "maplinks": "chem",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "chem",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
