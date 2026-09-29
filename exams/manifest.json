@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "bdd9f74e",
+  "version": "2801376e",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -5625,6 +5625,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
+    },
+    {
+      "id": "histo-guide",
+      "file": "histo-guide.json",
+      "course": "histo",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 11
     },
     {
       "id": "histo-high-yield",
