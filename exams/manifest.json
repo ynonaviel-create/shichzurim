@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "225a0edf",
+  "version": "d6a6eaa1",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1275,7 +1275,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 9
+      "count": 14
     },
     {
       "id": "anatomy-lamed-het-moed-a",
@@ -5605,7 +5605,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 25
+      "count": 27
     },
     {
       "id": "histo-mem-dalet-moed-a",

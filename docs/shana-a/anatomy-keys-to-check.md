@@ -21,7 +21,13 @@
    מפתח: **א**. לפי סיכום הקורס (נועה ענבי, מ״ו) גם השרירים הבין-צלעיים החיצוניים (מסיח ג׳) פועלים בשאיפה רגילה. המפתח המאומת = א׳; לא שונה.
 9. **מחזור מ״ז — מועד א׳, שאלה 38 בקובץ** (`anatomy-mem-zayin-moed-a`, trust=verified) — ציין זוג מבנים ששוכן ב-posterior cranial fossa:  
    מפתח: **ג**. המפתח (המאומת) = ג׳ (דיאנצפלון והיפופיזה), אבל ההיפופיזה יושבת באוכף הטורקי שבגומה האמצעית, והגומה האחורית מכילה את המוחון וגזע המוח (ד׳). גם גיליון הדיונים של מ״ח הציע ד׳. לא שונה.
-10. **מחזור ל״ח — מועד א׳, שאלה 14 בקובץ** (`anatomy-lamed-het-moed-a`, trust=verified) — מה לא נכון לגבי המסתם הטריקוספאדלי?  
+10. **מחזור מ״ד — מועד א׳, שאלה 2 בקובץ** (`anatomy-mem-dalet-moed-a`, trust=partial) — מה לא נכון לגבי המערכת הסירקולטורית?  
+   מפתח: **ב**. המפתח = ב (האנסטומוזות בין העורקים הברונכיאליים לעורקי הריאה). זה תואם את סיכום הקורס (נועה ענבי, מ״ו), שלפיו האנסטומוזות הן לוורידים הפולמונריים. אבל גם מסיח א (כל הדם הורידי מנוקז ע״י ה-IVC וה-SVC) אינו מדויק לפי אותו סיכום (ה-coronary sinus נפתח ישירות לעלייה הימנית). המפתח לא שונה.
+11. **מחזור מ״ד — מועד א׳, שאלה 7 בקובץ** (`anatomy-mem-dalet-moed-a`, trust=partial) — מה מהבאים נחשב accessory inspiratory muscles?  
+   מפתח: **ג**. המפתח = ג (Innermost intercostal muscles). סיכום הקורס (נועה ענבי, מ״ו) מונה כשרירי עזר לשאיפה את ה-SCM, ה-scalenes, ה-pectoralis minor וה-serratus anterior, ואת ה-external intercostals כשרירי שאיפה — ולא את ה-innermost. המפתח לא שונה.
+12. **מחזור מ״ד — מועד א׳, שאלה 30 בקובץ** (`anatomy-mem-dalet-moed-a`, trust=partial) — איזה סוג סיבי עצב מעבירים cardiopulmonary Splenchic Nerve ?  
+   מפתח: **ד**. המפתח = ד (Somatic motory). לפי סיכום הקורס (נועה ענבי, מ״ו) ה-cardiopulmonary splanchnic nerves נושאים סיבים סימפתטיים פוסט-גנגליוניים — אפשרות שאינה ברשימה, ואף אחת מהאפשרויות אינה מתאימה לניסוח „מה מעבירים”. ייתכן שהשאלה המקורית הייתה בשלילה. המפתח לא שונה.
+13. **מחזור ל״ח — מועד א׳, שאלה 14 בקובץ** (`anatomy-lamed-het-moed-a`, trust=verified) — מה לא נכון לגבי המסתם הטריקוספאדלי?  
    מפתח: **א**. גם מסיח 4 (האזנה במרווח 2–4 מימין לסטרנום) נראה לא נכון לפי החומר (שקף אטקין שצוטט בגיליון הדיונים של מ״ח: „Auscultation left ICS 3-5”), ובגיליון הוצע 1+4. המפתח המאומת = 1; לא שונה.
 
 ## הפרומפט לנוטבוק
@@ -56,7 +62,16 @@
 9. [מחזור מ״ז — מועד א׳] ציין זוג מבנים ששוכן ב-posterior cranial fossa:
    א. Left occipital lobe & right occipital lobe / ב. Left frontal lobe & right frontal lobe / ג. Diencephalon & hypophysis (pituitary gland) / ד. Medulla oblongata & cerebellum
    המפתח: ג.
-10. [מחזור ל״ח — מועד א׳] מה לא נכון לגבי המסתם הטריקוספאדלי?
+10. [מחזור מ״ד — מועד א׳] מה לא נכון לגבי המערכת הסירקולטורית?
+   א. כל הדם הורידי מנוקז ע"י ה-IVC וה-SVC / ב. יש אנסטומוזות בעובר בין הbronchial arteries לבין ה-pulmonary arteries / ג. איברי מערכת העיכול האי זוגיים מוזנים על ידי ה-descending abdominal aorta / ד. Internal carotid artery מזין את המוח
+   המפתח: ב.
+11. [מחזור מ״ד — מועד א׳] מה מהבאים נחשב accessory inspiratory muscles?
+   א. External intercostal muscles / ב. Internal intercostal muscles / ג. Innermost intercostal muscles / ד. כל התשובות נכונות
+   המפתח: ג.
+12. [מחזור מ״ד — מועד א׳] איזה סוג סיבי עצב מעבירים cardiopulmonary Splenchic Nerve ?
+   א. Parasympathetic post ganglion / ב. Sympathetic pre-ganglion / ג. Somatic sensory / ד. Somatic motory
+   המפתח: ד.
+13. [מחזור ל״ח — מועד א׳] מה לא נכון לגבי המסתם הטריקוספאדלי?
    א. מפריד בין עלייה ימנית לעלייה שמאלית. / ב. מורכב מ-3 עלעלים (cusps). / ג. סגור בזמן הסיסטולה. / ד. ניתן להאזין לו בין מרווח אינטרקוסטאלי 2-4 מימין לסטרנום.
    המפתח: א.
 ```
