@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "50eeb85e",
+  "version": "c062d53f",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -5245,6 +5245,25 @@
       "heroSub": "העובדות היבשות שאי אפשר להסיק, רק לזכור: חלבונים, רעלנים, רצפטורים, בופרים ותאי גליה — ולצידן ארבע עובדות מהמודל החשמלי שכולן נגזרות מדף הנוסחאות ובכל זאת נופלים עליהן. מרוכז — לבדיקה עצמית ולחזרה אחרונה.",
       "heroEyebrow": null,
       "count": 49
+    },
+    {
+      "id": "embryo-guide",
+      "file": "embryo-guide.json",
+      "course": "embryo",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 16
     },
     {
       "id": "embryo-high-yield",
