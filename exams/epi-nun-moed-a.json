@@ -47,7 +47,8 @@
           "נ״ב",
           "נ׳"
         ],
-        "span": 2
+        "span": 2,
+        "conflict": true
       }
     },
     {
@@ -146,7 +147,8 @@
           "נ״ב",
           "נ׳"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
@@ -193,7 +195,8 @@
           "נ״ב",
           "נ׳"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
@@ -580,7 +583,8 @@
           "נ״ב",
           "נ׳"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {
@@ -631,7 +635,8 @@
           "נ״ב",
           "נ׳"
         ],
-        "span": 2
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {

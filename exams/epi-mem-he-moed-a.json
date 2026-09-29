@@ -423,7 +423,8 @@
           "מ״ו ב׳",
           "מ״ה"
         ],
-        "span": 1
+        "span": 1,
+        "optsDiffer": true
       }
     }
   ]
