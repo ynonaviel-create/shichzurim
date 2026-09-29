@@ -64,6 +64,14 @@ DOCS = {
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "epi",
     },
+    "histo-full.html": {
+        "id": "histo-doc",
+        "gate": ".trap",
+        "maplinks": "histo",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "histo",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
