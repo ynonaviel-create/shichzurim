@@ -64,17 +64,15 @@
       "note": "מפתח: סימון יד של לירון מצר (לא מאומת)",
       "qid": "e491395b",
       "repeat": {
-        "n": 4,
+        "n": 3,
         "unit": "מחזורים",
         "in": [
           "מ״ט",
           "מ״ז",
-          "מ״ה",
-          "מ״א"
+          "מ״ה"
         ],
-        "span": 8,
-        "flipped": true,
-        "optsDiffer": true
+        "span": 4,
+        "flipped": true
       }
     },
     {
@@ -413,17 +411,14 @@
       "note": "מפתח: סימון יד של לירון מצר (לא מאומת)",
       "qid": "3a0b444d",
       "repeat": {
-        "n": 4,
+        "n": 2,
         "unit": "מחזורים",
         "in": [
-          "נ״א",
-          "מ״ט",
           "מ״ז",
           "מ״ה"
         ],
-        "span": 6,
-        "optsDiffer": true,
-        "conflict": true
+        "span": 2,
+        "optsDiffer": true
       }
     },
     {

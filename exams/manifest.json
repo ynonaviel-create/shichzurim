@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "3e6ec664",
+  "version": "00de412e",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1902,7 +1902,7 @@
       "series": null,
       "heroSub": null,
       "heroEyebrow": null,
-      "count": 141
+      "count": 143
     },
     {
       "id": "chem-lamed-dalet-moed-a",
