@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "b4386091",
+  "version": "50eeb85e",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1258,6 +1258,25 @@
     }
   ],
   "exams": [
+    {
+      "id": "anatomy-guide",
+      "file": "anatomy-guide.json",
+      "course": "anatomy",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 17
+    },
     {
       "id": "anatomy-high-yield",
       "file": "anatomy-high-yield.json",
