@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "00de412e",
+  "version": "725170b8",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1884,6 +1884,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 29
+    },
+    {
+      "id": "chem-guide",
+      "file": "chem-guide.json",
+      "course": "chem",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 16
     },
     {
       "id": "chem-high-yield",
