@@ -48,6 +48,22 @@ DOCS = {
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "chem",
     },
+    "organic-full.html": {
+        "id": "organic-doc",
+        "gate": ".trap",
+        "maplinks": "organic",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "organic",
+    },
+    "epi-full.html": {
+        "id": "epi-doc",
+        "gate": ".trap",
+        "maplinks": "epi",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "epi",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
