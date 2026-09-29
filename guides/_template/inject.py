@@ -31,6 +31,15 @@ DOCS = {
         "qa": "physics",
         "shinun": "physics",
     },
+    # שנה א׳ — הלומדה הראשונה של סמסטר א׳ (פיילוט, 30/09). אין שינון לקורס, ולכן בלי shinun.
+    "cellbio-full.html": {
+        "id": "cellbio-doc",
+        "gate": ".trap",
+        "maplinks": "cellbio",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "cellbio",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
