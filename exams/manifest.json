@@ -1,6 +1,6 @@
 {
   "updated": "2026-09-29",
-  "version": "725170b8",
+  "version": "bdd9f74e",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -6100,6 +6100,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 39
+    },
+    {
+      "id": "organic-guide",
+      "file": "organic-guide.json",
+      "course": "organic",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-09-30",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 16
     },
     {
       "id": "organic-high-yield",
