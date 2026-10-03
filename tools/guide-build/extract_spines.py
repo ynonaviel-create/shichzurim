@@ -27,6 +27,9 @@ SPINES = {
     'molecular': [('spine-din', '*סיכום ביומול - דין - נ״א*.pdf'),
                   ('sup-karman', '*סיכום ביולוגיה מולקולארית מלא תומר קרמן*.pdf'),
                   ('sup-cox-review', '*סיכום שיעור חזרה עם קוקס מ_ז*.pdf')],
+    'clinical': [('spine-mazorsky', '*סיכום על - עימות קליני - ניצן מזורסקי*.pdf'),
+                 ('sup-shefer-stock', '*סיכום מאוחד 2022*.pdf'),
+                 ('sup-thm-fried', '*THM*')],
     'embryo':  [('spine-morlevi', '*אמבריולוגיה - מחזור נ - מור לוי*.pdf'),
                 ('sup-kahalot', '*אמבריולוגיה - סיכום קורס - אדם כחלות*.pdf')],
 }

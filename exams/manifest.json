@@ -1,6 +1,6 @@
 {
   "updated": "2026-10-03",
-  "version": "d066e3a6",
+  "version": "84b75709",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -2595,6 +2595,25 @@
       "heroSub": "המתרגלים שלחו מיקוד למבחן. כאן הוא מפורק לכרטיסיות: מה בדיוק נשאל בכל נושא, מה התשובה, ולמה. עם קישור לתרגול על כל נושא.",
       "heroEyebrow": "🎯 המיקוד מהמתרגלים",
       "count": 19
+    },
+    {
+      "id": "clinical-guide",
+      "file": "clinical-guide.json",
+      "course": "clinical",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-10-04",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 11
     },
     {
       "id": "clinical-mem-zayin",

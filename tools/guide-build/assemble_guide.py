@@ -9,9 +9,12 @@ cfg = json.load(open(os.path.join(WT, 'exams', 'courses.json')))
 cl = cfg if isinstance(cfg, list) else cfg['courses']
 topics = next(x for x in cl if x['id'] == c)['topics']
 cnt = {}; n = 0
+any_shichzur = any(json.load(open(f)).get('kind') == 'shichzur' for f in glob.glob(os.path.join(WT, 'exams', c + '-*.json')))
 for f in glob.glob(os.path.join(WT, 'exams', c + '-*.json')):
     e = json.load(open(f))
-    if e.get('kind') != 'shichzur': continue
+    # שחזורים, ובקורס בלי שחזורים (עימות קליני) — גם practice שנחשב ראיה
+    if e.get('kind') not in ('shichzur', 'practice') or e.get('guideEvidence') is False: continue
+    if e.get('kind') == 'practice' and any_shichzur: continue
     for q in e['questions']: cnt[q['topic']] = cnt.get(q['topic'], 0) + 1; n += 1
 by = {u['topic']: u for u in units}
 miss = [t for t in topics if t not in by]; extra = [t for t in by if t not in topics]
