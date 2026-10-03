@@ -6,13 +6,13 @@ topics=next(x for x in cl if x['id']==c)['topics']
 by={t:[] for t in topics}; HEB='אבגדהוזח'
 for f in glob.glob(f'{WT}/exams/{c}-*.json'):
     e=json.load(open(f))
-    if e.get('kind')!='shichzur': continue
+    if e.get('kind') not in ('shichzur','practice') or e.get('guideEvidence') is False: continue
     for i,q in enumerate(e['questions'],1): by.setdefault(q['topic'],[]).append((e.get('cycle') or 0,e,i,q))
 os.makedirs(f'{SP}/{c}',exist_ok=True)
 for n,t in enumerate(topics,1):
     L=sorted(by[t],key=lambda x:-x[0]); out=[f'# נושא: {t} — {len(L)} שאלות','']
     for cy,e,i,q in L:
-        out.append(f"## qid {q['qid']} · {e['title'].replace('שחזור ','')} · ש׳{i} · trust={e.get('trust')}"); out.append(q['q'])
+        out.append(f"## qid {q['qid']} · {e['title'].replace('שחזור ','')} · ש׳{i} · trust={e.get('trust')}" + (f" · חלק {e['part']}" if e.get('part') else '') + (' · תרגול' if e.get('kind')=='practice' else '')); out.append(q['q'])
         for j,o in enumerate(q['opts']): out.append(f"  {'✔' if j==q['a'] else ' '} {HEB[j]}. {o}")
         if q.get('table'): out.append('  [טבלה בשאלה]')
         if q.get('image'): out.append('  [תמונה בשאלה]')

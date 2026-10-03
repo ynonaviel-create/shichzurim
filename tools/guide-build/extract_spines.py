@@ -22,6 +22,8 @@ SPINES = {
                 ('sup-lymph-harmati', '*מערכת הלימפה - נעה הרמתי*.pdf')],
     'anatomy': [('spine-peleg', '*סיכום אנטומיה - ליאור פלג*.pdf'),
                 ('sup-inbi', '*נועה ענבי*.pdf')],
+    'biochem': [('spine-kahalot-a', 'dir:*סיכום קורס ביוכימיה - אדם כחלות*'),
+                ('spine-korano-b', '*סיכום מאוחד סופי - טארה קוראנו*.pdf')],
     'embryo':  [('spine-morlevi', '*אמבריולוגיה - מחזור נ - מור לוי*.pdf'),
                 ('sup-kahalot', '*אמבריולוגיה - סיכום קורס - אדם כחלות*.pdf')],
 }
