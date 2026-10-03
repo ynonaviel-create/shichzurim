@@ -1,6 +1,6 @@
 {
   "updated": "2026-10-03",
-  "version": "6f592da8",
+  "version": "d066e3a6",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1669,6 +1669,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 40
+    },
+    {
+      "id": "biochem-guide",
+      "file": "biochem-guide.json",
+      "course": "biochem",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-10-04",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 15
     },
     {
       "id": "biochem-nun-bet",
