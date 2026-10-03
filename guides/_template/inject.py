@@ -88,6 +88,22 @@ DOCS = {
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "anatomy",
     },
+    "biochem-full.html": {
+        "id": "biochem-doc",
+        "gate": ".trap",
+        "maplinks": "biochem",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "biochem",
+    },
+    "molecular-full.html": {
+        "id": "molecular-doc",
+        "gate": ".trap",
+        "maplinks": "molecular",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "molecular",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
