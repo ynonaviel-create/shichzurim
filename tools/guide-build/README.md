@@ -5,4 +5,5 @@
 3. סוכן לכל 3–8 נושאים לפי `PROMPT_UNITS.md` (+ שני כללים: qid בנקודה אחת בלבד ביחידה; „<” תמיד עם רווח אחריו ב-trap/gap/what) → `sources/guide-work/<course>/out/X.json`.
 4. `header.json` באותה תיקייה (method, headline מהנתונים, stack, certaintyTags, nowWhy, sources, caveats) — כותבים ידנית מהתדירויות.
 5. `python3 tools/guide-build/assemble_guide.py <course>` → `exams/<course>-guide.json` (freq מחושב, lecturers/sup ברירת מחדל []), ואז `node sync.js` (מאמת qid↔נושא וכיסוי).
-6. **לבדוק בדפדפן** — sync לא תופס שדה חסר שהמנוע קורס עליו.
+6. **לומדה:** `python3 guides/_template/build.py <course>` → `python3 tools/guide-build/split_splice.py split <course>` → סוכנים לפי `PROMPT_LOMDA.md` → `split_splice.py splice` → רישום ב-DOCS של `guides/_template/inject.py` והרצתו → studyDoc בכרטיס.
+7. **לבדוק בדפדפן** — sync לא תופס שדה חסר שהמנוע קורס עליו.
