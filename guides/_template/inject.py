@@ -104,6 +104,14 @@ DOCS = {
                   "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "molecular",
     },
+    "clinical-full.html": {
+        "id": "clinical-doc",
+        "gate": ".trap",
+        "maplinks": "clinical",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "clinical",
+    },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
