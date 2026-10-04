@@ -40,10 +40,19 @@ const TRUST_TAG = {
 };
 
 const view = document.getElementById('view');
+/* ---------- כיווניות בתצוגה ----------
+   שני דברים שהדפדפן הופך בתוך טקסט עברי (נמדד במיקום התווים, 30/09 ו-04/10):
+   טווח מספרים עם מקף ארוך — „2–4%” מוצג „4–2%” (מקף רגיל נשאר בסדר הנכון),
+   וסימן עילי בסוף מילה לטינית — „NAD⁺”, „Ca²⁺” מוצגים „⁺NAD” (LRM אחריו מחזיר אותו).
+   מתוקן בזמן התצוגה בלבד: הנתונים לא משתנים, וה-norm שמייצר qid לא רואה את זה. */
+const bidiFix = (s) => (typeof s === 'string'
+  ? s.replace(/(\d)\u2013(?=\d)/g, '$1-')
+     .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+  : s);
 const el = (tag, cls, txt) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (txt != null) n.textContent = txt;
+  if (txt != null) n.textContent = bidiFix(txt);
   return n;
 };
 /* fem=true לשמות עצם נקביים. בלי זה יצא "שאלה אחד" — וזה כבר קרה בכרטיסיות
@@ -55,7 +64,7 @@ const plural = (n, one, many, fem) => (n === 1 ? `${one} ${fem ? 'אחת' : 'א�
    לבורר התרגול; הועלה לכאן כדי שהחיפוש הגלובלי לא יהיה עותק חמישי של
    נרמול עברית בקובץ (כבר יש norm ב-repeats.js, shinunNorm, ואחד ב-rulingA).
    ⚠️ זה **לא** ה-norm שמייצר qid — אותו אסור לגעת, הוא מגבב את הארכיון. */
-const searchNorm = (s) => (s || '').replace(/[֑-ׇ]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
+const searchNorm = (s) => (s || '').replace(/[֑-ׇ\u200E]/g, '').replace(/["'׳״`]/g, '').toLowerCase();
 
 /* ---------- הקראה ----------
    speechSynthesis הוא חלק מהדפדפן: בלי שרת, בלי מפתח, ועובד אופליין. הקול
@@ -2794,7 +2803,7 @@ async function renderShinun(courseId, topicFilter) {
           if (correct) tally.ok++;
           list.querySelectorAll('.shn-opt').forEach((x) => {
             x.classList.add('locked');
-            if (x.textContent === it.back) x.classList.add('right');
+            if (x.textContent === bidiFix(it.back)) x.classList.add('right');   // el() מעביר את הטקסט דרך bidiFix
           });
           if (!correct) b.classList.add('wrong');
           if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; qbox.append(m); }
@@ -6891,7 +6900,8 @@ async function renderTraps(courseId) {
     top.append(el('span', 'trapcard-topic', r.u.topic));
     top.append(el('span', 'trapcard-n', `✗ ${r.fell.length} מתוך ${r.qids.length}`));
     card.append(top);
-    card.append(el('div', 'trap-text', r.p.trap));
+    /* ה-trap מכיל <b> (BUILD.md סעיף 2) — כמו בעמוד המפה, לא כטקסט גולמי. */
+    const tt = el('div', 'trap-text'); tt.innerHTML = bidiFix(r.p.trap); card.append(tt);
     /* הנקודה עצמה — מה שנכון — מתחת למלכודת ולא מעליה, כדי שהקריאה תהיה
        "זו הטעות" ואז "וזה הנכון", ולא להפך. */
     card.append(el('div', 'trapcard-point', r.p.point));
@@ -11545,7 +11555,7 @@ function pointsPanel(courseId, u, idx, summaryMode) {
      שנאספו מהנקודות. זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
   if (summaryMode && u.summary) {
     const sum = el('div', 'g-summary');
-    u.summary.split('\n\n').forEach((para) => { const pp = el('p'); pp.innerHTML = para; sum.append(pp); });
+    u.summary.split('\n\n').forEach((para) => { const pp = el('p'); pp.innerHTML = bidiFix(para); sum.append(pp); });
     det.append(sum);
     const traps = [...new Set(u.points.map((p) => p.trap).filter(Boolean))];
     if (traps.length) {
@@ -11572,7 +11582,7 @@ function pointsPanel(courseId, u, idx, summaryMode) {
 
     if (p.trap) {
       const t = el('div', 'g-point-trap');
-      t.innerHTML = '<b>המלכודת:</b> ' + p.trap;
+      t.innerHTML = '<b>המלכודת:</b> ' + bidiFix(p.trap);
       row.append(t);
     }
 
@@ -11693,7 +11703,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
 
   if (u.gap) {
     const gap = el('div', 'g-gap');
-    gap.innerHTML = '<b>⚠️ פער:</b> ' + u.gap;
+    gap.innerHTML = '<b>⚠️ פער:</b> ' + bidiFix(u.gap);
     body.append(gap);
   }
 
@@ -11831,7 +11841,7 @@ async function renderGuide(courseId, focusTopic = null) {
   if (g.headline) {
     const hl = el('section', 'g-headline');
     hl.append(el('h2', null, g.headline.title));
-    const p = el('p', null); p.innerHTML = g.headline.body;
+    const p = el('p', null); p.innerHTML = bidiFix(g.headline.body);
     hl.append(p);
     view.append(hl);
   }
@@ -11842,7 +11852,7 @@ async function renderGuide(courseId, focusTopic = null) {
     ['spine', 'patch', 'warn'].forEach((k) => {
       if (!g.stack[k]) return;
       const d = el('div', 'g-stack-row g-stack-' + k);
-      d.innerHTML = g.stack[k];
+      d.innerHTML = bidiFix(g.stack[k]);
       st.append(d);
     });
     view.append(st);
@@ -11947,7 +11957,7 @@ async function renderGuide(courseId, focusTopic = null) {
   if ((g.caveats || []).length) {
     const cv = el('section', 'g-caveats');
     cv.append(el('h2', 'g-h2', '🔬 איך זה נמדד — והסייגים'));
-    g.caveats.forEach((t) => { const p = el('p', null); p.innerHTML = t; cv.append(p); });
+    g.caveats.forEach((t) => { const p = el('p', null); p.innerHTML = bidiFix(t); cv.append(p); });
     view.append(cv);
   }
 
@@ -11980,7 +11990,7 @@ function skipPanel(g) {
       const d = el('div', 'g-skip-row');
       const top = el('div', 'g-skip-top');
       top.append(el('b', null, s.term));
-      const w = el('span', 'g-skip-why'); w.innerHTML = s.why; top.append(w);
+      const w = el('span', 'g-skip-why'); w.innerHTML = bidiFix(s.why); top.append(w);
       if (s.src) top.append(el('span', 'g-skip-src', '📼 ' + s.src));
       d.append(top);
       /* מה שהארכיון אומר על הפריט, באותה שורה. אמירת "אל תלמדו" בלי הראיה
@@ -12009,7 +12019,7 @@ function sourcesPanel(g) {
     d.append(el('span', 'g-tier', s.tier));
     d.append(el('h4', null, s.name));
     d.append(el('div', 'g-scard-meta', `מחזור ${s.cycle} · ${s.pages} עמ׳`));
-    const u = el('p', 'g-scard-use'); u.innerHTML = s.use; d.append(u);
+    const u = el('p', 'g-scard-use'); u.innerHTML = bidiFix(s.use); d.append(u);
     const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + s.lack; d.append(l);
     grid.append(d);
   });

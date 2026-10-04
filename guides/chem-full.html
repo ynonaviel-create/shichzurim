@@ -2587,6 +2587,14 @@ if (CFG.qa) {
       [].forEach.call(document.querySelectorAll(unitSel), function (sec) {
         var u = byTopic[titleOf(sec)];
         if (!u || !(u.points || []).length) return;
+        /* point הוא טקסט פשוט (לא HTML) — מבריחים אותו, אחרת „Mg²⁺<Na⁺” נבלע כתגית.
+           ואותו תיקון כיווניות כמו במנוע: טווח עם מקף ארוך וסימן עילי בסוף מילה לטינית. */
+        var bidiFix = function (t) {
+          return String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
+            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E');
+        };
+        var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+
         var nQ = {};
         (u.points || []).forEach(function (p) { (p.qids || []).forEach(function (q) { nQ[q] = 1; }); });
         var det = document.createElement('details');
@@ -2599,7 +2607,7 @@ if (CFG.qa) {
         if (u.summary) {
           var s = document.createElement('div');
           s.className = 'dk-qa-sum';
-          s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + p + '</p>'; }).join('');
+          s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
         /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
@@ -2612,7 +2620,7 @@ if (CFG.qa) {
           row.className = 'dk-qa-p';
           var n = (p.qids || []).length;
           row.innerHTML = '<span class="dk-qa-n">' +
-            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + p.point;
+            (n === 1 ? 'נשאל פעם אחת' : 'נשאל ' + n + ' פעמים') + '</span> ' + esc(bidiFix(p.point));
           det.appendChild(row);
         });
         var foot = document.createElement('div');
