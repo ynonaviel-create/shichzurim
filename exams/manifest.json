@@ -1,6 +1,6 @@
 {
   "updated": "2026-10-04",
-  "version": "f1bbbe93",
+  "version": "749ddd13",
   "assets": {
     "tokens": "67607727",
     "components": "b33ec813",
@@ -1802,6 +1802,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 37
+    },
+    {
+      "id": "biostat-guide",
+      "file": "biostat-guide.json",
+      "course": "biostat",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-10-04",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 19
     },
     {
       "id": "biostat-high-yield",
@@ -6929,6 +6948,25 @@
       "heroSub": null,
       "heroEyebrow": null,
       "count": 24
+    },
+    {
+      "id": "physics-a-guide",
+      "file": "physics-a-guide.json",
+      "course": "physics-a",
+      "part": null,
+      "title": "מפת החומרים",
+      "kind": "guide",
+      "year": null,
+      "cycle": null,
+      "moed": null,
+      "added": "2026-10-04",
+      "official": null,
+      "trust": null,
+      "spotlight": null,
+      "series": null,
+      "heroSub": null,
+      "heroEyebrow": null,
+      "count": 13
     },
     {
       "id": "physics-a-nun-bet-moed-a",

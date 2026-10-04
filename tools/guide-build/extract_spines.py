@@ -30,6 +30,11 @@ SPINES = {
     'clinical': [('spine-mazorsky', '*סיכום על - עימות קליני - ניצן מזורסקי*.pdf'),
                  ('sup-shefer-stock', '*סיכום מאוחד 2022*.pdf'),
                  ('sup-thm-fried', '*THM*')],
+    'biostat': [('spine-cohen', '*סופר סיכום ביוסטטיסטיקה - רוני כהן*.pdf'),
+                ('sup-formula-51', '*ביוס - דף נוסחאות מחזור נ״א*.pdf')],
+    'physics-a': [('spine-swissa', 'dir:*מעיין סוויסה*'),
+                  ('sup-sabo', 'dir:*אביה סבו*'),
+                  ('sup-formula-2023', '*דף נוסחאות מעודכן למבחן סמסטר א* 2023*.pdf')],
     'embryo':  [('spine-morlevi', '*אמבריולוגיה - מחזור נ - מור לוי*.pdf'),
                 ('sup-kahalot', '*אמבריולוגיה - סיכום קורס - אדם כחלות*.pdf')],
 }
