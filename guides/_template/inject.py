@@ -80,6 +80,13 @@ DOCS = {
                   "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "anatomy",
     },
+    "biostat-full.html": {
+        "id": "biostat-doc",
+        "maplinks": "biostat",
+        "modes": {"unit": "section.unit",
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
+        "qa": "biostat",
+    },
     "biochem-full.html": {
         "id": "biochem-doc",
         "maplinks": "biochem",
