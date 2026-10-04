@@ -179,6 +179,7 @@ node repeats.js --ask     # בונה פרומפט עצמאי ושומר ב-sourc
 
 ```bash
 node sync.js       # מריץ repeats.js, ואז בודק a בטווח, מזהים כפולים, שדות חסרים
+python3 tools/audit-bidi.py --strict   # סדר ויזואלי מ-PDF (9.5=PK, )כיב(), סוגריים, HTML גולמי
 git add -A && git commit && git push
 ```
 

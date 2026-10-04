@@ -469,7 +469,7 @@
       "q": "עליך לשקול טיפול אנטיביוטי בחולה הסובל מזיהום של בקטריות אירוביות גרם חיובי וגרם שלילי. על איזה מהצירופים הבאים תמליץ?",
       "opts": [
         "Imipenem (Carbapenem)+ Cilastatin",
-        "(Aztreonam(Monobactam)+Tobramycin (Aminoglycoside",
+        "Aztreonam (Monobactam) + Tobramycin (Aminoglycoside)",
         "Imipenem (Carbapenem) + Clavulanic acid",
         "Aminopenicillin+ Clavulanic acid",
         "Nalidixic acid (1st generation Quinolone) + Tetracycline"
