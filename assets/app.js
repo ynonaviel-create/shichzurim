@@ -970,7 +970,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','keyer','formulas','sheet','simexam','survey','ecg'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','shinun','cards','case','keyer','formulas','sheet','simexam','survey','ecg'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   /* חזרה לכתובת שממנה נפתח סבב חי — מנגנים אותו מחדש במקום לצייר את הבורר
@@ -1008,7 +1008,8 @@ function router() {
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param, scopeKey(sub));
-  if (route === 'traps' && param) return renderTraps(param);
+  // #/traps — העמוד נמחק (04/10/2026). קישור ישן מגיע לעמוד הקורס.
+  if (route === 'traps' && param) { location.replace('#/course/' + param); return; }
   if (route === 'tree' && param) return renderTree(param);
   if (route === 'semester' && param) return renderSemester(param);
   if (route === 'q' && param) return renderOneQuestion(param);
@@ -1429,14 +1430,9 @@ function renderCourse(courseId, subKey = null) {
       : `${sim.questions} שאלות · ${Math.round(sim.minutes / 60)} שעות · בתנאי אמת`;
     lRow.append(sx);
   }
-  /* המלכודות — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. בקליני ובביוכימיה
-     הדף היה מציג מצב ריק, וכפתור שמוביל לכלום גרוע מכפתור שאינו. */
+  /* עץ הידע — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. כפתור שמוביל למצב
+     ריק גרוע מכפתור שאינו. */
   if (guideOf(courseId)) {
-    const tr = el('a', 'btn', '🪤 המלכודות שלי');
-    tr.title = 'המלכודות שנפלת בהן בתרגול — מה הטעות, מה הנכון, ואיפה ללמוד';
-    tr.href = '#/traps/' + courseId;
-    lRow.append(tr);
-    /* עץ הידע — אותו תנאי בדיוק: התוכן נגזר מהמפה. */
     const kt = el('a', 'btn', '🌳 עץ הידע');
     kt.dataset.tour = 'tree';   // עוגן לסיור החידושים
     kt.title = 'מפת השליטה שלך — כל נושא נצבע לפי כמה אתה יודע אותו עכשיו, ובמה כדאי לגעת';
@@ -1563,8 +1559,8 @@ function renderCourse(courseId, subKey = null) {
     t.append(el('div', 'learn-card-sub', sd.meta || 'קריאה לעומק'));
     const modes = el('div', 'learn-modes');
     [['📖 קריאה מלאה', '', 'כל התוכן, כמעבר ראשון על החומר'],
-     ['⚡ מרוכז', '?m=focus', 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'],
-     ['🎮 אינטראקטיבי', '?m=play', 'תרגילי התאמה, מפות חשיבה ושערי "נסה קודם"']]
+     ['⚡ מרוכז', '?m=focus', 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'],
+     ['🎮 אינטראקטיבי', '?m=play', 'תרגילי התאמה ומפות חשיבה']]
       .forEach(([lbl, q, tip]) => {
         const a = el('a', 'learn-mode', lbl);
         a.href = sd.href + q;
@@ -3395,7 +3391,7 @@ const ECG_RHYTHMS = [
   {
     id: 'sinus-tachy', name: 'סינוס טכיקרדיה', loc: 0, mech: 1,
     gen() { const bpm = rndi(106, 145); return { beats: sinusBeats(bpm, rnd(0.12, 0.16)), bg: null, bpm,
-      why: `כל המבנה תקין — P לפני כל QRS, סדיר, PR ו-QRS תקינים — רק מהר: ${bpm} לדקה. הקוצב עצמו יורה מהר מדי (כמו בפעילות יתר של בלוטת התריס), ולכן זו הפרעה על-חדרית באוטומטיות. המלכודת של המאגר: לסמן re-entry. לא — אין מעגל, יש קוצב מהיר.` }; },
+      why: `כל המבנה תקין — P לפני כל QRS, סדיר, PR ו-QRS תקינים — רק מהר: ${bpm} לדקה. הקוצב עצמו יורה מהר מדי (כמו בפעילות יתר של בלוטת התריס), ולכן זו הפרעה על-חדרית באוטומטיות. הטעות הנפוצה במאגר: לסמן re-entry. לא — אין מעגל, יש קוצב מהיר.` }; },
   },
   {
     id: 'sinus-brady', name: 'סינוס ברדיקרדיה', loc: 0, mech: 1,
@@ -6056,7 +6052,7 @@ async function renderPractice(courseId, seedTopic = null) {
         : mode === 'hard' ? 'שאלות שהמחזור נופל בהן'
         : 'שאלות';
       info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
-      /* פילטר נושא נדבק כשמגיעים מכרטיס מלכודת או מפילוח, והפאנל שמציג אותו
+      /* פילטר נושא נדבק כשמגיעים מקישור נושא או מפילוח, והפאנל שמציג אותו
          מקופל — אז המשתמש רואה „רק מה שטעיתי” ולא מבין למה חסרות טעויות.
          מציגים את זה בגובה העיניים, עם דרך אחת לנקות. */
       if (selTopics.size) {
@@ -6435,7 +6431,7 @@ async function buildSearchIndex() {
               kind: 'point', course: c, icon: '🎯',
               title: u.topic, body: p.point,
               href: `#/guide/${c.id}/${encodeURIComponent(u.topic)}`,
-              hay: searchNorm([u.topic, p.point, p.trap].filter(Boolean).join(' ')),
+              hay: searchNorm([u.topic, p.point].filter(Boolean).join(' ')),
             }));
           });
           return;
@@ -6602,7 +6598,7 @@ async function renderOneQuestion(qid) {
   }
 
   view.dataset.course = found.course.id;
-  await loadGuide(found.course.id).catch(() => null);   // בשביל המלכודת וכפתור "איפה ללמוד"
+  await loadGuide(found.course.id).catch(() => null);   // בשביל כפתור "איפה ללמוד"
   const q = found.exam.questions[found.idx];
 
   playQuestions({
@@ -6622,7 +6618,7 @@ async function renderOneQuestion(qid) {
    מסלול דחוס שנבנה משלושה דברים שכבר קיימים באתר, ושאף אחד מהם לא ניחוש:
    `freq` — כמה הנושא באמת שווה במבחן, נספר מהשחזורים עצמם;
    `strength` — כמה אתה יודע אותו *עכשיו*, כולל דעיכה עם הזמן;
-   והמלכודות שנפלת בהן.
+   והטעויות הפתוחות שלך.
 
    זה לא "תרגול אקראי עם טיימר". זו הקצאת זמן: אם נשארו לך שעה וחצי, השאלה
    היחידה היא במה לגעת — וזו בדיוק השאלה שאי אפשר לענות עליה בלי שלושת
@@ -6854,102 +6850,6 @@ async function renderFlagged(courseId) {
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
   });
-}
-
-/* ================= המלכודות שלי =================
-
-   הצד השני של "הטעויות שלי". שם רואים *אילו שאלות* טעית; כאן רואים **למה** —
-   מקובץ לפי התפיסה השגויה עצמה, כי חמש טעויות שנובעות מאותו בלבול אינן חמש
-   בעיות אלא אחת. כל התוכן כאן כבר קיים בשדה `trap` שבמפת החומרים; הדף הזה
-   רק מצליב אותו עם מה שבאמת נפלת בו. */
-async function renderTraps(courseId) {
-  setNav('home');
-  const c = courseOf(courseId);
-  if (!c) {
-    view.innerHTML = '';
-    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
-    toTop();
-    return;
-  }
-  view.dataset.course = courseId;
-  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>מחפש את המלכודות…</b></div>';
-
-  const g = await loadGuide(courseId).catch(() => null);
-  const metas = quizzesOf(courseId);
-  await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
-  const hmap = seenH.read();
-
-  view.innerHTML = '';
-  view.append(crumb(c.name, '#/course/' + courseId));
-  const head = el('div', 'page-head');
-  head.append(el('h1', null, `המלכודות שלי — ${c.name}`));
-  /* בלי הדגשות בכוכביות: המנוע מכניס טקסט דרך textContent ולא מרנדר Markdown,
-     אז ‎**‎ היה מוצג כתווים. */
-  head.append(el('p', null,
-    'לא "אילו שאלות טעית" אלא למה. חמש טעויות שנובעות מאותו בלבול הן בעיה אחת, ' +
-    'וכאן הן מקובצות יחד.'));
-  view.append(head);
-
-  if (!g) {
-    view.append(emptyState('🗺️', 'אין עדיין מפת חומרים למקצוע הזה',
-      'המלכודות נשענות על "מה באמת נשאל" שבמפה. במקצועות שיש בהם מפה — אלקטרו, ביומול ופיזיקה — הדף הזה מלא.'));
-    toTop(); updateFooter();
-    return;
-  }
-
-  /* אוספים כל נקודה שיש לה trap, וסופרים בכמה מה-qids שלה יש טעות פתוחה. */
-  const rows = [];
-  (g.units || []).forEach((u) => {
-    (u.points || []).forEach((p) => {
-      if (!p.trap) return;
-      const qids = p.qids || [];
-      const fell = qids.filter((q) => seenH.isOpenMistake(seenH.rec(q, hmap)));
-      const seenCnt = qids.filter((q) => seenH.has(q, hmap)).length;
-      if (!fell.length) return;
-      rows.push({ u, p, qids, fell, seenCnt });
-    });
-  });
-  rows.sort((a, b) => b.fell.length - a.fell.length || b.u.freq - a.u.freq);
-
-  if (!rows.length) {
-    view.append(emptyState('🎯', 'אין מלכודות פתוחות',
-      'או שעוד לא ענית מספיק במקצוע הזה, או שלא נפלת באף מלכודת שמופתה. ' +
-      'כל טעות בשאלה שממופה לנקודה תופיע כאן.'));
-    toTop(); updateFooter();
-    return;
-  }
-
-  const sum = el('p', 'traps-sum');
-  sum.textContent = `${plural(rows.length, 'מלכודת פתוחה', 'מלכודות פתוחות', true)} · ` +
-    `${rows.reduce((n, r) => n + r.fell.length, 0)} שאלות. מדורג לפי כמה נפלת, ואז לפי משקל הנושא במבחן.`;
-  view.append(sum);
-
-  rows.forEach((r) => {
-    const card = el('div', 'trapcard');
-    const top = el('div', 'trapcard-top');
-    top.append(el('span', 'trapcard-topic', r.u.topic));
-    top.append(el('span', 'trapcard-n', `✗ ${r.fell.length} מתוך ${r.qids.length}`));
-    card.append(top);
-    /* ה-trap מכיל <b> (BUILD.md סעיף 2) — כמו בעמוד המפה, לא כטקסט גולמי. */
-    const tt = el('div', 'trap-text'); tt.innerHTML = bidiFix(r.p.trap); card.append(tt);
-    /* הנקודה עצמה — מה שנכון — מתחת למלכודת ולא מעליה, כדי שהקריאה תהיה
-       "זו הטעות" ואז "וזה הנכון", ולא להפך. */
-    card.append(el('div', 'trapcard-point', r.p.point));
-    const acts = el('div', 'trapcard-acts');
-    const gA = el('a', 'btn ghost', '📚 איפה ללמוד');
-    gA.title = 'פתיחת הנושא במפת החומרים — סרטונים, סיכום ומקורות';
-    gA.href = `#/guide/${courseId}/${encodeURIComponent(r.u.topic)}`;
-    acts.append(gA);
-    const pA = el('a', 'btn ghost', '🏋️ תרגל את הנושא');
-    pA.title = 'תרגול שאלות אמת בנושא הזה בלבד';
-    pA.href = `#/practice/${courseId}/${encodeURIComponent(r.u.topic)}`;
-    acts.append(pA);
-    card.append(acts);
-    view.append(card);
-  });
-
-  toTop();
-  updateFooter();
 }
 
 /* ================= עץ הידע =================
@@ -7286,10 +7186,9 @@ function renderAbout() {
       { icon: '🎯', title: 'הטעויות שלי',
         body: 'כל שאלה שטעיתם בה נאספת לכאן לבד. הדף הכי שווה לפני מבחן: רשימת החורים ' +
               'המדויקת שלכם, בלי לבזבז זמן על מה שכבר יושב.' },
-      { icon: '🌳', title: 'עץ הידע והמלכודות',
+      { icon: '🌳', title: 'עץ הידע',
         body: 'העץ צובע כל נושא לפי כמה אתם שולטים בו עכשיו (הציון דועך עם הזמן, כמו ' +
-              'הזיכרון) ואומר במה לגעת. המלכודות אוספות את הפחים שנפלתם בהם — מה הטעות, ' +
-              'מה הנכון, ואיפה ללמוד.' },
+              'הזיכרון) ואומר במה לגעת.' },
       { icon: '🔬', title: 'סימולציות וכלים אינטראקטיביים',
         body: 'מעבדות חיות (פוטנציאל פעולה, מעגלים), תרגילי חישוב עם פתרון שלב-אחר-שלב, ' +
               'ודפי נוסחאות — בתחתית עמוד הקורס, בצבע המקצוע.' },
@@ -7297,8 +7196,8 @@ function renderAbout() {
     { id: 'ab-learn', title: '📖 לומדים', cards: [
       { icon: '📖', title: 'הלומדה — הסיכום המלא, בשלושה מצבים',
         body: 'סיכום מלא עם איורים, סרטונים, הקראה ותרגילים. 📖 קריאה מלאה — מעבר ראשון ' +
-              'על החומר; ⚡ מרוכז — רק התמצית, המלכודות ו"מה באמת נשאל", לחזרה לפני מבחן; ' +
-              '🎮 אינטראקטיבי — תרגילים ושערי "נסה קודם". אפשר לסמן במרקר (נשמר), ומכל ' +
+              'על החומר; ⚡ מרוכז — רק התמצית ו"מה באמת נשאל", לחזרה לפני מבחן; ' +
+              '🎮 אינטראקטיבי — תרגילים. אפשר לסמן במרקר (נשמר), ומכל ' +
               'נושא קופצים ישר לתרגול שלו.' },
       { icon: '🗺️', title: 'מפת החומרים',
         body: 'לכל נושא: מאיפה ללמוד, מה באמת נשאל עליו בשחזורים (עם קישור לכל שאלה), ' +
@@ -7480,7 +7379,7 @@ function whatsNewBanner() {
     a.append(t);
     grid.append(a);
   };
-  card('📖', 'הלומדה — שלושה מצבי קריאה', 'מלא, מרוכז (רק התמצית והמלכודות) ואינטראקטיבי (תרגילים). ובכל פרק: מה באמת נשאל.',
+  card('📖', 'הלומדה — שלושה מצבי קריאה', 'מלא, מרוכז (רק התמצית) ואינטראקטיבי (תרגילים). ובכל פרק: מה באמת נשאל.',
     doc.href + '?m=focus', `לפתוח את לומדת ${s.name} במצב מרוכז`);
   const firstItem = null;   // הקישור לחפיסה כולה — הבורר מציג את התיקים לפי נושא
   card('🎮', 'לשחק עם זה', 'בכל מקצוע: מפתח ההגדרה (זיהוי מרמזים), מקרים מתגלגלים, שינון, סימולציות ומעבדת אק״ג.',
@@ -8363,21 +8262,16 @@ async function renderAdmin() {
           const n = byChoice[oi] || 0;
           const p = total ? Math.round((n / total) * 100) : 0;
           const isC = oi === q.a;
-          const isTrap = topWrong && Number(topWrong[0]) === oi && p >= 35;
-          const row = el('div', 'adm-opt' + (isC ? ' correct' : isTrap ? ' trap' : ''));
+          const row = el('div', 'adm-opt' + (isC ? ' correct' : ''));
           const bar = el('div', 'adm-opt-bar');
           const f = el('i'); f.style.width = p + '%';
           bar.append(f);
           row.append(bar);
           row.append(el('span', 'adm-opt-n', `${p}% · ${n}`));
-          row.append(el('span', 'adm-opt-t', (isC ? '✓ ' : isTrap ? '🪤 ' : '') + opt));
+          row.append(el('span', 'adm-opt-t', (isC ? '✓ ' : '') + opt));
           body.append(row);
         });
-        body.append(el('p', 'adm-hint',
-          `${total} בחירות במבחנים.` +
-          (topWrong && Math.round((topWrong[1] / total) * 100) >= 35
-            ? ' המסיח 🪤 מושך שליש ומעלה — כנראה תפיסה שגויה משותפת, חומר למלכודת במפה.'
-            : '')));
+        body.append(el('p', 'adm-hint', `${total} בחירות במבחנים.`));
       } else {
         body.append(el('p', 'adm-empty',
           info ? 'אין פילוח מסיחים — פחות מ-10 ענו עליה בתוך מבחן (תרגול חופשי לא שומר את הבחירה).'
@@ -8485,7 +8379,7 @@ function prettyTarget(target, type) {
   if (id === undefined) {
     const plain = {
       course: '📚 עמוד מקצוע', exam: '📄 מבחן', sim: '🎛️ סימולציה', drill: '🧮 תרגיל',
-      practice: '🏋️ תרגול', review: '🎯 טעויות', guide: '🗺️ מפה', traps: '🪤 מלכודות',
+      practice: '🏋️ תרגול', review: '🎯 טעויות', guide: '🗺️ מפה',
       shinun: '🧠 שינון', cards: '📇 כרטיסיות', case: '🩺 מקרים', formulas: '🧾 נוסחאות',
     };
     return plain[kind] || target;
@@ -8499,7 +8393,6 @@ function prettyTarget(target, type) {
   if (kind === 'practice') return '🏋️ תרגול: ' + cName(id);
   if (kind === 'review')   return '🎯 טעויות: ' + cName(id);
   if (kind === 'guide')    return '🗺️ מפה: ' + cName(id);
-  if (kind === 'traps')    return '🪤 מלכודות: ' + cName(id);
   if (kind === 'shinun')   return '🧠 שינון: ' + cName(id);
   if (kind === 'cards')    return '📇 כרטיסיות: ' + eTitle(id);
   if (kind === 'case')     return '🩺 מקרים: ' + eTitle(id);
@@ -8704,7 +8597,7 @@ function tourStepsV5() {
             'שינון, סימולציות ומעבדת אק״ג. כאן עושים משהו עם החומר, לא רק עונים.' },
     { route: courseRoute, sel: '[data-tour="doc"]',
       title: '📖 הלומדה — שלושה מצבי קריאה',
-      body: '<b>מלא</b> לקריאה ראשונה, <b>מרוכז</b> — רק התמצית והמלכודות לחזרה מהירה, ו<b>אינטראקטיבי</b> ' +
+      body: '<b>מלא</b> לקריאה ראשונה, <b>מרוכז</b> — רק התמצית לחזרה מהירה, ו<b>אינטראקטיבי</b> ' +
             'עם תרגילים. בכל פרק גם „מה באמת נשאל” מהמבחנים.' },
     { route: courseRoute, sel: '[data-tour="semester"]',
       title: '🗓️ השבוע בבלוק',
@@ -10661,7 +10554,7 @@ const DRILLS = [
   {
     id: 'osmo', course: 'electro', topic: 'תנועת חלקיקים ודיפוזיה', icon: '🧂',
     title: 'אוסמולריות — פירוק חלקיקים', unit: 'mOsm', floor: 0.5,
-    blurb: 'המלכודת הקבועה: כמה חלקיקים החומר מתפרק אליהם',
+    blurb: 'הנקודה הקבועה: כמה חלקיקים החומר מתפרק אליהם',
     gen() {
       const cmp = dpick(OSMO_COMPOUNDS);
       return { name: cmp.name, factor: cmp.n, C: drnd(50, 200, 10) };
@@ -10701,7 +10594,7 @@ const DRILLS = [
       `F = (AUC<sub>פומי</sub> / AUC<sub>ורידי</sub>) × (D<sub>ורידי</sub> / D<sub>פומי</sub>) — השטח משקף כמה תרופה הגיעה לדם, אבל צריך לנרמל למנה.`,
       `יחס השטחים: ${num((v.AUCiv * v.Dpo / v.Div) * v.F)} / ${v.AUCiv} = <b>${num((v.Dpo / v.Div) * v.F, 3)}</b>`,
       `תיקון המנה: × ${v.Div}/${v.Dpo} = × ${num(v.Div / v.Dpo, 3)}`,
-      `F = <b>${num(ans)}%</b> — מלכודת: אם המנות שוות, יחס השטחים לבדו הוא F; אם לא — חובה לתקן.`,
+      `F = <b>${num(ans)}%</b> — שימו לב: אם המנות שוות, יחס השטחים לבדו הוא F; אם לא — חובה לתקן.`,
     ],
   },
   {
@@ -10727,7 +10620,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `k = 0.693 / t½ = 0.693 / ${v.t12} = <b>${num(Math.LN2 / v.t12, 3)} 1/h</b> — קבוע הפינוי (איזה חלק מהתרופה מתפנה בשעה).`,
       `CL = k · V = ${num(Math.LN2 / v.t12, 3)} × ${v.V} = <b>${num(ans)} L/h</b>`,
-      `מלכודת: t½ תלוי גם ב-V וגם ב-CL. תרופה עם V ענק יכולה להיות עם t½ ארוך למרות פינוי מהיר.`,
+      `שימו לב: t½ תלוי גם ב-V וגם ב-CL. תרופה עם V ענק יכולה להיות עם t½ ארוך למרות פינוי מהיר.`,
     ],
   },
   {
@@ -10766,7 +10659,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `מנת העמסה = Css · V — כמה תרופה צריך כדי „למלא” את נפח ההתפזרות לריכוז המטרה.`,
       `${v.Css} × ${v.V} = <b>${num(v.Css * v.V)} mg</b>` + (v.F < 1 ? ` — אבל רק F=${v.F} מהמנה הפומית מגיע לדם, ולכן מחלקים ב-F: ${num(v.Css * v.V)} / ${v.F} = <b>${num(ans)} mg</b>` : ''),
-      `מלכודת: מנת ההעמסה תלויה ב-V ולא ב-CL. הפינוי קובע את מנת ה<b>אחזקה</b>.`,
+      `שימו לב: מנת ההעמסה תלויה ב-V ולא ב-CL. הפינוי קובע את מנת ה<b>אחזקה</b>.`,
     ],
   },
   {
@@ -10795,7 +10688,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `q² = 1/${v.N.toLocaleString('en-US')} → q = √(1/${v.N.toLocaleString('en-US')}) = <b>1/${num(Math.sqrt(v.N), 0)}</b>`,
       `נשאים = 2pq ≈ 2q (כי p ≈ 1) = 2/${num(Math.sqrt(v.N), 0)} = <b>1 ל-${num(ans, 0)}</b>`,
-      `מלכודת: הנשאים שכיחים הרבה יותר מהחולים — במחלה של 1:${v.N.toLocaleString('en-US')}, אחד מכל ${num(ans, 0)} הוא נשא.`,
+      `שימו לב: הנשאים שכיחים הרבה יותר מהחולים — במחלה של 1:${v.N.toLocaleString('en-US')}, אחד מכל ${num(ans, 0)} הוא נשא.`,
     ],
   },
   {
@@ -10863,7 +10756,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `נפח פעימה SV = EDV − ESV = ${v.EDV} − ${v.ESV} = <b>${v.EDV - v.ESV} mL</b>`,
       `EF = SV / EDV = ${v.EDV - v.ESV} / ${v.EDV} = <b>${num(ans)}%</b>`,
-      `תקין ≈ 55–70%. מלכודת: מחלקים ב-EDV, לא ב-ESV.`,
+      `תקין ≈ 55–70%. שימו לב: מחלקים ב-EDV, לא ב-ESV.`,
     ],
   },
   {
@@ -10876,7 +10769,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `SV = EDV − ESV = <b>${v.EDV - v.ESV} mL</b>`,
       `CO = HR × SV = ${v.HR} × ${v.EDV - v.ESV} = ${v.HR * (v.EDV - v.ESV)} mL/min = <b>${num(ans)} L/min</b>`,
-      `מלכודת: בקצב מהיר מאוד הדיאסטולה מתקצרת, EDV יורד — ו-CO יכול לרדת למרות ש-HR עלה.`,
+      `שימו לב: בקצב מהיר מאוד הדיאסטולה מתקצרת, EDV יורד — ו-CO יכול לרדת למרות ש-HR עלה.`,
     ],
   },
 ];
@@ -11146,7 +11039,7 @@ const FORMULAS = [
   {
     id: 'osmo', course: 'electro', sheet: null, title: 'אוסמולריות', unit: 'mOsm',
     expr: 'אוסמולריות = ריכוז × מספר חלקיקים',
-    note: 'המלכודת: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
+    note: 'שימו לב: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
     vars: [
       { k: 'C', label: 'ריכוז', unit: 'mM', default: 100, step: 10 },
       { k: 'factor', label: 'חלקיקים לפירוק', options: OSMO_COMPOUNDS.map((c) => ({ label: `${c.name} (${c.n})`, val: c.n })) },
@@ -11662,24 +11555,16 @@ function pointsPanel(courseId, u, idx, summaryMode) {
      שחזרה אמורה לעשות. לומר את זה במפורש עדיף על שהלומד יגלה לבד. */
   const lead = el('p', 'g-points-lead');
   lead.textContent = summaryMode
-    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על התמצית מהר לפני המבחן, ומוודאים שלא נופלים במלכודות.'
+    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על התמצית מהר לפני המבחן, ומוודאים שהעיקר יושב.'
     : 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
       'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
   det.append(lead);
 
-  /* במצב תמצית: פסקת/שתי-פסקאות סיכום מרוכז לנושא (u.summary), ואז המלכודות
-     שנאספו מהנקודות. זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
+  /* במצב תמצית: פסקת/שתי-פסקאות סיכום מרוכז לנושא (u.summary). זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
   if (summaryMode && u.summary) {
     const sum = el('div', 'g-summary');
     u.summary.split('\n\n').forEach((para) => { const pp = el('p'); pp.innerHTML = bidiFix(para); sum.append(pp); });
     det.append(sum);
-    const traps = [...new Set(u.points.map((p) => p.trap).filter(Boolean))];
-    if (traps.length) {
-      const tb = el('div', 'g-traps');
-      tb.append(el('div', 'g-traps-lbl', '⚠️ מלכודות נפוצות'));
-      traps.forEach((t) => { const d = el('div', 'g-point-trap'); d.innerHTML = '• ' + t; tb.append(d); });
-      det.append(tb);
-    }
     return det;
   }
 
@@ -11695,12 +11580,6 @@ function pointsPanel(courseId, u, idx, summaryMode) {
     }
     if (wrong) meta.append(el('span', 'g-point-bad', `✗ נפלת ב-${wrong}`));
     if (meta.children.length) row.append(meta);
-
-    if (p.trap) {
-      const t = el('div', 'g-point-trap');
-      t.innerHTML = '<b>המלכודת:</b> ' + bidiFix(p.trap);
-      row.append(t);
-    }
 
     /* קישור דו-כיווני בחינם — ה-qids כבר יודעות איפה השאלה יושבת.
        כל קישור נושא את שם המועד שלו, ולכן הוא **גם** הקבלה: אין צורך בשורת
@@ -12143,12 +12022,6 @@ function sourcesPanel(g) {
   return sec;
 }
 
-/* trapBox — המלכודת שהוצגה כאן אחרי כל טעות — נמחקה (13/08/2026) בעקבות
-   הסקר: המלכודת נכתבת לנקודה שנשענת על עד שמונה שאלות ונורתה על כל טעות
-   בלי קשר למסיח שנבחר, ולכן הרגישה "לא קשורה" והפריעה אחרי השאלות.
-   המלכודות עצמן חיות בלומדה מאחורי שער "נסה קודם" — שם הן שאלה-עצמית
-   לפני חשיפה, לא האשמה אחרי טעות — ובעמוד #/traps שנשאר opt-in. */
-
 /* מהשאלה למפה — וכשיש סיכום מלא, גם ישר לפרק הנכון בו. שני הקישורים חיים
    על אותו עוגן (הנושא הקנוני), ולכן הצד השני של הלולאה סיכום→תרגול→סיכום
    מגיע בחינם: מהסיכום מגיעים לתרגול דרך קישורי ה-drill, ומטעות בתרגול
@@ -12251,7 +12124,7 @@ document.getElementById('searchBtn')?.addEventListener('click', openSearch);
   const topTab = el('a', 'nav-course');
   document.querySelector('.topnav')?.prepend(topTab);
 
-  const COURSE_ROUTES = new Set(['course', 'practice', 'review', 'guide', 'tree', 'traps',
+  const COURSE_ROUTES = new Set(['course', 'practice', 'review', 'guide', 'tree',
     'shinun', 'semester', 'anki', 'drills', 'tonight', 'flagged', 'formulas', 'sim', 'simexam']);
   const courseFromHash = () => {
     const [route, param] = location.hash.replace(/^#\/?/, '').split('/');

@@ -1524,8 +1524,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .g-summary p{margin:0 0 11px; font-size:14px; line-height:1.85; color:var(--text);}
 .g-summary p:last-child{margin-bottom:0;}
 .g-summary b{color:var(--accent-dp, var(--accent)); font-weight:800;}
-.g-traps{margin-top:15px; padding-top:13px; border-top:1px solid var(--line-soft);}
-.g-traps-lbl{font-size:12px; font-weight:800; color:var(--warn); margin-bottom:8px;}
 
 .g-point{padding:12px 0; border-bottom:1px solid var(--line-soft);}
 .g-point:last-child{border-bottom:none;}
@@ -1543,14 +1541,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   background:var(--bad-bg); border:1px solid var(--bad-ln); color:var(--bad);
   border-radius:99px; padding:2px 9px;
 }
-
-.g-point-trap{
-  margin-top:8px; font-size:12.5px; line-height:1.65;
-  color:var(--warn); background:var(--warn-bg);
-  border:1px solid var(--warn-ln); border-radius:var(--radius-sm);
-  padding:8px 11px;
-}
-.g-point-trap b{color:var(--warn);}
 
 .g-point-qs{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
 .g-point-q{
@@ -1849,11 +1839,9 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .adm-opt-bar{flex:0 0 110px; height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden; direction:ltr;}
 .adm-opt-bar i{display:block; height:100%; background:var(--dim); border-radius:99px;}
 .adm-opt.correct .adm-opt-bar i{background:var(--good);}
-.adm-opt.trap .adm-opt-bar i{background:var(--bad);}
 .adm-opt-n{flex:0 0 64px; font-size:12px; font-weight:800; color:var(--muted); direction:ltr; text-align:left;}
 .adm-opt-t{flex:1; font-size:13px; line-height:1.5;}
 .adm-opt.correct .adm-opt-t{color:var(--good); font-weight:700;}
-.adm-opt.trap .adm-opt-t{color:var(--bad); font-weight:700;}
 
 /* בריאות התוכן — מבחנים */
 .adm-exam{border-top:1px solid var(--line-soft); padding:12px 2px; display:flex; flex-direction:column; gap:6px;}
@@ -1999,12 +1987,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 .shn-summary{ text-align:center; }
 .shn-summary-line{ font-size:15px; color:var(--muted); margin-top:10px; line-height:1.6; }
 
-/* ═══════════════ מלכודות ═══════════════
-   דף מרוכז לכל המקצוע (#/traps). הקופסה שהופיעה בפאנל המשוב אחרי טעות
-   נמחקה 13/08/2026 — פידבק הסקר: המלכודת של הנקודה נורתה על כל טעות בלי
-   קשר למסיח, והרגישה "לא קשורה". המלכודות חיות בלומדה מאחורי "נסה קודם". */
-.trap-text{ font-size:14.5px; line-height:1.8; max-width:70ch; }
-
 /* ═══════════════ שאלות hotspot — לחצו על האזור ═══════════════ */
 .q-hotspot{ position:relative; }
 .hs-rect{
@@ -2093,23 +2075,6 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .tree-doc:hover{ opacity:1; }
 .tree-foot{ margin-top:26px; color:var(--dim); font-size:13px; text-align:center; }
-
-.traps-sum{ color:var(--dim); font-size:14px; margin:-6px 0 18px; }
-.trapcard{
-  background:var(--surface); border:1px solid var(--line-soft);
-  border-radius:var(--radius); box-shadow:var(--shadow);
-  padding:16px 18px; margin-bottom:14px;
-}
-.trapcard-top{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:9px; }
-.trapcard-topic{ font-size:13px; font-weight:800; color:var(--accent-dk); }
-[data-theme="dark"] .trapcard-topic{ color:var(--accent); }
-.trapcard-n{ font-size:12.5px; font-weight:800; color:var(--bad); white-space:nowrap; }
-.trapcard .trap-text{ font-weight:600; }
-.trapcard-point{
-  margin-top:11px; padding-top:11px; border-top:1px solid var(--line-soft);
-  font-size:14px; line-height:1.8; color:var(--muted); max-width:70ch;
-}
-.trapcard-acts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
 
 
 /* ═══════════════ כלי השאלה — סימון וקישור ═══════════════
