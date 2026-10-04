@@ -412,6 +412,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   font-size:17.5px; font-weight:600; line-height:1.9;
   max-width:70ch;                 /* שורה ארוכה מדי מעייפת את העין */
   letter-spacing:.1px;
+  white-space:pre-line;           /* שבירות השורה בשאלה הן תוכן — פתיח מקרה, רשימת חומרים, נוסחה בשורה משלה */
 }
 .q-origin{font-size:12.5px; font-weight:700; color:var(--dim); margin-top:9px;}
 
@@ -419,6 +420,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   font-size:14px; color:var(--warn); background:var(--warn-bg);
   border:1px solid var(--warn-ln); border-radius:8px;
   padding:10px 14px; margin-top:14px; line-height:1.65;
+  white-space:pre-line;
 }
 /* הערה שנוקבת בתשובה, ולכן חיה בתוך המשוב ולא מעל המסיחים. הצהוב של האזהרה
    מיותר כאן — היא כבר לא מזהירה מכלום, היא מלמדת. */
@@ -591,7 +593,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   color:var(--muted); text-transform:none;
 }
 .fb .ex-t:first-child{margin-top:0;}
-.fb .ex-head{margin:0; font-size:14.5px; font-weight:500; line-height:1.85;}
+.fb .ex-head{margin:0; font-size:14.5px; font-weight:500; line-height:1.85; white-space:pre-line;}
 .fb .ex-rej{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:9px;}
 .fb .ex-rej > li{
   display:flex; align-items:flex-start; gap:10px;
@@ -608,7 +610,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   font-size:11.5px; font-weight:800; color:var(--muted);
   font-variant-numeric:tabular-nums;
 }
-.fb .ex-b{flex:1; min-width:0;}
+.fb .ex-b{flex:1; min-width:0; white-space:pre-line;}
 /* הפסילה של המסיח שנבחר — היא ההסבר לטעות עצמה, ולכן היא בולטת. */
 .fb .ex-rej > li.mine{
   border-color:var(--bad-ln); background:var(--bad-bg);
@@ -1181,7 +1183,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   box-shadow:var(--shadow);
 }
 .g-headline h2{margin:0 0 5px; font-size:16.5px; color:#fff;}
-.g-headline p{margin:0; font-size:13px; line-height:1.6; color:rgba(255,255,255,.94);}
+.g-headline p{margin:0; font-size:14px; line-height:1.65; color:rgba(255,255,255,.94);}
 .g-headline b{color:#ffe08a;}
 
 .g-stack{margin:0 0 18px;}
@@ -1299,7 +1301,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 .g-intel-head{font-size:13px; font-weight:800; color:var(--muted); padding:9px 0 4px;}
 .g-quote{padding:8px 0; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:4px;}
-.g-q{font-size:13px; line-height:1.6; color:var(--text);}
+.g-q{font-size:14px; line-height:1.65; color:var(--text);}
 .g-qsrc{font-size:11px; color:var(--dim);}
 
 .g-acts{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:4px;}
@@ -1323,7 +1325,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   padding:9px 13px; margin-bottom:6px;
 }
 .g-skip-row b{font-size:13.5px; flex-shrink:0;}
-.g-skip-why{font-size:12.5px; color:var(--muted); line-height:1.55; flex:1; min-width:180px;}
+.g-skip-why{font-size:14px; color:var(--muted); line-height:1.6; flex:1; min-width:180px;}
 .g-skip-src{font-size:11px; color:var(--dim); flex-shrink:0;}
 
 /* --- תיקי הסיכומים --- */
@@ -1352,7 +1354,7 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
   margin-top:8px; background:var(--surface-2); border:1px dashed var(--line);
   border-radius:var(--radius); padding:14px 18px;
 }
-.g-caveats p{margin:0 0 9px; font-size:12.5px; color:var(--muted); line-height:1.65;}
+.g-caveats p{margin:0 0 9px; font-size:14px; color:var(--muted); line-height:1.65;}
 .g-caveats p:last-child{margin-bottom:0;}
 
 /* קושי המחזור — שורת עובדה קטנה במשוב, לא קופסה צעקנית */
@@ -1521,13 +1523,13 @@ main{flex:1; width:100%; max-width:1020px; margin:0 auto; padding:36px 24px 72px
 }
 
 /* תמצית מרוכזת (קורס בלי שחזורים) — פסקאות קריאה, לא רשימת נקודות. */
-.g-summary p{margin:0 0 11px; font-size:14px; line-height:1.85; color:var(--text);}
+.g-summary p{margin:0 0 11px; font-size:15px; line-height:1.85; color:var(--text);}
 .g-summary p:last-child{margin-bottom:0;}
 .g-summary b{color:var(--accent-dp, var(--accent)); font-weight:800;}
 
 .g-point{padding:12px 0; border-bottom:1px solid var(--line-soft);}
 .g-point:last-child{border-bottom:none;}
-.g-point-txt{font-size:14px; font-weight:700; line-height:1.7; color:var(--text);}
+.g-point-txt{font-size:15.5px; font-weight:700; line-height:1.75; color:var(--text);}
 
 .g-point-meta{display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:7px;}
 /* המספר הוא הסיבה שהשורה למעלה — הוא צריך להיראות כמו נתון, לא כמו קישוט. */

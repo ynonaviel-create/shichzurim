@@ -196,6 +196,10 @@ body:not(:has(#ed-prog)) #dk-modes{
 body.dk-toolhide .tools,
 body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
 
+/* עמודת הקריאה: ב-50rem יצאו ~90 תווים בשורה — 44rem ≈ 75, הטווח הנוח לעין.
+   מסך בלבד (בהדפסה הגוף ברוחב מלא), ולא באלקטרו שיש לו פריסה משלו. */
+@media screen{ body:not(:has(#ed-prog)){max-width:44rem;} }
+
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,

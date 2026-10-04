@@ -45,14 +45,71 @@ const view = document.getElementById('view');
    טווח מספרים עם מקף ארוך — „2–4%” מוצג „4–2%” (מקף רגיל נשאר בסדר הנכון),
    וסימן עילי בסוף מילה לטינית — „NAD⁺”, „Ca²⁺” מוצגים „⁺NAD” (LRM אחריו מחזיר אותו).
    מתוקן בזמן התצוגה בלבד: הנתונים לא משתנים, וה-norm שמייצר qid לא רואה את זה. */
+/* ועוד שלושה (נמדדו 04/10 באותה שיטה):
+   מינוס מוביל — „-70mV” מוצג „70mV-”; LRM לפניו הופך את הספרות ל-LTR (כלל W7).
+     לא אחרי אות-תחילית בודדת („כ -53%” הוא מקף של תחילית עם רווח מיותר, לא מינוס).
+   מטען ASCII בסוף נוסחה כימית — „H+ לחלל” מוצג „+H”; LRM אחריו, כמו ב-⁺.
+     רק נוסחה (אות גדולה: H, OH, Fe2, NH4) — סיומת כמו „(olol-)” כבר מוצגת „-olol”
+     כמו שצריך, ו-LRM היה הופך אותה.
+   חץ → בהקשר עברי מצביע אחורה (חצים לא משתקפים) — הופך ל-←, אלא אם משני
+     צדדיו אותיות לטיניות (שם הקטע כולו LTR והחץ תקין). חצי ASCII (-> / <-)
+     מתורגמים לפי המשמעות: קדימה = מהמילה הקודמת לבאה. */
+const bidiArrows = (s) => {
+  if (!/[→]|->|<-/.test(s)) return s;
+  if (!s.includes('<!--')) {
+    s = s.replace(/<-{1,2}>/g, '↔').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+  }
+  /* האות הקרובה מכל צד, בדילוג על תגיות HTML (בשדות המפה יש <b>). */
+  const side = (i, step) => {
+    let inTag = false;
+    for (let j = i + step; j >= 0 && j < s.length; j += step) {
+      const c = s[j];
+      if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+      if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+      if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';   // כל אות LTR חזקה, כולל יוונית — α(1→6)
+      if (/[א-ת]/.test(c)) return 'R';
+      if (step > 0 && /\d/.test(c)) return side(i, -1);   // ספרה יורשת את האות החזקה שלפניה (W7)
+    }
+    return null;
+  };
+  let out = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c !== '→' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+    /* חץ שפותח טקסט הוא אייקון („→ חזרה”), ובעמוד RTL הוא נכון. מחברים רק חץ שבין שני פריטים. */
+    if (c === '→') {
+      let j = i - 1;
+      while (j >= 0 && /\s/.test(s[j])) j--;
+      if (j < 0 || (s[j] === '>' && s[s.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+    }
+    const ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+    const fwd = c !== '\uE001';
+    out += (fwd === ltr) ? '→' : '←';
+  }
+  return out;
+};
 const bidiFix = (s) => (typeof s === 'string'
-  ? s.replace(/(\d)\u2013(?=\d)/g, '$1-')
+  ? bidiArrows(s.replace(/(\d)\u2013(?=\d)/g, '$1-')
      .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+     .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, (m, pre, sign, at, str) =>
+       (/\s/.test(pre) && /(^|\s)[בכלמהוש]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign)
+     .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'))
   : s);
+/* **מודגש** בתוכן (~270 מקומות, בעיקר בעימות קליני ובאלקטרו) הוצג ככוכביות.
+   כאן הוא הופך ל-<b> — דרך צמתי טקסט, לא innerHTML, כך שאין סיכון הזרקה. */
+const boldStrip = (s) => (typeof s === 'string' ? s.replace(/\*\*([^*\n]+?)\*\*/g, '$1') : s);
 const el = (tag, cls, txt) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (txt != null) n.textContent = bidiFix(txt);
+  if (txt != null) {
+    const s = bidiFix(txt);
+    const parts = typeof s === 'string' && s.includes('**') ? s.split(/\*\*([^*\n]+?)\*\*/) : null;
+    if (!parts || parts.length === 1) n.textContent = s;
+    else parts.forEach((p, i) => {
+      if (!p) return;
+      if (i % 2) { const b = document.createElement('b'); b.textContent = p; n.append(b); } else n.append(p);
+    });
+  }
   return n;
 };
 /* fem=true לשמות עצם נקביים. בלי זה יצא "שאלה אחד" — וזה כבר קרה בכרטיסיות
@@ -2672,7 +2729,7 @@ async function renderShinun(courseId, topicFilter) {
       card.append(el('div', 'shn-flip-front', it.front));
       if (flipped) {
         card.append(el('div', 'shn-flip-back', it.back));
-        if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
+        if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + bidiFix(it.mnem); card.append(m); }
         card.append(reportButton(courseId, 'shinun', id, shinunNorm(it.front), it.front + ' — ' + it.back));
       } else {
         card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · רווח / →ידעתי / ←עוד לא'));
@@ -2772,7 +2829,7 @@ async function renderShinun(courseId, topicFilter) {
         row.append(el('div', 'shn-row-f', it.front));
         const b = el('div', 'shn-row-b');
         b.append(el('span', 'shn-row-btext', it.back));
-        if (it.mnem) { const m = el('span', 'shn-row-mnem'); m.innerHTML = ' · 💡 ' + it.mnem; b.append(m); }
+        if (it.mnem) { const m = el('span', 'shn-row-mnem'); m.innerHTML = ' · 💡 ' + bidiFix(it.mnem); b.append(m); }
         row.append(b);
         row.addEventListener('click', () => row.classList.toggle('open'));
         body.append(row);
@@ -2819,10 +2876,10 @@ async function renderShinun(courseId, topicFilter) {
           if (correct) tally.ok++;
           list.querySelectorAll('.shn-opt').forEach((x) => {
             x.classList.add('locked');
-            if (x.textContent === bidiFix(it.back)) x.classList.add('right');   // el() מעביר את הטקסט דרך bidiFix
+            if (x.textContent === boldStrip(bidiFix(it.back))) x.classList.add('right');   // el() מעביר את הטקסט דרך bidiFix
           });
           if (!correct) b.classList.add('wrong');
-          if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; qbox.append(m); }
+          if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + bidiFix(it.mnem); qbox.append(m); }
           bar.innerHTML = `ציון: <b>${tally.ok}/${tally.total}</b>`;
         });
         list.append(b);
@@ -3844,7 +3901,7 @@ function playQuestions(cfg) {
   if (cfg.spotlight) {
     const sp = el('div', 'spotlight-box');
     sp.append(el('b', null, cfg.spotlight.title));
-    const body = el('p', null); body.innerHTML = cfg.spotlight.body;
+    const body = el('p', null); body.innerHTML = bidiFix(cfg.spotlight.body);
     sp.append(body);
     view.append(sp);
   }
@@ -4953,7 +5010,7 @@ function sheetNode(courseId, focusKey = null) {
       infoBox.append(el('div', 'sheet-info-t', '💡 ' + sec.label));
       const p = el('p');
       /* **הדגשה** → <b>. הטקסט נכתב על ידינו ולא מגיע מקלט משתמש. */
-      p.innerHTML = String(sec.info).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      p.innerHTML = bidiFix(String(sec.info).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'));
       infoBox.append(p);
     }
     const m = marks[k];
@@ -10918,7 +10975,7 @@ function renderDrill(id) {
   function fresh() {
     v = d.gen();
     answered = false;
-    promptBox.innerHTML = d.prompt(v);
+    promptBox.innerHTML = bidiFix(d.prompt(v));
     input.value = '';
     input.disabled = false;
     checkBtn.disabled = false;
@@ -10948,14 +11005,14 @@ function renderDrill(id) {
 
     fb.className = 'drill-fb show ' + (ok ? 'ok' : 'no');
     const verdict = el('div', 'drill-verdict');
-    verdict.innerHTML = ok
+    verdict.innerHTML = bidiFix(ok
       ? `✓ נכון! התשובה: <b>${num(ans)} ${d.unit}</b>`
-      : `✗ לא מדויק. ענית ${num(userAns)}, התשובה הנכונה: <b>${num(ans)} ${d.unit}</b>`;
+      : `✗ לא מדויק. ענית ${num(userAns)}, התשובה הנכונה: <b>${num(ans)} ${d.unit}</b>`);
     fb.append(verdict);
     const steps = el('ol', 'drill-steps');
     d.steps(v, ans).forEach((s) => {
       const li = el('li');
-      li.innerHTML = s;
+      li.innerHTML = bidiFix(s);
       steps.append(li);
     });
     fb.append(steps);
@@ -11726,7 +11783,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
     det.append(el('div', 'g-intel-head', `🔒 מה נאמר בהקלטות (${u.intel.length})`));
     u.intel.forEach((it) => {
       const q = el('div', 'g-quote');
-      q.innerHTML = '<span class="g-q">„' + it.quote + '”</span><span class="g-qsrc">📼 ' + it.src + '</span>';
+      q.innerHTML = '<span class="g-q">„' + bidiFix(it.quote) + '”</span><span class="g-qsrc">📼 ' + it.src + '</span>';
       det.append(q);
     });
     body.append(det);
@@ -11980,7 +12037,7 @@ function skipPanel(g) {
     if (!items.length) return;
     const box = el('div', 'g-skip-cat');
     box.append(el('h3', null, title));
-    const p = el('p', 'g-skip-note'); p.innerHTML = sub; box.append(p);
+    const p = el('p', 'g-skip-note'); p.innerHTML = bidiFix(sub); box.append(p);
     items.forEach((s) => {
       const d = el('div', 'g-skip-row');
       const top = el('div', 'g-skip-top');
@@ -11993,7 +12050,7 @@ function skipPanel(g) {
          על נושא שנשאל ארבע פעמים. */
       if (s.asked) {
         const a = el('div', 'g-skip-asked');
-        a.innerHTML = '<b>אבל בארכיון:</b> ' + s.asked;
+        a.innerHTML = '<b>אבל בארכיון:</b> ' + bidiFix(s.asked);
         d.append(a);
       }
       box.append(d);
@@ -12015,7 +12072,7 @@ function sourcesPanel(g) {
     d.append(el('h4', null, s.name));
     d.append(el('div', 'g-scard-meta', `מחזור ${s.cycle} · ${s.pages} עמ׳`));
     const u = el('p', 'g-scard-use'); u.innerHTML = bidiFix(s.use); d.append(u);
-    const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + s.lack; d.append(l);
+    const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + bidiFix(s.lack); d.append(l);
     grid.append(d);
   });
   sec.append(grid);
