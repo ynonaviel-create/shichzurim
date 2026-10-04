@@ -42,14 +42,14 @@ HTML_OK_FIELDS = ('summary', 'gap', 'body', 'why', 'use', 'asked', 'lack', 'mnem
 
 
 def parens_ok(s):
-    """סוגריים מאוזנים. „)” בלי פותח שבא אחרי „1”/„A” בתחילת מילה הוא מספור רשימה („1) … 2)”), לא יתום."""
+    """סוגריים מאוזנים. „)” בלי פותח שבא אחרי „1”/„A”/„א” בתחילת מילה הוא מספור רשימה („1) … 2)”), לא יתום."""
     depth = 0
     for m in re.finditer(r'[()]', s):
         if m.group() == '(':
             depth += 1
         elif depth:
             depth -= 1
-        elif not re.search(r'(?:^|[\s=:,>])(?:\d{1,2}|[A-Za-z])$', s[:m.start()]):
+        elif not re.search(r'(?:^|[\s=:,>])(?:\d{1,2}|[A-Za-z]|[\u05d0-\u05ea])$', s[:m.start()]):
             return False
     return depth == 0
 
@@ -81,7 +81,7 @@ def course_of(fname):
 def audit():
     hits = defaultdict(list)
     for f in sorted(glob.glob(os.path.join(ROOT, 'exams', '*.json')) +
-                    glob.glob(os.path.join(ROOT, 'exams', '_staging', 'fragments', '*.json'))):
+                    glob.glob(os.path.join(ROOT, 'exams', '_staging', '**', '*.json'), recursive=True)):
         if os.path.basename(f) in ('manifest.json',):
             continue
         try:
