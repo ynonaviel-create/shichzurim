@@ -17,22 +17,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -46,9 +30,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -167,10 +149,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -204,8 +185,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -214,11 +194,9 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,

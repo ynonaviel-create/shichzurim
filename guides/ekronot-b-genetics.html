@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -340,7 +331,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -395,14 +386,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו הרפואה של ייעוץ גנטי בפועל: ילד עם עיכוב התפתחותי — CMA; ממצא VUS — CMA להורים; שני נשאים לטיי-זקס שרוצים להימנע מהפסקות היריון — אבחון טרום-השרשתי; NIPT לא תקין — דיקור; פרדר-ווילי ואנגלמן — תבחין מתילציה, שמכסה גם חסר, גם UPD וגם פגם הטבעה. ומה שחוזר בפתולוגיה ובווירולוגיה: PCR, FISH ו-NGS הם אותם כלים, על גידול ועל נגיף.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „למוטציית נקודה בגן ידוע — NGS, כי הוא מתקדם יותר.” <b>האמת:</b> השיטה הטובה ביותר למוטציה ידועה בגן ידוע היא <b>סנגר</b> — מדויק, ממוקד וזול. NGS הוא לחיפוש רחב, ולא טוב ל<b>חסרים גדולים</b>.</div>
-<div class="trap"><b>המלכודת:</b> „ילד עם מוגבלות שכלית וקריוטיפ תקין — QF-PCR.” <b>האמת:</b> QF-PCR סופר טריזומיות; לעיכוב התפתחותי עם קריוטיפ תקין הבדיקה היא <b>CMA</b>. (במאגר 2013 המפתח אומר QF-PCR — ללמוד את העיקרון, לא את המפתח.)</div>
-<div class="trap"><b>המלכודת:</b> „CMA מזהה הכול.” <b>האמת:</b> לא <b>שינויים מאוזנים</b> (טרנסלוקציה רוברטסונית מאוזנת — אין חומר שאבד) ולא <b>מוטציות נקודתיות</b>. ו-UPD רואים רק בזרוע ה-<b>SNP array</b> של הצ׳יפ, לא ב-CGH.</div>
-<div class="trap"><b>המלכודת:</b> „NIPT לא תקין — הפסקת היריון” או „לחזור על NIPT”. <b>האמת:</b> NIPT הוא <b>סקר</b>: ה-DNA מהשליה, ויש מוזאיקה שלייתית ואימהית. מאמתים ב<b>דיקור מי שפיר</b>. ואם יש ממצא מבני באולטרסאונד — NIPT לא מספיק, ישר פולשנית.</div>
-<div class="trap"><b>המלכודת:</b> „בת 39 — תמיד דיקור מי שפיר.” <b>האמת:</b> הגיל כבר משוקלל בסקר. סקר משולב תקין (סיכון נמוך) — <b>אין הצדקה לפולשנית</b>. יתרון סיסי שליה — הזמן המוקדם; חסרונו — סיכון הפלה גבוה יותר.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>QF-PCR</span><span data-d>ספירת STR — טריזומיה מהר, בלי תאים מתחלקים</span>
@@ -414,7 +397,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>בירור היריון בסיכון — מהסקר לאבחנה</b><ol><li>סקר שליש ראשון: שקיפות עורפית, β-hCG, PAPP-A, גיל</li><li>סיכון ביניים — תבחין משולב עם שליש שני</li><li>סיכון גבוה או NIPT לא תקין — בדיקה פולשנית</li><li>סיסי שליה (מוקדם) או מי שפיר (משבוע 17)</li><li>מהחומר: קריוטיפ / CMA / ריצוף לפי השאלה</li><li>ממצא VUS — בדיקת ההורים</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/שיטות אבחון מולקולריות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/שיטות אבחון מולקולריות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/שיטות אבחון מולקולריות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/שיטות אבחון מולקולריות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t02">
 <h3>גנטיקה של אוכלוסיות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הרדי-ויינברג הוא חשבון של שני שלבים: שכיחות אללים (p+q=1) ושכיחות גנוטיפים (p²+2pq+q²=1), בהנחות של זיווג אקראי, אוכלוסייה גדולה, בלי מוטציות, הגירה או סלקציה. החישוב שחוזר בכל מבחן: משכיחות מחלה רצסיבית — שורש — שכיחות נשאים. ואז ייעוץ: אח בריא של חולה הוא נשא ב-2/3, והסיכון לילד הוא מכפלה. אפקט המייסד מסביר למה הסקר מותאם למוצא.</p>
@@ -450,14 +433,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זה מה שקורה בייעוץ לפני היריון בישראל: פאנל לפי מוצא (אפקט המייסד), CF ו-X שביר לכולם, ובזוג מעורב — קודם הצד שבו המחלה שכיחה. ומאחורי כל „מומלץ” או „לא מומלץ” עומדים אותם עקרונות: שכיחות, חומרה, בדיקה זולה, ויש מה לעשות עם התשובה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „שכיחות המחלה 1:250,000 — הנשאים 1:125,000.” <b>האמת:</b> קודם <b>שורש</b>: q=1:500. ואז כפול שתיים: נשאים <b>1:250</b>. 1:1,000,000 — 1:500. 1:2500 — 1:25.</div>
-<div class="trap"><b>המלכודת:</b> „אח בריא של חולה במחלה רצסיבית — נשא בסיכוי 1/2.” <b>האמת:</b> <b>2/3</b>. מארבע האפשרויות ירדה זו של החולה; נשארו שלוש, ובשתיים הוא נשא. וכל סיכון לילד מוכפל ב-<b>1/4</b> בסוף.</div>
-<div class="trap"><b>המלכודת:</b> „הנחת הרדי-ויינברג: זיווגים מתוכננים / אוכלוסייה קטנה.” <b>האמת:</b> ההנחות הן ההפך: <b>זיווג אקראי</b> ו<b>אוכלוסייה גדולה</b>. זיווגים מתוכננים (שני גמדים), סחיפה באוכלוסייה קטנה ואפקט המייסד — הם מה שמפר את שיווי המשקל.</div>
-<div class="trap"><b>המלכודת:</b> „X שביר נבדק לכולם כי הוא קטלני.” <b>האמת:</b> כי הוא <b>שכיח</b> — ולכל הנשים, כי הוא בתאחיזה ל-X. CF נבדק לכולם מאותה סיבה — אבל לא בבדואים, כי אחוז הגילוי של הפאנל אצלם נמוך.</div>
-<div class="trap"><b>המלכודת:</b> בזוג מעורב — „לבדוק את שניהם.” <b>האמת:</b> קודם את בן הזוג <b>מהמוצא שבו המחלה שכיחה</b>; רק אם הוא נשא — את השני.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>q²</span><span data-d>שכיחות החולים במחלה רצסיבית</span>
@@ -469,7 +444,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>חישוב סיכון לילד חולה — הצעדים</b><ol><li>שכיחות המחלה = q²</li><li>שורש — q</li><li>נשאים באוכלוסייה = 2q</li><li>קרוב של חולה: אח בריא 2/3, ילד של חולה 1</li><li>מכפלת נשאות האב והאם</li><li>כפול 1/4</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/גנטיקה של אוכלוסיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/גנטיקה של אוכלוסיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/גנטיקה של אוכלוסיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/גנטיקה של אוכלוסיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t03">
 <h3>תורשה מנדלית ולא-מנדלית<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">עץ משפחה קוראים לפי כללים: דומיננטי בכל דור ו-50%, רצסיבי בהורים בריאים ו-25%, בתאחיזה ל-X — ואב חולה עם בן חולה שולל אותה, מיטוכונדריאלי — רק דרך האם. ומעבר לכללים: חדירות מול ביטוי, אנטיסיפציה מחזרות שמתרחבות, הטבעה, compound heterozygote, סף ו-bottleneck במיטוכונדריה, ובייס — עדכון הסיכון המנדלי לפי מה שרואים. מחלה רב-גורמית: המין הנדיר נושא יותר גנים.</p>
@@ -505,15 +480,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זה הייעוץ הגנטי: לבת 45 בריאה של חולה קרויצפלד-יעקב — לא 50% אלא 1/11; לאם שחמשת בניה בריאים — הסיכון לבן הבא ירד; לאישה עם מוטציית BRCA1 בגיל 64 בלי סרטן — חדירות, לא ביטוי. ובמיטוכונדריה — תרומת ביצית היא הדרך היחידה לעקוף מוטציה בגנום המיטוכונדריאלי.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „בת בריאה עם בן חולה — אוטוזומלי רצסיבי, כי כך במפתח.” <b>האמת:</b> התמונה מתאימה ל-<b>X רצסיבי</b> (אם נשאית, בן חולה). במאגר של קויפמן X רצסיבי לא הוצע, ולכן המפתח בחר רצסיבי — לצייר את העץ, ולזכור מה באמת מתאים.</div>
-<div class="trap"><b>המלכודת:</b> „MERRF שעוברת דרך אב — עדיין מיטוכונדריאלית.” <b>האמת:</b> העברה דרך <b>אב</b> פוסלת תורשה מיטוכונדריאלית. מחלה עם פנוטיפ מיטוכונדריאלי שעוברת מאב — הגן <b>גרעיני</b>, ואז ריצוף גרעיני ותורשה מנדלית.</div>
-<div class="trap"><b>המלכודת:</b> „שני הורים עם אכונדרופלזיה — 25% ילד חולה.” <b>האמת:</b> 25% <b>תקין</b>, 50% חולה, 25% הומוזיגוט לטאלי. לקרוא מה נשאל: „תקין” או „חולה” או „לטאלי”.</div>
-<div class="trap"><b>המלכודת:</b> „חדירות” ו„ביטוי” מתחלפים. <b>האמת:</b> <b>חדירות</b> — כן/לא (נושאת BRCA1 בלי סרטן). <b>ביטוי</b> — כמה (שני בני משפחה עם אותה מחלה בחומרה שונה).</div>
-<div class="trap"><b>המלכודת:</b> „המחלה שכיחה יותר בבנים, ולכן בן חולה מסוכן יותר לאחים.” <b>האמת:</b> הפוך. במודל הסף, <b>המין הנדיר</b> (הבת) חולה רק עם עומס גנטי גדול — ולכן בת חולה, ובוודאי כמה בנות, מעידות על יותר גנים במשפחה ומעלות את הסיכון.</div>
-<div class="trap"><b>המלכודת:</b> „Prior הוא הסיכון אחרי הבדיקות.” <b>האמת:</b> ה-<b>prior</b> הוא ההתחלה — הסיכון המנדלי. אחר כך מכפילים בסבירות של מה שרואים ומנרמלים.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>חדירות</span><span data-d>האם נושא המוטציה מבטא בכלל</span>
@@ -525,7 +491,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-map"><b>קריאת עץ משפחה</b><ul><li>בכל דור, אב לבן<ul><li>אוטוזומלי דומיננטי — 50%</li><li>דילוג דור? חדירות חלקית או הטבעה</li></ul></li><li>הורים בריאים<ul><li>אוטוזומלי רצסיבי — 25%, קרבת משפחה</li><li>רק בנים דרך האם — X רצסיבי</li></ul></li><li>אב חולה<ul><li>כל הבנות ואף בן — X דומיננטי</li><li>גם בן חולה — לא X</li></ul></li><li>רק דרך האם, לכולם<ul><li>מיטוכונדריאלי — הטרופלסמיה, סף</li></ul></li></ul></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/תורשה מנדלית ולא-מנדלית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/תורשה מנדלית ולא-מנדלית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/תורשה מנדלית ולא-מנדלית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/תורשה מנדלית ולא-מנדלית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t04">
 <h3>ציטוגנטיקה ומושגי יסוד<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הקריוטיפ צריך תאים מתחלקים שנעצרים במטאפאזה, ו-4c ב-G2; הכתיב התקני (46,XY,+21) מספר מה נמצא. הפרעות מספר — טריזומיות, טרנר, קליינפלטר; הפרעות מבנה — טרנסלוקציה רוברטסונית (הסיכון הגבוה ביותר לילד עם הפרעה כרומוזומלית), אינברסיה (עם או בלי צנטרומר), חסרים. ובהרצאה על גנטיקה התפתחותית: ארבעת מנגנוני המומים — malformation, deformation, disruption, dysplasia — ותסמונת מול רצף מול אסוציאציה.</p>
@@ -564,15 +530,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו הרפואה של חדר היילודים ושל בירור הפלות חוזרות: יילוד עם ריבוי מומים — CMA ראשון, ואחרי טריזומיה — קריוטיפ הילד ואז ההורים, כי טרנסלוקציה תורשתית משנה את הייעוץ לכל המשפחה. סיסי שליה עם מוזאיקה — דיקור מי שפיר; מי שפיר עם מוזאיקה ועובר תקין — דם טבורי. ובהיריון: אישה שמטופלת בכולכיצין (FMF) — בדיקת הקריוטיפ עצמה משתמשת בכולכיצין.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „קריוטיפ מבצעים בטלופאזה” — כך במפתח 2018. <b>האמת:</b> <b>מטאפאזה</b>. המפתח של 2018 מסומן טלופאזה לפי סדר המסיחים בקובץ — טעות מתועדת. בקויפמן — מטאפאזה. וב-G2 — 4c.</div>
-<div class="trap"><b>המלכודת:</b> „גיל האם הוא גורם הסיכון הגבוה ביותר לילד עם הפרעה כרומוזומלית.” <b>האמת:</b> השכיח — כן; <b>הגבוה ביותר</b> — נשא <b>טרנסלוקציה רוברטסונית מאוזנת</b> (45,XY, t(14;21)). ובין נשים — אישה עם עובר קודם עם דאון.</div>
-<div class="trap"><b>המלכודת:</b> „עובר עם 45 כרומוזומים בדיקור של נשאית רוברטסונית — חולה.” <b>האמת:</b> אם הוא נושא את הטרנסלוקציה <b>המאוזנת</b> — בריא כמו אמו. הבעיה היא רק בצורה הלא-מאוזנת.</div>
-<div class="trap"><b>המלכודת:</b> „חסר של זרוע שלמה — בהכרח חמור.” <b>האמת:</b> חסר של כל הזרוע הקצרה של כרומוזום <b>אקרוצנטרי</b> (13p, 14p, 15p, 21p, 22p) — פנוטיפ <b>תקין</b>; שם יש רק rDNA. ובאינברסיה מה שחשוב הוא הצנטרומר, לא הגודל.</div>
-<div class="trap"><b>המלכודת:</b> „ריאות שלא התפתחו ממיעוט מי שפיר — disruption.” <b>האמת:</b> במפתח — <b>deformation</b>: הרקמה נוצרה תקין וכוח חיצוני (חוסר מי שפיר) עיוות אותה; זה גם חלק מרצף פוטר. disruption הוא <b>הרס</b> — קוקאין, amniotic bands, אירוע וסקולרי.</div>
-<div class="trap"><b>המלכודת:</b> „אישה חולה במחלה X רצסיבית — הומוזיגוטית.” <b>האמת:</b> נדיר. ההסבר הסביר: <b>אינאקטיבציה לא-אקראית של X</b>, או טרנסלוקציה X-אוטוזום. ומוזאיקה שנמצאת בעור אבל לא בדם — נוצרה מיטוטית אחרי ההפריה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>מטאפאזה</span><span data-d>השלב שבו עוצרים תאים לקריוטיפ</span>
@@ -584,7 +541,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>אחרי לידת ילד עם טריזומיה — סדר הבירור</b><ol><li>קריוטיפ הילד — חופשית או טרנסלוקציה?</li><li>אם טרנסלוקציה — קריוטיפ ההורים</li><li>נשא מאוזן — ייעוץ לכל המשפחה</li><li>בהיריון הבא: סיסי שליה או מי שפיר</li><li>ממצא לא חד-משמעי — רקמה קרובה יותר לעובר</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/ציטוגנטיקה ומושגי יסוד" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/ציטוגנטיקה ומושגי יסוד" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/ציטוגנטיקה ומושגי יסוד" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/ציטוגנטיקה ומושגי יסוד" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 </section>
 
 <section class="block" id="last">
@@ -712,7 +669,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1012,22 +969,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1041,9 +982,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1162,10 +1101,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1199,8 +1137,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1209,11 +1146,9 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1234,13 +1169,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-b-genetics-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
+<script>window.DOCKIT={"id": "ekronot-b-genetics-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1273,66 +1207,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1343,7 +1217,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1361,7 +1235,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1382,8 +1256,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1476,7 +1350,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1578,9 +1452,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1600,13 +1472,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -1841,7 +1709,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */

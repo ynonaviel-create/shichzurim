@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -343,7 +334,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -398,14 +389,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>כל התרופות האנטי-אריתמיות יושבות על הזרמים האלה: <b>לידוקאין</b> על תעלות הנתרן (פאזה 0 ופלאטו קצר יותר), <b>נימודיפין וניפדיפין</b> על תעלות הסידן מסוג L (פלאטו קצר, הולכה איטית ב-AV), <b>אמיודרון</b> על IKs (פלאטו ארוך, QT ארוך). ו<b>קפאין</b>, חוסם פוספודיאסטראז, מעלה cAMP ולכן קצב — בדיוק המנגנון שבודקים במאגר.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „זרם Kir הוא הגדול ביותר בשיא פוטנציאל הפעולה, כשהכוח המניע מקסימלי.” <b>האמת:</b> שם התעלות חסומות בפוליאמינים — הזרם כמעט אפס. הזרם הגדול ביותר הוא <b>במתחים תת-סיפיים, מיד מעל Ek</b>. וב-Ek עצמו — אין כוח מניע ואין זרם בכלל.</div>
-<div class="trap"><b>המלכודת:</b> „HCN4 חדירה אך ורק לנתרן” ו„הסתברות הפתיחה עולה עם דפולריזציה.” <b>האמת:</b> התעלה קטיונית לא-סלקטיבית — נתרן ואשלגן באותה מידה — ונפתחת <b>בהיפרפולריזציה</b>. מה שמעלה את הסתברות הפתיחה: היפרפולריזציה, cAMP, וקפאין (שמונע את פירוק ה-cAMP). ירידה ב-cAMP מורידה אותה — זה הוואגוס.</div>
-<div class="trap"><b>המלכודת:</b> „ICa-L הוא הזרם ששובר את הפלאטו” — הרי הוא הזרם של הפלאטו. <b>האמת:</b> הסידן הוא מה ש<b>מחזיק</b> את הפלאטו. מה ששובר אותו הוא <b>IKs</b>, שמתחיל בשיא וגדל לאט לאורך כל הפלאטו עד שהוא גובר. Ito שייך לפאזה 1, ו-Kir חסום בפלאטו.</div>
-<div class="trap"><b>המלכודת:</b> „IKs מאריך את הפלאטו” / „הסידן מאריך את ה-QT.” <b>האמת:</b> הזרם ש<b>מאריך</b> את הפלאטו (ואת ה-QT, שהוא משך פוטנציאל הפעולה החדרי) הוא <b>זרם הנתרן המתמשך</b>. IKs מקצר. וזו הסיבה שלידוקאין, חוסם נתרן, מקצר את הפלאטו.</div>
-<div class="trap"><b>המלכודת:</b> באיור של פוטנציאל הפעולה ב-SA node — „השלב הראשון הוא If, כי הקוצב מתחיל בו.” <b>האמת:</b> לקרוא את המספרים <b>על האיור</b>, לא לפי הסדר הכרונולוגי. במאגר הסדר היה 1-ICa (ה-upstroke), 2-IKs (רפולריזציה), 3-If (הדפולריזציה הדיאסטולית).</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>Kir</span><span data-d>תעלת אשלגן שמייצבת את המנוחה; נחסמת מבפנים בספרמין בדפולריזציה</span>
@@ -416,7 +399,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>פוטנציאל פעולה בסיב פורקינייה — מה נפתח ומתי</b><ol><li>If (בסיבים בלי מנוחה) או Kir מחזיק מנוחה</li><li>תעלות נתרן — פאזה 0, ה-upstroke</li><li>Ito — פאזה 1, ירידה קטנה מהשיא</li><li>ICa-L ונתרן מתמשך מול IKs — פלאטו, סכום אפס</li><li>IKs גובר — פאזה 3, רפולריזציה</li><li>Kir — פאזה 4, חזרה למנוחה</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/תעלות יונים וזרמים בלב" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/תעלות יונים וזרמים בלב" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/תעלות יונים וזרמים בלב" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/תעלות יונים וזרמים בלב" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t02">
 <h3>רקמות מהירות מול איטיות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הלב בנוי משתי משפחות של רקמה: <b>מהירה</b> — עליות, סיבי פורקינייה וחדרים — שהדפולריזציה שלה נשענת על תעלות נתרן, ו<b>איטית</b> — הקוצבים, SA node ו-AV node — שנשענת על תעלות סידן ובלי Kir. ההבדל הזה קובע את מהירות ההולכה, את פוטנציאל המנוחה, ואיזה חוסם תרופתי מאט איזו רקמה. במאגר שואלים על זה בשתי דרכים בלבד.</p>
@@ -448,12 +431,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>ה-AV node הוא הרקמה האיטית שבין שני הסינציטיומים, ולכן הוא הנקודה ה„רגישה” לחסימה — ה-AV block — וגם המקום שבו חוסמי סידן (וריפמיל, נימודיפין) ובטא-בלוקרים מאטים הולכה בכוונה, למשל בפרפור עליות מהיר. חוסמי נתרן כמו לידוקאין פועלים דווקא על החדרים והפורקינייה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „מהירות ההולכה בסיבי פורקינייה יורדת אחרי נימודיפין.” <b>האמת:</b> פורקינייה היא רקמה <b>מהירה</b> — פאזה 0 שלה על תעלות נתרן. חוסם סידן לא משנה את מהירות ההולכה שם. יורדת אחרי <b>TTX</b> (100 nM או 1 µM) או לידוקאין.</div>
-<div class="trap"><b>המלכודת:</b> „מהירות ההולכה ב-AV node יורדת אחרי TTX.” <b>האמת:</b> ב-AV node תעלות הנתרן באינאקטיבציה ממילא (המתח לא יורד מתחת למינוס 60). מה שמאט אותו הוא חוסם <b>סידן</b> — נימודיפין 10 µM.</div>
-<div class="trap"><b>המלכודת:</b> „Kir הכי נמוך ב-SA node — ולכן AV node לא נכון.” <b>האמת:</b> בשני הקוצבים אין כמעט Kir. כשהמסיחים כוללים גם SA וגם AV, התשובה היא <b>„1+3 נכונות”</b>. לבדוק אם שני הקוצבים מופיעים לפני שבוחרים אחד.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>סיבי פורקינייה</span><span data-d>מנוחה הכי שלילית, 1500 וולט לשנייה, Kir הכי גבוה</span>
@@ -463,7 +440,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>נימודיפין</span><span data-d>חוסם סידן L — מאט את הקוצבים</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/רקמות מהירות מול איטיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/רקמות מהירות מול איטיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/רקמות מהירות מול איטיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/רקמות מהירות מול איטיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t03">
 <h3>פוטנציאל פעולה ותקופה רפרקטורית<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">פוטנציאל הפעולה של תא חדרי בנוי מחמש פאזות, והתקופה הרפרקטורית שלו נובעת מדבר אחד: תעלות הנתרן נמצאות באינאקטיבציה מהשיא ועד סוף הרפולריזציה. לכן היא נמשכת בערך כמו הפלאטו, תואמת את ה-QT, ומתקצרת כשקצב הלב עולה. השאלה שחוזרת במאגר: כשקצב הלב קבוע — מה מאריך אותה ומה מקצר.</p>
@@ -492,13 +469,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו הלוגיקה של תרופות ה-Class III (אמיודרון): הארכת הפלאטו והתקופה הרפרקטורית מונעת re-entry — אבל מאריכה QT, ועודף שלה גורם ל-EADs (הפרעות קצב מהמתח שנתקע בפלאטו). ולידוקאין (Class Ib) מקצר. הטרופונין ומרווח ה-QT באק״ג הם המדד הקליני למה שקורה כאן ברמת התעלה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „חוסם סידן מאט את הלב, ולכן מאריך את התקופה הרפרקטורית.” <b>האמת:</b> כשקצב הלב קבוע, פחות זרם סידן פנימה = <b>פלאטו קצר יותר</b> = תקופה רפרקטורית <b>קצרה יותר</b>. „יורדת לאחר מתן נימודיפין / ניפדיפין.” אמיודרון (חוסם IKs) — עולה.</div>
-<div class="trap"><b>המלכודת:</b> בשאלת „התקופה הרפרקטורית בחדרים” לבחור את ההיגד הראשון שנראה נכון. <b>האמת:</b> כל ההיגדים נכונים — אינאקטיבציה של תעלות נתרן, כמשך פוטנציאל הפעולה, תואמת QT, מתקצרת בקצב מהיר — ולכן התשובה היא <b>„כל התשובות נכונות”</b> או <b>„1+2 נכונות”</b>, לפי מה שהודפס. לקרוא עד הסוף. ו„תואמת את PQ” — לא: PQ הוא ההולכה ב-AV.</div>
-<div class="trap"><b>המלכודת:</b> „יציבות פוטנציאל המנוחה של תא חדרי תלויה בתעלות סידן / נתרן.” <b>האמת:</b> תלויה ב-<b>Kir</b> — תעלות אשלגן מסוג inward rectifier. הנתרן עושה את פאזה 0, הסידן את הפלאטו.</div>
-<div class="trap"><b>המלכודת:</b> בשמות הפאזות — להחליף early ו-late repolarization. <b>האמת:</b> הסדר: <b>upstroke (0) — early repolarization (1) — plateau (2) — late repolarization (3)</b>. המוקדמת היא הירידה הקטנה מהשיא, המאוחרת היא הנפילה למנוחה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>פאזה 0</span><span data-d>upstroke — תעלות נתרן מהירות</span>
@@ -508,7 +478,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>פאזה 4</span><span data-d>מנוחה (Kir) או פוטנציאל קוצב</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/פוטנציאל פעולה ותקופה רפרקטורית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פוטנציאל פעולה ותקופה רפרקטורית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/פוטנציאל פעולה ותקופה רפרקטורית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פוטנציאל פעולה ותקופה רפרקטורית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t04">
 <h3>אק"ג<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">האק״ג הוא רישום של דיפול: הרקמה שכבר קיבלה את גל האקסיטציה מול הרקמה שעדיין במנוחה. מכאן נובע הכול — שיא של גל הוא הרגע שבו בדיוק חצי מהסינציטיום בדפולריזציה, מקטע שקט הוא רקמה שכולה באותו מצב, ו-T חיובי כי הרפולריזציה מתחילה מבחוץ. זה הנושא הגדול ביותר בפיזיולוגיה — 21 שאלות במאגר — וכולן על העיקרון הזה.</p>
@@ -545,14 +515,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>רוב בדיקות האק״ג נעשות לא בשביל הפרעות קצב אלא בשביל <b>איסכמיה</b>. באזור איסכמי אין ATP, משאבת הנתרן-אשלגן לא מפנה אשלגן, הוא מצטבר בין התאים (עד 12 מילימול), פוטנציאל המנוחה עולה ממינוס 90 למינוס 60 — והאזור עובר דפולריזציה חלקית. בזמן ST, כשהרקמה הבריאה בפלאטו (מינוס 20) והאיסכמית תקועה במינוס 60, נשאר דיפול — <b>ST elevation</b>. אם התאים כבר עברו נמק, המתח מתאזן וההרמה נעלמת.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „שיא גל P הוא סוף הדפולריזציה של העליות.” <b>האמת:</b> בסוף — כל העלייה באותו מצב, ואין דיפול. השיא הוא הרגע שבו <b>כמחצית מהסינציטיום העלייתי בדפולריזציה</b>. אותו כלל ל-R בחדרים.</div>
-<div class="trap"><b>המלכודת:</b> „מקטע PQ מתייחס להתפשטות ב-Bundle of His.” <b>האמת:</b> ה-Bundle מהיר מאוד ונראה בתחילת ה-QRS. PQ הוא הזמן שהגל חוצה את <b>ה-AV node</b> — רקמה איטית שאינה מייצרת דיפול נראה.</div>
-<div class="trap"><b>המלכודת:</b> „T חיובי בגלל הפרשי טמפרטורה” / „הרפולריזציה מתחילה מהאנדוקרד.” <b>האמת:</b> הרפולריזציה מתחילה <b>מהשכבות הסוב-אפיקרדיאליות</b>, כי פוטנציאל הפעולה שם קצר יותר (יותר תעלות אשלגן). הטמפרטורה — אפקט מינורי שנפסל בניסוי.</div>
-<div class="trap"><b>המלכודת:</b> „QT מתקצר כשהקצב עולה כי ה-AV node מוליך מהר יותר.” <b>האמת:</b> QT הוא <b>משך פוטנציאל הפעולה החדרי</b>, והוא מתקצר כי פוטנציאל הפעולה מתקצר בקצב מהיר. ה-AV שייך ל-PQ.</div>
-<div class="trap"><b>המלכודת:</b> „גירוי סימפתטי מאריך את PQ.” <b>האמת:</b> הסימפתטי <b>מקצר</b> PQ (יותר זרם סידן ב-AV) ומקצר R-R. הוואגוס <b>מאריך</b> PQ.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>גל P</span><span data-d>התפשטות האקסיטציה בסינציטיום העליות</span>
@@ -564,7 +526,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>מסלול גל האקסיטציה — מה נרשם בכל שלב</b><ol><li>SA node יורה (לא נראה)</li><li>התפשטות בעליות — גל P</li><li>מעבר ב-AV node — מקטע PQ שקט</li><li>Bundle of His והמחיצה — Q קטן</li><li>פורקינייה מהאפקס ומעלה — R</li><li>עובי דופן חדר שמאל — S</li><li>כל החדר בפלאטו — ST</li><li>רפולריזציה מהאפיקרד — T</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/אק"ג" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/אק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/אק"ג" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/אק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t05">
 <h3>הפרעות קצב<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הפרעת קצב מסווגים בשלושה צירים: מיקום (על-חדרית מול חדרית), תדירות (טכי מול ברדי), ומנגנון — הפרעה באוטומטיות, כשקוצב יורה לא נכון, או הפרעה בהתפשטות, כשהגל נחסם או חוזר על עצמו (re-entry). הרעיון המרכזי לשאלות: re-entry נוצר כשגל האקסיטציה משלים סיבוב אחרי שהרקמה כבר יצאה מהתקופה הרפרקטורית.</p>
@@ -597,13 +559,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו הסיבה שאמיודרון, שמאריך את התקופה הרפרקטורית, מונע re-entry — ושאיסכמיה, שמאטה הולכה ומעמיסה סידן (DAD), מייצרת VT ו-VF. ובפרפור עליות הטיפול הוא לא ב„תיקון” המעגל אלא בהאטת ה-AV (חוסמי סידן, בטא-בלוקרים), בקרדיוברסיה — ובנוגדי קרישה נגד השבץ. בחסימות מדרגה 2 ו-3 — קוצב.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „הארכת התקופה הרפרקטורית מעלה את הסיכון ל-re-entry.” <b>האמת:</b> הפוך — היא <b>מגינה</b>. מה שמסכן: <b>התקצרות התקופה הרפרקטורית</b>, האטת ההולכה והגדלת המעגל.</div>
-<div class="trap"><b>המלכודת:</b> „סינוס טכיקרדיה היא re-entry” / „הפרעה חדרית.” <b>האמת:</b> סינוס טכיקרדיה היא <b>הפרעה בקיצוב (אוטומטיות)</b> — ה-SA node עצמו מהיר — על-חדרית, ולרוב לא מסוכנת.</div>
-<div class="trap"><b>המלכודת:</b> בשאלת „באיזו הפרעה מספר ה-P שווה למספר ה-QRS” לבחור מהר. <b>האמת:</b> לספור בכל מסיח: שווה ב<b>חסימה מדרגה 1</b> וב<b>סינוס ברדיקרדיה</b>; לא בדרגה 2 (P בלי QRS), לא בדרגה 3 (שני מקצבים), לא בפרפור (אין P). כשכל המסיחים הם חסימות מתקדמות ופרפור — <b>„אין תשובה נכונה”</b>.</div>
-<div class="trap"><b>המלכודת:</b> „חסימה היא הפרעה באוטומטיות.” <b>האמת:</b> חסימה (block) ו-re-entry הם <b>הפרעות בהתפשטות</b>. אוטומטיות = קוצב שיורה לא נכון (סינוס טכי/ברדי, קוצב נודד, DAD/EAD).</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>סינוס טכיקרדיה</span><span data-d>על-חדרית, אוטומטיות — הקוצב מהיר מדי</span>
@@ -615,7 +570,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-map"><b>סיווג הפרעות קצב</b><ul><li>לפי מיקום<ul><li>על-חדרית — SA, עליות, AV</li><li>חדרית — PVC, VT, VF</li></ul></li><li>לפי תדירות<ul><li>טכי-אריתמיה</li><li>ברדי-אריתמיה</li></ul></li><li>לפי מנגנון<ul><li>אוטומטיות — סינוס טכי/ברדי, קוצב נודד, DAD, EAD</li><li>התפשטות — חסימה (AV block 1-3), re-entry (פרפור)</li></ul></li></ul></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/הפרעות קצב" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הפרעות קצב" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/הפרעות קצב" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הפרעות קצב" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t06">
 <h3>צימוד חשמלי-מכני ומכניקת הכיווץ<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הגירוי החשמלי הוא רק הוראה; מה שמכווץ את הלב הוא סידן. הסידן נכנס בתעלת L, פותח את RyR שב-SR ומשחרר ממנו את רוב הסידן (calcium-induced calcium release), נקשר לטרופונין C וחושף את אתרי המיוזין על האקטין — ואז נשאב חזרה ב-SERCA ומוצא ב-NCX. על זה יושבת המכניקה: אורך-מתח (פרנק-סטרלינג), preload ו-afterload, ואינוטרופיה שהסימפתטי מגביר. כל השאלות כאן הן מבוחני הקרדיו הישנים.</p>
@@ -649,14 +604,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>טרופונין בדם</b> הוא סימן להרס קרדיומיוציטים — הבדיקה הקלינית היא טרופונין I ו-T (טרופונין C זהה בשריר השלד ולכן לא נבדק). <b>דיגוקסין</b> מחזק כיווץ דרך עיכוב משאבת נתרן-אשלגן. ובחולה מיובש — פחות preload, פחות נפח פעימה, הדופק עולה כפיצוי; אחרי עירוי — נפח הפעימה עולה כמעט בלי שינוי ב-ESV. היצרות המסתם האאורטלי ויתר לחץ דם — יותר afterload.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „בכיווץ איזו-וולומי המסתמים האטריו-ונטריקולריים סגורים ומסתמי היציאה פתוחים.” <b>האמת:</b> איזו-וולומי = הנפח לא משתנה = <b>כל ארבעת המסתמים סגורים</b>. המיטרלי והטריקוספידלי כבר נסגרו, האאורטלי והפולמונרי עוד לא נפתחו. AV סגורים ויציאה פתוחים — זה שלב הפליטה.</div>
-<div class="trap"><b>המלכודת:</b> „עירוי נוזלים מעלה afterload.” <b>האמת:</b> עירוי מעלה <b>preload</b> (מילוי). afterload הוא הלחץ שהחדר צריך לגבור עליו — הלחץ באאורטה, שעולה ביתר לחץ דם ובהיצרות המסתם האאורטלי. „הזרקת בולוס נוזלים” היא המסיח שלא משפיע על afterload.</div>
-<div class="trap"><b>המלכודת:</b> „חוק סטרלינג מסביר את קצב הלב.” <b>האמת:</b> סטרלינג מסביר את <b>כוח הכיווץ</b> ואת <b>תפוקת הלב</b> כפונקציה של המילוי — יחסי אורך-מתח. הקצב נקבע בקוצב.</div>
-<div class="trap"><b>המלכודת:</b> „קצב הלב משפיע ישירות על מקטע הפליטה.” <b>האמת:</b> EF = SV חלקי EDV — תלוי בקונטרקטיליות, ב-preload וב-afterload. קצב הלב לבדו <b>אינו</b> משנה אותו ישירות (Bowditch הוא אפקט משני). ובחישוב — לחלק ב-EDV: 60 חלקי 300 = 20%.</div>
-<div class="trap"><b>המלכודת:</b> „רוב הסידן שמכווץ נכנס מבחוץ דרך תעלת L.” <b>האמת:</b> הסידן מבחוץ הוא רק ה<b>הדק</b>. <b>90-95% משתחרר מה-SR דרך RyR</b> — calcium-induced calcium release.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>RyR</span><span data-d>תעלת ה-SR שנפתחת בעליית סידן — CICR</span>
@@ -669,7 +616,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>מחזור הסידן בפעימה אחת</b><ol><li>פוטנציאל פעולה פותח תעלות סידן L</li><li>סידן פותח RyR — שחרור מה-SR</li><li>סידן נקשר לטרופונין C — אתרי המיוזין נחשפים</li><li>גשרי אקטין-מיוזין — כיווץ (ATP)</li><li>SERCA שואבת ל-SR, NCX מוציא מהתא</li><li>הרפיה — מוכן לפעימה הבאה</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/צימוד חשמלי-מכני ומכניקת הכיווץ" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/צימוד חשמלי-מכני ומכניקת הכיווץ" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/צימוד חשמלי-מכני ומכניקת הכיווץ" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/צימוד חשמלי-מכני ומכניקת הכיווץ" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t07">
 <h3>שריר חלק<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">שריר חלק הוא שריר אחר לגמרי: בלי סרקומרים, בלי פסים, בלי טרופונין. הבקרה על הכיווץ נעשית על המיוזין עצמו — סידן נקשר לקלמודולין, הקומפלקס מפעיל MLCK שמזרחן את השרשרת הקלה של המיוזין, ורק אז נוצר גשר לאקטין. הוא מתכווץ מכל הכיוונים, יכול להתכווץ בלי שינוי חשמלי בכלל, והוא מה שקובע את קוטר כלי הדם — ולכן את הפרפוזיה. שיעור 9 בנ״א — ועדיין אין עליו אף שאלה בארכיון.</p>
@@ -701,13 +648,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>הטונוס של השריר החלק בעורקיקים הוא לחץ הדם: אלפא-1 מכווץ (וזה מה שחוסמי אלפא מרפים), בטא-2 מרחיב לשרירים ולריאות, NO מהאנדותל מרחיב (ניטרטים, ויאגרה דרך cGMP), אנגיוטנסין II מכווץ (ולכן מעכבי ACE מורידים לחץ). והכול ייפגש שוב בפרמקולוגיה של המערכת האדרנרגית — ובבלוק ABC.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „גם בשריר חלק הסידן נקשר לטרופונין.” <b>האמת:</b> בשריר חלק <b>אין טרופונין</b>. החיישן הוא <b>קלמודולין</b>, והבקרה היא על המיוזין (thick filament regulated) דרך MLCK.</div>
-<div class="trap"><b>המלכודת:</b> „שריר חלק, כמו שריר שלד, חייב פוטנציאל פעולה כדי להתכווץ.” <b>האמת:</b> יש ארבע דרכים, ואחת מהן — <b>צימוד פרמקו-מכני</b> — היא כיווץ בתגובה לשליח כימי <b>בלי שום שינוי במתח הממברנה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „הנימים מתכווצים בתגובה לעצבוב סימפתטי.” <b>האמת:</b> הנימים הם <b>אנדותל בלבד, בלי שריר חלק</b>, ולא מעוצבבים. מעוצבבים: עורקים קטנים, עורקיקים וורידים.</div>
-<div class="trap"><b>המלכודת:</b> „אצטילכולין מכווץ כלי דם.” <b>האמת:</b> על השריר ישירות — כיווץ, אבל בפועל האפקט הוא <b>הרפיה עקיפה</b>: ACh על האנדותל משחרר <b>NO</b> שמרפה את השריר החלק.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>קלמודולין</span><span data-d>חיישן הסידן בשריר חלק</span>
@@ -719,7 +659,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>כיווץ שריר חלק — מהסידן לגשר</b><ol><li>סידן נכנס (תעלת L, ליגנד, IP3 מה-SR)</li><li>סידן נקשר לקלמודולין</li><li>הקומפלקס מפעיל MLCK</li><li>MLCK מזרחן את השרשרת הקלה של המיוזין</li><li>מיוזין מזורחן נקשר לאקטין — כיווץ</li><li>סידן יורד, myosin phosphatase — הרפיה</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/שריר חלק" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/שריר חלק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/שריר חלק" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/שריר חלק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 </section>
 
 <section class="block" id="last">
@@ -848,7 +788,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1148,22 +1088,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1177,9 +1101,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1298,10 +1220,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1335,8 +1256,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1345,11 +1265,9 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1370,13 +1288,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-b-physio-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
+<script>window.DOCKIT={"id": "ekronot-b-physio-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1409,66 +1326,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1479,7 +1336,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1497,7 +1354,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1518,8 +1375,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1612,7 +1469,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1714,9 +1571,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1736,13 +1591,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -1977,7 +1828,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */

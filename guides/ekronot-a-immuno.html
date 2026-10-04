@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -338,12 +329,12 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
   </div>
 </div>
 
-<div class="note"><b>קודם כול — אופי המבחן.</b> אימונולוגיה היא כ-24 מתוך 80 השאלות במבחן הבלוק. זה המקצוע עם הכי הרבה <b>שאלות חוזרות</b>: פולימורפיזם של MHC, סופר-אנטיגן, אנרג׳י, ניסויי ההכלאה, איור ה-IgA — כל אחת מהן הופיעה בשלושה או ארבעה מחזורים. אבל שימו לב: <b>אותה שאלה חוזרת עם מסיחים אחרים, ולפעמים עם מפתח אחר.</b> מי שזוכר „התשובה היא ג׳” ייפול; מי שמבין את המנגנון יענה על כל הגרסאות. בשלושה מקרים המפתחות בשחזורים סותרים זה את זה (מלנומה, חיסון HPV, ו-IgE על תאי מאסט), וכל אחד מהם מוסבר במלכודות של הנושא שלו.</div>
+<div class="note"><b>קודם כול — אופי המבחן.</b> אימונולוגיה היא כ-24 מתוך 80 השאלות במבחן הבלוק. זה המקצוע עם הכי הרבה <b>שאלות חוזרות</b>: פולימורפיזם של MHC, סופר-אנטיגן, אנרג׳י, ניסויי ההכלאה, איור ה-IgA — כל אחת מהן הופיעה בשלושה או ארבעה מחזורים. אבל שימו לב: <b>אותה שאלה חוזרת עם מסיחים אחרים, ולפעמים עם מפתח אחר.</b> מי שזוכר „התשובה היא ג׳” ייפול; מי שמבין את המנגנון יענה על כל הגרסאות. בשלושה מקרים המפתחות בשחזורים סותרים זה את זה (מלנומה, חיסון HPV, ו-IgE על תאי מאסט).</div>
 
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -410,14 +401,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>ב<b>מחלות מעי דלקתיות (IBD)</b>, קרוהן וקוליטיס כיבית, המחסום של המעי נפגע, חיידקים וחומרי דלקת חוצים את האפיתל, ונוצרת דלקת כרונית. הטיפול הביולוגי שעוזר הוא <b>נוגדנים חוסמי TNF</b>. ו<b>חסר ב-IgA</b> — הכשל החיסוני הראשוני השכיח ביותר — לרוב קל, עם זיהומים חוזרים בריריות; הוא לא גורם „בוודאות” למחלה אוטואימונית.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „PAMP ו-DAMP הם כולם NON-SELF”. <b>האמת:</b> DAMP הן מולקולות <b>עצמיות</b> מתאים פגועים. המשותף לשתיהן הוא שהן מעוררות הפעלה חיסונית.</div>
-<div class="trap"><b>המלכודת:</b> „אנטיגן הוא חלבון ו-PAMP הוא סוכר”. <b>האמת:</b> ההבדל הוא ב<b>ספציפיות</b> — אנטיגן מזוהה על ידי TCR או BCR, PAMP על ידי רצפטור דפוס. שניהם יכולים להיות מכל סוג חומר.</div>
-<div class="trap"><b>המלכודת:</b> „הפרשת הציטוקינים הדלקתיים מעוכבת על ידי NF-κB”. <b>האמת:</b> NF-κB <b>מפעיל</b> את השעתוק שלהם.</div>
-<div class="trap"><b>המלכודת:</b> „Rolling מתרחש אחרי ה-sticking”. <b>האמת:</b> קודם מתגלגלים על סלקטינים, ורק הכמוקין מפעיל את האינטגרין ומאפשר היצמדות.</div>
-<div class="trap"><b>המלכודת:</b> באיור ה-IgA — „עובר בדיפוזיה לחלל המעי” או „עובר דרך השליה”. <b>האמת:</b> IgA מופרש <b>אקטיבית, דרך רצפטור</b>. דרך השליה עובר <b>IgG</b>. ובשלושה מחזורים נבחרו שלוש טענות נכונות שונות על אותו איור — הפרשה אקטיבית, מעבר בהנקה, ופגיעה בנטרול בחלל המעי — אז לא לזכור מפתח, לזכור את המנגנון.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>TLR4</span><span data-d>ממברנלי, מזהה LPS</span>
@@ -427,7 +410,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>pIgR</span><span data-d>מעביר IgA דימרי דרך האפיתל אל החלל</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/חיסון מולד וריריות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/חיסון מולד וריריות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/חיסון מולד וריריות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/חיסון מולד וריריות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t02">
 <h3>הצגת אנטיגן ו-MHC<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -466,13 +449,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>צליאק</b> היא הדוגמה של הקורס: יש בה נטייה משפחתית חזקה, כי אללים מסוימים של HLA (למשל HLA-DQ2) מתאימים במיוחד להציג פפטידים מהגלוטן לתאי CD4. וזה גם הבסיס ל<b>התאמת רקמות</b> בהשתלות — ראו בנושא האחרון. ו<b>נגיפים שנשארים בגוף שנים</b> (למשל הרפס ו-CMV) עושים את זה בעיקר בשיבוש מנגנוני ההצגה, למשל בהורדת ביטוי MHC-I.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „הפולימורפיזם של MHC הוא תוצאה של רקומבינציה VDJ”. <b>האמת:</b> רקומבינציה יוצרת את המגוון של <b>TCR ו-BCR</b>. הפולימורפיזם של MHC נובע ממספר רב של <b>אללים באוכלוסייה</b>. המסיח הזה מופיע בכל ארבע הגרסאות של השאלה. ושימו לב: במבחן הבלוק „מספר רב של אללים” <b>נמחק מהאפשרויות</b>, והנכונה הפכה ל„הפלוטיפ שונה ישפיע על העמידות לפתוגנים באוכלוסייה” — אותו רעיון, מהצד של התוצאה.</div>
-<div class="trap"><b>המלכודת:</b> „ה-MHC עובר מוטציות סומטיות כדי להתאים לפתוגן”. <b>האמת:</b> ה-MHC של אדם קבוע. מה שמאפשר לכמה מולקולות להציג מגוון עצום הוא שכל אחת <b>קושרת פפטידים רבים</b>.</div>
-<div class="trap"><b>המלכודת:</b> „MHC-II משמש להצגה לתאי T ציטוטוקסיים”. <b>האמת:</b> MHC-II מציג לתאי CD4, ו-MHC-I לתאי CD8.</div>
-<div class="trap"><b>המלכודת:</b> „תא B מציג לתא T את המולקולה השלמה”, או „את האפיטופ שה-BCR זיהה”. <b>האמת:</b> הוא מציג <b>פפטיד</b> מתוך המולקולה שנקשרה — לא בהכרח אותו אפיטופ.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>MHC-I</span><span data-d>פפטידים תוך-תאיים, לתאי CD8, כמעט בכל תא</span>
@@ -481,7 +457,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>cross-presentation</span><span data-d>אנטיגן חוץ-תאי שמוצג על MHC-I בתא דנדריטי</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/הצגת אנטיגן ו-MHC" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/הצגת אנטיגן ו-MHC" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/הצגת אנטיגן ו-MHC" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/הצגת אנטיגן ו-MHC" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t03">
 <h3>הפעלת תאי T וסבילות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -530,16 +506,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>טיפולים באוטואימוניות</b> שנשאלו: תאים דנדריטיים <b>לא בשלים</b> ואוטולוגיים (מציגים בלי קו-סטימולציה, ולכן משרים סבילות), או <b>Tregs אוטולוגיים פוליקלונליים</b> שמדכאים בסביבתם. ב<b>טרשת נפוצה</b> — ראו את נושא רגישות היתר. ובצד השני של אותו מטבע: חסימת CTLA-4 ו-PD-1 בסרטן משחררת את הבלמים — ראו בנושא האחרון.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „תאי T נאיביים מופעלים לראשונה באזור הדלקת”, או „HEV מסנן תאים אפקטוריים לרקמה”. <b>האמת:</b> דרך ה-HEV נכנסים <b>נאיביים לבלוטה</b>, וההפעלה הראשונה קורית <b>בבלוטה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „בהפעלה משתנה הספציפיות של ה-TCR”. <b>האמת:</b> הספציפיות קבועה. משתנים ביטוי IL-2Rα, הציטוקינים ופקטורי השעתוק.</div>
-<div class="trap"><b>המלכודת:</b> „אנרג׳י מחייבת PD-1”, „מתרחשת רק בתימוס”, או „חוסמת תאי זיכרון”. <b>האמת:</b> אנרג׳י היא אות 1 בלי אות 2, <b>בפריפריה</b>, ב<b>תאים נאיביים</b>.</div>
-<div class="trap"><b>המלכודת:</b> „AIRE פועל בקורטקס של התימוס”. <b>האמת:</b> AIRE פועל ב<b>מדולה</b>, בסלקציה השלילית.</div>
-<div class="trap"><b>המלכודת:</b> „היתרון של Tregs הוא שהם מדכאים קלון אחד ספציפי”, או „נבררים בזיקה נמוכה”. <b>האמת:</b> הם נבררים בזיקה <b>גבוהה</b> ומדכאים גם תאים סמוכים (bystander).</div>
-<div class="trap"><b>המלכודת:</b> בניסויי ההכלאה — „תתפתח דלקת כבד כרונית”. <b>האמת:</b> אנטיגן רק בכבד ← <b>אנרג׳י</b>. אנטיגן גם בתימוס ← <b>מחיקה</b>. אין מחלה.</div>
-<div class="trap"><b>המלכודת:</b> „מחלה אוטואימונית היא בהכרח פגם בתימוס”, או „תתפתח בוודאות לפי ה-HLA”. <b>האמת:</b> מילות הוודאות הן הרמז. זה שילוב של גנטיקה, סביבה וכשל בכמה רמות של סבילות.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>AIRE</span><span data-d>מבטא חלבוני רקמות במדולה של התימוס</span>
@@ -550,7 +516,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>מסלול החיים של תא T — בסדר הנכון</b><ol><li>אב-תא מגיע ממח העצם לקורטקס של התימוס</li><li>רקומבינציה של ה-TCR ושלב double positive</li><li>סלקציה חיובית בקורטקס</li><li>סלקציה שלילית במדולה, בעזרת AIRE</li><li>יציאה לפריפריה וכניסה לבלוטות דרך HEV</li><li>הפעלה בבלוטה: אות 1, קו-סטימולציה ו-IL-2</li><li>התמיינות ויציאה לרקמה, שם נדרשת הצגה נוספת</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/הפעלת תאי T וסבילות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/הפעלת תאי T וסבילות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/הפעלת תאי T וסבילות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/הפעלת תאי T וסבילות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t04">
 <h3>תאי B ונוגדנים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -595,14 +561,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>קריאת בדיקת נוגדנים:</b> IgM גבוה מעיד על תגובה ראשונית, טרייה; IgG גבוה — על חשיפה קודמת או תגובה שניונית; IgA גבוה — על פעילות בריריות (למשל EBV, שמדביק את האפיתל ואת תאי ה-B של הלוע). <b>נוגדנים כתרופה</b>: המרצה סימן נוגדנים נגד <b>CD20</b>, שמדללים תאי B — בלימפומות של תאי B, בטרשת נפוצה ובדלקת פרקים; והסביר את ההבדל בין נוגדן כימרי, מואנש ואנושי מלא (כמו panitumumab) — ככל שהנוגדן אנושי יותר, הוא פחות אימונוגני.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „ה-Fc לא משנה את התפקוד — הנוגדן הכימרי יתפקד כמו IgG”. <b>האמת:</b> ה-Fc <b>קובע</b> את התפקוד. עם Fc של IgA הוא יתנהג כמו IgA.</div>
-<div class="trap"><b>המלכודת:</b> „דנטורציה של האנטיגן תבטל בהכרח את הקישור”. <b>האמת:</b> לא בהכרח — נוגדן לאפיטופ ליניארי (רצף) ייקשר גם לחלבון פרוש.</div>
-<div class="trap"><b>המלכודת:</b> „היפרמוטציה מתרחשת רק בתאי זיכרון”, או „היא בלתי תלויה בברירה”. <b>האמת:</b> היפרמוטציה וברירה קורות יחד בג׳רמינל סנטר, בעזרת Tfh — וזו הבשלת הזיקה.</div>
-<div class="trap"><b>המלכודת:</b> „מעבר איזוטיפ מתקיים רק בתגובה השניונית”. <b>האמת:</b> הוא מתחיל כבר בראשונית. השניונית פשוט נשענת על תאים שכבר עברו אותו.</div>
-<div class="trap"><b>המלכודת:</b> „ADCC: תאי NK נקשרים לנוגדן דרך ה-Fab”, או „מפעילים משלים”. <b>האמת:</b> דרך <b>FcγR</b>, שנקשר ל-<b>Fc</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>CDR</span><span data-d>הרצפים ההיפר-משתנים שקובעים ספציפיות</span>
@@ -612,7 +570,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>conduits</span><span data-d>מביאים אנטיגנים קטנים לתאי B בבלוטה</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/תאי B ונוגדנים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/תאי B ונוגדנים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/תאי B ונוגדנים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/תאי B ונוגדנים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t05">
 <h3>רגישות יתר ואלרגיה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -658,13 +616,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>אנפילקסיס</b> — נפיחות בשפתיים וקשיי נשימה רבע שעה אחרי חמאת בוטנים. <b>הקו הראשון הוא אדרנלין</b>: הוא פועל ישירות על השריר החלק ועל כלי הדם, ומתנגד להיצרות דרכי הנשימה ולנפילת לחץ הדם. אנטיהיסטמין וסטרואידים באים אחריו, לא במקומו. <b>תינוק שהגיב לבמבה</b> — להימנע מקטניות (הבוטן הוא קטנית) עד בירור במרפאת אלרגיה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> שתי גרסאות של אותה שאלה עם מפתחות „הפוכים” — במ״ט „IgE נקשר לאלרגן”, בנ׳ „IgE נקשר לתאי המאסט”. <b>האמת:</b> שני החלקים נכונים, ושתי הקבלות לא אומתו: IgE <b>יושב</b> על תא המאסט, והאלרגן <b>מצליב</b> אותו. המסיחים הבטוחים לפסילה: IgG, תאי אפיתל הריאה, והמשלים.</div>
-<div class="trap"><b>המלכודת:</b> „אנטיהיסטמין, סטרואידים והשגחה” כטיפול באנפילקסיס. <b>האמת:</b> בלי <b>אדרנלין</b> זה לא הטיפול באנפילקסיס.</div>
-<div class="trap"><b>המלכודת:</b> „התגובה האלרגית מופיעה כבר בחשיפה הראשונה”. <b>האמת:</b> החשיפה הראשונה היא סנסיטיזציה, בלי תסמינים. התגובה בחשיפה החוזרת.</div>
-<div class="trap"><b>המלכודת:</b> „טרשת נפוצה — לטפל בפלזמפרזיס” או „בנוגדני IgG מתחרים”. <b>האמת:</b> זו רגישות יתר מסוג <b>4</b>, תאית. הטיפול חוסם את תאי ה-T — למשל את מעברם למוח.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>FcεRI</span><span data-d>הקולטן ל-IgE על תאי מאסט</span>
@@ -673,7 +624,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>אדרנלין</span><span data-d>הקו הראשון באנפילקסיס</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/רגישות יתר ואלרגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/רגישות יתר ואלרגיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/רגישות יתר ואלרגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/רגישות יתר ואלרגיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t06">
 <h3>כשל חיסוני ומשלים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -727,13 +678,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p><b>תינוק עם דלקות אוזניים וריאות חוזרות מחיידק עם קפסולה</b> — בודקים <b>רמת IgG</b> (הנוגדן שמאפשר אופסוניזציה של חיידקים עטופי קפסולה). ואת הבדיקה עושים <b>מגיל חצי שנה ומעלה</b>: עד אז הדם של התינוק מכיל IgG שעבר מהאם דרך השליה, ובדיקה בלידה תראה את הנוגדנים של האם. ביופסיה של התימוס או בדיקת TREC מתאימות לחשד לכשל בתאי T — לא לתינוק עם זיהומים חיידקיים בלבד.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אין הבדל משמעותי בין המסלולים”, או „חסר C2 לא משנה — יש מסלולים אחרים”. <b>האמת:</b> המסלולים שונים בהפעלה ובספציפיות, וחסר ב-C2 פוגע בתגובה וגורם גם לזיהומים וגם לאוטואימוניות.</div>
-<div class="trap"><b>המלכודת:</b> „C3 הוא המרכז, ולכן כל המעכבים פועלים עליו”. <b>האמת:</b> <b>CD59</b> פועל על ה-<b>MAC</b>, לא על C3.</div>
-<div class="trap"><b>המלכודת:</b> „בדיקת IgG מיד בלידה”. <b>האמת:</b> בלידה רואים את ה-IgG של <b>האם</b>. בודקים מגיל חצי שנה.</div>
-<div class="trap"><b>המלכודת:</b> „מוטציה ב-IL2RA תמנע יצירת תאי T בתימוס”. <b>האמת:</b> היא פוגעת ב<b>ויסות</b> — אוטואימוניות ולימפופרוליפרציה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>MBL</span><span data-d>המסלול הלקטיני — מזהה סוכרים</span>
@@ -743,7 +687,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>C5a</span><span data-d>כמוטקסיס ודלקת</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/כשל חיסוני ומשלים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/כשל חיסוני ומשלים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/כשל חיסוני ומשלים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/כשל חיסוני ומשלים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t07">
 <h3>חיסונים, גידולים והשתלות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -775,14 +719,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>בהשתלת <b>מח עצם</b> שלא תואמת HLA במלואה, הסיכון העיקרי לפי המפתח הוא פגיעה בהפעלת הלימפוציטים במחלות זיהומיות. ההיגיון: תאי ה-T החדשים מתחנכים בתימוס של המקבל, על ה-MHC שלו, אבל התאים המציגים החדשים באים ממח העצם של התורם — וכשה-MHC שונה, ההצגה להם פחות יעילה. ב<b>השתלת איברים</b> נדרש טיפול מדכא חיסון לכל החיים, ו<b>הורה אינו בהכרח התורם הטוב ביותר</b> לילדו — אח מלא יכול להתאים לגמרי.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> שאלת המלנומה בנ׳ (לא אומתה) קבעה ש„אימונותרפיה — קצר, לרבים”. <b>האמת:</b> שתי הגרסאות האחרות — מ״ח (שאומתה) ומבחן הבלוק — מסכימות: <b>טיפול ממוקד</b> הוא הקצר ולרבים. המפתח בנ׳ כנראה שגוי.</div>
-<div class="trap"><b>המלכודת:</b> בחיסון HPV — בנ׳ הנכונה „מניעת סרטן צוואר הרחם”, ובמבחן הבלוק „אף תשובה אינה נכונה”. <b>האמת:</b> אין סתירה של ממש — המסיחים שונים. במבחן הבלוק הוצעו „פעולה ישירה נגד הגידול” ו„מניעת יבלות”, ושתיהן שגויות. קראו את כל האפשרויות לפני שבוחרים.</div>
-<div class="trap"><b>המלכודת:</b> „PD-1 מתבטא בעיקר במקרופאגים”, או „PD-L1 לא מתבטא במקרופאגים”. <b>האמת:</b> PD-1 על <b>תאי T</b>. PD-L1 על תאי גידול <b>וגם</b> על מקרופאגים.</div>
-<div class="trap"><b>המלכודת:</b> במ״ט (לא אומת) המפתח קבע ש„מוטציה ב-BRAF היא tumor-associated antigen”. <b>האמת:</b> חלבון מוטנטי שקיים רק בגידול מוגדר בדרך כלל כ-<b>tumor-specific</b>. אם זה יופיע — לבדוק בסיכום לפני שסומכים על המפתח.</div>
-<div class="trap"><b>המלכודת:</b> „ב-GVHD מוצגים פפטידים חוץ-תאיים על MHC-II”, ו„בדחייה כרונית נוגדנים פוגעים באנדותל”. <b>האמת:</b> GVHD — CTL של התורם, פפטידים של המקבל על <b>MHC-I</b>. דחייה כרונית — T, מקרופאגים, <b>פיברוזיס ועיבוי כלי דם</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>ipilimumab</span><span data-d>נוגדן נגד CTLA-4 — משחרר את הבלם</span>
@@ -792,7 +728,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>HPV 16 ו-18</span><span data-d>הזנים האונקוגניים שבחיסון</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/חיסונים, גידולים והשתלות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/חיסונים, גידולים והשתלות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/חיסונים, גידולים והשתלות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/חיסונים, גידולים והשתלות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 </section>
 
@@ -829,7 +765,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </section>
 
 <footer>
-  נכתב מתוך הסיכום של נועה אמיר למחזור נ״א (136 עמודים, מבוסס על ספר הקורס וההרצאות), הסיכום של אלישמע — 16 שיעורים עם מרצה ותאריך לכל שיעור — וסיכומי דין פרי (שיעורים 1-9) וליאור פלג (שיעורים 10-16), ומשאלות הארכיון. המלכודות נדחסו מהמסיחים שהופיעו בפועל. זה סיכום של סטודנטים, לא חומר רשמי של הקורס.
+  נכתב מתוך הסיכום של נועה אמיר למחזור נ״א (136 עמודים, מבוסס על ספר הקורס וההרצאות), הסיכום של אלישמע — 16 שיעורים עם מרצה ותאריך לכל שיעור — וסיכומי דין פרי (שיעורים 1-9) וליאור פלג (שיעורים 10-16), ומשאלות הארכיון. זה סיכום של סטודנטים, לא חומר רשמי של הקורס.
   <a href="../index.html#/course/ekronot-a/immuno">→ חזרה לעמוד הקורס בארכיון</a>
 </footer>
 
@@ -921,7 +857,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1221,22 +1157,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1250,9 +1170,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1371,10 +1289,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1408,8 +1325,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1418,11 +1334,9 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1443,13 +1357,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-a-immuno-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-a", "shinun": "ekronot-a"};</script>
+<script>window.DOCKIT={"id": "ekronot-a-immuno-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-a", "shinun": "ekronot-a"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1482,66 +1395,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1552,7 +1405,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1570,7 +1423,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1591,8 +1444,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1685,7 +1538,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1787,9 +1640,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1809,13 +1660,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -2050,7 +1897,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */
