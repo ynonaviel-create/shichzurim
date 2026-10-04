@@ -304,6 +304,52 @@ const COURSES = {
       return e.part && e.part !== 'High Yield' ? `${cycle} · ${e.part}` : cycle;
     },
   },
+  /* ביוכימיה א׳ — רשום לפי חלק (הכרעת ינון 04/10): נכתב אל biochem-a-high-yield.json הקיים.
+     ציר שנה כי לשחזורי חלק ב׳ (2024, 2026) אין מחזור. הבנק-100 מחוץ לזה — הוא אוסף ממחזורים רבים, לא מבחן. */
+  'biochem-a': {
+    course: 'biochem',
+    parts: ["א׳", "א׳+ב׳"],
+    topics: ["חומצות אמינו ושיטות הפרדה", "מבנה חלבון", "המוגלובין ומיוגלובין", "אנזימים, קינטיקה ועיכוב", "מטבוליזם של נוקלאוטידים", "תרגום ואנטיביוטיקות", "תזונה וויטמינים"],
+    skip: ['biochem-a-bank-100'],
+    keepHY: true,      // ה-High Yield הקיים נאסף ידנית (50/30 שאלות) — לא לדרוס; תגי החזרה כן נכתבים
+    axis: 'year',
+    part: 'א׳',
+    unit: 'שנים',
+    they: 'השחזורים',
+    twoPlus: 'בשתי שנים לפחות',
+    corpus: (n) => `${n} השחזורים בארכיון`,
+    pick: 'הנוסח נלקח מהשחזור האמין ביותר מבין אלה שבהם הופיעה.',
+    clashSummary: 'שאלה שהמשחזרים עצמם נחלקו עליה היא בדיוק זו שקל ליפול בה.',
+    source: (label) => `שחזור ${label}`,
+    clashNote: (rep) =>
+      `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
+        rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
+      }.`,
+    label: (e) => `${e.year}`,
+  },
+  /* ביוכימיה ב׳ — רשום לפי חלק (הכרעת ינון 04/10): נכתב אל biochem-b-high-yield.json הקיים.
+     ציר שנה כי לשחזורי חלק ב׳ (2024, 2026) אין מחזור. הבנק-100 מחוץ לזה — הוא אוסף ממחזורים רבים, לא מבחן. */
+  'biochem-b': {
+    course: 'biochem',
+    parts: ["ב׳", "א׳+ב׳"],
+    topics: ["גליקוליזה ובקרתה", "גלוקונאוגנזה ומעגל הפנטוזות", "מטבוליזם גליקוגן ומחלות אגירה", "מעגל קרבס ושרשרת הנשימה", "חומצות שומן וגופי קטון", "כולסטרול וליפופרוטאינים", "מטבוליזם חומצות אמינו ומעגל האוריאה", "אינטגרציה מטבולית: צום, שובע וסוכרת"],
+    skip: ['biochem-a-bank-100'],
+    keepHY: true,      // ה-High Yield הקיים נאסף ידנית (50/30 שאלות) — לא לדרוס; תגי החזרה כן נכתבים
+    axis: 'year',
+    part: 'ב׳',
+    unit: 'שנים',
+    they: 'השחזורים',
+    twoPlus: 'בשתי שנים לפחות',
+    corpus: (n) => `${n} השחזורים בארכיון`,
+    pick: 'הנוסח נלקח מהשחזור האמין ביותר מבין אלה שבהם הופיעה.',
+    clashSummary: 'שאלה שהמשחזרים עצמם נחלקו עליה היא בדיוק זו שקל ליפול בה.',
+    source: (label) => `שחזור ${label}`,
+    clashNote: (rep) =>
+      `כאן מוצגת תשובת ${rep._exam.label}, שהמפתח שלו ${
+        rep._exam.data.trust === 'verified' ? 'אומת בחשיפה' : 'האמין מבין אלה שנחלקו'
+      }.`,
+    label: (e) => `${e.year}`,
+  },
   electro: {
     axis: 'year',
     part: 'High Yield',    // סקשן משלו בראש עמוד הקורס (שאר האלקטרו מחולק לבחני אמצע/מבחני גמר)
@@ -481,7 +527,11 @@ function loadCourse(courseId, cfg) {
     if (file === path.basename(LEDGER)) continue;
     const p = path.join(EXAMS, file);
     const d = JSON.parse(fs.readFileSync(p, 'utf8'));
-    if (d.course !== courseId || d.kind !== 'shichzur' || d[cfg.axis] == null) continue;
+    /* מקצוע שמפוצל לחלקים (ביוכימיה א׳/ב׳) רשום פעמיים: המפתח הוא קובץ ה-High
+       Yield (biochem-a), `course` הוא המקצוע האמיתי, ו-`parts` אילו מבחנים נכנסים. */
+    if (d.course !== (cfg.course || courseId) || d.kind !== 'shichzur' || d[cfg.axis] == null) continue;
+    if (cfg.parts && !cfg.parts.includes(d.part)) continue;
+    if (cfg.skip && cfg.skip.includes(d.id)) continue;
 
     let touched = false;
     d.questions.forEach((q) => {
@@ -556,6 +606,8 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
   exams.forEach((e) =>
     e.data.questions.forEach((q, i) => {
       if (q.offSyllabus) return;
+      /* מבחן מאוחד (א׳+ב׳) נכנס לשני החלקים — כל שאלה רק לחלק שהנושא שלה שייך אליו */
+      if (cfg.topics && !cfg.topics.includes(q.topic)) return;
       qs.push({ ...q, _exam: e, _n: i + 1, _cycle: e.data[cfg.axis], _trust: TRUST[e.data.trust] || 1 });
     })
   );
@@ -616,7 +668,11 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
 
   /* --- ניקוי שדות ישנים, ואז כתיבת הספירה על כל שאלה --- */
   qs.forEach((q) => delete q.repeat);
-  exams.forEach((e) => e.data.questions.forEach((q) => { if (q.repeat) { delete q.repeat; e.touched = true; } }));
+  // בקורס שנרשם לפי חלק, מבחן משותף (א׳+ב׳) נסרק פעמיים — כל מעבר מנקה רק את הנושאים שלו
+  exams.forEach((e) => e.data.questions.forEach((q) => {
+    if (cfg.topics && !cfg.topics.includes(q.topic)) return;
+    if (q.repeat) { delete q.repeat; e.touched = true; }
+  }));
 
   const hy = [];
   clusters.forEach((g) => {
@@ -805,7 +861,7 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
 
   /* --- מבחן ה-High Yield --- */
   const course = JSON.parse(fs.readFileSync(path.join(EXAMS, 'courses.json'), 'utf8'))
-    .courses.find((c) => c.id === courseId);
+    .courses.find((c) => c.id === (cfg.course || courseId));
   const conflicts = hy.filter((q) => q.repeat.conflict).length;
   const resolved = hy.filter((q) => q.repeat.resolved).length;
   const hyFile = path.join(EXAMS, `${courseId}-high-yield.json`);
@@ -818,13 +874,13 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       : `⚠️ ב-${conflicts} שאלות ${cfg.they} חלוקים על התשובה (${resolved} מהן כבר הוכרעו מול חומרי הקורס). ` +
         `הן מסומנות, וכדאי ללמוד אותן לעומק. `;
 
-  if (hy.length) {
+  if (hy.length && !cfg.keepHY) {
     fs.writeFileSync(
       hyFile,
       JSON.stringify(
         {
           id: `${courseId}-high-yield`,
-          course: courseId,
+          course: cfg.course || courseId,
           part: cfg.part,
           title: 'High Yield — השאלות שחוזרות',
           kind: 'highyield',
@@ -856,7 +912,7 @@ for (const [courseId, cfg] of Object.entries(COURSES)) {
       ) + '\n',
       'utf8'
     );
-  } else if (fs.existsSync(hyFile)) {
+  } else if (!cfg.keepHY && fs.existsSync(hyFile)) {
     fs.unlinkSync(hyFile);
   }
 

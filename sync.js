@@ -709,7 +709,8 @@ quizFiles.forEach((e) => {
   if (e.kind === 'shichzur') shichzurCount[e.course] = (shichzurCount[e.course] || 0) + 1;
 });
 Object.entries(shichzurCount).forEach(([cid, n]) => {
-  if (n >= 2 && !repeatCfg[cid])
+  /* מקצוע שרשום לפי חלקים (ביוכימיה) מופיע ב-repeats.js תחת מפתחות אחרים עם course */
+  if (n >= 2 && !repeatCfg[cid] && !Object.values(repeatCfg).some((c) => c.course === cid))
     courseNotes.push(`${cid}: ${n} שחזורים ואין לו הגדרה ב-repeats.js — אין זיהוי שאלות חוזרות ואין High Yield`);
 });
 
