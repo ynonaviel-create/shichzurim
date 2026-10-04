@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -344,7 +335,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -413,14 +404,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>ה-LPS של גרם-שליליים הוא אנדוטוקסין: הוא גורם לדלקת, לשינויי לחץ דם ולשוק, ולכן זיהום דם בגרם-שלילי מסוכן במיוחד. הקפסולה היא פקטור אלימות מרכזי — היא מה שמאפשר לפנאומוקוק ולקלבסיאלה להתחמק מפגוציטוזה. ומסלול הפפטידוגליקן הוא המטרה של המשפחה הגדולה של האנטיביוטיקות — הבטא-לקטמים והגליקופפטידים — כי אין לו מקבילה בתא אנושי.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אחרי השטיפה באלכוהול הקומפלקס נשאר רק בגרם-שליליים”. <b>האמת:</b> הוא נשאר ב<b>גרם-חיוביים</b>, שהדופן שלהם עבה. בגרם-שליליים הוא נשטף, והם נצבעים ורוד בספרנין.</div>
-<div class="trap"><b>המלכודת:</b> „LTA נמצא בממברנה החיצונית של גרם-שליליים”. <b>האמת:</b> LTA (ליפוטיקואית) שייכת לגרם-<b>חיוביים</b>. בממברנה החיצונית של גרם-שליליים יש LPS.</div>
-<div class="trap"><b>המלכודת:</b> „הפפטיד נבנה על NAG”, או „חומצות האמינו מוספות בעזרת ריבוזום ו-tRNA”. <b>האמת:</b> הפפטיד נבנה על <b>NAM</b>, וחומצות האמינו מוספות על ידי <b>אנזימים</b> — זה לא תרגום.</div>
-<div class="trap"><b>המלכודת:</b> „ליזוזים מפרק אנזימים עם פעילות בטא-לקטמאז”. <b>האמת:</b> ליזוזים מפרק את <b>הפפטידוגליקן</b>. זה המשפט הלא-נכון שמחפשים בשאלה.</div>
-<div class="trap"><b>המלכודת:</b> „הפימבריה מעבירה DNA”, או „ה-O-antigen מגיע מסוכרי הקפסולה”. <b>האמת:</b> את ה-DNA מעביר הפילוס של הקוניוגציה, והפימבריה משמשת להיצמדות. ה-O-antigen הוא הסוכרים שעל ה-<b>LPS</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>חומצה טיקואית</span><span data-d>רק בגרם-חיובי — „תעודת הזהות” של הדופן</span>
@@ -431,7 +414,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>סינתזת הפפטידוגליקן — בסדר הנכון</b><ol><li>NAG הופך ל-NAM ועליו נבנה פנטא-פפטיד</li><li>עיגון לממברנה בעזרת bactoprenol phosphate</li><li>NAG מצטרף ליצירת דו-סוכר</li><li>flipase מהפך את היחידה החוצה</li><li>טרנסגליקוזילציה — חיבור הסוכרים לרשת</li><li>טרנספפטידציה — הצלבת הפפטידים</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/מבנה החיידק והמעטפת" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/מבנה החיידק והמעטפת" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/מבנה החיידק והמעטפת" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/מבנה החיידק והמעטפת" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t02">
 <h3>גנטיקה, גדילה ומטבוליזם של חיידקים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -477,14 +460,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זמן דור קצר הוא מחלה אקוטית ומהירה. זמן דור ארוך, כמו בשחפת, הוא מחלה איטית ותרבית של שבועות. העברת גנים אופקית היא הדרך שבה עמידות לאנטיביוטיקה מתפשטת בין זנים ואפילו בין מינים. בהתפרצות ה-HUS בגרמניה ב-2011, E. coli ממשפחה אחרת קיבל את הגן לשיגה טוקסין — בדיוק במנגנון הזה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אופרון הוא רצף DNA שאליו נקשר הסיגמה פקטור”, או „קבוצת גנים שמייצרים אותו חומר”. <b>האמת:</b> אופרון = כמה גנים תחת פרומוטר אחד, שמשועתקים ל-<b>mRNA אחד</b>. הסיגמה נקשר לפרומוטר.</div>
-<div class="trap"><b>המלכודת:</b> לבטא שני גנים תחת אותה בקרה על ידי הוספת פרומוטר, או רצף Rho-independent, ביניהם. <b>האמת:</b> צריך <b>Shine-Dalgarno (RBS)</b> לפני הגן השני, כדי שהריבוזום יוכל להתחיל לתרגם אותו מאותו mRNA.</div>
-<div class="trap"><b>המלכודת:</b> „הריבוזום החיידקי מתחבר ל-RNA דרך הסיגמה פקטור”. <b>האמת:</b> הסיגמה פקטור מתחבר ל-<b>RNA פולימראז</b>. הריבוזום נקשר ב-Shine-Dalgarno.</div>
-<div class="trap"><b>המלכודת:</b> „שרשרת מעבר האלקטרונים בגרם-שלילי יושבת בממברנה החיצונית”. <b>האמת:</b> בממברנה ה<b>פנימית</b>. החיצונית היא מחסום עם LPS.</div>
-<div class="trap"><b>המלכודת:</b> „ה-DNA החיידקי מורכב מגדיל בודד”. <b>האמת:</b> הוא <b>דו-גדילי ומעגלי</b>. זו התשובה בשאלת „מה לא נכון”.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>Shine-Dalgarno</span><span data-d>אתר קישור הריבוזום ל-mRNA</span>
@@ -494,7 +469,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>זמן דור</span><span data-d>הזמן שהאוכלוסייה מכפילה את עצמה</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/גנטיקה, גדילה ומטבוליזם של חיידקים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/גנטיקה, גדילה ומטבוליזם של חיידקים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/גנטיקה, גדילה ומטבוליזם של חיידקים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/גנטיקה, גדילה ומטבוליזם של חיידקים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t03">
 <h3>שיטות אבחון ומעגל האבחון<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -558,14 +533,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>בקבוקי תרבית דם מודגרים במכשיר שמצפצף ברגע שיש גדילה — חיידק אחד למיליליטר מספיק כדי לגרום לתגובה חריפה. בדלקת גרון, בדיקת אנטיגן מהירה ל-GAS מדויקת אבל לא רגישה: חיובית — החולה בטוח חולה; שלילית — לא בטוח שהוא בריא. ובבית חולים, ריצוף גנום עוזר לדעת אם כמה חולים נדבקו מאותו מקור.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „מלחי המרה הופכים את מקונקי למצע דיפרנציאלי”. <b>האמת:</b> מלחי המרה (וקריסטל ויולט) הופכים אותו ל<b>סלקטיבי</b>. הלקטוז הוא שהופך אותו לדיפרנציאלי. ולכן גרם-חיובי <b>לא זורעים על מקונקי</b>.</div>
-<div class="trap"><b>המלכודת:</b> „M. tuberculosis נצבע כחול בצביעת גרם בגלל פפטידוגליקן עבה”. <b>האמת:</b> מיקובקטריה לא נצבעים בגרם כראוי. מזהים אותם בצביעה <b>עמידת-חומצה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „פירוש תוצאת PCR לגן עמידות — שלב אנליטי”. <b>האמת:</b> הרצת ה-PCR היא אנליטית. <b>הפרשנות וההחלטה הן פוסט-אנליטיות</b>.</div>
-<div class="trap"><b>המלכודת:</b> „תאי אפיתל קשקשי רבים בכיח מעידים על דגימה טובה”. <b>האמת:</b> הפוך. תאי אפיתל רבים הם רוק; <b>תאי דלקת</b> מעידים על דגימה טובה מדרכי הנשימה.</div>
-<div class="trap"><b>המלכודת:</b> „PCR תמיד מקצר את האבחון”. <b>האמת:</b> לא כשצריך גם <b>רגישות לאנטיביוטיקה</b> — את זה עדיין צריך לגדל בתרבית.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>אגר דם</span><span data-d>תומך ודיפרנציאלי — לפי סוג ההמוליזה</span>
@@ -575,7 +542,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>Broad range PCR</span><span data-d>מגביר 16S rRNA ומזהה כמעט כל חיידק</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/שיטות אבחון ומעגל האבחון" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/שיטות אבחון ומעגל האבחון" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/שיטות אבחון ומעגל האבחון" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/שיטות אבחון ומעגל האבחון" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t04">
 <h3>אנטיביוטיקה ועמידות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -625,14 +592,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <br>• בתרופה בקטריוסטטית חשוב במיוחד להשלים את הטיפול, כי מערכת החיסון היא שגומרת את העבודה.
 <br>• פיתוח אנטיביוטיקות חדשות כמעט נעצר, כי זה לא רווחי — והעמידות רק עולה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „בטא-לקטם נקשרת לחלק הפפטידי של הפפטידוגליקן”. <b>האמת:</b> זו <b>גליקופפטיד</b> (ונקומיצין). בטא-לקטם נקשרת ל<b>אנזים</b> — ה-PBP.</div>
-<div class="trap"><b>המלכודת:</b> „עיכוב ה-PBP מוביל לעיכוב טרנסגליקוזילציה”. <b>האמת:</b> ה-PBP עושה <b>טרנספפטידציה</b> — הצילוב בין הפפטידים.</div>
-<div class="trap"><b>המלכודת:</b> „PBP2a של MRSA מפרק את האנטיביוטיקה”, או „קרבפנם יעזור כי רק פניצילינים נפגעים”. <b>האמת:</b> PBP2a הוא אנזים <b>שהתרופה לא נקשרת אליו</b>. הוא עמיד לכל הבטא-לקטמים, כולל קרבפנם.</div>
-<div class="trap"><b>המלכודת:</b> „פלואורוקווינולונים מפריעים לשעתוק”. <b>האמת:</b> הם מעכבים את DNA gyrase ופוגעים ב<b>שכפול</b>.</div>
-<div class="trap"><b>המלכודת:</b> „בריכוז נמוך מה-MIC הגידול ייעצר”, או „ה-MIC ישתנה”. <b>האמת:</b> מתחת ל-MIC החיידק <b>גדל כרגיל</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>בטא-לקטם</span><span data-d>קשר בלתי הפיך ל-PBP ועיכוב טרנספפטידציה</span>
@@ -642,7 +601,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>mecA</span><span data-d>הגן של MRSA שמקודד ל-PBP2a</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/אנטיביוטיקה ועמידות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/אנטיביוטיקה ועמידות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/אנטיביוטיקה ועמידות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/אנטיביוטיקה ועמידות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t05">
 <h3>סטאפילוקוק וסטרפטוקוק<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -690,14 +649,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <br>• סקר GBS לכל אישה הרה הוריד דרמטית את הזיהומים בילודים.
 <br>• MRSA הוא „החיידק של בתי החולים”, ומתפשט בעיקר בידיים של הצוות.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „סטרפטוקוקים קטלאז-חיוביים וסטאפילוקוקים קטלאז-שליליים”. <b>האמת:</b> הפוך. <b>סטאפ חיובי, סטרפ שלילי.</b> ולהבחנה בין aureus ל-epidermidis קטלאז לא יעזור — שניהם חיוביים. בודקים קואגולאז או המוליזה.</div>
-<div class="trap"><b>המלכודת:</b> „Protein A יוצר חורים בממברנה של תאי דם לבנים”, או „גורם ל-TSS”. <b>האמת:</b> אלה לויקוצידין וסופר-אנטיגן. <b>Protein A נקשר ל-Fc ומונע אופסוניזציה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „הסיבוכים הלא-מוגלתיים הם pharyngitis ואימפטיגו”. <b>האמת:</b> אלה המוגלתיים. <b>הלא-מוגלתיים</b> הם אוטואימוניים, כ-3 שבועות אחר כך: קדחת שיגרון ו-PSGN.</div>
-<div class="trap"><b>המלכודת:</b> לייחס ל-S. aureus את חלבון M או סטרפטוקינאז. <b>האמת:</b> אלה פקטורים של <b>GAS</b>. של aureus הם Protein A, קואגולאז והיאלורונידאז.</div>
-<div class="trap"><b>המלכודת:</b> „תינוק בן חודש עם GBS נדבק בלידה, וטיפול לפני הלידה היה מונע זאת”. <b>האמת:</b> בגיל חודש זו הדבקה <b>אופקית</b>, מאוחרת — הטיפול לפני הלידה לא היה משנה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>קטלאז</span><span data-d>סטאפ חיובי, סטרפ שלילי</span>
@@ -707,7 +658,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>חלבון M</span><span data-d>פקטור האלימות המרכזי של GAS</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/סטאפילוקוק וסטרפטוקוק" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/סטאפילוקוק וסטרפטוקוק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/סטאפילוקוק וסטרפטוקוק" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/סטאפילוקוק וסטרפטוקוק" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t06">
 <h3>אנטרובקטריאצאה וחיידקי המעי<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -755,13 +706,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <br>• <b>שיגלה:</b> אסור לתת תרופות שעוצרות שלשול — הן מונעות את פינוי החיידק.
 <br>• <b>טיפוס הבטן</b> נשאר מחלה קטלנית בלי טיפול, עם תמותה של 10-30%.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אנטרובקטריאצאה הם אוקסידאז-חיוביים”. <b>האמת:</b> הם <b>אוקסידאז-שליליים</b> — זה מה שמבדיל אותם מפסאודומונס. חיידק מעי אוקסידאז-חיובי הוא לא מהמשפחה.</div>
-<div class="trap"><b>המלכודת:</b> „סלמונלה ושיגלה מתסיסות לקטוז”. <b>האמת:</b> לא. מתסיסי הלקטוז הם <b>E. coli וקלבסיאלה</b>. מושבות צבעוניות במקונקי מכוונות ל-E. coli.</div>
-<div class="trap"><b>המלכודת:</b> לטפל בשיגלה באמינוגליקוזידים. <b>האמת:</b> שיגלה חיה <b>בתוך תאים</b>, ואמינוגליקוזידים לא חודרים לתאים אאוקריוטיים — ולכן הם הקבוצה שאינה מומלצת.</div>
-<div class="trap"><b>המלכודת:</b> בשאלת עקרונות קוך בסלמונלה — „היא תוך-תאית”. <b>האמת:</b> זה נכון, אבל מה שסותר את קוך הוא ה<b>נשאות האסימפטומטית</b>: החיידק נמצא גם באנשים בריאים.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>EHEC</span><span data-d>שיגה טוקסין, מינון נמוך, סיכון ל-HUS</span>
@@ -771,7 +715,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>פרוטאוס</span><span data-d>אוראז, pH גבוה ואבנים בכליות</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/אנטרובקטריאצאה וחיידקי המעי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/אנטרובקטריאצאה וחיידקי המעי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/אנטרובקטריאצאה וחיידקי המעי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/אנטרובקטריאצאה וחיידקי המעי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t07">
 <h3>יחסי חיידק-מאכסן ומיקרוביום<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -829,13 +773,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <br>• <b>תזונה</b> עשירה בסיבים ובמזון מותסס מגדילה את המגוון.
 <br>• <b>אופורטוניסטים</b> כמו קלבסיאלה ו-epidermidis חולים בדיוק כשהמחסומים נפרצים: צנתר, מכונת הנשמה, דיכוי חיסוני.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „AMP טעונים שלילית”, או „עושים חורים בפפטידוגליקן”. <b>האמת:</b> הם טעונים <b>חיובית</b> ועושים חורים ב<b>ממברנה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „שכבת המוקוס בנויה משכבה של תאי גובלט”, או „מגליקוליפידים”. <b>האמת:</b> תאי הגובלט <b>מפרישים</b> אותה, והיא בנויה מ<b>גליקופרוטאינים</b>.</div>
-<div class="trap"><b>המלכודת:</b> „TLR נמצאים על החיידק ומאפשרים לו להיצמד”. <b>האמת:</b> TLR הם רצפטורים של <b>המאכסן</b> שמתריעים על פתוגן.</div>
-<div class="trap"><b>המלכודת:</b> בשאלת קוך — „גדל רק במדיום מועשר” סותר את העקרונות. <b>האמת:</b> מה שסותר הוא שהחיידק <b>לא נמצא בכל החולים</b> (28 מתוך 30). גידול במדיום מועשר הוא עדיין גידול בתרבית.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>colonization resistance</span><span data-d>המיקרוביום מונע מפתוגנים להתיישב</span>
@@ -844,7 +781,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>infection dose</span><span data-d>כמה חיידקים צריך כדי לחלות</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/יחסי חיידק-מאכסן ומיקרוביום" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/יחסי חיידק-מאכסן ומיקרוביום" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/יחסי חיידק-מאכסן ומיקרוביום" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/יחסי חיידק-מאכסן ומיקרוביום" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t08">
 <h3>מיקובקטריה ושחפת<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -876,12 +813,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>נשא לטנטי לא מדביק, ולכן לא מבודדים אותו — אבל הוא עלול לחלות בעתיד, בשפעול מחדש, במיוחד בדיכוי חיסוני. בשחפת פעילה הטיפול משולב וממושך, כי החיידק גדל לאט ומפתח עמידות.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „נשאית לטנטית חולה וחייבת בידוד”. <b>האמת:</b> בשחפת לטנטית <b>אין הדבקה</b>. בידוד הוא לשחפת פעילה.</div>
-<div class="trap"><b>המלכודת:</b> „כדי להחליט על בידוד נעשה צביעת גרם לכיח”. <b>האמת:</b> שחפת לא נצבעת בגרם. משתמשים ב<b>צביעה עמידת-חומצה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „איזוניאזיד מעכב את הדופן המיוחד”. <b>האמת:</b> התשובה המדויקת היא <b>החומצה המיקולית</b> עצמה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>איזוניאזיד</span><span data-d>מעכב סינתזת חומצה מיקולית</span>
@@ -889,7 +820,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>צביעה עמידת-חומצה</span><span data-d>מזהה מיקובקטריה</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-a/מיקובקטריה ושחפת" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/מיקובקטריה ושחפת" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-a/מיקובקטריה ושחפת" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-a/מיקובקטריה ושחפת" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 </section>
 
 <section class="block" id="last">
@@ -925,7 +856,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </section>
 
 <footer>
-  נכתב מתוך הסיכום של אלישמע למחזור נ״א — 17 שיעורים עם מרצה ותאריך לכל שיעור — ומשאלות הארכיון, והמלכודות נדחסו מהמסיחים שהופיעו בפועל. הסיכומים של דין פרי מכסים רק 11 מהשיעורים (בלי הסטרפטוקוקים הבטא-המוליטיים, הסטפילוקוקים וחיידקי המעי). זה סיכום של סטודנטים, לא חומר רשמי של הקורס.
+  נכתב מתוך הסיכום של אלישמע למחזור נ״א — 17 שיעורים עם מרצה ותאריך לכל שיעור — ומשאלות הארכיון. הסיכומים של דין פרי מכסים רק 11 מהשיעורים (בלי הסטרפטוקוקים הבטא-המוליטיים, הסטפילוקוקים וחיידקי המעי). זה סיכום של סטודנטים, לא חומר רשמי של הקורס.
   <a href="../index.html#/course/ekronot-a/micro">→ חזרה לעמוד הקורס בארכיון</a>
 </footer>
 
@@ -1017,7 +948,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1317,22 +1248,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1346,9 +1261,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1467,10 +1380,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1504,8 +1416,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1514,11 +1425,13 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
+
+/* עמודת הקריאה: ב-50rem יצאו ~90 תווים בשורה — 44rem ≈ 75, הטווח הנוח לעין.
+   מסך בלבד (בהדפסה הגוף ברוחב מלא), ולא באלקטרו שיש לו פריסה משלו. */
+@media screen{ body:not(:has(#ed-prog)){max-width:44rem;} }
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1539,13 +1452,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-a-micro-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-a", "shinun": "ekronot-a"};</script>
+<script>window.DOCKIT={"id": "ekronot-a-micro-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-a", "shinun": "ekronot-a"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1578,66 +1490,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1648,7 +1500,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1666,7 +1518,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1687,8 +1539,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1781,7 +1633,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1861,10 +1713,46 @@ if (CFG.qa) {
         var u = byTopic[titleOf(sec)];
         if (!u || !(u.points || []).length) return;
         /* point הוא טקסט פשוט (לא HTML) — מבריחים אותו, אחרת „Mg²⁺<Na⁺” נבלע כתגית.
-           ואותו תיקון כיווניות כמו במנוע: טווח עם מקף ארוך וסימן עילי בסוף מילה לטינית. */
+           ואותו תיקון כיווניות כמו במנוע (bidiFix ב-app.js; התאום בפייתון: tools/bidi_fix.py):
+           טווח עם מקף ארוך, סימן עילי ומטען ASCII בסוף נוסחה, מינוס מוביל, וחץ בהקשר עברי. */
+        var bidiArrows = function (t) {
+          if (!/[\u2192]|->|<-/.test(t)) return t;
+          if (t.indexOf('<!--') < 0) {
+            t = t.replace(/<-{1,2}>/g, '\u2194').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+          }
+          var side = function (i, step) {
+            var inTag = false;
+            for (var j = i + step; j >= 0 && j < t.length; j += step) {
+              var c = t[j];
+              if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+              if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+              if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';
+              if (/[\u05D0-\u05EA]/.test(c)) return 'R';
+              if (step > 0 && /\d/.test(c)) return side(i, -1);
+            }
+            return null;
+          };
+          var out = '';
+          for (var i = 0; i < t.length; i++) {
+            var c = t[i];
+            if (c !== '\u2192' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+            if (c === '\u2192') {
+              var j = i - 1;
+              while (j >= 0 && /\s/.test(t[j])) j--;
+              if (j < 0 || (t[j] === '>' && t[t.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+            }
+            var ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+            out += ((c !== '\uE001') === ltr) ? '\u2192' : '\u2190';
+          }
+          return out;
+        };
         var bidiFix = function (t) {
-          return String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
-            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E');
+          return bidiArrows(String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
+            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+            .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, function (m, pre, sign, at, str) {
+              return (/\s/.test(pre) && /(^|\s)[\u05D1\u05DB\u05DC\u05DE\u05D4\u05D5\u05E9]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign;
+            })
+            .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'));
         };
         var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
 
@@ -1883,9 +1771,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1905,13 +1791,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -1935,7 +1817,7 @@ if (CFG.qa) {
         a.href = '../index.html#/keyer/' + deck.id;
         a.target = '_blank'; a.rel = 'noopener';
         a.title = deck.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
-        a.textContent = '🔑 לזהות מרמזים — ' + deck.title;
+        a.textContent = '🔑 ' + deck.title;   /* הכותרות כבר פותחות ב-„זהה את…” */
         var drill = sec.querySelector('.drill');
         if (drill) drill.after(a); else sec.appendChild(a);
       });
@@ -2146,7 +2028,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */

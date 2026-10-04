@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -344,7 +335,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -408,13 +399,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>מעשן כבד בן 75 עם <b>סרטן תאי קשקש</b> בריאה — הדרך אליו עברה כמעט תמיד דרך מטפלזיה. וזו גם הסיבה שהפסקת עישון מוקדמת עוזרת: מטפלזיה הפיכה כל עוד הגירוי מפסיק לפני שמופיעה דיספלזיה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „בהיפרפלזיה ובהיפרטרופיה נוצרים תאים חדשים”. <b>האמת:</b> רק בהיפרפלזיה. המשותף לשתיהן: מנגנוני הסתגלות לעומס.</div>
-<div class="trap"><b>המלכודת:</b> „עודף גירוי הורמונלי גורם לאטרופיה”. <b>האמת:</b> עודף גירוי גורם להיפרפלזיה. אטרופיה היא מ<b>חוסר</b> גירוי.</div>
-<div class="trap"><b>המלכודת:</b> בשאלת Barrett של מ״ט הגזע כתוב „אפיתל עמודי מתחלף בקשקשי”. <b>האמת:</b> בפועל זה הפוך — בוושט הקשקשי מתחלף בעמודי. התשובה נשארת „מטפלזיה”.</div>
-<div class="trap"><b>המלכודת:</b> „דיספלזיה היא הסתגלות תאית”. <b>האמת:</b> דיספלזיה היא שלב מקדים לסרטן.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>היפרטרופיה</span><span data-d>תאים גדולים יותר — שריר</span>
@@ -424,7 +408,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>אטרופיה</span><span data-d>אשך אחרי סטרואידים, סיסים בצליאק</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/הסתגלות תאית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הסתגלות תאית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/הסתגלות תאית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הסתגלות תאית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t02">
 <h3>נזק תאי, נמק ואפופטוזיס<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -465,14 +449,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>מטופלת שהחלה תרופה ובדם שלה עלו AST ו-ALT — <b>תאי כבד מתים</b>. וכך גם טרופונין אחרי התקף לב: סמן הנזק בדם הוא תמיד סמן של תאים שהממברנה שלהם נפרצה. ובחולה צעירה עם פריחה נקודתית וביופסיה עם דלקת סביב כלי דם — <b>נמק פיברינואידי</b> קובע וסקוליטיס.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „ירידה ב-ATP” או „חדירת נתרן” כסימן לנזק בלתי הפיך. <b>האמת:</b> אלה קורים כבר בנזק הפיך. רק ב<b>בלתי הפיך</b>: עלייה בסידן בתא, פיקנוזיס, ממברנה פרוצה.</div>
-<div class="trap"><b>המלכודת:</b> „טרנסאמינזות גבוהות מעידות על נזק הפיך”. <b>האמת:</b> דליפה של אנזימים = <b>מוות</b> של תאים.</div>
-<div class="trap"><b>המלכודת:</b> „בנמק קרישתי התאים בזופיליים”. <b>האמת:</b> הם <b>אאוזינופיליים</b> — החלבונים עוברים דנטורציה, והגרעין נעלם.</div>
-<div class="trap"><b>המלכודת:</b> „אוטם מוחי — נמק גבינתי”, או „אחרי שנה נוצרת צלקת”. <b>האמת:</b> במוח הנמק <b>נוזלי</b>, והריפוי הוא <b>חלל ציסטי</b>.</div>
-<div class="trap"><b>המלכודת:</b> „המטוקסילין צובע את הציטופלסמה”. <b>האמת:</b> המטוקסילין — גרעין, כחול. אאוזין — ציטופלסמה, ורוד.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>פיקנוזיס</span><span data-d>הגרעין מתכווץ</span>
@@ -482,7 +458,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>נמק שומני</span><span data-d>לבלב בדלקת חריפה</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/נזק תאי, נמק ואפופטוזיס" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/נזק תאי, נמק ואפופטוזיס" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/נזק תאי, נמק ואפופטוזיס" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/נזק תאי, נמק ואפופטוזיס" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t03">
 <h3>הצטברויות, פיגמנטים והסתיידות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -525,13 +501,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>בלוטת לימפה שחורה בשער הריאה של מנותח בגלל סרטן ריאה — <b>פחם</b>, לא מלנין ולא גרורה. מטופל אחרי התקף לב עם אי-ספיקת לב וקוצר נשימה בשכיבה — בריאה שלו יימצאו <b>תאי אי-ספיקת לב</b>: מקרופאגים עם המוסידרין מאריתרוציטים שדלפו לחללי האוויר.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „הפיגמנט הנפוץ ביותר באדם הוא מלנין”. <b>האמת:</b> המפתח בחר ב<b>פחם</b> — האקסוגני השכיח. מלנין הוא האנדוגני השכיח.</div>
-<div class="trap"><b>המלכודת:</b> „ליפופוסין — פיגמנט חום מדימום ישן”. <b>האמת:</b> דימום ישן = המוסידרין. ליפופוסין — בלאי של תאים מזדקנים.</div>
-<div class="trap"><b>המלכודת:</b> „הסתיידות דיסטרופית קשורה לסידן גבוה בדם”. <b>האמת:</b> זו מטסטטית. דיסטרופית — ברקמה פגועה, עם סידן תקין.</div>
-<div class="trap"><b>המלכודת:</b> „בגודש ריאתי כרוני — מקרופאגים עם פחם”. <b>האמת:</b> מקרופאגים עם <b>המוסידרין</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>PAS</span><span data-d>גליקוגן</span>
@@ -541,7 +510,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>קסנתומה</span><span data-d>מקרופאגים קצפיים בעפעף</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/הצטברויות, פיגמנטים והסתיידות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הצטברויות, פיגמנטים והסתיידות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/הצטברויות, פיגמנטים והסתיידות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הצטברויות, פיגמנטים והסתיידות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t04">
 <h3>דלקת חריפה ומתווכים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -586,14 +555,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>ילד עם תוספתן מודלק ואקסודט עם נויטרופילים — הכאב מ<b>פרוסטגלנדינים וברדיקינין</b>. אישה שנוטלת אספירין לדלקת פרקים ומדממת מהפה ומהמעי — <b>תרומבוקסן</b>. ובתמונה של ריאה אדומה ומוצקה אצל מי שמת מדלקת ריאות — <b>red hepatization</b>, והאדום הוא מהאריתרוציטים.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „בדלקת חריפה נוצרים כלי דם חדשים שעוזרים לסלק את הפתוגן”. <b>האמת:</b> אנגיוגנזה שייכת לריפוי ולדלקת כרונית.</div>
-<div class="trap"><b>המלכודת:</b> „הנוזל הדלקתי בהכרח עשיר בתאים”. <b>האמת:</b> אקסודט בהכרח <b>עשיר בחלבון</b>. בדלקת סרוטית הוא דל תאים.</div>
-<div class="trap"><b>המלכודת:</b> באסתמה מאספירין — „ירידה ב-PGE2”. <b>האמת:</b> המנגנון הוא <b>עלייה בלויקוטריאנים</b> (LTE4).</div>
-<div class="trap"><b>המלכודת:</b> „IgA ו-C5a הם אופסונינים”. <b>האמת:</b> האופסונינים הם <b>IgG ו-C3b</b>. C5a מושך תאים.</div>
-<div class="trap"><b>המלכודת:</b> „באלבאולי של דלקת ריאות — טרנסודט”. <b>האמת:</b> <b>אקסודט</b> עם נויטרופילים. טרנסודט — בבצקת ריאות של אי-ספיקת לב.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>היסטמין</span><span data-d>אודם ונפיחות תוך שניות</span>
@@ -603,7 +564,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>red hepatization</span><span data-d>ריאה אדומה ומוצקה — אריתרוציטים באלבאולי</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/דלקת חריפה ומתווכים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/דלקת חריפה ומתווכים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/דלקת חריפה ומתווכים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/דלקת חריפה ומתווכים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t05">
 <h3>דלקת כרונית, גרנולומה וריפוי<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -644,13 +605,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>אישה עם שיעול כרוני, גושים קטנים בשתי הריאות ובלוטות מוגדלות, וביופסיה עם גרנולומות בלי נמק — סרקואידוזיס, ומי שמניע את הגרנולומה הוא <b>אינטרפרון גמא</b>. ומטופלת שנוטלת סטרואידים שנים ופצעיה לא נסגרים — דיכוי של <b>TGF-β</b>.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „התא הדומיננטי בגרנולומה הוא הלימפוציט”. <b>האמת:</b> <b>המקרופאג</b> (המופעל, האפיתליואידי).</div>
-<div class="trap"><b>המלכודת:</b> „היסטמין” או „C5a” כמתווך של גרנולומה. <b>האמת:</b> אלה של דלקת חריפה. הגרנולומה — <b>אינטרפרון גמא</b>.</div>
-<div class="trap"><b>המלכודת:</b> „remodeling = יצירת רקמה גרנולרית”. <b>האמת:</b> remodeling = <b>קולגן III מוחלף ב-I</b>.</div>
-<div class="trap"><b>המלכודת:</b> „תאי שריר שלד נכנסים ל-G1 אחרי פציעה”. <b>האמת:</b> שריר שלד נשאר ב-G0. פיברובלסטים, הפטוציטים ואנדותל — נכנסים.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>גרנולומה</span><span data-d>מקרופאגים מופעלים ותאי ענק</span>
@@ -660,7 +614,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>remodeling</span><span data-d>קולגן I מחליף את III</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/דלקת כרונית, גרנולומה וריפוי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/דלקת כרונית, גרנולומה וריפוי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/דלקת כרונית, גרנולומה וריפוי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/דלקת כרונית, גרנולומה וריפוי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t06">
 <h3>הפרעות המודינמיות<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -700,14 +654,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>צעירה מעשנת שנוטלת גלולות, אחרי טיסה ארוכה, עם רגל נפוחה — כל שלושת הגורמים של וירכוב. ובסלייד של הוריד שלה אחרי זמן — קריש שעבר <b>התארגנות ו-recanalization</b>. ונער עם כאב פתאומי באשך ו-bell clapper — תסביב, חסימה ורידית, ולכן <b>אוטם אדום</b>.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „הגורם החשוב ביותר בטריאדה הוא הזרימה המערבולתית” או „האטה”. <b>האמת:</b> <b>הפגיעה באנדותל</b>.</div>
-<div class="trap"><b>המלכודת:</b> „היצמדות” כגורל של טרומבוס. <b>האמת:</b> הגורלות: התמוססות, פרופגציה, תסחיף, התארגנות.</div>
-<div class="trap"><b>המלכודת:</b> „אוטם בלב הוא תמיד לבן”. <b>האמת:</b> בדרך כלל כן — אבל אחרי <b>רה-פרפוזיה</b> הוא אדום.</div>
-<div class="trap"><b>המלכודת:</b> פטכיה, פורפורה ואכימוזה. <b>האמת:</b> 1-2 מ״מ פטכיה, 3-5 מ״מ פורפורה, מעל 1-2 ס״מ אכימוזה. המספר בשאלה הוא כל התשובה.</div>
-<div class="trap"><b>המלכודת:</b> „בבצקת ריאות של אי-ספיקת לב — עלייה בלחץ האונקוטי”. <b>האמת:</b> <b>עלייה בלחץ ההידרוסטטי</b> בלבד.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>אנסרקה</span><span data-d>בצקת מפושטת בכל הגוף — מחלת כליות</span>
@@ -717,7 +663,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>saddle embolus</span><span data-d>תסחיף בהתפצלות עורק הריאה — מוות</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/הפרעות המודינמיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הפרעות המודינמיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/הפרעות המודינמיות" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/הפרעות המודינמיות" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t07">
 <h3>נאופלזיה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -764,14 +710,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>מנתחת שמוצאת בזמן ניתוח שחלה גושים אדומים בבטן ושולחת לחתך קפוא — התשובה „רקמת טחול” פירושה <b>כוריסטומה</b>, לא גרורה. ואישה עם סרטן שד שלילי לקולטנים הורמונליים וחיובי ל-HER2 — ה-HER2 הוא <b>אונקוגן</b>, והבדיקה נועדה לבחירת הטיפול.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „LYMPHOMA” או „MELANOMA” כגידול שפיר. <b>האמת:</b> שניהם ממאירים, למרות הסיומת.</div>
-<div class="trap"><b>המלכודת:</b> הגדרת דיספלזיה — „החלפה של סוג אפיתל” או „רקמה במקום לא נכון”. <b>האמת:</b> אלה מטפלזיה וכוריסטומה. דיספלזיה = <b>אי-סדר עם עלייה במיטוזות</b>.</div>
-<div class="trap"><b>המלכודת:</b> „הגרורות הראשונות תמיד בבלוטות לימפה”. <b>האמת:</b> סרקומות מתפשטות <b>בדם</b>.</div>
-<div class="trap"><b>המלכודת:</b> „חתך קפוא כדי לזרז אבחנה של נגע עורי”. <b>האמת:</b> חתך קפוא — רק כשהתשובה משנה את הניתוח.</div>
-<div class="trap"><b>המלכודת:</b> „אנפלזיה = יותר מ-10 מיטוזות”. <b>האמת:</b> אנפלזיה = <b>חוסר התמיינות</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>כוריסטומה</span><span data-d>רקמה תקינה במקום הלא נכון</span>
@@ -781,7 +719,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>HER2</span><span data-d>אונקוגן — קובע את הטיפול</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/נאופלזיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/נאופלזיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/נאופלזיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/נאופלזיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 <section class="unit" id="u-t08">
 <h3>מחלות זיהומיות בפתולוגיה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
@@ -827,13 +765,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>סוכרתי לא מאוזן עם נמק שחור בחך או באף — <b>מוקור</b>, דחוף. אישה בהיריון שנחשפה ל-Parvovirus — העובר בסיכון לאנמיה קשה. ורופא זיהומולוג עם שיעול יבש של שנה ומוקדים באונות העליונות — הביופסיה תראה גרנולומה, והציטוקין שמאחוריה הוא <b>אינטרפרון גמא</b>.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> שאלת „מה נכון לגבי שחפת” (נ׳, לא אומתה) — המפתח: „המחלה הראשונית בעלת ביטוי קליני”. <b>האמת:</b> זה שנוי במחלוקת — השחפת הראשונית לרוב אסימפטומטית. לקרוא את כל ההיגדים ולבחור את הפחות שגוי.</div>
-<div class="trap"><b>המלכודת:</b> „דלקת מונונוקלארית — תגובה חריפה לחיידקים”. <b>האמת:</b> חיידקים חוץ-תאיים = מוגלתי. מונונוקלארי = נגיפים ופטריות.</div>
-<div class="trap"><b>המלכודת:</b> „כל זיהום HPV גורם לסרטן”. <b>האמת:</b> HPV מסרטן יחד עם גורמים נוספים.</div>
-<div class="trap"><b>המלכודת:</b> „Parvovirus פוגע בעובר דרך נוגדנים של האם”. <b>האמת:</b> הוא <b>הורס ישירות</b> את קדמי האריתרוציטים.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>מוקור</span><span data-d>סינוסים, עין ומוח — חוסם כלי דם</span>
@@ -843,7 +774,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>נמק גבינתי</span><span data-d>שחפת</span>
 </div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/מחלות זיהומיות בפתולוגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/מחלות זיהומיות בפתולוגיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/מחלות זיהומיות בפתולוגיה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/מחלות זיהומיות בפתולוגיה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 
 </section>
 
@@ -973,7 +904,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1273,22 +1204,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1302,9 +1217,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1423,10 +1336,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1460,8 +1372,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1470,11 +1381,13 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
+
+/* עמודת הקריאה: ב-50rem יצאו ~90 תווים בשורה — 44rem ≈ 75, הטווח הנוח לעין.
+   מסך בלבד (בהדפסה הגוף ברוחב מלא), ולא באלקטרו שיש לו פריסה משלו. */
+@media screen{ body:not(:has(#ed-prog)){max-width:44rem;} }
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1495,13 +1408,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-b-patho-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
+<script>window.DOCKIT={"id": "ekronot-b-patho-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1534,66 +1446,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1604,7 +1456,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1622,7 +1474,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1643,8 +1495,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1737,7 +1589,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1817,10 +1669,46 @@ if (CFG.qa) {
         var u = byTopic[titleOf(sec)];
         if (!u || !(u.points || []).length) return;
         /* point הוא טקסט פשוט (לא HTML) — מבריחים אותו, אחרת „Mg²⁺<Na⁺” נבלע כתגית.
-           ואותו תיקון כיווניות כמו במנוע: טווח עם מקף ארוך וסימן עילי בסוף מילה לטינית. */
+           ואותו תיקון כיווניות כמו במנוע (bidiFix ב-app.js; התאום בפייתון: tools/bidi_fix.py):
+           טווח עם מקף ארוך, סימן עילי ומטען ASCII בסוף נוסחה, מינוס מוביל, וחץ בהקשר עברי. */
+        var bidiArrows = function (t) {
+          if (!/[\u2192]|->|<-/.test(t)) return t;
+          if (t.indexOf('<!--') < 0) {
+            t = t.replace(/<-{1,2}>/g, '\u2194').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+          }
+          var side = function (i, step) {
+            var inTag = false;
+            for (var j = i + step; j >= 0 && j < t.length; j += step) {
+              var c = t[j];
+              if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+              if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+              if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';
+              if (/[\u05D0-\u05EA]/.test(c)) return 'R';
+              if (step > 0 && /\d/.test(c)) return side(i, -1);
+            }
+            return null;
+          };
+          var out = '';
+          for (var i = 0; i < t.length; i++) {
+            var c = t[i];
+            if (c !== '\u2192' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+            if (c === '\u2192') {
+              var j = i - 1;
+              while (j >= 0 && /\s/.test(t[j])) j--;
+              if (j < 0 || (t[j] === '>' && t[t.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+            }
+            var ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+            out += ((c !== '\uE001') === ltr) ? '\u2192' : '\u2190';
+          }
+          return out;
+        };
         var bidiFix = function (t) {
-          return String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
-            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E');
+          return bidiArrows(String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
+            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+            .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, function (m, pre, sign, at, str) {
+              return (/\s/.test(pre) && /(^|\s)[\u05D1\u05DB\u05DC\u05DE\u05D4\u05D5\u05E9]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign;
+            })
+            .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'));
         };
         var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
 
@@ -1839,9 +1727,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1861,13 +1747,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -1891,7 +1773,7 @@ if (CFG.qa) {
         a.href = '../index.html#/keyer/' + deck.id;
         a.target = '_blank'; a.rel = 'noopener';
         a.title = deck.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
-        a.textContent = '🔑 לזהות מרמזים — ' + deck.title;
+        a.textContent = '🔑 ' + deck.title;   /* הכותרות כבר פותחות ב-„זהה את…” */
         var drill = sec.querySelector('.drill');
         if (drill) drill.after(a); else sec.appendChild(a);
       });
@@ -2102,7 +1984,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */

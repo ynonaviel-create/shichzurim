@@ -16,12 +16,11 @@ guides/<course>-<key>.html. הניווט הוא לפי נושא ולא לפי ב
 נבנות שם עד שכל המקצועות מוכנים.
 
 מה שנכנס לשלד מהמפה בחינם: שמות הבלוקים והיחידות (חייבים להיות זהים למפה —
-זה מה שמחבר לתרגול), תמצית היחידה (what), המלכודות (points[].trap, עם TODO
-על "האמת"), והסרטונים המאומתים. השאר — פרוזה, איורים, חיבור רפואי — נכתב
+זה מה שמחבר לתרגול), תמצית היחידה (what) והסרטונים המאומתים. השאר — פרוזה, איורים, חיבור רפואי — נכתב
 לפי הסקיל write-study-guide.
 
 אחרי מילוי התוכן: python3 guides/_template/inject.py (להוסיף את המסמך
-ל-DOCS שם) — זה מטמיע את ערכת ה-doc-kit: סימון על הטקסט, שער "נסה קודם",
+ל-DOCS שם) — זה מטמיע את ערכת ה-doc-kit: סימון על הטקסט,
 פס התקדמות.
 """
 import argparse
@@ -84,7 +83,6 @@ def load_shinun_topics(cid):
 
 def unit_html(cid, i, topic, u, shinun_topics=frozenset()):
     what = (u or {}).get("what", "")
-    traps = [p["trap"] for p in (u or {}).get("points", []) if p.get("trap")]
     vids = [v for v in (u or {}).get("videos", []) if v.get("id")]
     out = [f'<section class="unit" id="u-t{i:02d}">']
     out.append(f"<h3>{topic}{SPEAK}</h3>")
@@ -96,14 +94,6 @@ def unit_html(cid, i, topic, u, shinun_topics=frozenset()):
                "<figcaption><!-- TODO: המסקנה שנבחנת, לא כיתוב --></figcaption></figure>")
     out.append("\n<h4>החיבור הרפואי</h4>")
     out.append("<p><!-- TODO: איפה זה פוגש רפואה. אם אין חיבור אמיתי — למחוק את הסקשן, לא להמציא. --></p>")
-    out.append('\n<div class="traps">\n<h4>מלכודות</h4>')
-    if traps:
-        for t in traps:
-            out.append(f'<div class="trap"><b>המלכודת:</b> {t} <b>האמת:</b> <!-- TODO: התיקון --></div>')
-    else:
-        out.append('<div class="trap"><b>המלכודת:</b> <!-- TODO: התפיסה השגויה --> '
-                   "<b>האמת:</b> <!-- TODO: התיקון --></div>")
-    out.append("</div>")
     # תרגיל התאמה: אם נושא היחידה קיים גם בשינון — הזוגות יגיעו משם בזמן
     # ריצה (data-shinun). אחרת שלד inline עם TODO — הצלבת topic↔topic בין
     # המפה לשינון חלשה בפועל, ולכן לא ממציאים התאמה אוטומטית רחבה יותר.
@@ -174,7 +164,7 @@ def build(cid, out_path=None, subject=None):
   <div class="sub"><!-- TODO: משפט אחד — מה יש בפנים --></div>
   <div class="st">
     <div><b>{n_units}</b><span>נושאים</span></div>
-    <!-- TODO: שאלות במבחן / שעות / מלכודות / סרטונים — כשהמספרים ידועים -->
+    <!-- TODO: שאלות במבחן / שעות / סרטונים — כשהמספרים ידועים -->
   </div>
 </div>
 
@@ -183,7 +173,7 @@ def build(cid, out_path=None, subject=None):
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -228,8 +218,7 @@ def build(cid, out_path=None, subject=None):
     out = (head + "\n".join(nav) + chrome + "\n".join(body) + "\n" + scripts + "\n</body>\n</html>\n")
     dest = Path(out_path) if out_path else ROOT / "guides" / (f"{cid}-{sj['key']}.html" if sj else f"{cid}-full.html")
     dest.write_text(out, encoding="utf-8")
-    n_traps = len(re.findall(r'class="trap"', out))
-    print(f"✅ {dest} — {n_units} יחידות, {n_traps} שלדי מלכודות, {out.count('TODO')} TODO")
+    print(f"✅ {dest} — {n_units} יחידות, {out.count('TODO')} TODO")
     print("   המשך: מילוי תוכן לפי הסקיל write-study-guide (סוכן לכל בלוק),")
     print(f"   ואז: לרשום את המסמך ב-DOCS של inject.py — עם modes/qa" +
           (f"/shinun ('{cid}')" if shinun_topics else f" ('{cid}')") +

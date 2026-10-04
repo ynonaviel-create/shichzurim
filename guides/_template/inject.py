@@ -24,102 +24,90 @@ GUIDES = HERE.parent
 DOCS = {
     "physics-full.html": {
         "id": "physics-doc",
-        "gate": ".trap",          # שער "נסה קודם" על "האמת:" במלכודות
         "maplinks": "physics",    # קישור "במפה" ליד כל קישור תרגול
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "physics",
         "shinun": "physics",
     },
     # שנה א׳ — הלומדה הראשונה של סמסטר א׳ (פיילוט, 30/09). אין שינון לקורס, ולכן בלי shinun.
     "cellbio-full.html": {
         "id": "cellbio-doc",
-        "gate": ".trap",
         "maplinks": "cellbio",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "cellbio",
     },
     "chem-full.html": {
         "id": "chem-doc",
-        "gate": ".trap",
         "maplinks": "chem",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "chem",
     },
     "organic-full.html": {
         "id": "organic-doc",
-        "gate": ".trap",
         "maplinks": "organic",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "organic",
     },
     "epi-full.html": {
         "id": "epi-doc",
-        "gate": ".trap",
         "maplinks": "epi",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "epi",
     },
     "histo-full.html": {
         "id": "histo-doc",
-        "gate": ".trap",
         "maplinks": "histo",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "histo",
     },
     "embryo-full.html": {
         "id": "embryo-doc",
-        "gate": ".trap",
         "maplinks": "embryo",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "embryo",
     },
     "anatomy-full.html": {
         "id": "anatomy-doc",
-        "gate": ".trap",
         "maplinks": "anatomy",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "anatomy",
     },
     "biochem-full.html": {
         "id": "biochem-doc",
-        "gate": ".trap",
         "maplinks": "biochem",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "biochem",
     },
     "molecular-full.html": {
         "id": "molecular-doc",
-        "gate": ".trap",
         "maplinks": "molecular",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "molecular",
     },
     "clinical-full.html": {
         "id": "clinical-doc",
-        "gate": ".trap",
         "maplinks": "clinical",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "clinical",
     },
     "electro-full.html": {
         "id": "electro-doc",
         "progress": False,        # יש לו פס התקדמות משלו (#ed-prog)
-        "gate": None,             # יש לו שערי reveal משלו (wrapReveal)
-        # מבנה הפרקים שונה (section.chap): במצב מרוכז נשארים הפתיח, המלכודות
-        # וגבולות הגזרה. אם האימות בדפדפן מראה שבירה — מוחקים את השורה הזאת.
+        # מבנה הפרקים שונה (section.chap): במצב מרוכז נשארים הפתיח וגבולות
+        # הגזרה. אם האימות בדפדפן מראה שבירה — מוחקים את השורה הזאת.
         "modes": {"unit": "section.chap",
-                  "keep": "header.ch, .why, .trap, .bn, .dk-qa, .ex, .dk-more"},
+                  "keep": "header.ch, .why, .bn, .dk-qa, .ex, .dk-more"},
         "qa": "electro",
         "shinun": "electro",
     },
@@ -127,73 +115,65 @@ DOCS = {
     # כמו פיזיקה; qa נמשך מהמפה של הקורס כולו, שמכסה את כל נושאי המקצוע.
     "ekronot-a-immuno.html": {
         "id": "ekronot-a-immuno-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-a",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
         "shinun": "ekronot-a",
     },
     "ekronot-a-micro.html": {
         "id": "ekronot-a-micro-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-a",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
         "shinun": "ekronot-a",
     },
     "ekronot-a-para.html": {
         "id": "ekronot-a-para-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-a",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
         "shinun": "ekronot-a",
     },
     "ekronot-a-viro.html": {
         "id": "ekronot-a-viro-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-a",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-a",
         "shinun": "ekronot-a",
     },
     "ekronot-b-patho.html": {
         "id": "ekronot-b-patho-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-b",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
         "shinun": "ekronot-b",
     },
     "ekronot-b-pharma.html": {
         "id": "ekronot-b-pharma-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-b",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
         "shinun": "ekronot-b",
     },
     "ekronot-b-physio.html": {
         "id": "ekronot-b-physio-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-b",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
         "shinun": "ekronot-b",
     },
     "ekronot-b-genetics.html": {
         "id": "ekronot-b-genetics-doc",
-        "gate": ".trap",
         "maplinks": "ekronot-b",
         "modes": {"unit": "section.unit",
-                  "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"},
+                  "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"},
         "qa": "ekronot-b",
         "shinun": "ekronot-b",
     },
@@ -228,7 +208,7 @@ def add_map_links(html, course):
         return (whole +
                 f'<a class="drill dk-map" href="../index.html#/guide/{course}/{topic}"'
                 f' target="_blank" rel="noopener"'
-                f' title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">'
+                f' title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">'
                 f'🗺️ מה באמת נשאל ←</a>')
 
     return pat.sub(repl, html)

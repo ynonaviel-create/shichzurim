@@ -2,7 +2,6 @@
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -35,66 +34,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -105,7 +44,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -123,7 +62,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -144,8 +83,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -238,7 +177,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -318,10 +257,46 @@ if (CFG.qa) {
         var u = byTopic[titleOf(sec)];
         if (!u || !(u.points || []).length) return;
         /* point הוא טקסט פשוט (לא HTML) — מבריחים אותו, אחרת „Mg²⁺<Na⁺” נבלע כתגית.
-           ואותו תיקון כיווניות כמו במנוע: טווח עם מקף ארוך וסימן עילי בסוף מילה לטינית. */
+           ואותו תיקון כיווניות כמו במנוע (bidiFix ב-app.js; התאום בפייתון: tools/bidi_fix.py):
+           טווח עם מקף ארוך, סימן עילי ומטען ASCII בסוף נוסחה, מינוס מוביל, וחץ בהקשר עברי. */
+        var bidiArrows = function (t) {
+          if (!/[\u2192]|->|<-/.test(t)) return t;
+          if (t.indexOf('<!--') < 0) {
+            t = t.replace(/<-{1,2}>/g, '\u2194').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+          }
+          var side = function (i, step) {
+            var inTag = false;
+            for (var j = i + step; j >= 0 && j < t.length; j += step) {
+              var c = t[j];
+              if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+              if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+              if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';
+              if (/[\u05D0-\u05EA]/.test(c)) return 'R';
+              if (step > 0 && /\d/.test(c)) return side(i, -1);
+            }
+            return null;
+          };
+          var out = '';
+          for (var i = 0; i < t.length; i++) {
+            var c = t[i];
+            if (c !== '\u2192' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+            if (c === '\u2192') {
+              var j = i - 1;
+              while (j >= 0 && /\s/.test(t[j])) j--;
+              if (j < 0 || (t[j] === '>' && t[t.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+            }
+            var ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+            out += ((c !== '\uE001') === ltr) ? '\u2192' : '\u2190';
+          }
+          return out;
+        };
         var bidiFix = function (t) {
-          return String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
-            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E');
+          return bidiArrows(String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
+            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+            .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, function (m, pre, sign, at, str) {
+              return (/\s/.test(pre) && /(^|\s)[\u05D1\u05DB\u05DC\u05DE\u05D4\u05D5\u05E9]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign;
+            })
+            .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'));
         };
         var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
 
@@ -340,9 +315,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -362,13 +335,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -392,7 +361,7 @@ if (CFG.qa) {
         a.href = '../index.html#/keyer/' + deck.id;
         a.target = '_blank'; a.rel = 'noopener';
         a.title = deck.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
-        a.textContent = '🔑 לזהות מרמזים — ' + deck.title;
+        a.textContent = '🔑 ' + deck.title;   /* הכותרות כבר פותחות ב-„זהה את…” */
         var drill = sec.querySelector('.drill');
         if (drill) drill.after(a); else sec.appendChild(a);
       });
@@ -603,7 +572,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */

@@ -45,14 +45,71 @@ const view = document.getElementById('view');
    טווח מספרים עם מקף ארוך — „2–4%” מוצג „4–2%” (מקף רגיל נשאר בסדר הנכון),
    וסימן עילי בסוף מילה לטינית — „NAD⁺”, „Ca²⁺” מוצגים „⁺NAD” (LRM אחריו מחזיר אותו).
    מתוקן בזמן התצוגה בלבד: הנתונים לא משתנים, וה-norm שמייצר qid לא רואה את זה. */
+/* ועוד שלושה (נמדדו 04/10 באותה שיטה):
+   מינוס מוביל — „-70mV” מוצג „70mV-”; LRM לפניו הופך את הספרות ל-LTR (כלל W7).
+     לא אחרי אות-תחילית בודדת („כ -53%” הוא מקף של תחילית עם רווח מיותר, לא מינוס).
+   מטען ASCII בסוף נוסחה כימית — „H+ לחלל” מוצג „+H”; LRM אחריו, כמו ב-⁺.
+     רק נוסחה (אות גדולה: H, OH, Fe2, NH4) — סיומת כמו „(olol-)” כבר מוצגת „-olol”
+     כמו שצריך, ו-LRM היה הופך אותה.
+   חץ → בהקשר עברי מצביע אחורה (חצים לא משתקפים) — הופך ל-←, אלא אם משני
+     צדדיו אותיות לטיניות (שם הקטע כולו LTR והחץ תקין). חצי ASCII (-> / <-)
+     מתורגמים לפי המשמעות: קדימה = מהמילה הקודמת לבאה. */
+const bidiArrows = (s) => {
+  if (!/[→]|->|<-/.test(s)) return s;
+  if (!s.includes('<!--')) {
+    s = s.replace(/<-{1,2}>/g, '↔').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+  }
+  /* האות הקרובה מכל צד, בדילוג על תגיות HTML (בשדות המפה יש <b>). */
+  const side = (i, step) => {
+    let inTag = false;
+    for (let j = i + step; j >= 0 && j < s.length; j += step) {
+      const c = s[j];
+      if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+      if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+      if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';   // כל אות LTR חזקה, כולל יוונית — α(1→6)
+      if (/[א-ת]/.test(c)) return 'R';
+      if (step > 0 && /\d/.test(c)) return side(i, -1);   // ספרה יורשת את האות החזקה שלפניה (W7)
+    }
+    return null;
+  };
+  let out = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c !== '→' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+    /* חץ שפותח טקסט הוא אייקון („→ חזרה”), ובעמוד RTL הוא נכון. מחברים רק חץ שבין שני פריטים. */
+    if (c === '→') {
+      let j = i - 1;
+      while (j >= 0 && /\s/.test(s[j])) j--;
+      if (j < 0 || (s[j] === '>' && s[s.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+    }
+    const ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+    const fwd = c !== '\uE001';
+    out += (fwd === ltr) ? '→' : '←';
+  }
+  return out;
+};
 const bidiFix = (s) => (typeof s === 'string'
-  ? s.replace(/(\d)\u2013(?=\d)/g, '$1-')
+  ? bidiArrows(s.replace(/(\d)\u2013(?=\d)/g, '$1-')
      .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+     .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, (m, pre, sign, at, str) =>
+       (/\s/.test(pre) && /(^|\s)[בכלמהוש]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign)
+     .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'))
   : s);
+/* **מודגש** בתוכן (~270 מקומות, בעיקר בעימות קליני ובאלקטרו) הוצג ככוכביות.
+   כאן הוא הופך ל-<b> — דרך צמתי טקסט, לא innerHTML, כך שאין סיכון הזרקה. */
+const boldStrip = (s) => (typeof s === 'string' ? s.replace(/\*\*([^*\n]+?)\*\*/g, '$1') : s);
 const el = (tag, cls, txt) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (txt != null) n.textContent = bidiFix(txt);
+  if (txt != null) {
+    const s = bidiFix(txt);
+    const parts = typeof s === 'string' && s.includes('**') ? s.split(/\*\*([^*\n]+?)\*\*/) : null;
+    if (!parts || parts.length === 1) n.textContent = s;
+    else parts.forEach((p, i) => {
+      if (!p) return;
+      if (i % 2) { const b = document.createElement('b'); b.textContent = p; n.append(b); } else n.append(p);
+    });
+  }
   return n;
 };
 /* fem=true לשמות עצם נקביים. בלי זה יצא "שאלה אחד" — וזה כבר קרה בכרטיסיות
@@ -101,7 +158,11 @@ function speak(text) {
     try { speechSynthesis.speak(u); } catch { resolve(); }
   });
 }
-function stopSpeech() { try { if (speechOK()) speechSynthesis.cancel(); } catch {} }
+/* מונה-דור להקראה. cancel() מסיים רק את המשפט הנוכחי — ה-promise של speak נפתר,
+   ולולאת ההקראה בשינון הייתה ממשיכה למשפט הבא בעמוד אחר (ביקורת 14/08). כל
+   stopSpeech מעלה את המונה, ולולאה שנפתחה בדור קודם עוצרת בבדיקה הבאה שלה. */
+let speechEpoch = 0;
+function stopSpeech() { speechEpoch++; try { if (speechOK()) speechSynthesis.cancel(); } catch {} }
 
 /* צ'יפ נבחר בעכבר בכל בוררי התרגול, ולכן קל היה לשכוח שהוא לא כפתור אמיתי:
    בלי תפקיד ובלי tabIndex אי אפשר להגיע אליו במקלדת בכלל. בסימולציות אותה
@@ -278,6 +339,7 @@ function checkCourseMilestone(m) {
 
 /* חגיגת סיום סבב — נקראת ממסך התוצאה על ציון גבוה. */
 function celebrateResult(pct, scoredCount, name) {
+  if (!isFinite(pct) || !scoredCount) return;   // סבב בלי שאלות נספרות — אין מה לחגוג
   if (pct < 90) return;
   const perfect = pct === 100 && scoredCount >= 5;
   celebrate({
@@ -332,7 +394,7 @@ function applyTheme(mode) {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
+  const saved = previewParam('theme') || localStorage.getItem(THEME_KEY);   // ?theme=light — תצוגה מקדימה/צילום; לא נשמר
   const mode = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : 'auto';
   applyTheme(mode);
   document.getElementById('themeBtn').onclick = () => {
@@ -560,15 +622,22 @@ const seenH = {
    וההקשחה של flush זורקת את הפעולה — הסימון נשאר מקומי ושום סנכרון אחר
    לא נפגע. */
 const FLAG_KEY = 'shichzurim.flag';
+/* ── הסרה היא tombstone, לא מחיקה (ביקורת 14/08: „דגלון שהוסר קם לתחייה ממכשיר שני”) ──
+   המיזוג בענן מעלה כל מפתח שקיים רק מקומית. מכשיר א׳ הסיר דגלון ומחק את השורה;
+   מכשיר ב׳ עדיין החזיק אותו מקומית — והעלה אותו חזרה. בלי חותמת זמן אין דרך
+   לדעת שההסרה מאוחרת מהסימון. לכן שלוש צורות ערך: 1 (ישן — דלוק, זמן 0),
+   {on:1,t} דלוק, {on:0,t} הוסר. המנצח במיזוג הוא המאוחר (cloud.js, winner). */
+const flagOn = (v) => v === 1 || !!(v && typeof v === 'object' && v.on);
 const flags = {
   read() { try { return JSON.parse(localStorage.getItem(FLAG_KEY)) || {}; } catch { return {}; } },
   write(d) { try { localStorage.setItem(FLAG_KEY, JSON.stringify(d)); } catch {} },
-  has(k) { return !!this.read()[k]; },
+  has(k) { return flagOn(this.read()[k]); },
+  list() { const d = this.read(); return Object.keys(d).filter((k) => flagOn(d[k])); },   // הדלוקים בלבד
   toggle(k) {
     const d = this.read();
-    if (d[k]) { delete d[k]; this.write(d); window.Cloud?.queueDelete('flag', k); return false; }
-    d[k] = 1; this.write(d); window.Cloud?.queue('flag', k, 1);
-    return true;
+    const v = { on: flagOn(d[k]) ? 0 : 1, t: Date.now() };
+    d[k] = v; this.write(d); window.Cloud?.queue('flag', k, v);
+    return !!v.on;
   },
 };
 
@@ -958,7 +1027,7 @@ function router() {
   if (REQUIRE_LOGIN && window.Cloud?.enabled && !window.Cloud.user && route !== 'about') return renderLogin();
   /* מעקב אגרגטיבי: אירוע צפייה על הנתיבים המשמעותיים. הפרמטר (מזהה קורס/מבחן/
      סימולציה) הוא ה-target. דה-דופ ושתיקה-כשמנותק חיים ב-Cloud.track עצמו. */
-  if (['course','exam','sim','drill','practice','review','guide','traps','shinun','cards','case','keyer','formulas','sheet','simexam','survey','ecg'].includes(route)) {
+  if (['course','exam','sim','drill','practice','review','guide','shinun','cards','case','keyer','formulas','sheet','simexam','survey','ecg'].includes(route)) {
     window.Cloud?.track('view', param ? `${route}:${param}` : route);
   }
   /* חזרה לכתובת שממנה נפתח סבב חי — מנגנים אותו מחדש במקום לצייר את הבורר
@@ -996,7 +1065,8 @@ function router() {
   // #/practice/<course>/<topic> — נושא מכוון מראש, מגיע מעמוד סימולציה
   if (route === 'practice' && param) return renderPractice(param, sub ? decodeURIComponent(sub) : null);
   if (route === 'review' && param) return renderReview(param, scopeKey(sub));
-  if (route === 'traps' && param) return renderTraps(param);
+  // #/traps — העמוד נמחק (04/10/2026). קישור ישן מגיע לעמוד הקורס.
+  if (route === 'traps' && param) { location.replace('#/course/' + param); return; }
   if (route === 'tree' && param) return renderTree(param);
   if (route === 'semester' && param) return renderSemester(param);
   if (route === 'q' && param) return renderOneQuestion(param);
@@ -1417,15 +1487,11 @@ function renderCourse(courseId, subKey = null) {
       : `${sim.questions} שאלות · ${Math.round(sim.minutes / 60)} שעות · בתנאי אמת`;
     lRow.append(sx);
   }
-  /* המלכודות — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. בקליני ובביוכימיה
-     הדף היה מציג מצב ריק, וכפתור שמוביל לכלום גרוע מכפתור שאינו. */
+  /* עץ הידע — רק למקצוע שיש לו מפה, כי משם מגיע התוכן. כפתור שמוביל למצב
+     ריק גרוע מכפתור שאינו. */
   if (guideOf(courseId)) {
-    const tr = el('a', 'btn', '🪤 המלכודות שלי');
-    tr.title = 'המלכודות שנפלת בהן בתרגול — מה הטעות, מה הנכון, ואיפה ללמוד';
-    tr.href = '#/traps/' + courseId;
-    lRow.append(tr);
-    /* עץ הידע — אותו תנאי בדיוק: התוכן נגזר מהמפה. */
     const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.dataset.tour = 'tree';   // עוגן לסיור החידושים
     kt.title = 'מפת השליטה שלך — כל נושא נצבע לפי כמה אתה יודע אותו עכשיו, ובמה כדאי לגעת';
     kt.href = '#/tree/' + courseId;
     lRow.append(kt);
@@ -1440,7 +1506,7 @@ function renderCourse(courseId, subKey = null) {
     lRow.append(tn);
   }
   /* המסומנות — רק אם יש מה להראות. */
-  if (Object.keys(flags.read()).length) {
+  if (flags.list().length) {
     const fg = el('a', 'btn', '🔖 מה שסימנתי');
     fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
     fg.href = '#/flagged/' + courseId;
@@ -1500,6 +1566,7 @@ function renderCourse(courseId, subKey = null) {
     sec.id = 'sec-play';
     const h = el('div', 'zone-head');
     h.append(el('span', 'zone-head-t', '🎮 לשחק עם זה'));
+    h.dataset.tour = 'play';   // עוגן לסיור החידושים
     h.append(el('span', 'zone-head-line'));
     sec.append(h);
     const g = el('div', 'learn-grid');
@@ -1542,14 +1609,15 @@ function renderCourse(courseId, subKey = null) {
        מהפרמטר — ולכן אין צורך בדגל בדאטה. */
     const sd = studyDoc;
     const card = el('div', 'learn-card learn-card-doc');
+    card.dataset.tour = 'doc';   // עוגן לסיור החידושים
     card.append(el('span', 'learn-card-ico', '📖'));
     const t = el('div');
     t.append(el('div', 'learn-card-ttl', 'הלומדה — הסיכום המלא'));
     t.append(el('div', 'learn-card-sub', sd.meta || 'קריאה לעומק'));
     const modes = el('div', 'learn-modes');
     [['📖 קריאה מלאה', '', 'כל התוכן, כמעבר ראשון על החומר'],
-     ['⚡ מרוכז', '?m=focus', 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'],
-     ['🎮 אינטראקטיבי', '?m=play', 'תרגילי התאמה, מפות חשיבה ושערי "נסה קודם"']]
+     ['⚡ מרוכז', '?m=focus', 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'],
+     ['🎮 אינטראקטיבי', '?m=play', 'תרגילי התאמה ומפות חשיבה']]
       .forEach(([lbl, q, tip]) => {
         const a = el('a', 'learn-mode', lbl);
         a.href = sd.href + q;
@@ -1564,10 +1632,12 @@ function renderCourse(courseId, subKey = null) {
   (c.extraDocs || []).forEach((d) => lg.append(learnCard(d.icon || '📄', d.title, d.sub, d.href, d.badge)));
   /* ליווי הסמסטר — רק לקורס שהוגדרה לו תוכנית הוראה (teaching). */
   if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) {
-    lg.append(learnCard('🗓️', s ? 'השבוע בבלוק' : 'השבוע בקורס',
+    const semCard = learnCard('🗓️', s ? 'השבוע בבלוק' : 'השבוע בקורס',
       s ? `מה נלמד השבוע ב${s.name} ובשאר המקצועות, ומה אתה אמור כבר לדעת`
         : 'איפה ההוראה עומדת, מה אתה אמור לדעת כבר, ומה נשאר לסגור',
-      '#/semester/' + courseId));
+      '#/semester/' + courseId);
+    semCard.dataset.tour = 'semester';   // עוגן לסיור החידושים
+    lg.append(semCard);
   }
   if (hasGuide) {
     const gcard = learnCard('🗺️', s ? `מפת החומרים — ${s.name}` : 'מפת החומרים', 'מה ללמוד, מאיפה, ותמצית', '#/guide/' + courseId + sfx);
@@ -1697,6 +1767,7 @@ function renderBlockHub(c) {
   row.append(rv);
   if (guideOf(courseId)) {
     const kt = el('a', 'btn', '🌳 עץ הידע');
+    kt.dataset.tour = 'tree';   // עוגן לסיור החידושים
     kt.href = '#/tree/' + courseId;
     kt.title = 'כל נושא בבלוק נצבע לפי כמה אתה יודע אותו עכשיו';
     row.append(kt);
@@ -1708,7 +1779,7 @@ function renderBlockHub(c) {
     tn.title = 'מסלול חזרה מרוכז לערב שלפני המבחן — לפי הזמן שנשאר לך';
     row.append(tn);
   }
-  if (Object.keys(flags.read()).length) {
+  if (flags.list().length) {
     const fg = el('a', 'btn', '🔖 מה שסימנתי');
     fg.href = '#/flagged/' + courseId;
     fg.title = 'כל השאלות שסימנת בדגלון — במקום אחד';
@@ -2554,17 +2625,19 @@ async function renderShinun(courseId, topicFilter) {
     paint();
 
     async function loop() {
-      while (playing && i < items.length) {
+      const ep = speechEpoch;             // הדור שבו הלולאה נפתחה; stopSpeech (גם מה-router) משנה אותו
+      const alive = () => playing && ep === speechEpoch;
+      while (alive() && i < items.length) {
         const it = items[i];
         front.textContent = it.front;
         back.textContent = '';
         await speak(it.front);
-        if (!playing) break;
+        if (!alive()) break;
         await pause(900);                 // השהייה לשליפה — זה כל העניין
-        if (!playing) break;
+        if (!alive()) break;
         back.textContent = it.back;
         await speak(it.back);
-        if (!playing) break;
+        if (!alive()) break;
         await pause(500);
         i++;
         pos.textContent = `${Math.min(i + 1, items.length)} מתוך ${items.length}`;
@@ -2656,7 +2729,7 @@ async function renderShinun(courseId, topicFilter) {
       card.append(el('div', 'shn-flip-front', it.front));
       if (flipped) {
         card.append(el('div', 'shn-flip-back', it.back));
-        if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; card.append(m); }
+        if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + bidiFix(it.mnem); card.append(m); }
         card.append(reportButton(courseId, 'shinun', id, shinunNorm(it.front), it.front + ' — ' + it.back));
       } else {
         card.append(el('div', 'shn-flip-hint', 'קליק כדי לחשוף · רווח / →ידעתי / ←עוד לא'));
@@ -2756,7 +2829,7 @@ async function renderShinun(courseId, topicFilter) {
         row.append(el('div', 'shn-row-f', it.front));
         const b = el('div', 'shn-row-b');
         b.append(el('span', 'shn-row-btext', it.back));
-        if (it.mnem) { const m = el('span', 'shn-row-mnem'); m.innerHTML = ' · 💡 ' + it.mnem; b.append(m); }
+        if (it.mnem) { const m = el('span', 'shn-row-mnem'); m.innerHTML = ' · 💡 ' + bidiFix(it.mnem); b.append(m); }
         row.append(b);
         row.addEventListener('click', () => row.classList.toggle('open'));
         body.append(row);
@@ -2803,10 +2876,10 @@ async function renderShinun(courseId, topicFilter) {
           if (correct) tally.ok++;
           list.querySelectorAll('.shn-opt').forEach((x) => {
             x.classList.add('locked');
-            if (x.textContent === bidiFix(it.back)) x.classList.add('right');   // el() מעביר את הטקסט דרך bidiFix
+            if (x.textContent === boldStrip(bidiFix(it.back))) x.classList.add('right');   // el() מעביר את הטקסט דרך bidiFix
           });
           if (!correct) b.classList.add('wrong');
-          if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + it.mnem; qbox.append(m); }
+          if (it.mnem) { const m = el('div', 'shn-mnem'); m.innerHTML = '💡 ' + bidiFix(it.mnem); qbox.append(m); }
           bar.innerHTML = `ציון: <b>${tally.ok}/${tally.total}</b>`;
         });
         list.append(b);
@@ -3375,7 +3448,7 @@ const ECG_RHYTHMS = [
   {
     id: 'sinus-tachy', name: 'סינוס טכיקרדיה', loc: 0, mech: 1,
     gen() { const bpm = rndi(106, 145); return { beats: sinusBeats(bpm, rnd(0.12, 0.16)), bg: null, bpm,
-      why: `כל המבנה תקין — P לפני כל QRS, סדיר, PR ו-QRS תקינים — רק מהר: ${bpm} לדקה. הקוצב עצמו יורה מהר מדי (כמו בפעילות יתר של בלוטת התריס), ולכן זו הפרעה על-חדרית באוטומטיות. המלכודת של המאגר: לסמן re-entry. לא — אין מעגל, יש קוצב מהיר.` }; },
+      why: `כל המבנה תקין — P לפני כל QRS, סדיר, PR ו-QRS תקינים — רק מהר: ${bpm} לדקה. הקוצב עצמו יורה מהר מדי (כמו בפעילות יתר של בלוטת התריס), ולכן זו הפרעה על-חדרית באוטומטיות. הטעות הנפוצה במאגר: לסמן re-entry. לא — אין מעגל, יש קוצב מהיר.` }; },
   },
   {
     id: 'sinus-brady', name: 'סינוס ברדיקרדיה', loc: 0, mech: 1,
@@ -3828,7 +3901,7 @@ function playQuestions(cfg) {
   if (cfg.spotlight) {
     const sp = el('div', 'spotlight-box');
     sp.append(el('b', null, cfg.spotlight.title));
-    const body = el('p', null); body.innerHTML = cfg.spotlight.body;
+    const body = el('p', null); body.innerHTML = bidiFix(cfg.spotlight.body);
     sp.append(body);
     view.append(sp);
   }
@@ -3995,8 +4068,17 @@ function playQuestions(cfg) {
     cGood.textContent = hideScore ? `נענו ${answered}` : `✓ ${good}`;
     cBad.textContent = hideScore ? '' : `✗ ${bad}`;
     cLeft.textContent = `נותרו ${scoredCount - answered}`;
-    fill.style.width = Math.round((answered / scoredCount) * 100) + '%';
+    fill.style.width = (scoredCount ? Math.round((answered / scoredCount) * 100) : 0) + '%';
     fill.className = hideScore ? '' : (answered ? (good / answered >= 0.7 ? 'good' : 'bad') : '');
+
+    /* סבב שכולו מחוץ לחומר (קישור ישיר #/q/ לשאלת offSyllabus): המכנה אפס —
+       היה מציג NaN% וטוסט חגיגה מיידי (ביקורת 14/08). אין ציון, ואומרים את זה. */
+    if (!scoredCount) {
+      toResult.style.display = 'none';
+      resultBox.innerHTML = '';
+      resultBox.append(el('div', 'result-off', '✦ השאלות כאן מחוץ לחומר — הן להעשרה, ולא נספרות בציון או בהתקדמות.'));
+      return;
+    }
 
     if (persist) {
       store.save(key, {
@@ -4928,7 +5010,7 @@ function sheetNode(courseId, focusKey = null) {
       infoBox.append(el('div', 'sheet-info-t', '💡 ' + sec.label));
       const p = el('p');
       /* **הדגשה** → <b>. הטקסט נכתב על ידינו ולא מגיע מקלט משתמש. */
-      p.innerHTML = String(sec.info).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      p.innerHTML = bidiFix(String(sec.info).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'));
       infoBox.append(p);
     }
     const m = marks[k];
@@ -4992,6 +5074,7 @@ function reportButton(courseId, kind, deckId, itemId, preview) {
   b.append(el('span', 'nb-ico', '🚩'));
   b.append(el('span', null, 'דיווח על טעות'));
   b.title = 'משהו לא נכון כאן? דיווח קצר — נבדוק מול חומרי הקורס';
+  b.dataset.tour = 'report';   // עוגן לסיור החידושים
   b.onclick = (e) => { e.stopPropagation(); openReport({ courseId, item: { examId: deckId, qid: `${kind}:${deckId}#${itemId}`, q: preview || '' }, chosen: null }); };
   return b;
 }
@@ -6026,7 +6109,7 @@ async function renderPractice(courseId, seedTopic = null) {
         : mode === 'hard' ? 'שאלות שהמחזור נופל בהן'
         : 'שאלות';
       info.textContent = `בבריכה: ${f.length} ${label}. ייבחרו ${take} באקראי.`;
-      /* פילטר נושא נדבק כשמגיעים מכרטיס מלכודת או מפילוח, והפאנל שמציג אותו
+      /* פילטר נושא נדבק כשמגיעים מקישור נושא או מפילוח, והפאנל שמציג אותו
          מקופל — אז המשתמש רואה „רק מה שטעיתי” ולא מבין למה חסרות טעויות.
          מציגים את זה בגובה העיניים, עם דרך אחת לנקות. */
       if (selTopics.size) {
@@ -6405,7 +6488,7 @@ async function buildSearchIndex() {
               kind: 'point', course: c, icon: '🎯',
               title: u.topic, body: p.point,
               href: `#/guide/${c.id}/${encodeURIComponent(u.topic)}`,
-              hay: searchNorm([u.topic, p.point, p.trap].filter(Boolean).join(' ')),
+              hay: searchNorm([u.topic, p.point].filter(Boolean).join(' ')),
             }));
           });
           return;
@@ -6572,7 +6655,7 @@ async function renderOneQuestion(qid) {
   }
 
   view.dataset.course = found.course.id;
-  await loadGuide(found.course.id).catch(() => null);   // בשביל המלכודת וכפתור "איפה ללמוד"
+  await loadGuide(found.course.id).catch(() => null);   // בשביל כפתור "איפה ללמוד"
   const q = found.exam.questions[found.idx];
 
   playQuestions({
@@ -6592,7 +6675,7 @@ async function renderOneQuestion(qid) {
    מסלול דחוס שנבנה משלושה דברים שכבר קיימים באתר, ושאף אחד מהם לא ניחוש:
    `freq` — כמה הנושא באמת שווה במבחן, נספר מהשחזורים עצמם;
    `strength` — כמה אתה יודע אותו *עכשיו*, כולל דעיכה עם הזמן;
-   והמלכודות שנפלת בהן.
+   והטעויות הפתוחות שלך.
 
    זה לא "תרגול אקראי עם טיימר". זו הקצאת זמן: אם נשארו לך שעה וחצי, השאלה
    היחידה היא במה לגעת — וזו בדיוק השאלה שאי אפשר לענות עליה בלי שלושת
@@ -6796,7 +6879,7 @@ async function renderFlagged(courseId) {
   metas.forEach((m, mi) => {
     if (!loaded[mi]) return;
     (loaded[mi].questions || []).forEach((q, i) => {
-      if (!q.qid || !f[q.qid] || shown.has(q.qid)) return;
+      if (!q.qid || !flagOn(f[q.qid]) || shown.has(q.qid)) return;
       shown.add(q.qid);
       picked.push({ ...q, origin: loaded[mi].title, examId: m.id, idx: i });
     });
@@ -6824,102 +6907,6 @@ async function renderFlagged(courseId) {
     persist: false,
     back: { text: c.name, href: '#/course/' + courseId },
   });
-}
-
-/* ================= המלכודות שלי =================
-
-   הצד השני של "הטעויות שלי". שם רואים *אילו שאלות* טעית; כאן רואים **למה** —
-   מקובץ לפי התפיסה השגויה עצמה, כי חמש טעויות שנובעות מאותו בלבול אינן חמש
-   בעיות אלא אחת. כל התוכן כאן כבר קיים בשדה `trap` שבמפת החומרים; הדף הזה
-   רק מצליב אותו עם מה שבאמת נפלת בו. */
-async function renderTraps(courseId) {
-  setNav('home');
-  const c = courseOf(courseId);
-  if (!c) {
-    view.innerHTML = '';
-    view.append(emptyState('⚠️', 'מקצוע לא נמצא', 'הקישור כנראה שגוי.'));
-    toTop();
-    return;
-  }
-  view.dataset.course = courseId;
-  view.innerHTML = '<div class="empty"><span class="ico">⏳</span><b>מחפש את המלכודות…</b></div>';
-
-  const g = await loadGuide(courseId).catch(() => null);
-  const metas = quizzesOf(courseId);
-  await Promise.all(metas.map((m) => loadExam(m.id).catch(() => null)));
-  const hmap = seenH.read();
-
-  view.innerHTML = '';
-  view.append(crumb(c.name, '#/course/' + courseId));
-  const head = el('div', 'page-head');
-  head.append(el('h1', null, `המלכודות שלי — ${c.name}`));
-  /* בלי הדגשות בכוכביות: המנוע מכניס טקסט דרך textContent ולא מרנדר Markdown,
-     אז ‎**‎ היה מוצג כתווים. */
-  head.append(el('p', null,
-    'לא "אילו שאלות טעית" אלא למה. חמש טעויות שנובעות מאותו בלבול הן בעיה אחת, ' +
-    'וכאן הן מקובצות יחד.'));
-  view.append(head);
-
-  if (!g) {
-    view.append(emptyState('🗺️', 'אין עדיין מפת חומרים למקצוע הזה',
-      'המלכודות נשענות על "מה באמת נשאל" שבמפה. במקצועות שיש בהם מפה — אלקטרו, ביומול ופיזיקה — הדף הזה מלא.'));
-    toTop(); updateFooter();
-    return;
-  }
-
-  /* אוספים כל נקודה שיש לה trap, וסופרים בכמה מה-qids שלה יש טעות פתוחה. */
-  const rows = [];
-  (g.units || []).forEach((u) => {
-    (u.points || []).forEach((p) => {
-      if (!p.trap) return;
-      const qids = p.qids || [];
-      const fell = qids.filter((q) => seenH.isOpenMistake(seenH.rec(q, hmap)));
-      const seenCnt = qids.filter((q) => seenH.has(q, hmap)).length;
-      if (!fell.length) return;
-      rows.push({ u, p, qids, fell, seenCnt });
-    });
-  });
-  rows.sort((a, b) => b.fell.length - a.fell.length || b.u.freq - a.u.freq);
-
-  if (!rows.length) {
-    view.append(emptyState('🎯', 'אין מלכודות פתוחות',
-      'או שעוד לא ענית מספיק במקצוע הזה, או שלא נפלת באף מלכודת שמופתה. ' +
-      'כל טעות בשאלה שממופה לנקודה תופיע כאן.'));
-    toTop(); updateFooter();
-    return;
-  }
-
-  const sum = el('p', 'traps-sum');
-  sum.textContent = `${plural(rows.length, 'מלכודת פתוחה', 'מלכודות פתוחות', true)} · ` +
-    `${rows.reduce((n, r) => n + r.fell.length, 0)} שאלות. מדורג לפי כמה נפלת, ואז לפי משקל הנושא במבחן.`;
-  view.append(sum);
-
-  rows.forEach((r) => {
-    const card = el('div', 'trapcard');
-    const top = el('div', 'trapcard-top');
-    top.append(el('span', 'trapcard-topic', r.u.topic));
-    top.append(el('span', 'trapcard-n', `✗ ${r.fell.length} מתוך ${r.qids.length}`));
-    card.append(top);
-    /* ה-trap מכיל <b> (BUILD.md סעיף 2) — כמו בעמוד המפה, לא כטקסט גולמי. */
-    const tt = el('div', 'trap-text'); tt.innerHTML = bidiFix(r.p.trap); card.append(tt);
-    /* הנקודה עצמה — מה שנכון — מתחת למלכודת ולא מעליה, כדי שהקריאה תהיה
-       "זו הטעות" ואז "וזה הנכון", ולא להפך. */
-    card.append(el('div', 'trapcard-point', r.p.point));
-    const acts = el('div', 'trapcard-acts');
-    const gA = el('a', 'btn ghost', '📚 איפה ללמוד');
-    gA.title = 'פתיחת הנושא במפת החומרים — סרטונים, סיכום ומקורות';
-    gA.href = `#/guide/${courseId}/${encodeURIComponent(r.u.topic)}`;
-    acts.append(gA);
-    const pA = el('a', 'btn ghost', '🏋️ תרגל את הנושא');
-    pA.title = 'תרגול שאלות אמת בנושא הזה בלבד';
-    pA.href = `#/practice/${courseId}/${encodeURIComponent(r.u.topic)}`;
-    acts.append(pA);
-    card.append(acts);
-    view.append(card);
-  });
-
-  toTop();
-  updateFooter();
 }
 
 /* ================= עץ הידע =================
@@ -7256,10 +7243,9 @@ function renderAbout() {
       { icon: '🎯', title: 'הטעויות שלי',
         body: 'כל שאלה שטעיתם בה נאספת לכאן לבד. הדף הכי שווה לפני מבחן: רשימת החורים ' +
               'המדויקת שלכם, בלי לבזבז זמן על מה שכבר יושב.' },
-      { icon: '🌳', title: 'עץ הידע והמלכודות',
+      { icon: '🌳', title: 'עץ הידע',
         body: 'העץ צובע כל נושא לפי כמה אתם שולטים בו עכשיו (הציון דועך עם הזמן, כמו ' +
-              'הזיכרון) ואומר במה לגעת. המלכודות אוספות את הפחים שנפלתם בהם — מה הטעות, ' +
-              'מה הנכון, ואיפה ללמוד.' },
+              'הזיכרון) ואומר במה לגעת.' },
       { icon: '🔬', title: 'סימולציות וכלים אינטראקטיביים',
         body: 'מעבדות חיות (פוטנציאל פעולה, מעגלים), תרגילי חישוב עם פתרון שלב-אחר-שלב, ' +
               'ודפי נוסחאות — בתחתית עמוד הקורס, בצבע המקצוע.' },
@@ -7267,8 +7253,8 @@ function renderAbout() {
     { id: 'ab-learn', title: '📖 לומדים', cards: [
       { icon: '📖', title: 'הלומדה — הסיכום המלא, בשלושה מצבים',
         body: 'סיכום מלא עם איורים, סרטונים, הקראה ותרגילים. 📖 קריאה מלאה — מעבר ראשון ' +
-              'על החומר; ⚡ מרוכז — רק התמצית, המלכודות ו"מה באמת נשאל", לחזרה לפני מבחן; ' +
-              '🎮 אינטראקטיבי — תרגילים ושערי "נסה קודם". אפשר לסמן במרקר (נשמר), ומכל ' +
+              'על החומר; ⚡ מרוכז — רק התמצית ו"מה באמת נשאל", לחזרה לפני מבחן; ' +
+              '🎮 אינטראקטיבי — תרגילים. אפשר לסמן במרקר (נשמר), ומכל ' +
               'נושא קופצים ישר לתרגול שלו.' },
       { icon: '🗺️', title: 'מפת החומרים',
         body: 'לכל נושא: מאיפה ללמוד, מה באמת נשאל עליו בשחזורים (עם קישור לכל שאלה), ' +
@@ -7398,44 +7384,80 @@ function shinunHomePush() {
    ⚠️ המפתח נושא מספר גרסה. גל חידושים הבא מקבל v6 והבאנר יופיע שוב לכולם —
    כולל למי שסגר את הקודם. זה מכוון: מי שסגר הודעה על פיצ׳ר א׳ עדיין צריך
    לשמוע על פיצ׳ר ב׳. */
-/* באנר הסקר — גדול ובולט בראש עמוד הבית, בכוונה בלי כפתור סגירה קבוע:
-   הוא יורד לכולם רק כשנוריד אותו בקוד, ולמי שכבר מילא — מיד. "אחר כך"
-   מסתיר עד הביקור הבא (sessionStorage), לא לתמיד. */
-function whatsNewBanner() {
-  /* ── הסקר נסגר ב-09/08/2026, אחרי 57 תשובות ──
-     ינון: „אפשר להוריד אותו; אנשים כבר לא יענו עליו”. הבאנר יורד; עמוד
-     הסקר עצמו (#/survey) נשאר נגיש למי שיש לו קישור, וגם התשובות שנשמרו
-     מקומית בלי רשת עדיין יישלחו. הסקר הבא: להעלות את SURVEY_VERSION,
-     לכתוב את הנוסח החדש, ולהחזיר את השורה הזאת עם תאריך תפוגה. */
+const WHATS_NEW_ON = true;   // ינון בחר באופציה הזאת (29/09/2026). לכבות: false. ?whatsnew=1 מציג גם כשכבוי (תצוגה מקדימה)
+const WHATS_NEW_KEY = 'shichzurim.whatsNew.v6';
+/* פרמטר תצוגה מקדימה בכתובת (?whatsnew=1, ?tour=v5) — לבדיקה לפני שמדליקים לכולם. */
+const previewParam = (name) => { try { return new URLSearchParams(location.search).get(name); } catch { return null; } };
+
+/* על איזה מקצוע מדגימים את החידושים: הראשון שיש לו מקצועות-משנה, לומדה וחפיסת
+   מפתח-הגדרה — בפועל עקרונות המדע. הכול נגזר מהדאטה, כדי שהבאנר והסיור לא
+   יצביעו על כלום אם קורס ישתנה. */
+function showcaseCourse() {
+  for (const c of COURSES) {
+    if (isArchived(c)) continue;
+    for (const s of subjectsOf(c)) {
+      const keyer = EXAMS.find((e) => e.kind === 'keyer' && e.course === c.id && e.part === s.name);
+      if (s.studyDoc && keyer) return { c, s, keyer, doc: s.studyDoc };
+    }
+  }
   return null;
-  try { if (localStorage.getItem(SURVEY_DONE_KEY)) return null; } catch { return null; }
-  try { if (sessionStorage.getItem('shichzurim.surveyHeroHide')) return null; } catch { /* מציגים */ }
+}
 
-  const b = el('div', 'survey-hero');
-  b.append(el('div', 'survey-hero-ico', '🎉'));
-  b.append(el('h2', null, 'דקה לפני קו הסיום של שנה א׳'));
-  b.append(el('p', 'survey-hero-sub',
-    'כל הכבוד על השנה הזאת 💪 ולפני שכולם מתפזרים לחופשה — יש לנו בקשה אחת קטנה: ' +
-    '5–10 דקות של משוב. מה עזר, מה חסר, ומה לבנות לכם עד מבחני דצמבר. ' +
-    'זה הזמן היחיד בשנה לשמוע אתכם — והתשובות באמת קובעות מה יהיה כאן.'));
+function whatsNewBanner() {
+  if (!WHATS_NEW_ON && !previewParam('whatsnew')) return null;
+  try { if (localStorage.getItem(WHATS_NEW_KEY)) return null; } catch { return null; }
+  if (!previewParam('whatsnew') && !localStorage.getItem(SEEN_KEY)) return null;   // חדש באתר: באנר הפתיחה והסיור קודמים ל„מה חדש”
+  const sc = showcaseCourse();
+  if (!sc) return null;
+  const { c, s, keyer, doc } = sc;
 
-  const acts = el('div', 'btn-row survey-hero-acts');
-  const go = el('a', 'btn primary survey-hero-cta', '💜 למילוי הסקר');
-  go.title = 'סקר המשוב — 5–10 דקות שקובעות את הגרסה הבאה';
-  go.href = '#/survey';
-  acts.append(go);
-  const later = el('button', 'btn ghost', 'אחר כך');
-  later.title = 'הסתרה לביקור הזה — הבאנר יחזור בפעם הבאה, והסקר תמיד זמין';
-  later.onclick = () => {
-    try { sessionStorage.setItem('shichzurim.surveyHeroHide', '1'); } catch { /* מסתירים */ }
-    b.remove();
+  const b = el('div', 'intro wn');
+  const head = el('div', 'wn-head');
+  head.append(el('b', null, '✨ מה חדש לשנה ב׳'));
+  head.append(el('span', null, 'בקיץ נבנו כמה דברים גדולים. כל כרטיס נפתח לדוגמה חיה.'));
+  b.append(head);
+
+  const x = el('button', 'intro-x', '✕');
+  x.type = 'button';
+  x.title = 'סגירה — הבאנר לא יופיע שוב';
+  x.setAttribute('aria-label', 'סגירה');
+  x.onclick = () => { try { localStorage.setItem(WHATS_NEW_KEY, '1'); } catch {} b.remove(); };
+  b.append(x);
+
+  const grid = el('div', 'wn-grid');
+  const card = (ico, ttl, sub, href, tip) => {
+    const a = el('a', 'learn-card wn-card');
+    a.href = href;
+    a.title = tip;
+    a.append(el('span', 'learn-card-ico', ico));
+    const t = el('div');
+    t.append(el('div', 'learn-card-ttl', ttl));
+    t.append(el('div', 'learn-card-sub', sub));
+    a.append(t);
+    grid.append(a);
   };
-  acts.append(later);
-  b.append(acts);
+  card('📖', 'הלומדה — שלושה מצבי קריאה', 'מלא, מרוכז (רק התמצית) ואינטראקטיבי (תרגילים). ובכל פרק: מה באמת נשאל.',
+    doc.href + '?m=focus', `לפתוח את לומדת ${s.name} במצב מרוכז`);
+  const firstItem = null;   // הקישור לחפיסה כולה — הבורר מציג את התיקים לפי נושא
+  card('🎮', 'לשחק עם זה', 'בכל מקצוע: מפתח ההגדרה (זיהוי מרמזים), מקרים מתגלגלים, שינון, סימולציות ומעבדת אק״ג.',
+    '#/keyer/' + keyer.id, `לנסות: ${keyer.title}`);
+  if (guideOf(c.id)) card('🌳', 'עץ הידע', 'כל נושא נצבע לפי כמה אתם יודעים אותו עכשיו — ובמה כדאי לגעת.',
+    '#/tree/' + c.id, `עץ הידע של ${c.name}`);
+  if (c.teaching && c.teaching.start && (c.teaching.weeks || []).length) card('🗓️', 'השבוע בבלוק', 'איפה ההוראה עומדת, מה כדאי כבר לדעת — ולקראת המבחן: מה נשאר לסגור.',
+    '#/semester/' + c.id, `ליווי הסמסטר של ${c.name}`);
+  if (EXAMS.some((e) => e.kind === 'shinun' && e.course === c.id)) card('🔁', 'חזרה מרווחת', 'מה שטעיתם חוזר מחר, מה שידעתם חוזר בעוד שבוע. „הטעויות שלי” והשינון עובדים ככה מאליהם.',
+    '#/shinun/' + c.id, `שינון ${c.name} — כרטיסי היפוך בקופסאות`);
+  card('🚩', 'דיווח על טעות', 'משהו לא נכון? בכל שאלה, תיק, מקרה וכרטיס יש כפתור דיווח. נבדוק מול חומרי הקורס.',
+    '#/keyer/' + keyer.id + '/' + encodeURIComponent((EXAMS.find((e) => e.id === keyer.id) || {}).first || firstItem || ''), 'דוגמה: כפתור הדיווח בראש תיק במפתח ההגדרה');
+  b.append(grid);
 
-  b.append(el('p', 'survey-hero-mail',
-    '📮 דרך אגב: הכתובת שאיתה נכנסת (מגוגל) שמורה אצלנו, ונשתמש בה מדי פעם לעדכונים חשובים — ' +
-    'חומרים חדשים ומבחנים קרבים. בלי ספאם. מעדיפים בלי? כתבו לנו ל-shichzurim52@gmail.com ונסיר מיד.'));
+  const acts = el('div', 'wn-acts');
+  const tour = el('button', 'btn ghost', '🧭 סיור של דקה על החידושים');
+  tour.type = 'button';
+  tour.title = 'סיור מודרך קצר שמצביע על כל חידוש במקום שבו הוא נמצא';
+  tour.onclick = () => startTour('v5');
+  acts.append(tour);
+  b.append(acts);
   return b;
 }
 
@@ -8297,21 +8319,16 @@ async function renderAdmin() {
           const n = byChoice[oi] || 0;
           const p = total ? Math.round((n / total) * 100) : 0;
           const isC = oi === q.a;
-          const isTrap = topWrong && Number(topWrong[0]) === oi && p >= 35;
-          const row = el('div', 'adm-opt' + (isC ? ' correct' : isTrap ? ' trap' : ''));
+          const row = el('div', 'adm-opt' + (isC ? ' correct' : ''));
           const bar = el('div', 'adm-opt-bar');
           const f = el('i'); f.style.width = p + '%';
           bar.append(f);
           row.append(bar);
           row.append(el('span', 'adm-opt-n', `${p}% · ${n}`));
-          row.append(el('span', 'adm-opt-t', (isC ? '✓ ' : isTrap ? '🪤 ' : '') + opt));
+          row.append(el('span', 'adm-opt-t', (isC ? '✓ ' : '') + opt));
           body.append(row);
         });
-        body.append(el('p', 'adm-hint',
-          `${total} בחירות במבחנים.` +
-          (topWrong && Math.round((topWrong[1] / total) * 100) >= 35
-            ? ' המסיח 🪤 מושך שליש ומעלה — כנראה תפיסה שגויה משותפת, חומר למלכודת במפה.'
-            : '')));
+        body.append(el('p', 'adm-hint', `${total} בחירות במבחנים.`));
       } else {
         body.append(el('p', 'adm-empty',
           info ? 'אין פילוח מסיחים — פחות מ-10 ענו עליה בתוך מבחן (תרגול חופשי לא שומר את הבחירה).'
@@ -8419,7 +8436,7 @@ function prettyTarget(target, type) {
   if (id === undefined) {
     const plain = {
       course: '📚 עמוד מקצוע', exam: '📄 מבחן', sim: '🎛️ סימולציה', drill: '🧮 תרגיל',
-      practice: '🏋️ תרגול', review: '🎯 טעויות', guide: '🗺️ מפה', traps: '🪤 מלכודות',
+      practice: '🏋️ תרגול', review: '🎯 טעויות', guide: '🗺️ מפה',
       shinun: '🧠 שינון', cards: '📇 כרטיסיות', case: '🩺 מקרים', formulas: '🧾 נוסחאות',
     };
     return plain[kind] || target;
@@ -8433,7 +8450,6 @@ function prettyTarget(target, type) {
   if (kind === 'practice') return '🏋️ תרגול: ' + cName(id);
   if (kind === 'review')   return '🎯 טעויות: ' + cName(id);
   if (kind === 'guide')    return '🗺️ מפה: ' + cName(id);
-  if (kind === 'traps')    return '🪤 מלכודות: ' + cName(id);
   if (kind === 'shinun')   return '🧠 שינון: ' + cName(id);
   if (kind === 'cards')    return '📇 כרטיסיות: ' + eTitle(id);
   if (kind === 'case')     return '🩺 מקרים: ' + eTitle(id);
@@ -8616,6 +8632,49 @@ function tourSteps() {
   return steps;
 }
 
+/* v5 — סיור החידושים לפתיחת שנה ב׳ (27/09/2026). עובר על מה שנבנה בקיץ בעמוד
+   מקצוע אחד (showcaseCourse), ומסיים בתיק מפתח-הגדרה עם כפתור הדיווח. עוגנים
+   שחסרים נדלגים בשקט, כמו בכל סיור. עדיין לא ברירת המחדל: startTour('v5') מהבאנר
+   „מה חדש”, או ?tour=v5 לתצוגה מקדימה. להפעלה לכולם: ver='v5' כברירת מחדל
+   ו-TOUR_KEY → .v5 (יקפוץ פעם אחת גם למי שכבר ראה את v4). */
+function tourStepsV5() {
+  const sc = showcaseCourse();
+  if (!sc) return tourSteps();
+  const { c, s, keyer } = sc;
+  const courseRoute = `#/course/${c.id}/${encodeURIComponent(s.key)}`;
+  const firstItem = (EXAMS.find((e) => e.id === keyer.id) || {}).first || '';
+  return [
+    { route: '#/', center: true,
+      title: '✨ מה חדש לשנה ב׳',
+      body: 'בקיץ נבנו כמה דברים גדולים. דקה אחת — ונראה לכם איפה כל אחד מהם יושב, ' +
+            `על ${s.name} לדוגמה. אפשר לדלג בכל רגע.` },
+    { route: courseRoute, sel: '[data-tour="play"]',
+      title: '🎮 לשחק עם זה',
+      body: 'אזור חדש בכל מקצוע: <b>מפתח ההגדרה</b> (זיהוי מרמזים, כמו במעבדה), <b>מקרים מתגלגלים</b>, ' +
+            'שינון, סימולציות ומעבדת אק״ג. כאן עושים משהו עם החומר, לא רק עונים.' },
+    { route: courseRoute, sel: '[data-tour="doc"]',
+      title: '📖 הלומדה — שלושה מצבי קריאה',
+      body: '<b>מלא</b> לקריאה ראשונה, <b>מרוכז</b> — רק התמצית לחזרה מהירה, ו<b>אינטראקטיבי</b> ' +
+            'עם תרגילים. בכל פרק גם „מה באמת נשאל” מהמבחנים.' },
+    { route: courseRoute, sel: '[data-tour="semester"]',
+      title: '🗓️ השבוע בבלוק',
+      body: 'איפה ההוראה עומדת השבוע ומה כדאי כבר לדעת. לקראת המבחן זה מתהפך ל„מה נשאר לסגור”.' },
+    { route: courseRoute, sel: '[data-tour="tree"]',
+      title: '🌳 עץ הידע',
+      body: 'כל נושא נצבע לפי כמה אתם יודעים אותו <b>עכשיו</b> — כולל שכחה עם הזמן — ובמה כדאי לגעת.' },
+    { route: courseRoute, sel: '[data-tour="review"]',
+      title: '🔁 חזרה מרווחת',
+      body: 'מה שטעיתם חוזר מחר, מה שידעתם חוזר בעוד שבוע. „הטעויות שלי” והשינון עובדים ככה מאליהם — ' +
+            'בלי להגדיר כלום.' },
+    { route: `#/keyer/${keyer.id}/${encodeURIComponent(firstItem)}`, sel: '[data-tour="report"]',
+      title: '🚩 דיווח על טעות',
+      body: 'ראיתם משהו לא נכון? בכל שאלה, תיק, מקרה וכרטיס יש כפתור דיווח. נבדוק מול חומרי הקורס.' },
+    { route: '#/', center: true,
+      title: '✅ זהו — בהצלחה בשנה ב׳!',
+      body: 'הכול מחכה בעמוד המקצוע. והסיור הזה, כמו הקודם, זמין תמיד מעמוד „איך זה עובד”. 🚀' },
+  ];
+}
+
 /* ממתין שהאלמנט יופיע. הניווט בין דפים הוא אסינכרוני (הראוטר מרנדר מחדש, וחלק
    מהמסכים טוענים קבצים), ולכן אי אפשר פשוט למדוד מיד אחרי שינוי ה-hash. */
 /* פולינג ב-setTimeout ולא ב-requestAnimationFrame: rAF לא פועל כשהלשונית
@@ -8634,11 +8693,11 @@ function waitFor(sel, ms = 1200) {
 
 let tourStop = null;
 
-async function startTour() {
+async function startTour(ver = 'v4', startAt = 0) {   // startAt — צעד התחלה לתצוגה מקדימה (?tour=v5&step=3)
   if (tourStop) return;                       // כבר רץ
   localStorage.setItem(SEEN_KEY, '1');
   localStorage.setItem(TOUR_KEY, '1');        // מסומן כ"נראה" כבר עכשיו — קופץ פעם אחת, גם אם מדלגים באמצע
-  const steps = tourSteps();
+  const steps = ver === 'v5' ? tourStepsV5() : tourSteps();
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let i = 0;
   let curTarget = null;   // היעד שכבר אותר לשלב הנוכחי — place משתמש בו במקום לשאול שוב (מונע מרוץ)
@@ -8767,7 +8826,14 @@ async function startTour() {
     place(step);
     /* מיקום שני אחרי שהפריסה נחה — תופס מקרים שבהם היעד (סרגל דביק, תוכן
        שנטען) קיבל את גודלו רק רגע אחרי הציור הראשון. */
-    if (step.sel) setTimeout(() => { if (i === n) place(step); }, 300);
+    if (step.sel) setTimeout(() => {
+      if (i !== n) return;
+      /* מרוץ עם toTop() של הרנדרר (rAF → scrollTo(0,0)) שרץ אחרי הגלילה שלנו ומשאיר
+         את היעד מחוץ למסך — גוללים אליו שוב לפני המיקום השני. */
+      const r = curTarget && curTarget.getBoundingClientRect();
+      if (r && !step.top && (r.top < 0 || r.bottom > window.innerHeight)) curTarget.scrollIntoView({ block: 'center', behavior: 'auto' });
+      place(step);
+    }, 300);
   }
 
   function draw(step) {
@@ -8795,7 +8861,7 @@ async function startTour() {
     nx.focus();
   }
 
-  go(0);
+  go(Math.min(Math.max(0, startAt | 0), steps.length - 1));
 }
 
 /* ================= סימולציות =================
@@ -10545,7 +10611,7 @@ const DRILLS = [
   {
     id: 'osmo', course: 'electro', topic: 'תנועת חלקיקים ודיפוזיה', icon: '🧂',
     title: 'אוסמולריות — פירוק חלקיקים', unit: 'mOsm', floor: 0.5,
-    blurb: 'המלכודת הקבועה: כמה חלקיקים החומר מתפרק אליהם',
+    blurb: 'הנקודה הקבועה: כמה חלקיקים החומר מתפרק אליהם',
     gen() {
       const cmp = dpick(OSMO_COMPOUNDS);
       return { name: cmp.name, factor: cmp.n, C: drnd(50, 200, 10) };
@@ -10585,7 +10651,7 @@ const DRILLS = [
       `F = (AUC<sub>פומי</sub> / AUC<sub>ורידי</sub>) × (D<sub>ורידי</sub> / D<sub>פומי</sub>) — השטח משקף כמה תרופה הגיעה לדם, אבל צריך לנרמל למנה.`,
       `יחס השטחים: ${num((v.AUCiv * v.Dpo / v.Div) * v.F)} / ${v.AUCiv} = <b>${num((v.Dpo / v.Div) * v.F, 3)}</b>`,
       `תיקון המנה: × ${v.Div}/${v.Dpo} = × ${num(v.Div / v.Dpo, 3)}`,
-      `F = <b>${num(ans)}%</b> — מלכודת: אם המנות שוות, יחס השטחים לבדו הוא F; אם לא — חובה לתקן.`,
+      `F = <b>${num(ans)}%</b> — שימו לב: אם המנות שוות, יחס השטחים לבדו הוא F; אם לא — חובה לתקן.`,
     ],
   },
   {
@@ -10611,7 +10677,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `k = 0.693 / t½ = 0.693 / ${v.t12} = <b>${num(Math.LN2 / v.t12, 3)} 1/h</b> — קבוע הפינוי (איזה חלק מהתרופה מתפנה בשעה).`,
       `CL = k · V = ${num(Math.LN2 / v.t12, 3)} × ${v.V} = <b>${num(ans)} L/h</b>`,
-      `מלכודת: t½ תלוי גם ב-V וגם ב-CL. תרופה עם V ענק יכולה להיות עם t½ ארוך למרות פינוי מהיר.`,
+      `שימו לב: t½ תלוי גם ב-V וגם ב-CL. תרופה עם V ענק יכולה להיות עם t½ ארוך למרות פינוי מהיר.`,
     ],
   },
   {
@@ -10650,7 +10716,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `מנת העמסה = Css · V — כמה תרופה צריך כדי „למלא” את נפח ההתפזרות לריכוז המטרה.`,
       `${v.Css} × ${v.V} = <b>${num(v.Css * v.V)} mg</b>` + (v.F < 1 ? ` — אבל רק F=${v.F} מהמנה הפומית מגיע לדם, ולכן מחלקים ב-F: ${num(v.Css * v.V)} / ${v.F} = <b>${num(ans)} mg</b>` : ''),
-      `מלכודת: מנת ההעמסה תלויה ב-V ולא ב-CL. הפינוי קובע את מנת ה<b>אחזקה</b>.`,
+      `שימו לב: מנת ההעמסה תלויה ב-V ולא ב-CL. הפינוי קובע את מנת ה<b>אחזקה</b>.`,
     ],
   },
   {
@@ -10679,7 +10745,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `q² = 1/${v.N.toLocaleString('en-US')} → q = √(1/${v.N.toLocaleString('en-US')}) = <b>1/${num(Math.sqrt(v.N), 0)}</b>`,
       `נשאים = 2pq ≈ 2q (כי p ≈ 1) = 2/${num(Math.sqrt(v.N), 0)} = <b>1 ל-${num(ans, 0)}</b>`,
-      `מלכודת: הנשאים שכיחים הרבה יותר מהחולים — במחלה של 1:${v.N.toLocaleString('en-US')}, אחד מכל ${num(ans, 0)} הוא נשא.`,
+      `שימו לב: הנשאים שכיחים הרבה יותר מהחולים — במחלה של 1:${v.N.toLocaleString('en-US')}, אחד מכל ${num(ans, 0)} הוא נשא.`,
     ],
   },
   {
@@ -10747,7 +10813,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `נפח פעימה SV = EDV − ESV = ${v.EDV} − ${v.ESV} = <b>${v.EDV - v.ESV} mL</b>`,
       `EF = SV / EDV = ${v.EDV - v.ESV} / ${v.EDV} = <b>${num(ans)}%</b>`,
-      `תקין ≈ 55–70%. מלכודת: מחלקים ב-EDV, לא ב-ESV.`,
+      `תקין ≈ 55–70%. שימו לב: מחלקים ב-EDV, לא ב-ESV.`,
     ],
   },
   {
@@ -10760,7 +10826,7 @@ const DRILLS = [
     steps: (v, ans) => [
       `SV = EDV − ESV = <b>${v.EDV - v.ESV} mL</b>`,
       `CO = HR × SV = ${v.HR} × ${v.EDV - v.ESV} = ${v.HR * (v.EDV - v.ESV)} mL/min = <b>${num(ans)} L/min</b>`,
-      `מלכודת: בקצב מהיר מאוד הדיאסטולה מתקצרת, EDV יורד — ו-CO יכול לרדת למרות ש-HR עלה.`,
+      `שימו לב: בקצב מהיר מאוד הדיאסטולה מתקצרת, EDV יורד — ו-CO יכול לרדת למרות ש-HR עלה.`,
     ],
   },
 ];
@@ -10909,7 +10975,7 @@ function renderDrill(id) {
   function fresh() {
     v = d.gen();
     answered = false;
-    promptBox.innerHTML = d.prompt(v);
+    promptBox.innerHTML = bidiFix(d.prompt(v));
     input.value = '';
     input.disabled = false;
     checkBtn.disabled = false;
@@ -10939,14 +11005,14 @@ function renderDrill(id) {
 
     fb.className = 'drill-fb show ' + (ok ? 'ok' : 'no');
     const verdict = el('div', 'drill-verdict');
-    verdict.innerHTML = ok
+    verdict.innerHTML = bidiFix(ok
       ? `✓ נכון! התשובה: <b>${num(ans)} ${d.unit}</b>`
-      : `✗ לא מדויק. ענית ${num(userAns)}, התשובה הנכונה: <b>${num(ans)} ${d.unit}</b>`;
+      : `✗ לא מדויק. ענית ${num(userAns)}, התשובה הנכונה: <b>${num(ans)} ${d.unit}</b>`);
     fb.append(verdict);
     const steps = el('ol', 'drill-steps');
     d.steps(v, ans).forEach((s) => {
       const li = el('li');
-      li.innerHTML = s;
+      li.innerHTML = bidiFix(s);
       steps.append(li);
     });
     fb.append(steps);
@@ -11030,7 +11096,7 @@ const FORMULAS = [
   {
     id: 'osmo', course: 'electro', sheet: null, title: 'אוסמולריות', unit: 'mOsm',
     expr: 'אוסמולריות = ריכוז × מספר חלקיקים',
-    note: 'המלכודת: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
+    note: 'שימו לב: כמה חלקיקים החומר מתפרק אליהם. NaCl→2 · CaCl₂→3 · AlCl₃→4 · גלוקוז→1.',
     vars: [
       { k: 'C', label: 'ריכוז', unit: 'mM', default: 100, step: 10 },
       { k: 'factor', label: 'חלקיקים לפירוק', options: OSMO_COMPOUNDS.map((c) => ({ label: `${c.name} (${c.n})`, val: c.n })) },
@@ -11546,24 +11612,16 @@ function pointsPanel(courseId, u, idx, summaryMode) {
      שחזרה אמורה לעשות. לומר את זה במפורש עדיף על שהלומד יגלה לבד. */
   const lead = el('p', 'g-points-lead');
   lead.textContent = summaryMode
-    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על התמצית מהר לפני המבחן, ומוודאים שלא נופלים במלכודות.'
+    ? 'לא מקום להתחיל בו — זו החזרה האחרונה. אחרי שלמדת והבנת, רצים על התמצית מהר לפני המבחן, ומוודאים שהעיקר יושב.'
     : 'זה לא תחליף לסיכום, וזה לא מקום להתחיל בו — זו החזרה השנייה. ' +
       'אחרי שקראת את החומר והבנת אותו, כאן רואים מה מתוכו באמת נבחן, כמה פעמים, ואיפה נופלים.';
   det.append(lead);
 
-  /* במצב תמצית: פסקת/שתי-פסקאות סיכום מרוכז לנושא (u.summary), ואז המלכודות
-     שנאספו מהנקודות. זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
+  /* במצב תמצית: פסקת/שתי-פסקאות סיכום מרוכז לנושא (u.summary). זו "החזרה שעוברים עליה אחרי שכבר יודעים". */
   if (summaryMode && u.summary) {
     const sum = el('div', 'g-summary');
     u.summary.split('\n\n').forEach((para) => { const pp = el('p'); pp.innerHTML = bidiFix(para); sum.append(pp); });
     det.append(sum);
-    const traps = [...new Set(u.points.map((p) => p.trap).filter(Boolean))];
-    if (traps.length) {
-      const tb = el('div', 'g-traps');
-      tb.append(el('div', 'g-traps-lbl', '⚠️ מלכודות נפוצות'));
-      traps.forEach((t) => { const d = el('div', 'g-point-trap'); d.innerHTML = '• ' + t; tb.append(d); });
-      det.append(tb);
-    }
     return det;
   }
 
@@ -11579,12 +11637,6 @@ function pointsPanel(courseId, u, idx, summaryMode) {
     }
     if (wrong) meta.append(el('span', 'g-point-bad', `✗ נפלת ב-${wrong}`));
     if (meta.children.length) row.append(meta);
-
-    if (p.trap) {
-      const t = el('div', 'g-point-trap');
-      t.innerHTML = '<b>המלכודת:</b> ' + bidiFix(p.trap);
-      row.append(t);
-    }
 
     /* קישור דו-כיווני בחינם — ה-qids כבר יודעות איפה השאלה יושבת.
        כל קישור נושא את שם המועד שלו, ולכן הוא **גם** הקבלה: אין צורך בשורת
@@ -11669,7 +11721,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
   const ttl = el('div', 'g-unit-ttl');
   ttl.append(el('h3', null, u.topic));
   const meta = el('div', 'g-unit-meta');
-  u.lecturers.forEach((l) => meta.append(el('span', 'lecturer', l)));
+  (u.lecturers || []).forEach((l) => meta.append(el('span', 'lecturer', l)));   // יחידה חדשה בלי מרצים (ביקורת 14/08) — לא מפילה את המפה
   const [tag, cls] = certaintyTag(g, u.certainty);
   meta.append(el('span', 'lecturer ' + cls, tag));
   meta.append(el('span', 'g-lessons', u.lessons));
@@ -11731,7 +11783,7 @@ function unitCard(courseId, g, r, focus, collapsible) {
     det.append(el('div', 'g-intel-head', `🔒 מה נאמר בהקלטות (${u.intel.length})`));
     u.intel.forEach((it) => {
       const q = el('div', 'g-quote');
-      q.innerHTML = '<span class="g-q">„' + it.quote + '”</span><span class="g-qsrc">📼 ' + it.src + '</span>';
+      q.innerHTML = '<span class="g-q">„' + bidiFix(it.quote) + '”</span><span class="g-qsrc">📼 ' + it.src + '</span>';
       det.append(q);
     });
     body.append(det);
@@ -11985,7 +12037,7 @@ function skipPanel(g) {
     if (!items.length) return;
     const box = el('div', 'g-skip-cat');
     box.append(el('h3', null, title));
-    const p = el('p', 'g-skip-note'); p.innerHTML = sub; box.append(p);
+    const p = el('p', 'g-skip-note'); p.innerHTML = bidiFix(sub); box.append(p);
     items.forEach((s) => {
       const d = el('div', 'g-skip-row');
       const top = el('div', 'g-skip-top');
@@ -11998,7 +12050,7 @@ function skipPanel(g) {
          על נושא שנשאל ארבע פעמים. */
       if (s.asked) {
         const a = el('div', 'g-skip-asked');
-        a.innerHTML = '<b>אבל בארכיון:</b> ' + s.asked;
+        a.innerHTML = '<b>אבל בארכיון:</b> ' + bidiFix(s.asked);
         d.append(a);
       }
       box.append(d);
@@ -12020,18 +12072,12 @@ function sourcesPanel(g) {
     d.append(el('h4', null, s.name));
     d.append(el('div', 'g-scard-meta', `מחזור ${s.cycle} · ${s.pages} עמ׳`));
     const u = el('p', 'g-scard-use'); u.innerHTML = bidiFix(s.use); d.append(u);
-    const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + s.lack; d.append(l);
+    const l = el('div', 'g-scard-lack'); l.innerHTML = '<b>החיסרון:</b> ' + bidiFix(s.lack); d.append(l);
     grid.append(d);
   });
   sec.append(grid);
   return sec;
 }
-
-/* trapBox — המלכודת שהוצגה כאן אחרי כל טעות — נמחקה (13/08/2026) בעקבות
-   הסקר: המלכודת נכתבת לנקודה שנשענת על עד שמונה שאלות ונורתה על כל טעות
-   בלי קשר למסיח שנבחר, ולכן הרגישה "לא קשורה" והפריעה אחרי השאלות.
-   המלכודות עצמן חיות בלומדה מאחורי שער "נסה קודם" — שם הן שאלה-עצמית
-   לפני חשיפה, לא האשמה אחרי טעות — ובעמוד #/traps שנשאר opt-in. */
 
 /* מהשאלה למפה — וכשיש סיכום מלא, גם ישר לפרק הנכון בו. שני הקישורים חיים
    על אותו עוגן (הנושא הקנוני), ולכן הצד השני של הלולאה סיכום→תרגול→סיכום
@@ -12135,7 +12181,7 @@ document.getElementById('searchBtn')?.addEventListener('click', openSearch);
   const topTab = el('a', 'nav-course');
   document.querySelector('.topnav')?.prepend(topTab);
 
-  const COURSE_ROUTES = new Set(['course', 'practice', 'review', 'guide', 'tree', 'traps',
+  const COURSE_ROUTES = new Set(['course', 'practice', 'review', 'guide', 'tree',
     'shinun', 'semester', 'anki', 'drills', 'tonight', 'flagged', 'formulas', 'sim', 'simexam']);
   const courseFromHash = () => {
     const [route, param] = location.hash.replace(/^#\/?/, '').split('/');
@@ -12256,4 +12302,7 @@ window.addEventListener('storage', (e) => {
   updateAccountBtn();
   appReady = true;
   router();
+  /* תצוגה מקדימה של סיור לפי גרסה (?tour=v5) — לבדיקה לפני שהוא נעשה ברירת המחדל. */
+  const tv = previewParam('tour');
+  if (tv) setTimeout(() => startTour(tv, Number(previewParam('step')) || 0), 900);
 })();

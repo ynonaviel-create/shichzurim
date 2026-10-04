@@ -187,10 +187,10 @@ def check_units(c, s, units, idx, anywhere):
         mapped = set()
         for k, p in enumerate(pts):
             pa = f"{at} נקודה {k + 1}"
-            if not p.get("point") or not p.get("trap"):
-                errs.append(f"{pa}: חייבים point וגם trap")
+            if not p.get("point"):
+                errs.append(f"{pa}: חייב point")
             if "<" in (p.get("point") or ""):
-                errs.append(f"{pa}: point מוצג כטקסט פשוט — בלי HTML (ב-trap וב-gap מותר)")
+                errs.append(f"{pa}: point מוצג כטקסט פשוט — בלי HTML (ב-gap מותר)")
             qids = p.get("qids") or []
             if not qids:
                 errs.append(f"{pa}: אין qids — נקודה בלי שאלה שבדקה אותה היא טענה בלי ראיה")

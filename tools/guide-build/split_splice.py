@@ -19,8 +19,8 @@ else:
         assert new.startswith(f'<section class="unit" id="{m.group(1)}">') and new.endswith('</section>'), m.group(1)
         return new
     out, n = pat.subn(rep, html)
-    # טווח מספרים עם מקף ארוך (2–4%) מוצג הפוך בעברית — מקף רגיל נשאר בסדר הנכון
-    out = re.sub(r'(?<=\d)–(?=\d)', '-', out)
-    # סימן עילי (⁺ ⁻) בסוף מילה לטינית בטקסט עברי קופץ לצד השני („⁺NAD”) — LRM אחריו מחזיר אותו
-    out = re.sub('([\u207a\u207b])(?![\u200e\u207a\u207b\u2070-\u2079A-Za-z0-9])', '\\1\u200e', out)
+    # תיקוני הכיווניות (מקף ארוך, סימן עילי, מינוס, מטען, חצים) — אותם כללים כמו במנוע
+    sys.path.insert(0, os.path.join(WT, 'tools'))
+    from bidi_fix import fix_doc
+    out = fix_doc(out)
     open(P, 'w', encoding='utf-8').write(out); print('spliced', n, 'TODO left', out.count('TODO'))

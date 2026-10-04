@@ -122,7 +122,7 @@ a{color:var(--brand)}
   background:color-mix(in srgb,var(--brand) 13%,transparent);
   box-shadow:0 0 0 .35rem color-mix(in srgb,var(--brand) 13%,transparent);
   border-radius:5px;transition:background .25s,box-shadow .25s}
-.lead.reading-now,.traps .reading-now{box-shadow:none;
+.lead.reading-now{box-shadow:none;
   background:color-mix(in srgb,var(--brand) 17%,transparent)}
 @media (prefers-reduced-motion:reduce){ .reading-now{transition:none} }
 
@@ -134,15 +134,6 @@ a{color:var(--brand)}
   border-radius:99px;padding:.4rem 1rem;transition:.15s}
 .drill:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 :root[data-theme="dark"] .drill:hover{color:#0f151c}
-
-/* ── מלכודות ── */
-.traps{margin-top:1.4rem;background:var(--warn-bg);border:1px solid var(--warn-ln);
-  border-radius:12px;padding:.95rem 1.15rem}
-.traps h4{margin-top:0;color:var(--warn)}
-.trap{font-size:.95rem;padding:.55rem 0;border-bottom:1px dashed var(--warn-ln)}
-.trap:last-child{border-bottom:0;padding-bottom:0}
-.trap b{color:var(--warn)}
-.trap b:nth-of-type(2){color:var(--ok)}
 
 /* ── סרטונים ── */
 .vids{margin-top:1.4rem}
@@ -343,7 +334,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <div class="howto">
 <h2>איך משתמשים במסמך הזה</h2>
 <div class="howto-g">
-  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית, המלכודות ומה שבאמת נשאל · אינטראקטיבי — תרגילים ושערים.</span></div>
+  <div><b>📖⚡🎮 שלושה מצבים</b><span>במתג למטה: קריאה מלאה כמעבר ראשון · מרוכז — רק התמצית ומה שבאמת נשאל · אינטראקטיבי — תרגילים.</span></div>
   <div><b>🖍️ סימון</b><span>בוחרים טקסט ולוחצים "סמן" — הסימון נשמר בדפדפן לפעם הבאה.</span></div>
   <div><b>🔊 האזנה</b><span>הקראה לכל נושא — הכפתור ליד הכותרת. אפשר להשהות, להמשיך ולשנות מהירות.</span></div>
   <div><b>✍️ תרגול</b><span>בסוף כל נושא — קישור ישיר לשאלות אמת מהארכיון. לקרוא ואז מיד לתרגל.</span></div>
@@ -401,14 +392,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו הסיבה שלמורפין פומי צריך מנה גדולה בהרבה מלוורידי, שניטרוגליצרין ניתן מתחת ללשון, ושלמושתלים על ציקלוספורין אסור מיץ אשכוליות. ובעלון של כל תכשיר, המסמך המחייב, כתובים F ו-t½ — ואפשר לחפש ב-Drug bank לפי השם הגנרי.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „זמינות ביולוגית היא החלק מהמנה שמגיע לאתר הפעולה.” <b>האמת:</b> החלק שמגיע <b>למחזור הדם הסיסטמי</b>. מה שמגיע לאתר הפעולה הוא עניין של פיזור.</div>
-<div class="trap"><b>המלכודת:</b> „Cmax הוא הרגע שבו הספיגה נגמרת” / „הרגע של האפקט המקסימלי.” <b>האמת:</b> Cmax הוא הרגע שבו <b>קצב הספיגה שווה לקצב הפינוי</b>. גם אחריו יש ספיגה, וגם לפניו יש פינוי; והאפקט הוא גרף אחר.</div>
-<div class="trap"><b>המלכודת:</b> „התפוררות והתמוססות הן חלק מהמעבר הראשון.” <b>האמת:</b> הן <b>ביו-רוקחות</b> — לפני הספיגה. המעבר הראשון הוא ההפסד במעי, בדופן ובכבד אחרי הספיגה.</div>
-<div class="trap"><b>המלכודת:</b> „היתרון של מתן רקטלי — כל התרופה נספגת / הספיגה מהירה.” <b>האמת:</b> היתרון הוא <b>עקיפה חלקית של המעבר הראשון</b> (הרקטום התחתון מתנקז לווריד הנבוב). הספיגה חלקית ולא אחידה.</div>
-<div class="trap"><b>המלכודת:</b> „נורופן קוויק זמין יותר.” <b>האמת:</b> Cmax מוקדם יותר, אבל <b>אותו AUC</b> — אותה זמינות. השינוי בקינטיקת הספיגה, לא בשיעורה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>F</span><span data-d>אחוז המנה שמגיע למחזור הדם הסיסטמי</span>
@@ -420,7 +403,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>LADME — מסע התרופה</b><ol><li>Liberation — שחרור מהתכשיר</li><li>Absorption — ספיגה עד המחזור הסיסטמי</li><li>Distribution — פיזור לרקמות</li><li>Metabolism — פירוק, בעיקר בכבד</li><li>Excretion — הפרשה, בעיקר בכליות</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/ספיגה ודרכי מתן" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/ספיגה ודרכי מתן" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/ספיגה ודרכי מתן" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/ספיגה ודרכי מתן" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t02">
 <h3>פיזור, מטבוליזם ופינוי<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הליבה החישובית של הקורס: נפח התפזרות (V = כמות בגוף חלקי ריכוז בפלזמה), פינוי (CL = נפח הדם שנוקה ליחידת זמן), וזמן מחצית החיים שמחבר ביניהם — t½ = 0.693·V/CL. מכאן: אחרי 4 זמני מחצית חיים התרופה נעלמה או הגיעה למצב יציב, קצב הזלפה = CL × Css, ומנת דחף = V × Css. ולצידם: קישור לחלבון, CYP ואינטראקציות, ותפקודי כבד וכליה.</p>
@@ -454,15 +437,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זה מה שעושים בחדר מיון: מידזולם בדחף ואז הזלפה כדי לעצור סטטוס אפילפטיקוס; דיגוקסין עם רמה גבוהה — מורידים את מנת האחזקה, לא את ההעמסה שכבר ניתנה; פניצילין עם פרובנציד כדי להאריך; ונוגדן רפואי עם t½ של שבועות ניתן פעם בשבועיים. ומי שלוקח קומדין — כל תרופה חדשה שנקשרת לאלבומין או מעכבת CYP היא סכנת דימום.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „הזמן להגיע למצב יציב תלוי במנה.” <b>האמת:</b> תלוי <b>רק בזמן מחצית החיים</b> — 4 זמני מחצית חיים, תמיד. המנה (או קצב ההזלפה) קובעת את <b>גובה</b> המצב היציב.</div>
-<div class="trap"><b>המלכודת:</b> „נפח התפזרות גדול = התרופה חודרת היטב למוח / מסיסה במים.” <b>האמת:</b> V גדול מעיד על <b>קישור לרקמות</b> — התרופה יצאה מהפלזמה. זה לא נפח אמיתי ולא מדד לחדירה למוח (זה נבדק בנפרד).</div>
-<div class="trap"><b>המלכודת:</b> „אלבומין הוא החלבון היחיד שקושר תרופות.” <b>האמת:</b> העיקרי, לא היחיד — גם α1-חומצה גליקופרוטאין. וקישור גבוה לבדו (גליבנקלמיד, fu 2%) לא מחייב התאמת מינון — „אין תשובה נכונה”.</div>
-<div class="trap"><b>המלכודת:</b> „פנטניל, שמתפנה ב-CYP3A4, דורש התאמה לתפקודי כליה.” <b>האמת:</b> לתפקודי <b>כבד</b> ולתרופות שמעכבות או משרות CYP. הכליה כמעט לא מפנה אותו (fe מתחת ל-1%).</div>
-<div class="trap"><b>המלכודת:</b> „להאריך את פניצילין — חומצה קלבולנית / עיכוב CYP.” <b>האמת:</b> קלבולנית מגינה מבטא-לקטמאז; פניצילין לא עובר CYP. מאריכים עם <b>פרובנציד</b>, שמתחרה על ההפרשה הטובולרית.</div>
-<div class="trap"><b>המלכודת:</b> „TDM לפי AUC / לפי t½.” <b>האמת:</b> לפי <b>Cmin</b> — הריכוז לפני המנה הבאה. ומטרתו: מנה מיטבית, מניעת רעילות, בדיקת היענות — לא קביעת יחסי ריכוז-פעילות.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>V</span><span data-d>כמות התרופה בגוף חלקי הריכוז בפלזמה</span>
@@ -475,13 +449,13 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>חישוב דחף והזלפה — כמו מידזולם</b><ol><li>לבחור Css באמצע החלון התרפויטי</li><li>CL = 0.693·V / t½</li><li>קצב הזלפה k₀ = Css·CL</li><li>דחף D* = Css·V</li><li>אפקט אחרי t½ אחד (חצי מ-Css), שיווי משקל אחרי 4</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/פיזור, מטבוליזם ופינוי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פיזור, מטבוליזם ופינוי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/פיזור, מטבוליזם ופינוי" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פיזור, מטבוליזם ופינוי" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t03">
 <h3>פרמקודינמיקה<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">מה התרופה עושה לגוף: היא נקשרת למטרה — תעלה, GPCR, קינאז או רצפטור גרעיני, במהירויות שונות — ועקומת ריכוז-תגובה מתארת את זה בשני מספרים: EC50 (פוטנטיות, כמה צריך) ו-Emax (יעילות, עד כמה). אגוניסט מלא, חלקי ואנטגוניסט תחרותי ולא-תחרותי מזיזים את העקומה בדרכים שונות; החלון התרפויטי והאינדקס (TC50/EC50) מודדים בטיחות; ורצפטורים חלופיים, דה-סנסיטיזציה ו-downregulation מסבירים סבילות. שאלות גרף.</p>
 
 <h4>הרעיון לעומק</h4>
-<p><b>תיאוריית הרצפטור</b> (פול ארליך): תרופה לא עובדת בלי מתווך אנדוגני שהיא נקשרת אליו. D + R ⇄ DR → אפקט: כמות הקומפלקסים תרופה-קולטן קובעת את הפעילות. <b>ארבע מערכות אותות</b> לפי מהירות: <b>תעלות יוניות</b> — מילישניות (רצפטור ניקוטיני: חמש תת-יחידות, שני ACh פותחים, נתרן פנימה, דפולריזציה — ואז דה-סנסיטיזציה ו-self inactivation; מיאסתניה גרביס — נוגדנים נגדו); <b>GPCR</b> — שניות (מוסקריני, אדרנרגי: שבעה מקטעים חוצי-ממברנה, חלבון G מתפרק, second messengers — <b>אמפליפיקציה</b>: מולקולה אחת, הרבה חלבוני G, הרבה cAMP; בטא מעלה אדנילאט ציקלאז, אלפא-2 מוריד; קפאין ותאופילין מעכבים את הפוספודיאסטראז שמפרק cAMP); <b>קינאזות</b> — שעות (רצפטור לציטוקין, זרחון, ביטוי גנים); <b>רצפטור גרעיני</b> — שעות (אסטרוגן).</p>
+<p><b>תיאוריית הרצפטור</b> (פול ארליך): תרופה לא עובדת בלי מתווך אנדוגני שהיא נקשרת אליו. D + R ⇄ DR ← אפקט: כמות הקומפלקסים תרופה-קולטן קובעת את הפעילות. <b>ארבע מערכות אותות</b> לפי מהירות: <b>תעלות יוניות</b> — מילישניות (רצפטור ניקוטיני: חמש תת-יחידות, שני ACh פותחים, נתרן פנימה, דפולריזציה — ואז דה-סנסיטיזציה ו-self inactivation; מיאסתניה גרביס — נוגדנים נגדו); <b>GPCR</b> — שניות (מוסקריני, אדרנרגי: שבעה מקטעים חוצי-ממברנה, חלבון G מתפרק, second messengers — <b>אמפליפיקציה</b>: מולקולה אחת, הרבה חלבוני G, הרבה cAMP; בטא מעלה אדנילאט ציקלאז, אלפא-2 מוריד; קפאין ותאופילין מעכבים את הפוספודיאסטראז שמפרק cAMP); <b>קינאזות</b> — שעות (רצפטור לציטוקין, זרחון, ביטוי גנים); <b>רצפטור גרעיני</b> — שעות (אסטרוגן).</p>
 <p><b>העקומה.</b> באמבט איבר מבודד (ex vivo) מוסיפים תרופה בריכוזים עולים ומודדים תגובה: <b>סיגמואיד</b> — מעט בריכוז נמוך, עלייה חדה, ורוויה כשכל הקולטנים תפוסים. <b>EC50</b> — הריכוז ל-50% מהאפקט המרבי — הוא <b>הפוטנטיות</b>: עקומה משמאל = פוטנטית יותר, מספיק פחות תרופה. <b>Emax</b> — <b>היעילות</b>, גובה התקרה. n (shape factor) — התלילות. <b>ED50</b> — מינון שבו 50% מהאוכלוסייה מגיבים (ציר X מינון). מורפין: 10 מ״ג מספיקים ל-50% ו-Emax גבוה; אספירין — עשרות מ״ג ותקרה נמוכה.</p>
 <p><b>המשפחות.</b> <b>אגוניסט מלא</b> — האפקט המלא שהקולטן יכול לתווך; <b>חלקי</b> — גם בריכוז מקסימלי לא מגיע ל-Emax (יעיל פחות, לא בהכרח פוטנטי פחות). <b>אנטגוניסט תחרותי</b> — נקשר לאתר הפעיל בלי להפעיל, ומתחרה עם האגוניסט: העקומה <b>זזה ימינה</b>, ובריכוז גבוה של אגוניסט מגיעים לאותו Emax. <b>לא-תחרותי</b> — נקשר באתר אחר: <b>Emax יורד</b>, EC50 לא משתנה. ועוד: בלתי הפיך (אספירין על COX-1), כימי (נוגדן שקושר את האגוניסט — VEGF), ופיזיולוגי (קולטן אחר שמפעיל תהליך מנוגד).</p>
 <p><b>בטיחות.</b> לכל תרופה בריכוז גבוה יש אפקט רעיל; שתי עקומות — רצויה וטוקסית — וככל שהן מופרדות, התרופה בטוחה יותר. <b>החלון התרפויטי</b> — טווח הריכוזים מעל EC50 ומתחת לרעילות, למטופל ממוצע. <b>אינדקס תרפויטי = TC50 / EC50</b> (או LD50/ED50): חייב להיות מעל 1, ו-2 הוא חלון קטן ובעייתי (ציקלוספורין). לאינדקס אין יחידות. פנטניל: כאב 1-2, הרדמה 10-20, ומעל 7 ng/mL — הפסקת נשימה. <b>גרף אפקט-זמן</b>: onset/lag, max effect, משך, AUEC — וזה חיבור של הקינטיקה עם הדינמיקה. אבל לא תמיד יש קשר ישיר: <b>אספירין</b> — PK של שעות, PD של שבוע, כי העיכוב של COX-1 בטסיות בלתי הפיך.</p>
@@ -510,15 +484,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>מכאן כל ההחלטות: מורפין לכאב חזק כי Emax גבוה; נלוקסון כאנטגוניסט תחרותי שהופך מנת-יתר; אספירין במינון נמוך שעובד שבוע כי העיכוב בלתי הפיך; ציקלוספורין עם TI של 2 שדורש ניטור; וסבילות לאופיואידים מדה-סנסיטיזציה ואז downregulation. ובאלרגיה אמיתית — IgE נוצר בחשיפה ראשונה והתגובה בשנייה; תגובה חמורה בחשיפה ראשונה (טובוקוררין, סוקצינילכולין, מורפין, ונקומיצין) היא שחרור היסטמין ישיר, לא אלרגיה.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אגוניסט חלקי פוטנטי פחות.” <b>האמת:</b> הוא <b>יעיל</b> פחות — תקרה נמוכה גם בריכוז מקסימלי. הפוטנטיות (EC50) יכולה להיות כל דבר. לא לבלבל בין מיקום העקומה לגובהה.</div>
-<div class="trap"><b>המלכודת:</b> „אנטגוניסט לא-תחרותי מזיז את העקומה ימינה.” <b>האמת:</b> ימינה = <b>תחרותי</b> (אותו Emax בריכוז גבוה). לא-תחרותי = <b>Emax יורד</b>, EC50 לא משתנה.</div>
-<div class="trap"><b>המלכודת:</b> „אינדקס תרפויטי גבוה = תרופה יעילה יותר.” <b>האמת:</b> מדד ל<b>בטיחות</b>, לא ליעילות: רעיל חלקי יעיל (TC50/EC50 או LD50/ED50). גבוה = בטוח. ואין לו יחידות — התשובה „10mg” נפסלה במבחן.</div>
-<div class="trap"><b>המלכודת:</b> „אנטגוניסט אינו נקשר לרצפטור.” <b>האמת:</b> הוא <b>נקשר ולא מפעיל</b>. אגוניסט נקשר ומפעיל.</div>
-<div class="trap"><b>המלכודת:</b> „זמן מחצית החיים הוא מדד פרמקודינמי” / „דחיקה מאלבומין היא אינטראקציה פרמקודינמית.” <b>האמת:</b> שניהם <b>פרמקוקינטיים</b> (ריכוז). פרמקודינמית — שתי תרופות על אותו אפקט (דיאזפאם עם הרדמה).</div>
-<div class="trap"><b>המלכודת:</b> „תאי מאסט מרוגשים כבר בחשיפה ראשונה.” <b>האמת:</b> סתירה פנימית: הריגוש (IgE) נוצר בחשיפה הראשונה, והתגובה — בשנייה. תגובה קשה בחשיפה ראשונה — פסאודו-אלרגיה, שחרור היסטמין ישיר.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>EC50</span><span data-d>פוטנטיות — הריכוז ל-50% מהאפקט המרבי</span>
@@ -531,7 +496,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-map"><b>ארבע מערכות אותות — לפי מהירות</b><ul><li>תעלת יונים — מילישניות<ul><li>ניקוטיני: 5 תת-יחידות, נתרן, דפולריזציה, דה-סנסיטיזציה</li></ul></li><li>GPCR — שניות<ul><li>מוסקריני, אדרנרגי: 7 מקטעים, חלבון G, second messenger, אמפליפיקציה</li></ul></li><li>קינאז — שעות<ul><li>רצפטור לציטוקין, זרחון, ביטוי גנים</li></ul></li><li>רצפטור גרעיני — שעות<ul><li>אסטרוגן: כניסה לגרעין, שעתוק</li></ul></li></ul></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/פרמקודינמיקה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פרמקודינמיקה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/פרמקודינמיקה" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/פרמקודינמיקה" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t04">
 <h3>המערכת הכולינרגית<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הפאראסימפתטית היא המערכת הכולינרגית: אצטילכולין נבנה מכולין ואצטיל-CoA (ChAT), נאגר בווזיקולות, משתחרר עם סידן, ומתפרק מיד ב-AChE. כל שלב הוא מטרה לתרופה: המיכוליניום, וזמיקול, בוטולינום, זרחנים אורגניים. הרצפטורים — ניקוטיני (תעלה, גנגליונים ושריר) ומוסקריני (GPCR, איברי המטרה; M2 מוריד cAMP בלב, M3 מפעיל PLC). והתרופות: אסטרים ואלקלואידים, אנטי-מוסקריניים, מעכבי AChE ומשתקי שרירים.</p>
@@ -563,15 +528,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>מיאסתניה גרביס — פירידוסטיגמין; שיתוק מעי ושלפוחית אחרי ניתוח — בטנכול; הרעלת זרחנים אורגניים בחקלאות — אטרופין ופרלידוקסים; הרפיית שרירים בניתוח — טובוקורארין, שמבטלים בסוף בניאוסטיגמין; בוטוקס — בוטולינום. ואטרופין בברדיקרדיה ולפני הרדמה, כדי לייבש הפרשות.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „ACh מסתיים ב-reuptake, כמו נוראדרנלין.” <b>האמת:</b> ב<b>פירוק</b> — AChE במרווח, מהיר מאוד. הכולין הוא שממוחזר, לא ACh.</div>
-<div class="trap"><b>המלכודת:</b> „ACh מרחיב כלי דם ישירות דרך השריר החלק.” <b>האמת:</b> דרך <b>האנדותל</b>: M3 משחרר <b>NO</b> שמרפה את השריר. על השריר ישירות ACh דווקא מכווץ.</div>
-<div class="trap"><b>המלכודת:</b> „אטרופין גורם למיוזיס” / „אטרופין מעכב את AChE.” <b>האמת:</b> אטרופין <b>חוסם רצפטורים מוסקריניים</b> — אישונים <b>רחבים</b>. בהרעלת זרחנים הוא מטפל בתסמינים המוסקריניים, ולא מתקן את חולשת השרירים (ניקוטיני); פרלידוקסים משחזר את האנזים.</div>
-<div class="trap"><b>המלכודת:</b> „ניאוסטיגמין חודר היטב למוח.” <b>האמת:</b> הוא <b>רביעוני</b> — לא חוצה BBB. וטובוקורארין — לא נספג מהפה ולא חוצה למוח.</div>
-<div class="trap"><b>המלכודת:</b> „מעכבי AChE מבטלים גם שיתוק של סוקצינילכולין.” <b>האמת:</b> רק של <b>טובוקורארין</b> (תחרותי). סוקצינילכולין משתק בדפולריזציה — יותר ACh רק מחמיר; ותופעת הלוואי שלו <b>ברדיקרדיה</b>, לא טכיקרדיה.</div>
-<div class="trap"><b>המלכודת:</b> „בבלוטת זיעה מבודדת ניקוטין יגרום להזעה.” <b>האמת:</b> אין שם גנגליון — הרצפטור <b>מוסקריני</b>. ניקוטין פועל על גנגליונים ושריר.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>המיכוליניום</span><span data-d>חוסם כניסת כולין — השלב קובע הקצב</span>
@@ -582,9 +538,9 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>טובוקורארין</span><span data-d>אנטגוניסט תחרותי בצומת עצב-שריר</span>
 <span data-t>סוקצינילכולין</span><span data-d>משתק מדפולריזציה — לא מבוטל במעכבי AChE</span>
 </div>
-<div class="ex ex-order"><b>מחזור האצטילכולין</b><ol><li>כולין נכנס לתא — טרנספורט פעיל, קובע קצב</li><li>ChAT: כולין + אצטיל-CoA → ACh</li><li>אגירה בווזיקולות</li><li>סידן → SNARE → שחרור</li><li>קישור לרצפטור ניקוטיני או מוסקריני</li><li>AChE מפרק — הכולין ממוחזר</li></ol></div>
+<div class="ex ex-order"><b>מחזור האצטילכולין</b><ol><li>כולין נכנס לתא — טרנספורט פעיל, קובע קצב</li><li>ChAT: כולין + אצטיל-CoA → ACh</li><li>אגירה בווזיקולות</li><li>סידן ← SNARE ← שחרור</li><li>קישור לרצפטור ניקוטיני או מוסקריני</li><li>AChE מפרק — הכולין ממוחזר</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/המערכת הכולינרגית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/המערכת הכולינרגית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/המערכת הכולינרגית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/המערכת הכולינרגית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t05">
 <h3>המערכת האדרנרגית<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">הנושא הגדול ביותר בפרמקולוגיה. הקטכולאמינים נבנים מטירוזין (טירוזין הידרוקסילאז — קובע קצב) דרך DOPA ודופמין לנוראדרנלין (בווזיקולה) ואדרנלין (באדרנל); הפעולה נגמרת ב-uptake ובפירוק ב-MAO ו-COMT. ארבעה רצפטורים: α1 מכווץ, α2 מעכב שחרור, β1 לב וכליה (רנין), β2 מרפה שריר חלק. ותרופות בכל שלב: קלונידין, מתילדופה, בטא-בלוקרים לדורותיהם, חוסמי α1, אגוניסטי β2 לאסתמה, ומעכבי ACE וסרטנים.</p>
@@ -622,16 +578,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>זו רשימת התרופות של המרפאה: בטא-בלוקר סלקטיבי לחולה לב עם אסתמה, פרזוסין לפרוסטטה מוגדלת, ונטולין ואז סלמטרול לאסתמה, אדרנלין באנפילקסיס, מעכב ACE ראשון ליתר לחץ דם (ולא בהריון — מתילדופה), וקלונידין שאסור להפסיק בבת אחת. ופאוכרומוציטומה — הטריאדה שמזהים במיון.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „נוראדרנלין נוצר ישירות מדופה” / „השלב קובע הקצב הוא DBH.” <b>האמת:</b> הרצף: טירוזין — <b>DOPA</b> (טירוזין הידרוקסילאז, <b>קובע קצב</b>) — <b>דופמין</b> — NE (DBH, בווזיקולה) — אדרנלין (PNMT). והפירוק — MAO <b>וגם</b> COMT.</div>
-<div class="trap"><b>המלכודת:</b> „קשירת NE ל-α2 על התא המפריש מגבירה שחרור.” <b>האמת:</b> α2 פרה-סינפטי <b>מעכב</b> שחרור. לכן קלונידין (אגוניסט) מוריד NE, ויוהימבין (אנטגוניסט) מעלה.</div>
-<div class="trap"><b>המלכודת:</b> „פרופרנולול מתאים לחולה אסתמה עם מיגרנה.” <b>האמת:</b> לא סלקטיבי — חסימת <b>β2</b> מכווצת סימפונות. באסתמה ובסוכרת — דור שני סלקטיבי β1 (אטנולול, מטופרולול), ובחלון התרפויטי בלבד.</div>
-<div class="trap"><b>המלכודת:</b> „חוסם α1 גורם לטכיקרדיה רפלקסית חזקה.” <b>האמת:</b> פרזוסין <b>אינו</b> מעלה דופק ולא רנין; הבעיה שלו היא <b>תת-לחץ דם אורתוסטטי</b> (הוורידים). הטכיקרדיה הגדולה היא של <b>פנטולאמין</b>, שחוסם גם α2.</div>
-<div class="trap"><b>המלכודת:</b> „כיווץ כלי דם בשריר השלד הוא פעולה אדרנרגית.” <b>האמת:</b> בשריר השלד הרצפטור הוא <b>β2</b> — <b>הרחבה</b>. הכיווץ (α1) הוא במעי, בעור ובכליה.</div>
-<div class="trap"><b>המלכודת:</b> „אפשר להפסיק קלונידין בבת אחת.” <b>האמת:</b> אסור — הווזיקולות המלאות <b>מציפות</b> NE, מצב מסכן חיים. מתילדופה — אין בעיה כזאת.</div>
-<div class="trap"><b>המלכודת:</b> „היפוגליקמיה היא חלק מהטריאדה של פאוכרומוציטומה.” <b>האמת:</b> קטכולאמינים <b>מעלים</b> סוכר. הטריאדה: כאבי ראש, הזעה, דפיקות לב.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>טירוזין הידרוקסילאז</span><span data-d>השלב קובע הקצב — טירוזין ל-DOPA</span>
@@ -645,7 +591,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>סינתזת הקטכולאמינים</b><ol><li>טירוזין</li><li>DOPA — טירוזין הידרוקסילאז (קובע קצב)</li><li>דופמין — AAAD</li><li>כניסה לווזיקולה — VMAT2</li><li>נוראדרנלין — DBH בווזיקולה</li><li>אדרנלין — PNMT באדרנל</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/המערכת האדרנרגית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/המערכת האדרנרגית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/המערכת האדרנרגית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/המערכת האדרנרגית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t06">
 <h3>מערכת העצבים האוטונומית<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">המפה: הסומטית רצונית, האוטונומית לא — סימפתטית ופאראסימפתטית. בפאראסימפתטית הסיב הפרה-גנגליוני ארוך, בסימפתטית קצר; בכל גנגליון הרצפטור ניקוטיני; באדרנל אין גנגליון. יש איברים עם מערכת אחת בלבד — כלי הדם ובלוטות הזיעה סימפתטיים, ספינקטר האישון פאראסימפתטי — ולכן חסם גנגליון מבטל בכל איבר את הטונוס הדומיננטי. ואוטורצפטור מול הטרורצפטור בקצה העצב.</p>
@@ -681,14 +627,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>ההיגיון הזה עומד מאחורי תופעות הלוואי של כל תרופה אוטונומית: אנטי-מוסקריני מייבש, מרחיב אישון ועוצר שתן; בטא-בלוקר מאט; ובעישון — הסימפתטית מנצחת. וגם מאחורי הרפלקס: ירידת לחץ דם מהירה גוררת טכיקרדיה, אלא אם הרצפטור חסום.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „העצבוב העיקרי של הלב או המעי הוא סימפתטי.” <b>האמת:</b> הטונוס הדומיננטי בלב, במעי ובשלפוחית הוא <b>פאראסימפתטי</b>. סימפתטי בלבד — <b>כלי הדם ובלוטות הזיעה</b>.</div>
-<div class="trap"><b>המלכודת:</b> „חסם גנגליון גורם לברדיקרדיה, שלשול וריור.” <b>האמת:</b> הפוך — הוא מבטל את הטונוס הדומיננטי: <b>טכיקרדיה</b>, <b>עצירות</b>, <b>יובש</b>, עצירת שתן, הרחבת אישון, נפילת לחץ.</div>
-<div class="trap"><b>המלכודת:</b> „הרחבת אישונים היא פאראסימפתטית.” <b>האמת:</b> הפאראסימפתטית מכווצת את הספינקטר — <b>מיוזיס</b>. הרחבה — סימפתטי (α1).</div>
-<div class="trap"><b>המלכודת:</b> „ההטרורצפטור הוא פוסט-סינפטי” / „הוא מעכב את המתווך של עצמו.” <b>האמת:</b> שניהם <b>פרה-סינפטיים</b> על קצה העצב. את המתווך של עצמו קושר ה<b>אוטורצפטור</b>; ההטרורצפטור קושר את המתווך של העצב <b>השכן</b>.</div>
-<div class="trap"><b>המלכודת:</b> „בלב מבודד ניקוטין יגרום לברדיקרדיה ברורה.” <b>האמת:</b> ניקוטין מפעיל את <b>שני</b> הגנגליונים — התוצאה לא חד-משמעית. <b>מוסקרין</b> על M2 — ברדיקרדיה ברורה.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>פרה-גנגליוני ארוך</span><span data-d>פאראסימפתטית</span>
@@ -698,9 +636,9 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <span data-t>הקסמתוניום</span><span data-d>חסם גנגליונים — ההפך מהטונוס הדומיננטי</span>
 <span data-t>הטרורצפטור</span><span data-d>קולטן פרה-סינפטי למתווך של העצב השכן</span>
 </div>
-<div class="ex ex-map"><b>הטונוס הדומיננטי — ומה חסם גנגליון עושה</b><ul><li>סימפתטי דומיננטי<ul><li>כלי דם → הרחבה, נפילת לחץ</li><li>בלוטות זיעה → פחות זיעה</li></ul></li><li>פאראסימפתטי דומיננטי<ul><li>לב → טכיקרדיה</li><li>שלפוחית → עצירת שתן</li><li>מעי → עצירות</li><li>עין → אישון רחב</li><li>רוק → יובש</li></ul></li></ul></div>
+<div class="ex ex-map"><b>הטונוס הדומיננטי — ומה חסם גנגליון עושה</b><ul><li>סימפתטי דומיננטי<ul><li>כלי דם ← הרחבה, נפילת לחץ</li><li>בלוטות זיעה ← פחות זיעה</li></ul></li><li>פאראסימפתטי דומיננטי<ul><li>לב ← טכיקרדיה</li><li>שלפוחית ← עצירת שתן</li><li>מעי ← עצירות</li><li>עין ← אישון רחב</li><li>רוק ← יובש</li></ul></li></ul></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/מערכת העצבים האוטונומית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/מערכת העצבים האוטונומית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/מערכת העצבים האוטונומית" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/מערכת העצבים האוטונומית" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 <section class="unit" id="u-t07">
 <h3>היסטמין ופרוסטגלנדינים<span class="speak-wrap"><button class="speak" type="button">🔊 הקראה</button><button class="speak-stop" type="button" title="עצירה" aria-label="עצירת ההקראה">⏹</button></span></h3>
 <p class="lead">שני מתווכי הדלקת ותרופותיהם. היסטמין — מגרנולות של תאי מאסט ובזופילים, דרך IgE או ישירות (מורפין, טובוקורארין, חומר ניגוד); H1 מכווץ סימפונות, מרחיב ומגרד; H2 מפריש חומצה; אנטיהיסטמינים מדור ראשון מרדימים, מדור שני לא, וחוסמי H2 לכיב. איקוזנואידים — מחומצה ארכידונית דרך COX (פרוסטגלנדינים, תרומבוקסן) ו-LOX (לויקוטריאנים); NSAIDs, אספירין הבלתי הפיך, פרצטמול, מעכבי COX-2 וסטרואידים שחוסמים את המקור.</p>
@@ -735,16 +673,6 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <h4>החיבור הרפואי</h4>
 <p>אספירין 75 מ״ג ליום נגד אוטם — כי הטסית בלי גרעין; לא לילדים (Reye). איבופרופן לכאב ודלקת — אבל כיב וכליה, ובאסתמטי — התקף. פרצטמול לחום בלי קיבה. אנטיהיסטמין דור שני לנזלת אלרגית ביום, דור ראשון לשינה ולמחלת נסיעה. פמוטידין לצרבת, וסימטידין — לא עם קומדין. ובאנפילקסיס — אדרנלין, לא אנטיהיסטמין.</p>
 
-<div class="traps">
-<h4>מלכודות</h4>
-<div class="trap"><b>המלכודת:</b> „אדרנלין מגביר שחרור היסטמין” / „באנפילקסיס אנטיהיסטמין מספיק.” <b>האמת:</b> אדרנלין (β2, cAMP) <b>מדכא</b> דגרנולציה, והוא הטיפול באנפילקסיס. אנטיהיסטמין חוסם רק את H1 — לא את הלויקוטריאנים ושאר האוטקואידים.</div>
-<div class="trap"><b>המלכודת:</b> „PGI2 / TXA2 גורמים לחום.” <b>האמת:</b> <b>PGE2</b> — על ההיפותלמוס. PGI2 מרחיב ונגד קרישה; TXA2 מקריש.</div>
-<div class="trap"><b>המלכודת:</b> „פרצטמול אנטי-דלקתי” / „מעכב COX-1 בלתי הפיך.” <b>האמת:</b> פרצטמול מוריד <b>חום וכאב בלבד</b>, לא בצקת ולא דלקת. הבלתי הפיך היחיד הוא <b>אספירין</b>.</div>
-<div class="trap"><b>המלכודת:</b> „אספירין מוריד גם לויקוטריאנים.” <b>האמת:</b> רק <b>סטרואיד</b> (PLA2) מוריד את שני הזרועות. אספירין חוסם COX ו<b>מעלה</b> לויקוטריאנים — אסתמה.</div>
-<div class="trap"><b>המלכודת:</b> „השמנה בירכיים ובזרועות” כתופעת לוואי של סטרואידים. <b>האמת:</b> ההשמנה <b>מרכזית</b> — בטן, פנים, צוואר — והגפיים דקות.</div>
-<div class="trap"><b>המלכודת:</b> „מחלת נסיעה נמנעת רק בדור השני” / „H2 עם וורפרין = קרישיות יתר.” <b>האמת:</b> מחלת נסיעה — <b>דור ראשון</b> (חודר למוח). סימטידין מעכב CYP — וורפרין מצטבר — <b>דימום</b>.</div>
-<div class="trap"><b>המלכודת:</b> „יחס IC50 COX2/COX1 = 40 — התרופה סלקטיבית ל-COX-2.” <b>האמת:</b> צריך פי 40 <b>יותר</b> תרופה לעכב COX-2 — היא סלקטיבית ל-<b>COX-1</b>.</div>
-</div>
 
 <div class="ex ex-match">
 <span data-t>H1</span><span data-d>Gq, סידן — אלרגיה, כיווץ סימפונות, גירוד</span>
@@ -758,7 +686,7 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 </div>
 <div class="ex ex-order"><b>מחומצה ארכידונית לתופעות — ומה נחסם</b><ol><li>גירוי מפעיל פוספוליפאז A2 (סטרואיד חוסם)</li><li>חומצה ארכידונית משתחררת</li><li>COX-1/2 (NSAID, אספירין) או 5-LOX</li><li>PGE2, TXA2, PGI2 — או לויקוטריאנים</li><li>חום, כאב, בצקת, קרישה — או כיווץ סימפונות</li></ol></div>
 
-<a class="drill" href="../index.html#/practice/ekronot-b/היסטמין ופרוסטגלנדינים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/היסטמין ופרוסטגלנדינים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות, המלכודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
+<a class="drill" href="../index.html#/practice/ekronot-b/היסטמין ופרוסטגלנדינים" target="_blank" rel="noopener">✍️ לתרגל את הנושא הזה בארכיון ←</a><a class="drill dk-map" href="../index.html#/guide/ekronot-b/היסטמין ופרוסטגלנדינים" target="_blank" rel="noopener" title="מה באמת נשאל בנושא הזה — הנקודות והשאלות מהמבחנים">🗺️ מה באמת נשאל ←</a></section>
 </section>
 
 <section class="block" id="last">
@@ -776,18 +704,18 @@ th{background:var(--panel);font-family:'Heebo';font-weight:800;color:var(--brand
 <tr><td>EC50 / Emax</td><td>שמאלה = פוטנטי. גבוה = יעיל. חלקי — תקרה נמוכה.</td></tr>
 <tr><td>אנטגוניסטים</td><td>תחרותי — ימינה, אותו Emax. לא-תחרותי — Emax יורד. בלתי הפיך — אספירין.</td></tr>
 <tr><td>TI</td><td>TC50/EC50 (LD50/ED50). בטיחות. מעל 1; 2 בעייתי. בלי יחידות.</td></tr>
-<tr><td>סבילות</td><td>דה-סנסיטיזציה (זרחון, דקות) → downregulation (פחות קולטנים, Emax יורד).</td></tr>
+<tr><td>סבילות</td><td>דה-סנסיטיזציה (זרחון, דקות) ← downregulation (פחות קולטנים, Emax יורד).</td></tr>
 <tr><td>מערכות אותות</td><td>תעלה ms · GPCR שניות (7TM, אמפליפיקציה) · קינאז וגרעיני שעות.</td></tr>
-<tr><td>ACh</td><td>כולין (קובע קצב, המיכוליניום) + אצטיל-CoA (ChAT) → וזיקולה (וזמיקול) → סידן (בוטולינום) → AChE (זרחנים).</td></tr>
+<tr><td>ACh</td><td>כולין (קובע קצב, המיכוליניום) + אצטיל-CoA (ChAT) ← וזיקולה (וזמיקול) ← סידן (בוטולינום) ← AChE (זרחנים).</td></tr>
 <tr><td>רצפטורים כולינרגיים</td><td>ניקוטיני — גנגליון, שריר, אדרנל. מוסקריני — M2/M4 Gi (לב), M1/M3/M5 Gq. כלי דם — NO.</td></tr>
 <tr><td>תרופות כולינרגיות</td><td>בטנכול, קרבכול. ניאוסטיגמין (רביעוני). אטרופין (חם, יבש, רחב). טובוקורארין (מבוטל ב-AChE-i) / סוקצינילכולין (לא).</td></tr>
-<tr><td>קטכולאמינים</td><td>טירוזין → DOPA (TH קובע קצב) → דופמין → NE (DBH) → אדרנלין (PNMT). MAO + COMT. VMA.</td></tr>
+<tr><td>קטכולאמינים</td><td>טירוזין ← DOPA (TH קובע קצב) ← דופמין ← NE (DBH) ← אדרנלין (PNMT). MAO + COMT. VMA.</td></tr>
 <tr><td>סיום NE</td><td>uptake 1 (קוקאין, טריציקליים), α2 מעכב שחרור, רזרפין מרוקן, אמפטמין הופך.</td></tr>
 <tr><td>α1 / α2 / β1 / β2</td><td>כיווץ · מעכב שחרור · לב+רנין · הרפיה (סימפונות, שריר, רחם בהריון).</td></tr>
 <tr><td>בטא-בלוקרים</td><td>פרופרנולול לא סלקטיבי (אסתמה אסור, מיגרנה, רעד). אטנולול/מטופרולול β1. לבטלול/קרוודילול α1+β.</td></tr>
 <tr><td>α חוסמים</td><td>פרזוסין — אורתוסטטי, בלי טכיקרדיה, פרוסטטה. פנטולאמין — טכיקרדיה. קלונידין — אגוניסט α2, לא להפסיק.</td></tr>
 <tr><td>אסתמה</td><td>SABA/MABA (ונטולין)/LABA (סלמטרול) + סטרואיד. β2 → cAMP.</td></tr>
-<tr><td>RAAS</td><td>β1 → רנין → AT-II (ACE בריאות) → כיווץ, אלדוסטרון. pril- (שיעול, היפרקלמיה, לא בהריון) · sartan-.</td></tr>
+<tr><td>RAAS</td><td>β1 ← רנין ← AT-II (ACE בריאות) ← כיווץ, אלדוסטרון. pril- (שיעול, היפרקלמיה, לא בהריון) · sartan-.</td></tr>
 <tr><td>אוטונומית</td><td>פרה ארוך = פאראסימפתטי. גנגליון ניקוטיני. זיעה סימפתטית-כולינרגית. אדרנל בלי גנגליון.</td></tr>
 <tr><td>חסם גנגליון</td><td>ההפך מהטונוס הדומיננטי: כלי דם ↓, לב ↑, שתן עצור, עצירות, אישון רחב.</td></tr>
 <tr><td>היסטמין</td><td>IgE או ישיר (מורפין, טובוקורארין, ניגוד). H1 Gq אלרגיה · H2 cAMP חומצה. אנפילקסיס — אדרנלין.</td></tr>
@@ -892,7 +820,7 @@ document.querySelectorAll('.vq').forEach(function(q){
     var items = [];
     var title = unit.querySelector('h3');
     if (title) items.push({ el: title, text: title.childNodes[0].textContent.trim() });
-    unit.querySelectorAll('.lead, h4, p, .trap, figcaption').forEach(function(el){
+    unit.querySelectorAll('.lead, h4, p, figcaption').forEach(function(el){
       if (el.closest('.vids')) return;                 // תיאורי סרטונים אינם חלק מהתוכן
       /* במצב מרוכז ההעמקה מוסתרת (.dk-deep של ערכת ה-doc-kit) — הקראה של
          אלמנט נסתר גם מבלבלת וגם גוררת גלילה אליו. בדיקת display בפועל ולא
@@ -1192,22 +1120,6 @@ mark.dk-hl:hover{filter:brightness(1.06);}
   display:none;white-space:nowrap;}
 #dk-hlbtn.on{display:block;}
 
-/* ---------- שער "נסה קודם" במלכודות ---------- */
-.dk-gated{display:none;}
-.dk-open .dk-gated{display:inline;}
-button.dk-gate{display:inline-block;border:1px dashed var(--warn-ln,#d97706);
-  background:var(--warn-bg,#fff7e6);color:inherit;font:inherit;font-size:.85rem;
-  font-weight:700;border-radius:8px;padding:.15em .7em;cursor:pointer;
-  margin-inline-start:.35em;}
-button.dk-gate::before{content:"🤔 עצרו רגע — מה האמת? לחצו לבדיקה";}
-button.dk-gate:hover{border-style:solid;}
-.dk-open button.dk-gate{display:none;}
-#dk-reveal{position:fixed;bottom:14px;left:14px;z-index:60;border:1px solid var(--line,#d8dee7);
-  background:var(--panel,#fff);color:var(--dim,#5a6572);font:inherit;font-size:.78rem;
-  font-weight:700;border-radius:99px;padding:.45em 1em;cursor:pointer;opacity:.85;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);}
-#dk-reveal:hover{opacity:1;color:var(--ink,#1c2733);}
-
 /* ---------- קישור "במפה" ליד קישור התרגול ---------- */
 a.dk-map{margin-inline-start:.6em;}
 
@@ -1221,9 +1133,7 @@ a.dk-map{margin-inline-start:.6em;}
 #dk-modes button.on{background:var(--brand,#185FA5);color:#fff;}
 #dk-modes button:not(.on):hover{color:var(--ink,#1c2733);}
 @media (max-width:640px){#dk-modes button span{display:none;}
-  #dk-modes button{font-size:1rem;padding:.3em .7em;}
-  #dk-reveal .dk-rv-tx{display:none;}
-  #dk-reveal{font-size:1rem;padding:.35em .6em;}}
+  #dk-modes button{font-size:1rem;padding:.3em .7em;}}
 /* המתג צף מעל התחתית — שלא יכסה את הפוטר בסוף הגלילה */
 body.dk-has-modes{padding-bottom:72px;}
 
@@ -1342,10 +1252,9 @@ button.dk-node:hover{color:var(--brand,#185FA5);}
   padding-bottom:.5rem;border-bottom:2px solid #333;margin-bottom:1rem;}
 
 @media print{
-  .dk-gated{display:inline !important;}
   .dk-deep{display:block !important;}
   details.dk-qa{display:none;}
-  button.dk-gate,button.dk-more,#dk-reveal,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
+  button.dk-more,#dk-prog,#dk-hlbtn,#dk-modes,#dk-print{display:none !important;}
   mark.dk-hl{background:none;box-shadow:none;border-bottom:2px solid #b45309;}
   /* דף שבת: יחידות שלא נבחרו לא מודפסות; במצב תמצית ההעמקה לא מודפסת */
   .dk-print-skip{display:none !important;}
@@ -1379,8 +1288,7 @@ body:not(:has(#ed-prog)) .navbar{
 
 /* הכלים הצפים ומתג המצבים — עדשות זכוכית, ונעלמים בגלילה מטה (kit.js) */
 body:not(:has(#ed-prog)) .tools,
-body:not(:has(#ed-prog)) #dk-modes,
-body:not(:has(#ed-prog)) #dk-reveal{
+body:not(:has(#ed-prog)) #dk-modes{
   transition:transform .25s ease, opacity .25s ease;
 }
 body:not(:has(#ed-prog)) #dk-modes{
@@ -1389,11 +1297,13 @@ body:not(:has(#ed-prog)) #dk-modes{
   -webkit-backdrop-filter:blur(24px) saturate(1.8);
 }
 body.dk-toolhide .tools,
-body.dk-toolhide #dk-modes,
-body.dk-toolhide #dk-reveal{transform:translateY(140%); opacity:0; pointer-events:none;}
+body.dk-toolhide #dk-modes{transform:translateY(140%); opacity:0; pointer-events:none;}
+
+/* עמודת הקריאה: ב-50rem יצאו ~90 תווים בשורה — 44rem ≈ 75, הטווח הנוח לעין.
+   מסך בלבד (בהדפסה הגוף ברוחב מלא), ולא באלקטרו שיש לו פריסה משלו. */
+@media screen{ body:not(:has(#ed-prog)){max-width:44rem;} }
 
 /* קופסאות התוכן — שקיפות עדינה בלי blur (ביצועים במסמך ארוך) */
-body:not(:has(#ed-prog)) .traps,
 body:not(:has(#ed-prog)) .vq,
 body:not(:has(#ed-prog)) .drill,
 body:not(:has(#ed-prog)) .plus,
@@ -1414,13 +1324,12 @@ body:not(:has(#ed-prog)) details.dk-qa{
 .dk-unitnav-next{text-align:left;align-items:flex-end;}
 @media print{.dk-unitnav{display:none}}
 </style>
-<script>window.DOCKIT={"id": "ekronot-b-pharma-doc", "gate": ".trap", "modes": {"unit": "section.unit", "keep": "h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
+<script>window.DOCKIT={"id": "ekronot-b-pharma-doc", "modes": {"unit": "section.unit", "keep": "h3, .lead, .drill, .dk-qa, .ex, .dk-more"}, "qa": "ekronot-b", "shinun": "ekronot-b"};</script>
 <script>
 /* doc-kit — יכולות משותפות לכל "סיכום מלא". מוטמע ע"י inject.py, לא נטען כקובץ.
    קונפיגורציה דרך window.DOCKIT שמוזרק לפני הקובץ הזה:
      id        מזהה המסמך למפתחות localStorage (למשל 'physics-doc')
      progress  false = בלי פס התקדמות (לאלקטרו, שיש לו משלו)
-     gate      selector של מלכודות לעטיפת "האמת:" בשער נסה-קודם. null = בלי.
      blocks    selector של יחידות הטקסט שמותר לסמן בתוכן. */
 (function () {
 'use strict';
@@ -1453,66 +1362,6 @@ if (CFG.progress !== false) {
   paintProg();
 }
 
-/* ---------- שער "נסה קודם" במלכודות ----------
-   המלכודת נשארת גלויה; "האמת:" והלאה מוסתרים עד לחיצה. זה מה שהסקר ביקש —
-   לעצור ולנסות לפני חשיפת הפתרון. מי שזה מציק לו: "גלה הכל" קבוע ונשמר. */
-if (CFG.gate) {
-  var opened = read('reveal', false);
-  var gated = [];
-  [].forEach.call(document.querySelectorAll(CFG.gate), function (tr) {
-    var pivot = null;
-    [].some.call(tr.querySelectorAll('b'), function (b) {
-      if (/^האמת/.test(b.textContent)) { pivot = b; return true; }
-      return false;
-    });
-    if (!pivot || pivot.parentNode !== tr) return;
-    var hid = document.createElement('span');
-    hid.className = 'dk-gated';
-    var n = pivot;
-    while (n) { var nx = n.nextSibling; hid.appendChild(n); n = nx; }
-    /* התווית ב-CSS (::before) ולא ב-textContent, בכוונה: מנוע ההקראה של
-       המסמך מקריא את ה-textContent של המלכודת כולה, וכפתור עם טקסט היה
-       נכנס באמצע המשפט. aria-label שומר על קורא המסך. */
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dk-gate';
-    btn.setAttribute('aria-label', 'עצרו רגע — מה האמת? לחצו לבדיקה');
-    btn.title = 'נסו לענות בראש לפני שמציצים';
-    btn.addEventListener('click', function () { tr.classList.add('dk-open'); });
-    tr.appendChild(btn);
-    tr.appendChild(hid);
-    if (opened) tr.classList.add('dk-open');
-    gated.push(tr);
-  });
-  if (gated.length) {
-    var rv = document.createElement('button');
-    rv.type = 'button';
-    rv.id = 'dk-reveal';
-    /* אייקון וטקסט בנפרד — במסך צר הטקסט מוסתר ב-CSS, אחרת הכפתור
-       מתנגש במתג המצבים שבמרכז התחתית. */
-    var rvIc = document.createElement('span');
-    var rvTx = document.createElement('span');
-    rvTx.className = 'dk-rv-tx';
-    rv.appendChild(rvIc);
-    rv.appendChild(rvTx);
-    var paintRv = function () {
-      rvIc.textContent = opened ? '🙈' : '👁️';
-      rvTx.textContent = opened ? ' הסתירו את התשובות' : ' גלו את כל התשובות';
-      rv.title = opened
-        ? 'החזרת שערי "נסה קודם" על המלכודות'
-        : 'פתיחת כל "האמת" במלכודות, בלי לעצור על כל אחת';
-    };
-    rv.addEventListener('click', function () {
-      opened = !opened;
-      write('reveal', opened);
-      gated.forEach(function (tr) { tr.classList.toggle('dk-open', opened); });
-      paintRv();
-    });
-    paintRv();
-    document.body.appendChild(rv);
-  }
-}
-
 /* ---------- שלושת מצבי הקריאה ----------
    📖 קריאה מלאה (read) · ⚡ מרוכז (focus) · 🎮 אינטראקטיבי (play).
    הסיווג הוא runtime: רצפי ילדים שאינם "keep" נעטפים ב-div.dk-deep,
@@ -1523,7 +1372,7 @@ var MODES = null;
 if (CFG.modes) {
   MODES = (function () {
     var unitSel = CFG.modes.unit || 'section.unit';
-    var keepSel = CFG.modes.keep || 'h3, .lead, .traps, .drill, .dk-qa, .ex, .dk-more';
+    var keepSel = CFG.modes.keep || 'h3, .lead, .drill, .dk-qa, .ex, .dk-more';
     [].forEach.call(document.querySelectorAll(unitSel), function (unit) {
       var kids = [].slice.call(unit.children), run = [], made = false;
       var flush = function (before) {
@@ -1541,7 +1390,7 @@ if (CFG.modes) {
       });
       flush(null);
       if (made) {
-        /* התווית ב-CSS, מאותה סיבה כמו כפתור השער: לא להיכנס ל-textContent. */
+        /* התווית ב-CSS ולא ב-textContent — שמנוע ההקראה לא יקריא אותה באמצע המשפט. */
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'dk-more';
@@ -1562,8 +1411,8 @@ if (CFG.modes) {
       b.type = 'button';
       b.innerHTML = LBL[m][0] + '<span> ' + LBL[m][1] + '</span>';
       b.title = m === 'read' ? 'כל התוכן, כמעבר ראשון על החומר'
-        : m === 'focus' ? 'רק התמצית, המלכודות ומה שבאמת נשאל — לחזרה מהירה'
-        : 'ההעמקה מקופלת, התרגילים והשערים פתוחים — ללמידה פעילה';
+        : m === 'focus' ? 'רק התמצית ומה שבאמת נשאל — לחזרה מהירה'
+        : 'ההעמקה מקופלת, התרגילים פתוחים — ללמידה פעילה';
       b.addEventListener('click', function () { apply(m, true); });
       btns[m] = b;
       bar.appendChild(b);
@@ -1656,7 +1505,7 @@ if (CFG.modes) {
         inner.appendChild(all);
         var depth = document.createElement('div');
         depth.className = 'dk-print-depth';
-        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — תמצית ומלכודות</label>' +
+        depth.innerHTML = '<label><input type="radio" name="dkpd" value="focus" checked> ⚡ מרוכז — התמצית</label>' +
           '<label><input type="radio" name="dkpd" value="full"> 📖 מלא — כולל ההעמקה</label>';
         inner.appendChild(depth);
         var acts = document.createElement('div');
@@ -1736,10 +1585,46 @@ if (CFG.qa) {
         var u = byTopic[titleOf(sec)];
         if (!u || !(u.points || []).length) return;
         /* point הוא טקסט פשוט (לא HTML) — מבריחים אותו, אחרת „Mg²⁺<Na⁺” נבלע כתגית.
-           ואותו תיקון כיווניות כמו במנוע: טווח עם מקף ארוך וסימן עילי בסוף מילה לטינית. */
+           ואותו תיקון כיווניות כמו במנוע (bidiFix ב-app.js; התאום בפייתון: tools/bidi_fix.py):
+           טווח עם מקף ארוך, סימן עילי ומטען ASCII בסוף נוסחה, מינוס מוביל, וחץ בהקשר עברי. */
+        var bidiArrows = function (t) {
+          if (!/[\u2192]|->|<-/.test(t)) return t;
+          if (t.indexOf('<!--') < 0) {
+            t = t.replace(/<-{1,2}>/g, '\u2194').replace(/-{1,2}>/g, '\uE000').replace(/<-{1,2}/g, '\uE001');
+          }
+          var side = function (i, step) {
+            var inTag = false;
+            for (var j = i + step; j >= 0 && j < t.length; j += step) {
+              var c = t[j];
+              if (c === (step < 0 ? '>' : '<')) { inTag = true; continue; }
+              if (inTag) { if (c === (step < 0 ? '<' : '>')) inTag = false; continue; }
+              if (/[A-Za-z\u00C0-\u024F\u0370-\u03FF]/.test(c)) return 'L';
+              if (/[\u05D0-\u05EA]/.test(c)) return 'R';
+              if (step > 0 && /\d/.test(c)) return side(i, -1);
+            }
+            return null;
+          };
+          var out = '';
+          for (var i = 0; i < t.length; i++) {
+            var c = t[i];
+            if (c !== '\u2192' && c !== '\uE000' && c !== '\uE001') { out += c; continue; }
+            if (c === '\u2192') {
+              var j = i - 1;
+              while (j >= 0 && /\s/.test(t[j])) j--;
+              if (j < 0 || (t[j] === '>' && t[t.lastIndexOf('<', j) + 1] !== '/')) { out += c; continue; }
+            }
+            var ltr = side(i, -1) === 'L' && side(i, 1) === 'L';
+            out += ((c !== '\uE001') === ltr) ? '\u2192' : '\u2190';
+          }
+          return out;
+        };
         var bidiFix = function (t) {
-          return String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
-            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E');
+          return bidiArrows(String(t).replace(/(\d)\u2013(?=\d)/g, '$1-')
+            .replace(/([\u207A\u207B])(?![\u200E\u207A\u207B\u2070-\u2079A-Za-z0-9])/g, '$1\u200E')
+            .replace(/(^|[\s(\[,=:>])([-\u2212])(?=\d)/g, function (m, pre, sign, at, str) {
+              return (/\s/.test(pre) && /(^|\s)[\u05D1\u05DB\u05DC\u05DE\u05D4\u05D5\u05E9]$/.test(str.slice(0, at))) ? m : pre + '\u200E' + sign;
+            })
+            .replace(/(\b(?:[A-Z][a-z]?\d*)+)([+-]{1,2})(?=[\s,.;:)\]]|$)/g, '$1$2\u200E'));
         };
         var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
 
@@ -1758,9 +1643,7 @@ if (CFG.qa) {
           s.innerHTML = u.summary.split('\n\n').map(function (p) { return '<p>' + bidiFix(p) + '</p>'; }).join('');
           det.appendChild(s);
         }
-        /* בלי שורת המלכודת של כל נקודה — בלוק המלכודות של המסמך יושב ממש
-           מעל הפאנל, ושתי רשימות מלכודות צמודות זו בדיוק הכפילות שמבלבלת.
-           הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
+        /* הפאנל עונה על שאלה אחת: מה נשאל וכמה. */
         u.points.slice().sort(function (a, b) {
           return (b.qids || []).length - (a.qids || []).length;
         }).forEach(function (p) {
@@ -1780,13 +1663,9 @@ if (CFG.qa) {
           '<a href="../index.html#/practice/' + CFG.qa + '/' + enc + '" target="_blank" rel="noopener" ' +
           'title="תרגול שאלות אמת בנושא הזה בלבד">✍️ לתרגל את הנושא</a>';
         det.appendChild(foot);
-        var traps = sec.querySelector('.traps');
-        if (traps) traps.after(det);
-        else {
-          var drill = sec.querySelector('.drill');
-          if (drill) sec.insertBefore(det, drill);
-          else sec.appendChild(det);
-        }
+        var drill = sec.querySelector('.drill');
+        if (drill) sec.insertBefore(det, drill);
+        else sec.appendChild(det);
         if (document.body.dataset.dkMode === 'focus') det.open = true;
       });
     }).catch(function () {});
@@ -1810,7 +1689,7 @@ if (CFG.qa) {
         a.href = '../index.html#/keyer/' + deck.id;
         a.target = '_blank'; a.rel = 'noopener';
         a.title = deck.heroSub || 'משחק זיהוי מרמזים על הנושא הזה';
-        a.textContent = '🔑 לזהות מרמזים — ' + deck.title;
+        a.textContent = '🔑 ' + deck.title;   /* הכותרות כבר פותחות ב-„זהה את…” */
         var drill = sec.querySelector('.drill');
         if (drill) drill.after(a); else sec.appendChild(a);
       });
@@ -2021,7 +1900,7 @@ if (CFG.qa) {
    משנה textContent. אם הטקסט עצמו השתנה מאז, בדיקת 12 התווים מפילה את
    הסימון בשקט במקום לסמן טקסט שגוי. */
 (function () {
-  var SEL = CFG.blocks || 'p, li, figcaption, td, .trap';
+  var SEL = CFG.blocks || 'p, li, figcaption, td';
   function blocksNow() {
     return [].filter.call(document.querySelectorAll(SEL), function (b) {
       /* החיצוני בלבד: p בתוך li נספר פעם אחת, דרך ה-li. */
