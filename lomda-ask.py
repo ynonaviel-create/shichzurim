@@ -7,8 +7,7 @@
 
 התפיסה — אותה תפיסה כמו anki-ask.py: המפה היא סדר היום, הנוטבוק (שמחוברים
 אליו ההרצאות והסיכומים של הקורס) כותב את הטקסט. build.py מייצר שלד עם TODO;
-הסקריפט הזה ממלא לכל יחידה טיוטה של "הרעיון לעומק", "החיבור הרפואי" ו"האמת"
-של כל מלכודת.
+הסקריפט הזה ממלא לכל יחידה טיוטה של "הרעיון לעומק" ו"החיבור הרפואי".
 
 ‼️ מה שנכנס הוא **טיוטה מסומנת**, לא תוכן: כל קטע עטוף בתג גלוי
 "🤖 טיוטת נוטבוק — טרם אומתה" ובסימן `<!-- draft:unverified -->`. סוכני
@@ -45,13 +44,9 @@ PROMPT = """אני כותב פרק בסיכום לימוד (לומדה) לקור
 רפואי: פסקה אחת על החיבור הרפואי/קליני של הנושא, רק אם הוא מופיע בחומרי
 הקורס. אם אין חיבור אמיתי — כתוב "רפואי: אין".
 
-{traps_ask}
-
 כללים:
 - אל תוסיף ידע חיצוני ואל תנחש. מה שאין בחומרים — לא קיים.
-- בלי כותרות, בלי מספור, בלי שום טקסט מעבר לשורות המבוקשות.
-
-{traps_list}"""
+- בלי כותרות, בלי מספור, בלי שום טקסט מעבר לשורות המבוקשות."""
 
 
 def load_units(html):
@@ -68,19 +63,13 @@ def load_units(html):
 def ask_unit(nb, topic, body):
     lead = re.search(r'<p class="lead">(.*?)</p>', body, re.S)
     lead = re.sub(r'<[^>]+>', '', lead.group(1)) if lead else ''
-    traps = re.findall(r'<b>המלכודת:</b>\s*(.*?)\s*<b>האמת:</b>', body, re.S)
-    traps = [re.sub(r'<[^>]+>', '', t).strip() for t in traps]
-    traps_ask = ('אמת: לכל מלכודת שברשימה למטה — משפט או שניים שמסבירים מה האמת '
-                 '(התיקון לתפיסה השגויה). כל אחת בשורה "אמת N:".') if traps else ''
-    traps_list = ('המלכודות:\n' + '\n'.join(f'{i+1}. {t}' for i, t in enumerate(traps))) if traps else ''
-    q = PROMPT.format(topic=topic, lead=lead or '—', traps_ask=traps_ask, traps_list=traps_list)
-    out = run(['ask', '--notebook', nb, q], timeout=420)
-    return out, traps
+    q = PROMPT.format(topic=topic, lead=lead or '—')
+    return run(['ask', '--notebook', nb, q], timeout=420)
 
 
-def parse_answer(out, n_traps):
+def parse_answer(out):
     """שורות ממשיכות (ה-CLI שובר שורות ארוכות) מצטרפות לשדה האחרון שנפתח."""
-    paras, medical, truths = [], None, {}
+    paras, medical = [], None
     cur = None
     for line in out.splitlines():
         s = line.strip()
@@ -90,15 +79,11 @@ def parse_answer(out, n_traps):
             paras.append(s[len('פסקה:'):].strip()); cur = ('p', len(paras) - 1)
         elif s.startswith('רפואי:'):
             medical = s[len('רפואי:'):].strip(); cur = ('m', None)
-        elif (mm := re.match(r'אמת\s*(\d+)\s*:', s)):
-            i = int(mm.group(1)) - 1
-            truths[i] = s[mm.end():].strip(); cur = ('t', i)
         elif cur:
             if cur[0] == 'p': paras[cur[1]] += ' ' + s
-            elif cur[0] == 'm': medical += ' ' + s
-            else: truths[cur[1]] += ' ' + s
+            else: medical += ' ' + s
     # שערי איכות: בלי ציטוטים = הנוטבוק לא נשען על החומרים = נפסל.
-    raw = '\n'.join(paras) + (medical or '') + '\n'.join(truths.values())
+    raw = '\n'.join(paras) + (medical or '')
     if not CITE.search(raw):
         return None, 'אין ציטוטים — הטיוטה נפסלה'
     clean = lambda s: CITE.sub('', s).strip()
@@ -108,8 +93,7 @@ def parse_answer(out, n_traps):
     medical = clean(medical) if medical else ''
     if medical in ('אין', '') or len(medical) < 40:
         medical = None
-    truths = {i: clean(t) for i, t in truths.items() if len(clean(t)) > 20 and i < n_traps}
-    return {'paras': paras, 'medical': medical, 'truths': truths}, None
+    return {'paras': paras, 'medical': medical}, None
 
 
 TAG = '<span class="dk-draft-tag">🤖 טיוטת נוטבוק — טרם אומתה</span>'
@@ -125,15 +109,6 @@ def inject_draft(body, d):
         block = ('<div class="dk-draft"><!-- draft:unverified -->' + TAG +
                  f'<p>{d["medical"]}</p></div>')
         body = re.sub(r'<p><!-- TODO: איפה זה פוגש רפואה.*?--></p>', block, body, count=1, flags=re.S)
-    if d['truths']:
-        i = -1
-        def truth(m):
-            nonlocal i
-            i += 1
-            t = d['truths'].get(i)
-            return (m.group(1) + f'<span class="dk-draft-inline" title="טיוטת נוטבוק — טרם אומתה">'
-                    f'🤖 {t}</span><!-- draft:unverified -->' + m.group(3)) if t else m.group(0)
-        body = re.sub(r'(<b>האמת:</b>)\s*(<!-- TODO: התיקון -->)(</div>)', truth, body)
     return body
 
 
@@ -159,10 +134,10 @@ def main():
     offset = 0
     for u in todo:
         print(f'   ⏳ {u["topic"]} …', flush=True)
-        out, traps = ask_unit(nb, u['topic'], u['body'])
+        out = ask_unit(nb, u['topic'], u['body'])
         slug = re.sub(r'\W+', '-', u['topic'])[:40]
         open(os.path.join(DRAFTS, f'{course}-{slug}.txt'), 'w', encoding='utf-8').write(out)
-        d, err = parse_answer(out, len(traps))
+        d, err = parse_answer(out)
         if err:
             print(f'   ❌ {u["topic"]}: {err}')
             continue
@@ -171,8 +146,7 @@ def main():
         seg = html[s:e].replace(u['body'], new_body)
         html = html[:s] + seg + html[e:]
         offset += len(seg) - (e - s)
-        print(f'   ✅ {u["topic"]}: {len(d["paras"])} פסקאות · רפואי: {"יש" if d["medical"] else "אין"} · '
-              f'{len(d["truths"])}/{len(traps)} אמיתות')
+        print(f'   ✅ {u["topic"]}: {len(d["paras"])} פסקאות · רפואי: {"יש" if d["medical"] else "אין"}')
 
     open(fpath, 'w', encoding='utf-8').write(html)
     print('\nהטיוטות בפנים, מסומנות. הגולמי עם הציטוטים: sources/lomda-drafts/')
